@@ -187,7 +187,8 @@ GameBoyAdvanceCPU.prototype.SWI = function () {
 		this.enterARM();
 	}
 	else {
-		//TODO
+		//HLE the SWI command:
+		this.swi.execute(this.read8((this.getLR() - 2) | 0));
 	}
 }
 GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
