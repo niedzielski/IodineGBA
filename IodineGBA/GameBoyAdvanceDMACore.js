@@ -138,6 +138,14 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
 		controlShadow[2] = true;
 		controlShadow[3] = control[3];
 		controlShadow[5] = 2;
+		if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.FIFO_A) {
+			//Assert the FIFO A DMA request signal:
+			this.IOCore.sound.checkFIFOAPendingSignal();
+		}
+		if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.FIFO_B) {
+			//Assert the FIFO B DMA request signal:
+			this.IOCore.sound.checkFIFOBPendingSignal();
+		}
 	}
 	else if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.DISPLAY_SYNC) {
 		//Display Sync DMA repeats until stopped by gfx hardware:
@@ -202,7 +210,7 @@ GameBoyAdvanceDMA.prototype.perform = function () {
 			if (this.currentMatch != this.lastCurrentMatch) {
 				//Re-broadcasting on address bus, so non-seq:
 				this.IOCore.wait.NonSequentialBroadcast();
-				this.lastCurrentMatch = this.lastCurrentMatch;
+				this.lastCurrentMatch = this.currentMatch;
 			}
 			this.handleDMACopy(dmaPriority);
 			return false;
@@ -241,6 +249,14 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		wordCountShadow = this.wordCount[dmaChannel];
 		//DMA period has ended:
 		this.pending[dmaChannel] -= this.currentMatch;
+		//Assert the FIFO A DMA request signal:
+		if (dmaChannel == 1 && this.currentMatch == this.DMA_REQUEST_TYPE.FIFO_A) {
+			this.IOCore.sound.checkFIFOAPendingSignal();
+		}
+		//Assert the FIFO B DMA request signal:
+		if (dmaChannel == 2 && this.currentMatch == this.DMA_REQUEST_TYPE.FIFO_B) {
+			this.IOCore.sound.checkFIFOBPendingSignal();
+		}
 		//Check to see if we should flag for IRQ:
 		if (control[0]) {
 			this.IOCore.irq.requestIRQ(dmaChannel << 8);
