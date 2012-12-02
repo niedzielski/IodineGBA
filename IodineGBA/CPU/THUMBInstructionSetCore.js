@@ -42,8 +42,6 @@ THUMBInstructionSet.prototype.writePC = function (data) {
 	//We performed a branch:
 	//Update the program counter to branch address:
 	this.CPUCore.branch(data & -2);
-	//Restore SPSR to CPSR:
-	this.CPUCore.SPSRtoCPSR();
 }
 THUMBInstructionSet.prototype.offsetPC = function (data) {
 	//We performed a branch:
@@ -618,7 +616,7 @@ THUMBInstructionSet.prototype.LDRSP = function (parentObj) {
 }
 THUMBInstructionSet.prototype.ADDPC = function (parentObj) {
 	//Add PC With Offset Into Register
-	parentObj.registers[(parentObj.execute >> 8) & 0x7] = (((parentObj.execute & 0xFF) << 2) + parentObj.registers[15]) | 0;
+	parentObj.registers[(parentObj.execute >> 8) & 0x7] = ((parentObj.registers[15] & -3) + ((parentObj.execute & 0xFF) << 2)) | 0;
 }
 THUMBInstructionSet.prototype.ADDSP = function (parentObj) {
 	//Add SP With Offset Into Register
