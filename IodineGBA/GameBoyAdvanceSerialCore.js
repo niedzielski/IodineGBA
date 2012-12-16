@@ -343,11 +343,7 @@ GameBoyAdvanceSerial.prototype.readRCNT1 = function () {
 }
 GameBoyAdvanceSerial.prototype.writeJOYCNT = function (data) {
 	this.JOYBUS_IRQ = ((data & 0x40) == 0x40);
-	this.JOYBUS_CNTL_FLAGS = data & 0x7;
-	if (this.JOYBUS_IRQ && this.JOYBUS_CNTL_FLAGS > 0) {
-		//We forced a reset, so trigger IRQ:
-		this.IOCore.irq.requestIRQ(0x80);
-	}
+	this.JOYBUS_CNTL_FLAGS &= ~(data & 0x7);
 }
 GameBoyAdvanceSerial.prototype.readJOYCNT = function () {
 	return 0xB8 | ((this.JOYBUS_IRQ) ? 0x40 : 0) | this.JOYBUS_CNTL_FLAGS;
