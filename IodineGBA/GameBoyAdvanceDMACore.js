@@ -266,25 +266,25 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		//Update source address:
 		switch (control[4]) {
 			case 0:	//Increment
-				this.source[dmaChannel] = (source + transferred) & -1;
+				source[dmaChannel] = (source + transferred) & -1;
 				break;
 			case 1:	//Decrement
-				this.source[dmaChannel] = (source - transferred) & -1;
+				source[dmaChannel] = (source - transferred) & -1;
 				break;
 			case 3:	//Reload
 				//Prohibited code, should not get here:
-				this.source[dmaChannel] = this.sourceShadow[dmaChannel];
+				source[dmaChannel] = this.source[dmaChannel];
 		}
 		//Update destination address:
 		switch (control[5]) {
 			case 0:	//Increment
-				this.destination[dmaChannel] = (destination + transferred) & -1;
+				destination[dmaChannel] = (destination + transferred) & -1;
 				break;
 			case 1:	//Decrement
-				this.destination[dmaChannel] = (destination - transferred) & -1;
+				destination[dmaChannel] = (destination - transferred) & -1;
 				break;
 			case 3:	//Reload
-				this.destination[dmaChannel] = this.destinationSource[dmaChannel];
+				destination[dmaChannel] = this.destination[dmaChannel];
 		}
 	}
 	else {
@@ -292,19 +292,19 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		switch (control[4]) {
 			case 0:	//Increment
 			case 3:	//Prohibited code...
-				this.source[dmaChannel] = (source + transferred) & -1;
+				source[dmaChannel] = (source + transferred) & -1;
 				break;
 			case 1:
-				this.source[dmaChannel] = (source - transferred) & -1;
+				source[dmaChannel] = (source - transferred) & -1;
 		}
 		//Update destination address:
 		switch (control[5]) {
 			case 0:	//Increment
 			case 3:	//Increment
-				this.destination[dmaChannel] = (destination + transferred) & -1;
+				destination[dmaChannel] = (destination + transferred) & -1;
 				break;
 			case 1:	//Decrement
-				this.destination[dmaChannel] = (destination - transferred) & -1;
+				destination[dmaChannel] = (destination - transferred) & -1;
 		}
 	}
 	//Save the new word count:

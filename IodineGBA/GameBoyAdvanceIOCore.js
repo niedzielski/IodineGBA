@@ -2173,6 +2173,7 @@ GameBoyAdvanceIO.prototype.handleHalt = function () {
 GameBoyAdvanceIO.prototype.handleStop = function () {
 	//Update sound system to add silence to buffer:
 	this.sound.addClocks(this.cyclesToIterate);
+	this.cyclesToIterate = 0;
 	//Exits when user presses joypad or from an external irq outside of GBA internal.
 }
 GameBoyAdvanceIO.prototype.loadBIOS = function () {

@@ -52,10 +52,11 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 	//Undefined mode registers (R13-R14):
 	this.registersUND = [0,0];
 	//Pre-initialize stack pointers if no BIOS loaded:
-	if (!this.IOCore.BIOSFound) {
+	if (!this.IOCore.BIOSFound || this.IOCore.emulatorCore.SKIPBoot) {
 		this.registersSVC[0] = 0x3007FE0;
 		this.registersIRQ[0] = 0x3007FA0;
 		this.registers[13] = 0x3007F00;
+		this.registers[15] = 0x8000000;
 	}
 	//CPSR Register:
 	this.CPSRNegative = false;		//N Bit
