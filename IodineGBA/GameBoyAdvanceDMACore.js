@@ -251,10 +251,12 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		this.pending[dmaChannel] -= this.currentMatch;
 		//Assert the FIFO A DMA request signal:
 		if (dmaChannel == 1 && this.currentMatch == this.DMA_REQUEST_TYPE.FIFO_A) {
+			wordCountShadow = 4;
 			this.IOCore.sound.checkFIFOAPendingSignal();
 		}
 		//Assert the FIFO B DMA request signal:
 		if (dmaChannel == 2 && this.currentMatch == this.DMA_REQUEST_TYPE.FIFO_B) {
+			wordCountShadow = 4;
 			this.IOCore.sound.checkFIFOBPendingSignal();
 		}
 		//Check to see if we should flag for IRQ:
