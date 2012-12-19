@@ -143,8 +143,8 @@ GameBoyAdvanceSound.prototype.initializeAudioStartState = function () {
 	this.AGBDirectSoundBRightCanPlay = false;
 	this.mixerSoundBIAS = 0;
 	this.CGBOutputRatio = 2;
-	this.FIFOABuffer = [];
-	this.FIFOBBuffer = [];
+	this.FIFOABuffer = new GameBoyAdvanceFIFO();
+	this.FIFOBBuffer = new GameBoyAdvanceFIFO();
 	this.AGBDirectSoundAFIFOClear();
 	this.AGBDirectSoundBFIFOClear();
 	//Clear legacy PAPU registers:
@@ -736,37 +736,33 @@ GameBoyAdvanceSound.prototype.channel4UpdateCache = function () {
 	this.channel4OutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.writeFIFOA = function (data) {
-	if (this.FIFOABuffer.length < 32) {
-		this.FIFOABuffer.push(data);
-		if (this.FIFOABuffer.length <= 16) {
-			this.IOCore.dma.soundFIFOARequest();
-		}
+	this.FIFOABuffer.push(data);
+	if (this.FIFOABuffer.requestingDMA()) {
+		this.IOCore.dma.soundFIFOARequest();
 	}
 }
 GameBoyAdvanceSound.prototype.checkFIFOAPendingSignal = function () {
-	if (this.FIFOABuffer.length <= 16) {
+	if (this.FIFOABuffer.requestingDMA()) {
 		this.IOCore.dma.soundFIFOARequest();
 	}
 }
 GameBoyAdvanceSound.prototype.checkFIFOBPendingSignal = function () {
-	if (this.FIFOBBuffer.length <= 16) {
+	if (this.FIFOBBuffer.requestingDMA()) {
 		this.IOCore.dma.soundFIFOBRequest();
 	}
 }
 GameBoyAdvanceSound.prototype.writeFIFOB = function (data) {
-	if (this.FIFOBBuffer.length < 32) {
-		this.FIFOBBuffer.push(data);
-		if (this.FIFOBBuffer.length <= 16) {
-			this.IOCore.dma.soundFIFOBRequest();
-		}
+	this.FIFOBBuffer.push(data);
+	if (this.FIFOBBuffer.requestingDMA()) {
+		this.IOCore.dma.soundFIFOBRequest();
 	}
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundAFIFOClear = function () {
-	this.FIFOABuffer = [];
+	this.FIFOABuffer.count = 0;
 	this.AGBDirectSoundATimerIncrement();
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundBFIFOClear = function () {
-	this.FIFOBBuffer = [];
+	this.FIFOBBuffer.count = 0;
 	this.AGBDirectSoundBTimerIncrement();
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundTimer0ClockTick = function () {
@@ -788,28 +784,28 @@ GameBoyAdvanceSound.prototype.AGBDirectSoundTimer1ClockTick = function () {
 	}
 }
 GameBoyAdvanceSound.prototype.nextFIFOAEventTime = function () {
-	if (this.FIFOABuffer.length > 16) {
-		return this.IOCore.timer.nextTimer1Overflow(this.FIFOABuffer.length - 16);
+	if (!this.FIFOABuffer.requestingDMA()) {
+		return this.IOCore.timer.nextTimer1Overflow(this.FIFOABuffer.count - 16);
 	}
 	else {
 		return 0;
 	}
 }
 GameBoyAdvanceSound.prototype.nextFIFOBEventTime = function () {
-	if (this.FIFOBBuffer.length > 16) {
-		return this.IOCore.timer.nextTimer2Overflow(this.FIFOBBuffer.length - 16);
+	if (!this.FIFOBBuffer.requestingDMA()) {
+		return this.IOCore.timer.nextTimer2Overflow(this.FIFOBBuffer.count - 16);
 	}
 	else {
 		return 0;
 	}
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundATimerIncrement = function () {
-	this.AGBDirectSoundA = (this.FIFOABuffer.length) ? ((this.FIFOABuffer.shift() << 24) >> 22) : 0;
+	this.AGBDirectSoundA = this.FIFOABuffer.shift();
 	this.checkFIFOAPendingSignal();
 	this.AGBFIFOAFolder();
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundBTimerIncrement = function () {
-	this.AGBDirectSoundB = (this.FIFOBBuffer.length) ? ((this.FIFOBBuffer.shift() << 24) >> 22) : 0;
+	this.AGBDirectSoundB = this.FIFOBBuffer.shift();
 	this.checkFIFOBPendingSignal();
 	this.AGBFIFOBFolder();
 }
