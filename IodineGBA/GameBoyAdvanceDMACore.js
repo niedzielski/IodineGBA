@@ -266,25 +266,25 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		//Update source address:
 		switch (control[4]) {
 			case 0:	//Increment
-				source[dmaChannel] = (source + transferred) & -1;
+				this.sourceShadow[dmaChannel] = (source + transferred) & -1;
 				break;
 			case 1:	//Decrement
-				source[dmaChannel] = (source - transferred) & -1;
+				this.sourceShadow[dmaChannel] = (source - transferred) & -1;
 				break;
 			case 3:	//Reload
 				//Prohibited code, should not get here:
-				source[dmaChannel] = this.source[dmaChannel];
+				this.sourceShadow[dmaChannel] = this.source[dmaChannel];
 		}
 		//Update destination address:
 		switch (control[5]) {
 			case 0:	//Increment
-				destination[dmaChannel] = (destination + transferred) & -1;
+				this.destinationShadow[dmaChannel] = (destination + transferred) & -1;
 				break;
 			case 1:	//Decrement
-				destination[dmaChannel] = (destination - transferred) & -1;
+				this.destinationShadow[dmaChannel] = (destination - transferred) & -1;
 				break;
 			case 3:	//Reload
-				destination[dmaChannel] = this.destination[dmaChannel];
+				this.destinationShadow[dmaChannel] = this.destination[dmaChannel];
 		}
 	}
 	else {
@@ -292,19 +292,19 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		switch (control[4]) {
 			case 0:	//Increment
 			case 3:	//Prohibited code...
-				source[dmaChannel] = (source + transferred) & -1;
+				this.sourceShadow[dmaChannel] = (source + transferred) & -1;
 				break;
 			case 1:
-				source[dmaChannel] = (source - transferred) & -1;
+				this.sourceShadow[dmaChannel] = (source - transferred) & -1;
 		}
 		//Update destination address:
 		switch (control[5]) {
 			case 0:	//Increment
 			case 3:	//Increment
-				destination[dmaChannel] = (destination + transferred) & -1;
+				this.destinationShadow[dmaChannel] = (destination + transferred) & -1;
 				break;
 			case 1:	//Decrement
-				destination[dmaChannel] = (destination - transferred) & -1;
+				this.destinationShadow[dmaChannel] = (destination - transferred) & -1;
 		}
 	}
 	//Save the new word count:
