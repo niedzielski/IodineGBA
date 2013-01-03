@@ -967,7 +967,7 @@ GameBoyAdvanceGraphics.prototype.writeWIN0H0 = function (data) {
 	this.midScanLineJIT();
 	this.WIN0XCoordRight = data;		//Window x-coord goes up to this minus 1.
 }
-GameBoyAdvanceGraphics.prototype.writeWIN0H1 = function (dara) {
+GameBoyAdvanceGraphics.prototype.writeWIN0H1 = function (data) {
 	this.midScanLineJIT();
 	this.WIN0XCoordLeft = data;
 }
@@ -983,7 +983,7 @@ GameBoyAdvanceGraphics.prototype.writeWIN0V0 = function (data) {
 	this.midScanLineJIT();
 	this.WIN0YCoordBottom = data;		//Window y-coord goes up to this minus 1.
 }
-GameBoyAdvanceGraphics.prototype.writeWIN0V1 = function (dara) {
+GameBoyAdvanceGraphics.prototype.writeWIN0V1 = function (data) {
 	this.midScanLineJIT();
 	this.WIN0YCoordTop = data;
 }
@@ -1181,16 +1181,16 @@ GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
 		this.palette256[address] = palette;
 	}
 	else {
-		this.paletteOBJ256[address] = palette;
+		this.paletteOBJ256[address & 0xFF] = palette;
 	}
 	if ((address & 0xF) == 0) {
 		palette |= this.transparency;
 	}
 	if (address < 0x100) {
-		this.palette16[address >> 4][address] = palette;
+		this.palette16[address >> 4][address & 0xF] = palette;
 	}
 	else {
-		this.paletteOBJ16[address >> 4][address] = palette;
+		this.paletteOBJ16[(address >> 4) & 0xF][address & 0xF] = palette;
 	}
 }
 GameBoyAdvanceGraphics.prototype.readPalette = function (address) {

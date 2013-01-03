@@ -62,7 +62,7 @@ GameBoyAdvanceSWI.prototype.execute = function (command) {
 			break;
 		//Arc Tangent Corrected:
 		case 0x0A:
-			this.ArcTan();
+			this.ArcTan2();
 			break;
 		//CPU Set (Memory Copy + Fill):
 		case 0x0B:
@@ -184,4 +184,121 @@ GameBoyAdvanceSWI.prototype.execute = function (command) {
 		default:
 			//Don't do anything if we get here, although a real device errors.
 	}
+}
+GameBoyAdvanceSWI.prototype.SoftReset = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.RegisterRAMReset = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.Halt = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.Stop = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.IntrWait = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.VBlankIntrWait = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.Div = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.DivArm = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.Sqrt = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.ArcTan = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.ArcTan2 = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.CpuSet = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.CpuFastSet = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.GetBiosChecksum = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.BgAffineSet = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.ObjAffineSet = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.BitUnPack = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.LZ77UnCompWram = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.LZ77UnCompVram = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.HuffUnComp = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.RLUnCompWram = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.RLUnCompVram = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.Diff8bitUnFilterWram = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.Diff8bitUnFilterVram = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.Diff16bitUnFilter = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundBias = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundDriverInit = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundDriverMode = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundDriverMain = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundDriverVSync = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundChannelClear = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.MidiKey2Freq = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundDriverUnknown = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.MultiBoot = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.HardReset = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.CustomHalt = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundDriverVSyncOff = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundDriverVSyncOn = function () {
+	
+}
+GameBoyAdvanceSWI.prototype.SoundGetJumpList = function () {
+	
 }
