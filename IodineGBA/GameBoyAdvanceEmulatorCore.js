@@ -290,7 +290,8 @@ GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInput) {
 	}
 }
 GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
-	if (this.audioFound) {
+	this.CPUCyclesTotal = this.CPUCyclesPerIteration;
+    if (this.audioFound) {
 		var underrunAmount = this.audio.remainingBuffer();
 		if (typeof underrunAmount == "number") {
 			underrunAmount = this.audioBufferContainAmount - Math.max(underrunAmount, 0);
@@ -298,9 +299,6 @@ GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
 				this.CPUCyclesTotal += (underrunAmount >> 1) * this.audioResamplerFirstPassFactor;
 			}
 		}
-	}
-	else {
-		this.CPUCyclesTotal = this.CPUCyclesPerIteration;
 	}
 }
 GameBoyAdvanceEmulator.prototype.audioPushNewState = function () {
