@@ -68,7 +68,7 @@ GameBoyAdvanceBG2MatrixRenderer.prototype.incrementReferenceCounters = function 
 	this.pd += this.gfx.actualBG2dmy;
 }
 GameBoyAdvanceBG2MatrixRenderer.prototype.resetReferenceCounters = function () {
-	this.pb = this.gfx.actualBG2ReferenceY;
+	this.pb = this.gfx.actualBG2ReferenceX;
 	this.pd = this.gfx.actualBG2ReferenceY;
 }
 GameBoyAdvanceBG2MatrixRenderer.prototype.fetchTile = function (tileNumber) {

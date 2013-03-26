@@ -81,7 +81,7 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.incrementReferenceCounters = func
 	this.pd += this.gfx.actualBG2dmy;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.resetReferenceCounters = function () {
-	this.pb = this.gfx.actualBG2ReferenceY;
+	this.pb = this.gfx.actualBG2ReferenceX;
 	this.pd = this.gfx.actualBG2ReferenceY;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchTile = function (tileNumber) {

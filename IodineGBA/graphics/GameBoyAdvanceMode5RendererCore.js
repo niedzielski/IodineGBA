@@ -17,7 +17,7 @@
 function GameBoyAdvanceMode5Renderer(gfx) {
 	this.gfx = gfx;
 }
-GameBoyAdvanceMode4Renderer.prototype.renderScanLine = function (line) {
+GameBoyAdvanceMode5Renderer.prototype.renderScanLine = function (line) {
 	var BG2Buffer = (this.gfx.displayBG2) ? this.gfx.bg2FrameBufferRenderer.renderScanLine(line) : null;
 	var OBJBuffer = (this.gfx.displayOBJ) ? this.gfx.objRenderer.renderScanLine(line) : null;
 	this.gfx.compositeLayers(OBJBuffer, null, null, BG2Buffer, null);
