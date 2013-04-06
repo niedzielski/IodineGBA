@@ -508,14 +508,14 @@ GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
 	var offsetStart = line * 240;
 	var position = 0;
 	if (!this.greenSwap) {
-		for (var offsetEnd = offsetStart + 240; position < 240; ++offsetStart) {
+		for (; position < 240; ++offsetStart) {
 			this.frameBuffer[offsetStart] = this.lineBuffer[position++];
 		}
 	}
 	else {
 		var pixel0 = 0;
 		var pixel1 = 0;
-		for (var offsetEnd = offsetStart + 240; position < 240;) {
+		while (position < 240) {
 			pixel0 = this.lineBuffer[position++];
 			pixel1 = this.lineBuffer[position++];
 			this.frameBuffer[offsetStart++] = (pixel0 & 0x7C1F) | (pixel1 & 0x3E0);
