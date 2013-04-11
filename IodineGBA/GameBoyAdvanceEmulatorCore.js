@@ -15,7 +15,7 @@
  *
  */
 function GameBoyAdvanceEmulator() {
-	this.SKIPBoot = false;					//Skip the BIOS boot screen.
+	this.SKIPBoot = true;					//Skip the BIOS boot screen.
 	this.emulatorSpeed = 1;					//Speed multiplier of the emulator.
 	this.timerIntervalRate = 4;				//How often the emulator core is called into (in milliseconds).
 	this.graphicsFound = false;				//Do we have graphics output sink found yet?
