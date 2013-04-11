@@ -20,5 +20,6 @@ GNU General Public License for more details.*
 Current ARMWrestler ROM Status
 --------------------------------------------------------------------
 
+* **ARMWrestler:**
 
 	![ARMWrestler](http://i.imgur.com/eDsl1tk.png "Fails")
