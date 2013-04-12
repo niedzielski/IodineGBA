@@ -332,7 +332,7 @@ ARMInstructionSet.prototype.ADC = function (parentObj, operand2OP) {
 	var operand2 = operand2OP(parentObj, parentObj.execute);
 	//Perform Addition w/ Carry:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 + operand2) | 0);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 + operand2 + ((parentObj.CPUCore.CPSRCarry) ? 1 : 0)) | 0);
 }
 ARMInstructionSet.prototype.ADCS = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
