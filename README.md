@@ -22,4 +22,4 @@ Current ARMWrestler ROM Status
 
 * **ARMWrestler:**
 
-	![ARMWrestler](http://i.imgur.com/eDsl1tk.png "Fails")
+	![ARMWrestler](http://i.imgur.com/UVQyOIc.png "Fails")
