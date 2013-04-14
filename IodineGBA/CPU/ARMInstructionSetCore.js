@@ -318,7 +318,7 @@ ARMInstructionSet.prototype.ADDS = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
 	var operand2 = operand2OP(parentObj, parentObj.execute);
 	//Perform Addition:
-	var dirtyResult = operand1 + operand2 + ((parentObj.CPUCore.CPSRCarry) ? 1 : 0);
+	var dirtyResult = operand1 + operand2;
 	var result = dirtyResult | 0;
 	parentObj.CPUCore.CPSROverflow = (((operand1 & 0x7FFFFFFF) + (operand2 & 0x7FFFFFFF)) > 0x7FFFFFFF);
 	parentObj.CPUCore.CPSRCarry = (result != dirtyResult);
