@@ -208,8 +208,8 @@ GameBoyAdvanceEmulator.prototype.swizzleFrameBuffer = function () {
 	var bufferIndex = 0;
 	for (var canvasIndex = 0; canvasIndex < this.offscreenRGBCount;) {
 		this.swizzledFrame[canvasIndex++] = (this.frameBuffer[bufferIndex] & 0x1F) << 3;			//Red
-		this.swizzledFrame[canvasIndex++] = (this.frameBuffer[bufferIndex] & 0x3E0) << 6;			//Green
-		this.swizzledFrame[canvasIndex++] = (this.frameBuffer[bufferIndex++] & 0x7C00) << 9;		//Blue
+		this.swizzledFrame[canvasIndex++] = (this.frameBuffer[bufferIndex] & 0x3E0) >> 2;			//Green
+		this.swizzledFrame[canvasIndex++] = (this.frameBuffer[bufferIndex++] & 0x7C00) >> 7;		//Blue
 	}
 }
 GameBoyAdvanceEmulator.prototype.prepareFrame = function () {

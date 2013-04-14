@@ -421,7 +421,7 @@ ARMInstructionSet.prototype.CMNS = function (parentObj, operand2OP) {
 	var dirtyResult = operand1 + operand2;
 	var result = dirtyResult | 0;
 	parentObj.CPUCore.CPSROverflow = (((operand1 & 0x7FFFFFFF) + (operand2 & 0x7FFFFFFF)) > 0x7FFFFFFF);
-	parentObj.CPUCore.CPSRCarry = (result != dirtyResult);
+	parentObj.CPUCore.CPSRCarry = (result == dirtyResult);
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 }
