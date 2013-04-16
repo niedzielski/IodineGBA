@@ -67,14 +67,12 @@ GameBoyAdvanceEmulator.prototype.restart = function () {
 	this.faultFound = false;
 	this.save();
 	this.initializeCore();
-    this.clockCyclesSinceStart = 0;
-    this.metricStart = new Date();
+    this.resetMetrics();
     this.reinitializeAudio();
 }
 GameBoyAdvanceEmulator.prototype.clearTimer = function () {
 	clearInterval(this.timer);
-    this.clockCyclesSinceStart = 0;
-    this.metricStart = new Date();
+    this.resetMetrics();
 }
 GameBoyAdvanceEmulator.prototype.startTimer = function () {
 	this.clearTimer();
@@ -131,6 +129,10 @@ GameBoyAdvanceEmulator.prototype.changeCoreTimer = function (newTimerIntervalRat
 	}
 	this.calculateTimings();
 	this.reinitializeAudio();
+}
+GameBoyAdvanceEmulator.prototype.resetMetrics = function () {
+    this.clockCyclesSinceStart = 0;
+    this.metricStart = new Date();
 }
 GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
 	this.clocksPerSecond = this.emulatorSpeed * 0x1000000;
