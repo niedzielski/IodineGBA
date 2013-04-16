@@ -133,7 +133,7 @@ function keyUp(event) {
 		var keysTotal = keysMapped.length;
 		for (var index = 0; index < keysTotal; ++index) {
 			if (keysMapped[index] == keyCode) {
-				Iodine.keyDown(keyCheck[0]);
+				Iodine.keyUp(keyCheck[0]);
 				try {
 					event.preventDefault();
 				}

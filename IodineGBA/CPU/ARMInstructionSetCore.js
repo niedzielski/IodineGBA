@@ -280,8 +280,8 @@ ARMInstructionSet.prototype.SUBS = function (parentObj, operand2OP) {
 	//Perform Subtraction:
 	var dirtyResult = operand1 - operand2;
 	var result = dirtyResult | 0;
-	parentObj.CPUCore.CPSROverflow = (((operand1 & 0x7FFFFFFF) - (operand2 & 0x7FFFFFFF)) < 0);
-	parentObj.CPUCore.CPSRCarry = (result == dirtyResult);
+	parentObj.CPUCore.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
+	parentObj.CPUCore.CPSRCarry = (operand1 >= operand2);
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register:
@@ -300,8 +300,8 @@ ARMInstructionSet.prototype.RSBS = function (parentObj, operand2OP) {
 	//Perform Subtraction:
 	var dirtyResult = operand2 - operand1;
 	var result = dirtyResult | 0;
-	parentObj.CPUCore.CPSROverflow = (((operand2 & 0x7FFFFFFF) - (operand1 & 0x7FFFFFFF)) < 0);
-	parentObj.CPUCore.CPSRCarry = (result == dirtyResult);
+	parentObj.CPUCore.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
+	parentObj.CPUCore.CPSRCarry = (operand2 >= operand1);
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register:
@@ -315,13 +315,13 @@ ARMInstructionSet.prototype.ADD = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 + operand2) | 0);
 }
 ARMInstructionSet.prototype.ADDS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
 	//Perform Addition:
 	var dirtyResult = operand1 + operand2;
 	var result = dirtyResult | 0;
-	parentObj.CPUCore.CPSROverflow = (((operand1 & 0x7FFFFFFF) + (operand2 & 0x7FFFFFFF)) > 0x7FFFFFFF);
-	parentObj.CPUCore.CPSRCarry = (result != dirtyResult);
+	parentObj.CPUCore.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
+	parentObj.CPUCore.CPSRCarry = (dirtyResult > 0xFFFFFFFF);
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register:
@@ -340,8 +340,8 @@ ARMInstructionSet.prototype.ADCS = function (parentObj, operand2OP) {
 	//Perform Addition w/ Carry:
 	var dirtyResult = operand1 + operand2 + ((parentObj.CPUCore.CPSRCarry) ? 1 : 0);
 	var result = dirtyResult | 0;
-	parentObj.CPUCore.CPSROverflow = (((operand1 & 0x7FFFFFFF) + (operand2 & 0x7FFFFFFF) + ((parentObj.CPUCore.CPSRCarry) ? 1 : 0)) > 0x7FFFFFFF);
-	parentObj.CPUCore.CPSRCarry = (result != dirtyResult);
+	parentObj.CPUCore.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
+	parentObj.CPUCore.CPSRCarry = (dirtyResult != result);
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register:
@@ -355,13 +355,13 @@ ARMInstructionSet.prototype.SBC = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 - operand2 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) | 0);
 }
 ARMInstructionSet.prototype.SBCS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
 	//Perform Subtraction w/ Carry:
-	var dirtyResult = operand1 - operand2 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1);
+	var dirtyResult = (operand1 - operand2 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) >>> 0;
 	var result = dirtyResult | 0;
-	parentObj.CPUCore.CPSROverflow = (((operand1 & 0x7FFFFFFF) - (operand2 & 0x7FFFFFFF) - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) < 0);
-	parentObj.CPUCore.CPSRCarry = (result == dirtyResult);
+	parentObj.CPUCore.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
+	parentObj.CPUCore.CPSRCarry = (operand1 >= dirtyResult);
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register:
@@ -375,13 +375,13 @@ ARMInstructionSet.prototype.RSC = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand2 - operand1 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) | 0);
 }
 ARMInstructionSet.prototype.RSCS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
 	//Perform Reverse Subtraction w/ Carry:
-	var dirtyResult = operand2 - operand1 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1);
+	var dirtyResult = (operand2 - operand1 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) >>> 0;
 	var result = dirtyResult | 0;
-	parentObj.CPUCore.CPSROverflow = (((operand2 & 0x7FFFFFFF) - (operand1 & 0x7FFFFFFF) - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) < 0);
-	parentObj.CPUCore.CPSRCarry = (result == dirtyResult);
+	parentObj.CPUCore.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
+	parentObj.CPUCore.CPSRCarry = (operand2 >= dirtyResult);
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register:
@@ -404,13 +404,13 @@ ARMInstructionSet.prototype.TEQS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRZero = (result == 0);
 }
 ARMInstructionSet.prototype.CMPS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
 	//Perform Subtraction:
-	var dirtyResult = operand1 - operand2;
+	var dirtyResult = (operand1 - operand2) >>> 0;
 	var result = dirtyResult | 0;
-	parentObj.CPUCore.CPSROverflow = (((operand1 & 0x7FFFFFFF) - (operand2 & 0x7FFFFFFF)) < 0);
-	parentObj.CPUCore.CPSRCarry = (result == dirtyResult);
+	parentObj.CPUCore.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
+	parentObj.CPUCore.CPSRCarry = (operand2 >= dirtyResult);
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 }

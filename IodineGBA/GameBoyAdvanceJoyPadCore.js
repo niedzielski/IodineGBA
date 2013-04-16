@@ -25,7 +25,7 @@ GameBoyAdvanceJoyPad.prototype.initialize = function () {
 	this.keyIRQEnabled = false;
 }
 GameBoyAdvanceJoyPad.prototype.keyPress = function (keyPressed) {
-	switch (keyPressed) {
+	switch (keyPressed.toUpperCase()) {
 		case "A":
 			this.keyInput &= ~0x1;
 			break;
@@ -64,7 +64,7 @@ GameBoyAdvanceJoyPad.prototype.keyPress = function (keyPressed) {
 	}
 }
 GameBoyAdvanceJoyPad.prototype.keyRelease = function (keyReleased) {
-	switch (keyReleased) {
+	switch (keyReleased.toUpperCase()) {
 		case "A":
 			this.keyInput |= 0x1;
 			break;
