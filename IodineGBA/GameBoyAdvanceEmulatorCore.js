@@ -67,9 +67,14 @@ GameBoyAdvanceEmulator.prototype.restart = function () {
 	this.faultFound = false;
 	this.save();
 	this.initializeCore();
+    this.clockCyclesSinceStart = 0;
+    this.metricStart = new Date();
+    this.reinitializeAudio();
 }
 GameBoyAdvanceEmulator.prototype.clearTimer = function () {
 	clearInterval(this.timer);
+    this.clockCyclesSinceStart = 0;
+    this.metricStart = new Date();
 }
 GameBoyAdvanceEmulator.prototype.startTimer = function () {
 	this.clearTimer();
@@ -90,14 +95,15 @@ GameBoyAdvanceEmulator.prototype.timerCallback = function () {
 	}
 }
 GameBoyAdvanceEmulator.prototype.iterationStartSequence = function () {
-	this.faultFound = true;			//If the end routine doesn't unset this, then we are marked as having crashed.
-	this.drewFrame = false;			//Graphics has not drawn yet for this iteration block.
-	this.audioUnderrunAdjustment();	//If audio is enabled, look to see how much we should overclock by to maintain the audio buffer.
-	this.audioPushNewState();		//Check to see if we need to update the audio core for any output changes.
+	this.faultFound = true;                                             //If the end routine doesn't unset this, then we are marked as having crashed.
+	this.drewFrame = false;                                             //Graphics has not drawn yet for this iteration block.
+	this.audioUnderrunAdjustment();                                     //If audio is enabled, look to see how much we should overclock by to maintain the audio buffer.
+	this.audioPushNewState();                                           //Check to see if we need to update the audio core for any output changes.
 }
 GameBoyAdvanceEmulator.prototype.iterationEndSequence = function () {
-	this.requestDraw();				//If drewFrame is true, blit buffered frame out.
-	this.faultFound = false;		//If core did not throw while running, unset the fatal error flag.
+	this.requestDraw();                                                 //If drewFrame is true, blit buffered frame out.
+	this.faultFound = false;                                            //If core did not throw while running, unset the fatal error flag.
+    this.clockCyclesSinceStart += this.CPUCyclesTotal;                  //Accumulate tracking.
 }
 GameBoyAdvanceEmulator.prototype.attachROM = function (ROM) {
 	this.stop();
@@ -129,6 +135,10 @@ GameBoyAdvanceEmulator.prototype.changeCoreTimer = function (newTimerIntervalRat
 GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
 	this.clocksPerSecond = this.emulatorSpeed * 0x1000000;
 	this.CPUCyclesTotal = this.CPUCyclesPerIteration = (this.clocksPerSecond / 1000 * this.timerIntervalRate) | 0;
+}
+GameBoyAdvanceEmulator.prototype.getSpeedPercentage = function () {
+    var metricEnd = new Date();
+    return (((this.timerIntervalRate * this.clockCyclesSinceStart / (metricEnd.getTime() - this.metricStart.getTime())) / this.CPUCyclesPerIteration) * 100) + "%";
 }
 GameBoyAdvanceEmulator.prototype.initializeCore = function () {
 	//Setup a new instance of the i/o core:
