@@ -335,6 +335,27 @@ GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
 	}
 	this.MODEBits = newMode;
 }
+GameBoyAdvanceCPU.prototype.setADDFlags = function (operand1, operand2, dirtyResult, result) {
+    //Update flags for an addition operation:
+    this.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
+	this.CPSRCarry = (dirtyResult > 0xFFFFFFFF);
+	this.CPSRNegative = (result < 0);
+	this.CPSRZero = (result == 0);
+}
+GameBoyAdvanceCPU.prototype.setSUBFlags = function (operand1, operand2, result) {
+    //Update flags for a subtraction operation:
+    this.CPSROverflow = ((operand1 ^ operand2) < 0 && (operand1 ^ result) < 0);
+	this.CPSRCarry = (operand1 >= operand2);
+	this.CPSRNegative = (result < 0);
+	this.CPSRZero = (result == 0);
+}
+GameBoyAdvanceCPU.prototype.setSBCFlags = function (operand1, operand2, dirtyResult, result) {
+    //Update flags for a subtraction operation:
+    this.CPSROverflow = ((operand1 ^ operand2) < 0 && (operand1 ^ result) < 0);
+	this.CPSRCarry = (operand1 >= dirtyResult);
+	this.CPSRNegative = (result < 0);
+	this.CPSRZero = (result == 0);
+}
 GameBoyAdvanceCPU.prototype.performMUL32 = function (rs, rd, MLAClocks) {
 	//Predict the internal cycle time:
 	if ((rd >>> 8) == 0 || (rd >>> 8) == 0xFFFFFF) {

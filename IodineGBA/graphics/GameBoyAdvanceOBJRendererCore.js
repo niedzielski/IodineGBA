@@ -98,7 +98,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
 }
 GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
 	var yDiffFromCenter = yOffset - (ySize >> 1);
-	var params = this.OBJMatrixParameters[sprite.matrixParameters];
+	var params = this.gfx.OBJMatrixParameters[sprite.matrixParameters];
 	var pa = -params[0] * (xSize >> 1);
 	var pb = params[1] * yDiffFromCenter;
 	var pc = -params[2] * (xSize >> 1);
@@ -124,7 +124,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNumber, x, y, xSize) {
-	var address = tileNumberToAddress(sprite, tileNumber, xSize, yOffset);
+	var address = this.tileNumberToAddress(sprite, tileNumber, xSize, y);
 	if (sprite.monolithicPalette) {
 		//256 Colors / 1 Palette:
 		address += ((y & 7) << 3) + x;
@@ -146,7 +146,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize
 		//Flip y-coordinate offset:
 		yOffset = ySize - yOffset;
 	}
-	var address = tileNumberToAddress(sprite, sprite.tileNumber, xSize, yOffset);
+	var address = this.tileNumberToAddress(sprite, sprite.tileNumber, xSize, yOffset);
 	var vram = this.gfx.VRAM;
 	var objBufferPosition = 0;
 	if (sprite.monolithicPalette) {
