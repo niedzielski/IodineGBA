@@ -112,7 +112,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 		y = pc + pd;
 		if (x < xSize && y < ySize) {
 			//Coordinates in range, fetch pixel:
-			this.scratchOBJBuffer[position] = this.fetchMatrixPixel(sprite, tileNumber, x | 0, y | 0, xSize);
+			this.scratchOBJBuffer[position] = this.fetchMatrixPixel(sprite, tileNumber, x | 0, y | 0, xSize, yOffset);
 		}
 		else {
 			//Coordinates outside of range, transparency defaulted:
@@ -123,8 +123,8 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 		pc += params;
 	}
 }
-GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNumber, x, y, xSize) {
-	var address = this.tileNumberToAddress(sprite, tileNumber, xSize, y);
+GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNumber, x, y, xSize, yOffset) {
+	var address = this.tileNumberToAddress(sprite, tileNumber, xSize, yOffset);
 	if (sprite.monolithicPalette) {
 		//256 Colors / 1 Palette:
 		address += ((y & 7) << 3) + x;

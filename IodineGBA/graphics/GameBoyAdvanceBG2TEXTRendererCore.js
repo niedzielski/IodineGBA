@@ -33,9 +33,9 @@ GameBoyAdvanceBG2TEXTRenderer.prototype.renderScanLine = function (line) {
 		//Correct line number for mosaic:
 		line -= this.gfx.mosaicRenderer.getMosaicYOffset(line);
 	}
-	var yTileOffset = (line + this.BG2YCoord) & 0x7;
+	var yTileOffset = (line + this.gfx.BG2YCoord) & 0x7;
 	var pixelPipelinePosition = this.gfx.BG2XCoord & 0x7;
-	var tileNumber = (((line + this.BG2YCoord) >> 3) << 6) | (this.gfx.BG2XCoord >> 3);
+	var tileNumber = (((line + this.gfx.BG2YCoord) >> 3) << 6) | (this.gfx.BG2XCoord >> 3);
 	for (var position = 0; position < 240;) {
 		var chrData = this.fetchTile(tileNumber++);
 		while (pixelPipelinePosition < 0x8) {
@@ -62,7 +62,7 @@ GameBoyAdvanceBG2TEXTRenderer.prototype.computeTileNumber = function (tileNumber
 	return actualTile;
 }
 GameBoyAdvanceBG2TEXTRenderer.prototype.computeScreenMapAddress = function (tileNumber) {
-	return ((tileNumber << 1) | (this.BG2ScreenBaseBlock << 11)) & 0xFFFF;
+	return ((tileNumber << 1) | (this.gfx.BG2ScreenBaseBlock << 11)) & 0xFFFF;
 }
 GameBoyAdvanceBG2TEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffset, yOffset) {
 	//Parse flip attributes, grab palette, and then output pixel:
