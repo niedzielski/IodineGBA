@@ -119,8 +119,8 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 			this.scratchOBJBuffer[position] = this.gfx.transparency;
 		}
 		//Increment PA & PC for each X:
-		pa += params;
-		pc += params;
+		pa += params[0];
+		pc += params[2];
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNumber, x, y, xSize, yOffset) {

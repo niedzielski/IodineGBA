@@ -73,7 +73,7 @@ GameBoyAdvanceBG2MatrixRenderer.prototype.resetReferenceCounters = function () {
 }
 GameBoyAdvanceBG2MatrixRenderer.prototype.fetchTile = function (tileNumber) {
 	//Find the tile code to locate the tile block:
-	return this.gfx.VRAM[(tileNumber | (this.BG2ScreenBaseBlock << 11)) & 0xFFFF];
+	return this.gfx.VRAM[(tileNumber + (this.gfx.BG2ScreenBaseBlock << 11)) & 0xFFFF];
 }
 GameBoyAdvanceBG2MatrixRenderer.prototype.fetchPixel = function (x, y) {
 	//Output pixel:

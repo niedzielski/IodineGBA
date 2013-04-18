@@ -135,8 +135,8 @@ GameBoyAdvanceSound.prototype.initializeAudioStartState = function () {
 	this.AGBDirectSoundAFolded = 0;
 	this.AGBDirectSoundB = 0;
 	this.AGBDirectSoundBFolded = 0;
-	this.AGBDirectSoundAShifter = 1;
-	this.AGBDirectSoundBShifter = 1;
+	this.AGBDirectSoundAShifter = 2;
+	this.AGBDirectSoundBShifter = 2;
 	this.AGBDirectSoundALeftCanPlay = false;
 	this.AGBDirectSoundBLeftCanPlay = false;
 	this.AGBDirectSoundARightCanPlay = false;
@@ -810,11 +810,11 @@ GameBoyAdvanceSound.prototype.AGBDirectSoundBTimerIncrement = function () {
 	this.AGBFIFOBFolder();
 }
 GameBoyAdvanceSound.prototype.AGBFIFOAFolder = function () {
-	this.AGBDirectSoundAFolded = this.AGBDirectSoundA << this.AGBDirectSoundAShifter;
+	this.AGBDirectSoundAFolded = this.AGBDirectSoundA * this.AGBDirectSoundAShifter;
 	this.mixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.AGBFIFOBFolder = function () {
-	this.AGBDirectSoundBFolded = this.AGBDirectSoundB << this.AGBDirectSoundBShifter;
+	this.AGBDirectSoundBFolded = this.AGBDirectSoundB * this.AGBDirectSoundBShifter;
 	this.mixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.CGBFolder = function () {
@@ -1224,8 +1224,8 @@ GameBoyAdvanceSound.prototype.writeSOUNDCNT_H0 = function (data) {
 	//NR60:
 	this.audioJIT();
 	this.CGBOutputRatio = data & 0x3;
-	this.AGBDirectSoundAShifter = ((data & 0x04) >> 2) + 1;
-	this.AGBDirectSoundBShifter = ((data & 0x08) >> 4) + 1;
+	this.AGBDirectSoundAShifter = (((data & 0x04) >> 2) + 1) << 1;
+	this.AGBDirectSoundBShifter = (((data & 0x08) >> 3) + 1) << 1;
 	this.nr60 = data;
 }
 GameBoyAdvanceSound.prototype.readSOUNDCNT_H0 = function () {

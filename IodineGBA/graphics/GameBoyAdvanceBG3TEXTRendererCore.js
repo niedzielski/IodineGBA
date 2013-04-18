@@ -35,7 +35,7 @@ GameBoyAdvanceBG3TEXTRenderer.prototype.renderScanLine = function (line) {
 	}
 	var yTileOffset = (line + this.gfx.BG3YCoord) & 0x7;
 	var pixelPipelinePosition = this.gfx.BG3XCoord & 0x7;
-	var tileNumber = (((line + this.gfx.BG3YCoord) >> 3) << 6) | (this.gfx.BG3XCoord >> 3);
+	var tileNumber = (((line + this.gfx.BG3YCoord) >> 3) << 5) + (this.gfx.BG3XCoord >> 3);
 	for (var position = 0; position < 240;) {
 		var chrData = this.fetchTile(tileNumber++);
 		while (pixelPipelinePosition < 0x8) {
@@ -70,7 +70,7 @@ GameBoyAdvanceBG3TEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffs
 	address += this.baseBlockOffset;
 	address += (((chrData & 0x800) == 0x800) ? (0x7 - yOffset) : yOffset) << 2;
 	address += (((chrData & 0x400) == 0x400) ? (0x7 - xOffset) : xOffset) >> 1;
-	if ((xOffset & 0x1) != ((chrData & 0x400) >> 10)) {
+	if ((xOffset & 0x1) == ((chrData & 0x400) >> 10)) {
 		return this.palette[chrData >> 12][this.gfx.VRAM[address] & 0xF];
 	}
 	return this.palette[chrData >> 12][this.gfx.VRAM[address] >> 4];
