@@ -17,9 +17,12 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.*
 
 
-Current ARMWrestler ROM Status
+Screenshots
 --------------------------------------------------------------------
 
-* **ARMWrestler:**
+* **ARMWrester:**
 
 	![ARMWrestler](http://cdn.grantgalitz.org/t.png "Fails")
+    
+* **3 Balls By Darkfader:**
+    ![3 Balls](http://i.imgur.com/vWHra5O.png "3 Balls")
