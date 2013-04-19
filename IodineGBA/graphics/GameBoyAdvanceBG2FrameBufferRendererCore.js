@@ -94,7 +94,7 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y)
 	if (x > 239 || y > 159) {
 		return this.gfx.transparency;
 	}
-	address = (y * 480) + (x << 1);
+	var address = (y * 480) + (x << 1);
 	return ((this.gfx.VRAM[address | 1] << 8) | this.gfx.VRAM[address]) & 0x7FFF;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode4Pixel = function (x, y) {
@@ -109,7 +109,7 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5Pixel = function (x, y)
 	if (x > 159 || y > 127) {
 		return this.gfx.transparency;
 	}
-	address = this.gfx.frameSelect + (y * 480) + (x << 1);
+	var address = this.gfx.frameSelect + (y * 480) + (x << 1);
 	return ((this.gfx.VRAM[address | 1] << 8) | this.gfx.VRAM[address]) & 0x7FFF;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.preprocess = function () {
