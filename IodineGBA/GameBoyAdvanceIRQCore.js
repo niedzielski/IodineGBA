@@ -75,24 +75,27 @@ GameBoyAdvanceIRQ.prototype.readIF1 = function () {
 	return this.interruptsRequested >> 8;
 }
 GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
-	var clocks = this.IOCore.gfx.nextVBlankIRQEventTime();
-	clocks = this.findClosestEvent(clocks, this.IOCore.gfx.nextHBlankIRQEventTime());
-	clocks = this.findClosestEvent(clocks, this.IOCore.gfx.nextVCounterIRQEventTime());
-	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer0IRQEventTime());
-	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer1IRQEventTime());
-	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer2IRQEventTime());
-	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer3IRQEventTime());
-	clocks = this.findClosestEvent(clocks, this.IOCore.serial.nextIRQEventTime());
-	clocks = this.findClosestEvent(clocks, this.IOCore.dma.nextIRQEventTime());
+	var clocks = this.findClosestEvent(-1, this.IOCore.gfx.nextVBlankIRQEventTime(), 0x1);
+	clocks = this.findClosestEvent(clocks, this.IOCore.gfx.nextHBlankIRQEventTime(), 0x2);
+	clocks = this.findClosestEvent(clocks, this.IOCore.gfx.nextVCounterIRQEventTime(),0x4);
+	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer0IRQEventTime(), 0x8);
+	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer1IRQEventTime(), 0x10);
+	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer2IRQEventTime(), 0x20);
+	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer3IRQEventTime(), 0x40);
+	clocks = this.findClosestEvent(clocks, this.IOCore.serial.nextIRQEventTime(), 0x80);
+	clocks = this.findClosestEvent(clocks, this.IOCore.dma.nextIRQEventTime(), 0xF00);
 	//JoyPad input state should never update while we're in halt:
-	//clocks = this.findClosestEvent(clocks, this.IOCore.joypad.nextIRQEventTime());
-	clocks = this.findClosestEvent(clocks, this.IOCore.cartridge.nextIRQEventTime());
+	//clocks = this.findClosestEvent(clocks, this.IOCore.joypad.nextIRQEventTime(), 0x1000);
+	clocks = this.findClosestEvent(clocks, this.IOCore.cartridge.nextIRQEventTime(), 0x2000);
 	return clocks;
 }
-GameBoyAdvanceIRQ.prototype.findClosestEvent = function (oldClocks, newClocks) {
-	if (oldClocks > -1) {
+GameBoyAdvanceIRQ.prototype.findClosestEvent = function (oldClocks, newClocks, flagID) {
+	if ((this.interruptsEnabled & flagID) == 0) {
+        return oldClocks;
+    }
+    if (oldClocks > -1) {
 		if (newClocks > -1) {
-			return Math.min(oldClocks, newClocks);
+            return Math.min(oldClocks, newClocks);
 		}
 		return oldClocks;
 	}

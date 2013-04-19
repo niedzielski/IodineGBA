@@ -105,11 +105,11 @@ GameBoyAdvanceJoyPad.prototype.keyRelease = function (keyReleased) {
 }
 GameBoyAdvanceJoyPad.prototype.checkForIRQ = function () {
 	if (this.keyIRQType) {
-		if ((~this.keyInput & this.keyInterrupt & 0x3FF) == (this.keyInterrupt & 0x3FF)) {
+		if (((~this.keyInput) & this.keyInterrupt & 0x3FF) == (this.keyInterrupt & 0x3FF)) {
 			this.IOCore.irq.requestIRQ(0x1000);
 		}
 	}
-	else if ((~this.keyInput & this.keyInterrupt & 0x3FF) != 0) {
+	else if (((~this.keyInput) & this.keyInterrupt & 0x3FF) != 0) {
 		this.IOCore.irq.requestIRQ(0x1000);
 	}
 }
