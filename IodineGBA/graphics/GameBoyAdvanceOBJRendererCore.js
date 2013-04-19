@@ -173,17 +173,17 @@ GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize
 		var palette = this.gfx.paletteOBJ16[sprite.paletteNumber];
 		while (objBufferPosition < xSize) {
 			data = vram[address++];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
 			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF];
+            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
 			data = vram[address++];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
 			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF];
+            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
 			data = vram[address++];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
 			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF];
+            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
 			data = vram[address];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
 			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF];
+            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
 			address += 0x1D;
 		}
 	}
