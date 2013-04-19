@@ -1,4 +1,5 @@
-/* 
+"use strict";
+/*
  * This file is part of IodineGBA
  *
  * Copyright (C) 2012 Grant Galitz
@@ -205,7 +206,7 @@ GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
 GameBoyAdvanceGraphics.prototype.initializeOAMTable = function () {
 	this.OAMTable = [];
 	for (var spriteNumber = 0; spriteNumber < 128; ++spriteNumber) {
-		OAMTable = {};
+		var OAMTable = {};
 		OAMTable.ycoord = 0;
 		OAMTable.matrix2D = false;
 		OAMTable.doubleSizeOrDisabled = false;
