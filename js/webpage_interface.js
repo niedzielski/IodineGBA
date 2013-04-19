@@ -95,7 +95,6 @@ function registerGUIEvents() {
 		event.preventDefault();
 	});
 	addEvent("click", document.getElementById("restart"), function (event) {
-		logged = [];
 		Iodine.restart();
 		event.preventDefault();
 	});
