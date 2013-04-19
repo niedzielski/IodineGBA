@@ -149,6 +149,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize
 	}
 	var address = this.tileNumberToAddress(sprite, sprite.tileNumber, xSize, yOffset);
 	var vram = this.gfx.VRAM;
+    var data = 0;
 	var objBufferPosition = 0;
 	if (sprite.monolithicPalette) {
 		//256 Colors / 1 Palette:
@@ -201,7 +202,7 @@ GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tile
 		tileNumber += (yOffset >> 3) * (xSize >> 3);
 	}
 	//Starting address of currently drawing sprite line:
-	return tileNumber << 5;
+	return (tileNumber << 5) + 0x10000;
 }
 GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
 	//Mark sprite pixels as semi-transparent:
