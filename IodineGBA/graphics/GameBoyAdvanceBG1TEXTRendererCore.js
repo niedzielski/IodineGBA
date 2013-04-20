@@ -36,9 +36,10 @@ GameBoyAdvanceBG1TEXTRenderer.prototype.renderScanLine = function (line) {
 	}
 	var yTileOffset = (line + this.gfx.BG1YCoord) & 0x7;
 	var pixelPipelinePosition = this.gfx.BG1XCoord & 0x7;
-	var tileNumber = (((line + this.gfx.BG1YCoord) >> 3) << 5) + (this.gfx.BG1XCoord >> 3);
+    var yTileStart = (line + this.gfx.BG1YCoord) >> 3;
+    var xTileStart = this.gfx.BG1XCoord >> 3;
 	for (var position = 0; position < 240;) {
-		var chrData = this.fetchTile(tileNumber++);
+		var chrData = this.fetchTile(yTileStart, xTileStart++);
 		while (pixelPipelinePosition < 0x8) {
 			this.scratchBuffer[position++] = this.priorityFlag | this.fetchVRAM(chrData, pixelPipelinePosition++, yTileOffset);
 		}
@@ -50,17 +51,14 @@ GameBoyAdvanceBG1TEXTRenderer.prototype.renderScanLine = function (line) {
 	}
 	return this.scratchBuffer;
 }
-GameBoyAdvanceBG1TEXTRenderer.prototype.fetchTile = function (tileNumber) {
+GameBoyAdvanceBG1TEXTRenderer.prototype.fetchTile = function (yTileStart, xTileStart) {
 	//Find the tile code to locate the tile block:
-	tileNumber = this.computeScreenMapAddress(this.computeTileNumber(tileNumber));
-	return (this.gfx.VRAM[tileNumber | 1] << 8) | this.gfx.VRAM[tileNumber];
+	var address = this.computeScreenMapAddress(this.computeTileNumber(yTileStart, xTileStart));
+	return (this.gfx.VRAM[address | 1] << 8) | this.gfx.VRAM[address];
 }
-GameBoyAdvanceBG1TEXTRenderer.prototype.computeTileNumber = function (tileNumber) {
+GameBoyAdvanceBG1TEXTRenderer.prototype.computeTileNumber = function (yTile, xTile) {
 	//Return the true tile number:
-	var actualTile = tileNumber & 0x3FF;
-	actualTile |= (tileNumber & this.tileMask & 0x20) << 5;
-	actualTile += (tileNumber & this.tileMask & 0x800) >> 1;
-	return actualTile;
+    return (((yTile & this.tileHeight) << 5) + ((xTile & this.tileWidth) << 5)) | (xTile & 0x1F);
 }
 GameBoyAdvanceBG1TEXTRenderer.prototype.computeScreenMapAddress = function (tileNumber) {
 	return ((tileNumber << 1) | (this.gfx.BG1ScreenBaseBlock << 11)) & 0xFFFF;
@@ -93,7 +91,8 @@ GameBoyAdvanceBG1TEXTRenderer.prototype.preprocess = function () {
 		this.palette = this.gfx.palette16;
 		this.fetchVRAM = this.fetch4BitVRAM;
 	}
-	this.tileMask = this.tileMapMask[this.gfx.BG1ScreenSize];
+	this.tileWidth = (this.gfx.BG1ScreenSize & 0x1) << 0x5;
+    this.tileHeight = (0x20 << ((this.gfx.BG1ScreenSize & 0x2) - 1)) - 1;
 	this.priorityFlag = (this.gfx.BG1Priority << 22) | 0x10000;
 	this.baseBlockOffset = this.gfx.BG1CharacterBaseBlock << 14;
 }
