@@ -71,9 +71,9 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
 		//Obtain vertical size info:
 		var ySize = this.lookupYSize[(sprite.shape << 2) | sprite.size] << ((sprite.doubleSizeOrDisabled) ? 1 : 0);
 		var ycoord = sprite.ycoord - ((sprite.matrix2D) ? (ySize >> 1) : 0);
-		var yOffset = line + ySize - ycoord;
+		var yOffset = line - ycoord;
 		//Simulate y-coord wrap around logic:
-		if (ycoord > (0x100 - ySize)) {
+		if (ycoord > 0x100) {
 			yOffset += 0x100;
 		}
 		//Make a sprite line:
@@ -134,7 +134,7 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNum
 	else {
 		//16 Colors / 16 palettes:
 		address += (((y & 7) << 3) + x) >> 1;
-		if ((x & 0x1) == 0x1) {
+		if ((x & 0x1) == 0) {
 			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address] & 0xF];
 		}
 		else {
