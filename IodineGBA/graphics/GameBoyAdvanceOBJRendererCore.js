@@ -19,7 +19,7 @@ function GameBoyAdvanceOBJRenderer(gfx) {
 	this.gfx = gfx;
 	this.initialize();
 }
-GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
+GameBoyAdvanceOBJRenderer.prototype.lookupXSize = [
 	//Square:
 	8,  16, 32, 64,
 	//Vertical Rectangle:
@@ -27,7 +27,7 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
 	//Horizontal Rectangle:
 	8,   8, 16, 32
 ];
-GameBoyAdvanceOBJRenderer.prototype.lookupXSize = [
+GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
 	//Square:
 	8,  16, 32, 64,
 	//Vertical Rectangle:
