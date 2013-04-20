@@ -19,12 +19,6 @@ function GameBoyAdvanceBG3TEXTRenderer(gfx) {
 	this.gfx = gfx;
 	this.initialize();
 }
-GameBoyAdvanceBG3TEXTRenderer.prototype.tileMapMask = [
-	0,
-	0x20,
-	0x800,
-	0x820
-];
 GameBoyAdvanceBG3TEXTRenderer.prototype.initialize = function (line) {
 	this.scratchBuffer = getInt32Array(248);
 	this.preprocess();
@@ -93,6 +87,6 @@ GameBoyAdvanceBG3TEXTRenderer.prototype.preprocess = function () {
 	}
 	this.tileWidth = (this.gfx.BG3ScreenSize & 0x1) << 0x5;
     this.tileHeight = (0x20 << ((this.gfx.BG3ScreenSize & 0x2) - 1)) - 1;
-	this.priorityFlag = (this.gfx.BG3Priority << 22) | 0x40000;
+	this.priorityFlag = (this.gfx.BG3Priority << 23) | 0x80000;
 	this.baseBlockOffset = this.gfx.BG3CharacterBaseBlock << 14;
 }

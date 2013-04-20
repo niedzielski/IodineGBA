@@ -156,7 +156,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.totalLinesPassed = 0;
 	this.queuedScanLines = 0;
 	this.lastUnrenderedLine = 0;
-	this.transparency = 0x1100000;
+	this.transparency = 0x3A00000;
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 	this.initializeMatrixStorage();
@@ -194,13 +194,13 @@ GameBoyAdvanceGraphics.prototype.initializeMatrixStorage = function () {
 }
 GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
 	//Both BG and OAM in unified storage:
-	this.palette256 = getInt16Array(0x100);
-	this.paletteOBJ256 = getInt16Array(0x100);
+	this.palette256 = getInt32Array(0x100);
+	this.paletteOBJ256 = getInt32Array(0x100);
 	this.palette16 = [];
 	this.paletteOBJ16 = [];
 	for (var index = 0; index < 0x10; ++index) {
-		this.palette16[index] = getInt16Array(0x10);
-		this.paletteOBJ16[index] = getInt16Array(0x10);
+		this.palette16[index] = getInt32Array(0x10);
+		this.paletteOBJ16[index] = getInt32Array(0x10);
 	}
 }
 GameBoyAdvanceGraphics.prototype.initializeOAMTable = function () {
@@ -421,7 +421,7 @@ GameBoyAdvanceGraphics.prototype.compositeLayersNormal = function (OBJBuffer, BG
 		//Loop through all layers each pixel to resolve priority:
 		for (stackIndex = 0; stackIndex < stackDepth; ++stackIndex) {
 			workingPixel = layerStack[stackIndex][pixelPosition];
-			if ((workingPixel & 0x1D00000) <= (currentPixel & 0x1D00000)) {
+			if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
 				/*
 					If higher priority than last pixel and not transparent.
 					Also clear any plane layer bits other than backplane for
@@ -431,7 +431,7 @@ GameBoyAdvanceGraphics.prototype.compositeLayersNormal = function (OBJBuffer, BG
 				currentPixel = workingPixel;
 			}
 		}
-		if ((currentPixel & 0x200000) == 0) {
+		if ((currentPixel & 0x400000) == 0) {
 			//Normal Pixel:
 			this.lineBuffer[pixelPosition] = currentPixel;
 		}
@@ -462,7 +462,7 @@ GameBoyAdvanceGraphics.prototype.compositeLayersWithEffects = function (OBJBuffe
 		//Loop through all layers each pixel to resolve priority:
 		for (stackIndex = 0; stackIndex < stackDepth; ++stackIndex) {
 			workingPixel = layerStack[stackIndex][pixelPosition];
-			if ((workingPixel & 0x1D00000) <= (currentPixel & 0x1D00000)) {
+			if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
 				/*
 					If higher priority than last pixel and not transparent.
 					Also clear any plane layer bits other than backplane for
@@ -474,7 +474,7 @@ GameBoyAdvanceGraphics.prototype.compositeLayersWithEffects = function (OBJBuffe
 				currentPixel = workingPixel;
 			}
 		}
-		if ((currentPixel & 0x200000) == 0) {
+		if ((currentPixel & 0x400000) == 0) {
 			//Normal Pixel:
 			//Pass the highest two pixels to be arbitrated in the color effects processing:
 			this.lineBuffer[pixelPosition] = this.colorEffectsRenderer.process(lowerPixel, currentPixel);
@@ -1090,19 +1090,19 @@ GameBoyAdvanceGraphics.prototype.writeMOSAIC1 = function (data) {
 GameBoyAdvanceGraphics.prototype.writeBLDCNT0 = function (data) {
 	//Select target 1 and color effects mode:
 	this.midScanLineJIT();
-	this.effectsTarget1 = (data & 0x3F) << 15;
+	this.effectsTarget1 = (data & 0x3F) << 16;
 	this.colorEffectsType = data >> 6;
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT0 = function () {
-	return (this.effectsTarget1 >> 15) | (this.colorEffectsType << 6);
+	return (this.effectsTarget1 >> 16) | (this.colorEffectsType << 6);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT1 = function (data) {
 	//Select target 2:
 	this.midScanLineJIT();
-	this.effectsTarget2 = (data & 0x3F) << 15;
+	this.effectsTarget2 = (data & 0x3F) << 16;
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT1 = function () {
-	return this.effectsTarget2 >> 15;
+	return this.effectsTarget2 >> 16;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA0 = function (data) {
 	this.midScanLineJIT();
@@ -1180,7 +1180,7 @@ GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
 	this.paletteRAM[address] = data;
 	var palette = ((this.paletteRAM[address | 1] << 8) | this.paletteRAM[address & 0x3FE]) & 0x7FFF;
 	address >>= 1;
-	if (address == 0) {
+	if ((address & 0xFF) == 0) {
 		palette |= this.transparency;
 	}
 	if (address < 0x100) {

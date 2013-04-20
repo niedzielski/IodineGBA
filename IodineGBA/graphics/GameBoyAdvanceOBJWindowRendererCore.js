@@ -39,7 +39,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderNormalScanLine = function (line,
 			//Loop through all layers each pixel to resolve priority:
 			for (stackIndex = 0; stackIndex < stackDepth; ++stackIndex) {
 				workingPixel = layerStack[stackIndex][pixelPosition];
-				if ((workingPixel & 0x1D00000) <= (currentPixel & 0x1D00000)) {
+				if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
 					/*
 						If higher priority than last pixel and not transparent.
 						Also clear any plane layer bits other than backplane for
@@ -51,7 +51,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderNormalScanLine = function (line,
 					currentPixel = workingPixel;
 				}
 			}
-			if ((currentPixel & 0x200000) == 0) {
+			if ((currentPixel & 0x400000) == 0) {
 				//Normal Pixel:
 				lineBuffer[pixelPosition] = currentPixel;
 			}
@@ -86,7 +86,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderScanLineWithEffects = function (
 			//Loop through all layers each pixel to resolve priority:
 			for (stackIndex = 0; stackIndex < stackDepth; ++stackIndex) {
 				workingPixel = layerStack[stackIndex][pixelPosition];
-				if ((workingPixel & 0x1D00000) <= (currentPixel & 0x1D00000)) {
+				if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
 					/*
 						If higher priority than last pixel and not transparent.
 						Also clear any plane layer bits other than backplane for
@@ -98,7 +98,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderScanLineWithEffects = function (
 					currentPixel = workingPixel;
 				}
 			}
-			if ((currentPixel & 0x200000) == 0) {
+			if ((currentPixel & 0x400000) == 0) {
 				//Normal Pixel:
 				//Pass the highest two pixels to be arbitrated in the color effects processing:
 				lineBuffer[pixelPosition] = this.gfx.colorEffectsRenderer.process(lowerPixel, currentPixel);

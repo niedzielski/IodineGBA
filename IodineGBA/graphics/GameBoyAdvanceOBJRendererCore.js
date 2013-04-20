@@ -53,7 +53,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderWindowScanLine = function (line) {
 }
 GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line, isOBJWindow) {
 	this.clearScratch();
-	for (var objNumber = 0; objNumber < 128; ++objNumber) {
+	for (var objNumber = 127; objNumber > -1; --objNumber) {
 		this.renderSprite(line, this.gfx.OAMTable[objNumber], isOBJWindow);
 	}
 }
@@ -207,7 +207,7 @@ GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tile
 GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
 	//Mark sprite pixels as semi-transparent:
 	while (--xSize > -1) {
-		this.scratchOBJBuffer[xSize] |= 0x200000;
+		this.scratchOBJBuffer[xSize] |= 0x400000;
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xSize) {
@@ -223,12 +223,12 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
 	//Resolve end point:
 	var xcoordEnd = Math.min(xcoord + xSize, 240);
 	//Flag for compositor to ID the pixels as OBJ:
-	var bitFlags = (sprite.priority << 22) | 0x80000;
+	var bitFlags = (sprite.priority << 23) | 0x100000;
 	if (!sprite.horizontalFlip || sprite.matrix2D) {
 		//Normal:
 		for (var xSource = 0; xcoord < xcoordEnd; ++xcoord, ++xSource) {
 			//Only overwrite transparency:
-			if (xcoord > -1 && (this.targetBuffer[xcoord] & 0x1000000) == 0x1000000) {
+			if (xcoord > -1 && (this.targetBuffer[xcoord] & 0x3000000) == 0x3000000) {
 				this.targetBuffer[xcoord] = bitFlags | this.scratchOBJBuffer[xSource];
 			}
 		}
@@ -237,7 +237,7 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
 		//Flipped Horizontally:
 		for (var xSource = xSize; xcoord < xcoordEnd; ++xcoord, --xSource) {
 			//Only overwrite transparency:
-			if (xcoord > -1 && (this.targetBuffer[xcoord] & 0x1000000) == 0x1000000) {
+			if (xcoord > -1 && (this.targetBuffer[xcoord] & 0x3000000) == 0x3000000) {
 				this.targetBuffer[xcoord] = bitFlags | this.scratchOBJBuffer[xSource];
 			}
 		}

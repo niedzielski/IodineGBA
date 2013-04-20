@@ -87,6 +87,6 @@ GameBoyAdvanceBG0TEXTRenderer.prototype.preprocess = function () {
 	}
     this.tileWidth = (this.gfx.BG0ScreenSize & 0x1) << 0x5;
     this.tileHeight = (0x20 << ((this.gfx.BG0ScreenSize & 0x2) - 1)) - 1;
-	this.priorityFlag = (this.gfx.BG0Priority << 22) | 0x8000;
+	this.priorityFlag = (this.gfx.BG0Priority << 23) | 0x10000;
 	this.baseBlockOffset = this.gfx.BG0CharacterBaseBlock << 14;
 }
