@@ -50,7 +50,7 @@ function registerGUIEvents() {
 				Iodine.setSpeed(emuSpeed);
 				break;
 			case 50:
-				emuSpeed = Math.max(emuSpeed - 0.25, 0.25);
+				emuSpeed = Math.max(emuSpeed - 0.10, 0.10);
 				Iodine.setSpeed(emuSpeed);
 				break;
 			default:
