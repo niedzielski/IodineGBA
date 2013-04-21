@@ -424,7 +424,7 @@ GameBoyAdvanceCPU.prototype.performMLA64 = function (rs, rd, mlaHigh, mlaLow) {
 		this.IOCore.wait.CPUInternalCyclePrefetch(this.instructionHandle.fetch, 6);
 	}
 	//Solve for the high word (Do FPU double divide to bring down high word into the low word):
-	this.mul64ResultHigh = ((((rs * rd) + mlaLow) / 0x100000000) + mlaHigh) | 0;
+	this.mul64ResultHigh = ((((rs * rd) + (mlaLow >>> 0)) / 0x100000000) + (mlaHigh >>> 0)) | 0;
 	/*
 		We have to split up the 32 bit multiplication,
 		as JavaScript does multiplication on the FPU
@@ -434,7 +434,7 @@ GameBoyAdvanceCPU.prototype.performMLA64 = function (rs, rd, mlaHigh, mlaLow) {
 	var lowMul = (rs & 0xFFFF) * rd;
 	var highMul = (rs >> 16) * rd;
 	//Cut off bits above bit 31 and return with proper sign:
-	this.mul64ResultLow = ((highMul << 16) + lowMul + mlaLow) | 0;
+	this.mul64ResultLow = ((highMul << 16) + lowMul + (mlaLow >>> 0)) | 0;
 }
 GameBoyAdvanceCPU.prototype.performUMUL64 = function (rs, rd) {
 	//Predict the internal cycle time:
