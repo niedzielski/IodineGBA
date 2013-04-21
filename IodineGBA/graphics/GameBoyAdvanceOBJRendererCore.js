@@ -98,12 +98,11 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
-	var yDiffFromCenter = yOffset - (ySize >> 1);
 	var params = this.gfx.OBJMatrixParameters[sprite.matrixParameters];
-	var pa = -params[0] * (xSize >> 1);
-	var pb = params[1] * yDiffFromCenter;
-	var pc = -params[2] * (xSize >> 1);
-	var pd = params[3] * yDiffFromCenter;
+	var pa = 0;
+	var pb = params[1] * yOffset;
+	var pc = 0;
+	var pd = params[3] * yOffset;
 	var x = 0;
 	var y = 0;
 	var tileNumber = sprite.tileNumber;
@@ -111,7 +110,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 		//Find (X, Y):
 		x = pa + pb;
 		y = pc + pd;
-		if (x < xSize && y < ySize) {
+		if (x >= 0 && y >= 0 && x < xSize && y < ySize) {
 			//Coordinates in range, fetch pixel:
 			this.scratchOBJBuffer[position] = this.fetchMatrixPixel(sprite, tileNumber, x | 0, y | 0, xSize, yOffset);
 		}

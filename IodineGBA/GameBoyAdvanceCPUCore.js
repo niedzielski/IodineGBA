@@ -434,7 +434,7 @@ GameBoyAdvanceCPU.prototype.performMLA64 = function (rs, rd, mlaHigh, mlaLow) {
 	var lowMul = (rs & 0xFFFF) * rd;
 	var highMul = (rs >> 16) * rd;
 	//Cut off bits above bit 31 and return with proper sign:
-	this.mul64ResultLow = ((highMul << 16) + lowMul + (mlaLow >>> 0)) | 0;
+	this.mul64ResultLow = (((highMul << 16) >> 0) + (lowMul >>> 0) + (mlaLow >>> 0)) | 0;
 }
 GameBoyAdvanceCPU.prototype.performUMUL64 = function (rs, rd) {
 	//Predict the internal cycle time:
@@ -521,9 +521,10 @@ GameBoyAdvanceCPU.prototype.read32 = function (address) {
 	//Updating the address bus away from PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
 	var data = this.IOCore.memoryRead32(address);
+    var real_output = (data << ((address & 0x3) << 3)) | (data >>> ((4 -(address & 0x3)) << 3));
 	//Updating the address bus back to PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
-	return data;
+	return real_output;
 }
 GameBoyAdvanceCPU.prototype.read16 = function (address) {
 	//Updating the address bus away from PC fetch:
