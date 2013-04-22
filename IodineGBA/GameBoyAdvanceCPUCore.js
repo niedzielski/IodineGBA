@@ -336,26 +336,81 @@ GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
 	}
 	this.MODEBits = newMode;
 }
-GameBoyAdvanceCPU.prototype.setADDFlags = function (operand1, operand2, dirtyResult, result) {
+GameBoyAdvanceCPU.prototype.setADDFlags = function (operand1, operand2) {
     //Update flags for an addition operation:
-    this.CPSROverflow = ((operand1 ^ operand2) == 0 && (operand1 ^ result) < 0);
-	this.CPSRCarry = (dirtyResult > 0xFFFFFFFF);
+    operand1 >>>= 0;
+    operand2 >>>= 0;
+    var unsignedResult = operand1 + operand2;
+    var result = unsignedResult | 0;
+    this.setVFlagForADD(operand1, operand2, result);
+	this.CPSRCarry = (unsignedResult > 0xFFFFFFFF);
+	this.CPSRNegative = (result < 0);
+	this.CPSRZero = (result == 0);
+    return result;
+}
+GameBoyAdvanceCPU.prototype.setADCFlags = function (operand1, operand2) {
+    //Update flags for an addition operation:
+    operand1 >>>= 0;
+    operand2 >>>= 0;
+    var unsignedResult = operand1 + operand2 + ((this.CPSRCarry) ? 1 : 0);
+    var result = unsignedResult | 0;
+    this.setVFlagForADD(operand1, operand2, result);
+	this.CPSRCarry = (unsignedResult > 0xFFFFFFFF);
+	this.CPSRNegative = (result < 0);
+	this.CPSRZero = (result == 0);
+    return result;
+}
+GameBoyAdvanceCPU.prototype.setSUBFlags = function (operand1, operand2) {
+    //Update flags for a subtraction operation:
+    operand1 >>>= 0;
+    operand2 >>>= 0;
+    var unsignedResult = operand1 - operand2;
+    var result = unsignedResult | 0;
+    this.setVFlagForSUB(operand1, operand2, result);
+	this.CPSRCarry = (unsignedResult >= 0);
+	this.CPSRNegative = (result < 0);
+	this.CPSRZero = (result == 0);
+    return result;
+}
+GameBoyAdvanceCPU.prototype.setSBCFlags = function (operand1, operand2) {
+    //Update flags for a subtraction operation:
+    operand1 >>>= 0;
+    operand2 >>>= 0;
+    var unsignedResult = operand1 - operand2 - ((this.CPSRCarry) ? 0 : 1);
+    var result = unsignedResult | 0;
+    this.setVFlagForSUB(operand1, operand2, result);
+	this.CPSRCarry = (unsignedResult >= 0);
+	this.CPSRNegative = (result < 0);
+	this.CPSRZero = (result == 0);
+    return result;
+}
+GameBoyAdvanceCPU.prototype.setCMPFlags = function (operand1, operand2) {
+    //Update flags for a subtraction operation:
+    operand1 >>>= 0;
+    operand2 >>>= 0;
+    var unsignedResult = operand1 - operand2;
+    var result = unsignedResult | 0;
+    this.setVFlagForSUB(operand1, operand2, result);
+	this.CPSRCarry = (unsignedResult >= 0);
 	this.CPSRNegative = (result < 0);
 	this.CPSRZero = (result == 0);
 }
-GameBoyAdvanceCPU.prototype.setSUBFlags = function (operand1, operand2, result) {
-    //Update flags for a subtraction operation:
-    this.CPSROverflow = ((operand1 ^ operand2) < 0 && (operand1 ^ result) < 0);
-	this.CPSRCarry = (operand1 >= operand2);
+GameBoyAdvanceCPU.prototype.setCMNFlags = function (operand1, operand2) {
+    //Update flags for an addition operation:
+    operand1 >>>= 0;
+    operand2 >>>= 0;
+    var unsignedResult = operand1 + operand2;
+    var result = unsignedResult | 0;
+    this.setVFlagForADD(operand1, operand2, result);
+	this.CPSRCarry = (unsignedResult > 0xFFFFFFFF);
 	this.CPSRNegative = (result < 0);
 	this.CPSRZero = (result == 0);
 }
-GameBoyAdvanceCPU.prototype.setSBCFlags = function (operand1, operand2, dirtyResult, result) {
-    //Update flags for a subtraction operation:
+GameBoyAdvanceCPU.prototype.setVFlagForADD = function (operand1, operand2, result) {
+    this.CPSROverflow = ((operand1 ^ operand2) >= 0 && (operand1 ^ result) < 0);
+}
+GameBoyAdvanceCPU.prototype.setVFlagForSUB = function (operand1, operand2, result) {
     this.CPSROverflow = ((operand1 ^ operand2) < 0 && (operand1 ^ result) < 0);
-	this.CPSRCarry = (operand1 >= dirtyResult);
-	this.CPSRNegative = (result < 0);
-	this.CPSRZero = (result == 0);
 }
 GameBoyAdvanceCPU.prototype.performMUL32 = function (rs, rd, MLAClocks) {
 	//Predict the internal cycle time:

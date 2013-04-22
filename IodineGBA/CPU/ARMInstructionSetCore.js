@@ -276,13 +276,10 @@ ARMInstructionSet.prototype.SUB = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 - operand2) | 0);
 }
 ARMInstructionSet.prototype.SUBS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
-	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
-	//Perform Subtraction:
-	var result = (operand1 - operand2) | 0;
-	parentObj.CPUCore.setSUBFlags(operand1, operand2, result);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand2 = operand2OP(parentObj, parentObj.execute);
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSUBFlags(operand1, operand2));
 }
 ARMInstructionSet.prototype.RSB = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
@@ -292,14 +289,10 @@ ARMInstructionSet.prototype.RSB = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand2 - operand1) | 0);
 }
 ARMInstructionSet.prototype.RSBS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
-	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
-	//Perform Subtraction:
-	var dirtyResult = operand2 - operand1;
-	var result = dirtyResult | 0;
-	parentObj.CPUCore.setSUBFlags(operand2, operand1, result);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand2 = operand2OP(parentObj, parentObj.execute);
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSUBFlags(operand2, operand1));
 }
 ARMInstructionSet.prototype.ADD = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
@@ -309,14 +302,10 @@ ARMInstructionSet.prototype.ADD = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 + operand2) | 0);
 }
 ARMInstructionSet.prototype.ADDS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
-	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
-	//Perform Addition:
-	var dirtyResult = operand1 + operand2;
-	var result = dirtyResult | 0;
-	parentObj.CPUCore.setADDFlags(operand1, operand2, dirtyResult, result);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand2 = operand2OP(parentObj, parentObj.execute);
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setADDFlags(operand1, operand2));
 }
 ARMInstructionSet.prototype.ADC = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
@@ -326,14 +315,10 @@ ARMInstructionSet.prototype.ADC = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 + operand2 + ((parentObj.CPUCore.CPSRCarry) ? 1 : 0)) | 0);
 }
 ARMInstructionSet.prototype.ADCS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
-	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
-	//Perform Addition w/ Carry:
-	var dirtyResult = operand1 + operand2 + ((parentObj.CPUCore.CPSRCarry) ? 1 : 0);
-	var result = dirtyResult | 0;
-	parentObj.CPUCore.setADDFlags(operand1, operand2, dirtyResult, result);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand2 = operand2OP(parentObj, parentObj.execute);
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setADCFlags(operand1, operand2));
 }
 ARMInstructionSet.prototype.SBC = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
@@ -343,14 +328,10 @@ ARMInstructionSet.prototype.SBC = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 - operand2 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) | 0);
 }
 ARMInstructionSet.prototype.SBCS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
-	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
-	//Perform Subtraction w/ Carry:
-	var dirtyResult = (operand1 - operand2 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) >>> 0;
-    var result = dirtyResult | 0;
-	parentObj.CPUCore.setSBCFlags(operand1, operand2, dirtyResult, result);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand2 = operand2OP(parentObj, parentObj.execute);
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSBCFlags(operand1, operand2));
 }
 ARMInstructionSet.prototype.RSC = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
@@ -360,14 +341,10 @@ ARMInstructionSet.prototype.RSC = function (parentObj, operand2OP) {
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand2 - operand1 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) | 0);
 }
 ARMInstructionSet.prototype.RSCS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
-	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
-	//Perform Reverse Subtraction w/ Carry:
-	var dirtyResult = (operand2 - operand1 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) >>> 0;
-    var result = dirtyResult | 0;
-	parentObj.CPUCore.setSBCFlags(operand2, operand1, dirtyResult, result);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand2 = operand2OP(parentObj, parentObj.execute);
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSBCFlags(operand2, operand1));
 }
 ARMInstructionSet.prototype.TSTS = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
@@ -386,19 +363,14 @@ ARMInstructionSet.prototype.TEQS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRZero = (result == 0);
 }
 ARMInstructionSet.prototype.CMPS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
-	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
-	//Perform Subtraction:
-	var result = (operand1 - operand2) | 0;
-	parentObj.CPUCore.setSUBFlags(operand1, operand2, result);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand2 = operand2OP(parentObj, parentObj.execute);
+	parentObj.CPUCore.setCMPFlags(operand1, operand2);
 }
 ARMInstructionSet.prototype.CMNS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] >>> 0;
-	var operand2 = operand2OP(parentObj, parentObj.execute) >>> 0;
-	//Perform Addition:
-	var dirtyResult = operand1 + operand2;
-	var result = dirtyResult | 0;
-	parentObj.CPUCore.setADDFlags(operand1, operand2, dirtyResult, result);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand2 = operand2OP(parentObj, parentObj.execute);
+	parentObj.CPUCore.setCMNFlags(operand1, operand2);
 }
 ARMInstructionSet.prototype.ORR = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
