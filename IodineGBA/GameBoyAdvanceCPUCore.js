@@ -39,19 +39,19 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 		SPSR is the saved program status register.
 	*/
 	//Normal R0-R15 Registers:
-	this.registers = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	this.registers = getInt32Array(16);
 	//Used to copy back the R8-R14 state for normal operations:
-	this.registersUSR = [0,0,0,0,0,0,0];
+	this.registersUSR = getInt32Array(7);
 	//Fast IRQ mode registers (R8-R14):
-	this.registersFIQ = [0,0,0,0,0,0,0];
+	this.registersFIQ = getInt32Array(7);
 	//Supervisor mode registers (R13-R14):
-	this.registersSVC = [0,0];
+	this.registersSVC = getInt32Array(2);
 	//Abort mode registers (R13-R14):
-	this.registersABT = [0,0];
+	this.registersABT = getInt32Array(2);
 	//IRQ mode registers (R13-R14):
-	this.registersIRQ = [0,0];
+	this.registersIRQ = getInt32Array(2);
 	//Undefined mode registers (R13-R14):
-	this.registersUND = [0,0];
+	this.registersUND = getInt32Array(2);
 	//Pre-initialize stack pointers if no BIOS loaded:
 	if (!this.IOCore.BIOSFound || this.IOCore.emulatorCore.SKIPBoot) {
 		this.registersSVC[0] = 0x3007FE0;
@@ -489,7 +489,7 @@ GameBoyAdvanceCPU.prototype.performMLA64 = function (rs, rd, mlaHigh, mlaLow) {
 	var lowMul = (rs & 0xFFFF) * rd;
 	var highMul = (rs >> 16) * rd;
 	//Cut off bits above bit 31 and return with proper sign:
-	this.mul64ResultLow = (((highMul << 16) >> 0) + (lowMul >>> 0) + (mlaLow >>> 0)) | 0;
+	this.mul64ResultLow = (((highMul << 16) >>> 0) + (lowMul >>> 0) + (mlaLow >>> 0)) | 0;
 }
 GameBoyAdvanceCPU.prototype.performUMUL64 = function (rs, rd) {
 	//Predict the internal cycle time:

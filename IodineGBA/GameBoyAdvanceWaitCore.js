@@ -133,12 +133,12 @@ GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (address, clock
 	}
 }
 GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
-	if ((address >>> 24) >= 0x8 && (address >>> 24) < 0xE) {
+	if (address >= -0x80000000 && address <= -0x20000000) {
 		if (this.prefetchEnabled) {
 			if (this.ROMPrebuffer > 0) {
 				--this.ROMPrebuffer;
 				this.FASTAccess();
-				return (this.IOCore.cartridge.readROM(address & 0x1FFFFFF) +
+				return (this.IOCore.cartridge.readROM(address & 0x1FFFFFF) |
 					(this.IOCore.cartridge.readROM((address + 1) & 0x1FFFFFF) << 8));
 			}
 		}
@@ -149,7 +149,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 	return this.IOCore.memoryRead16(address);
 }
 GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
-	if ((address >>> 24) >= 0x8 && (address >>> 24) < 0xE) {
+	if (address >= -0x80000000 && address <= -0x20000000) {
 		if (this.prefetchEnabled) {
 			if (this.ROMPrebuffer > 1) {
 				this.ROMPrebuffer -= 2;
