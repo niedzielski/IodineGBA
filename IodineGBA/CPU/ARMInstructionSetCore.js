@@ -142,7 +142,7 @@ ARMInstructionSet.prototype.guardRegisterWriteSpecial = function (address, data,
 				}
 				else {
 					//User-Mode Register Write Inside Non-User-Mode:
-					this.CPUCore.registersUSR[address] = data;
+					this.CPUCore.registersUSR[address - 8] = data;
 				}
 				break;
 			default:
@@ -151,7 +151,7 @@ ARMInstructionSet.prototype.guardRegisterWriteSpecial = function (address, data,
 				}
 				else {
 					//User-Mode Register Write Inside Non-User-Mode:
-					this.CPUCore.registersUSR[address] = data;
+					this.CPUCore.registersUSR[address - 8] = data;
 				}
 		}
 	}
@@ -168,7 +168,7 @@ ARMInstructionSet.prototype.guardMultiRegisterWriteSpecial = function (parentObj
 			}
 			else {
 				//User-Mode Register Write Inside Non-User-Mode:
-				parentObj.CPUCore.registersUSR[address] = data;
+				parentObj.CPUCore.registersUSR[address - 8] = data;
 			}
 			break;
 		default:
@@ -177,7 +177,7 @@ ARMInstructionSet.prototype.guardMultiRegisterWriteSpecial = function (parentObj
 			}
 			else {
 				//User-Mode Register Write Inside Non-User-Mode:
-				parentObj.CPUCore.registersUSR[address] = data;
+				parentObj.CPUCore.registersUSR[address - 8] = data;
 			}
 	}
 }
@@ -193,7 +193,7 @@ ARMInstructionSet.prototype.guardMultiRegisterReadSpecial = function (parentObj,
 			}
 			else {
 				//User-Mode Register Read Inside Non-User-Mode:
-				return parentObj.CPUCore.registersUSR[address];
+				return parentObj.CPUCore.registersUSR[address - 8];
 			}
 			break;
 		default:
@@ -202,7 +202,7 @@ ARMInstructionSet.prototype.guardMultiRegisterReadSpecial = function (parentObj,
 			}
 			else {
 				//User-Mode Register Read Inside Non-User-Mode:
-				return parentObj.CPUCore.registersUSR[address];
+				return parentObj.CPUCore.registersUSR[address - 8];
 			}
 	}
 }
@@ -1272,7 +1272,6 @@ ARMInstructionSet.prototype.rcs = function (parentObj, operand) {
 	parentObj.CPUCore.CPSROverflow = ((operand & 0x10000000) != 0);
 	switch (parentObj.CPUCore.MODEBits) {
 		case 0x10:
-		case 0x1F:
 			return;
 		default:
 			parentObj.CPUCore.IRQDisabled = ((operand & 0x80) != 0);
@@ -1351,7 +1350,6 @@ ARMInstructionSet.prototype.ic = function (parentObj, operand) {
 	parentObj.CPUCore.CPSROverflow = ((operand & 0x10000000) != 0);
 	switch (parentObj.CPUCore.MODEBits) {
 		case 0x10:
-		case 0x1F:
 			return;
 		default:
 			parentObj.CPUCore.IRQDisabled = ((operand & 0x80) != 0);
