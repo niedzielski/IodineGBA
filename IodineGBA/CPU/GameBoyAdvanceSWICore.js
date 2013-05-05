@@ -193,31 +193,95 @@ GameBoyAdvanceSWI.prototype.RegisterRAMReset = function () {
 	
 }
 GameBoyAdvanceSWI.prototype.Halt = function () {
-	
+	this.IOCore.systemStatus |= 2;
 }
 GameBoyAdvanceSWI.prototype.Stop = function () {
-	
+	this.IOCore.systemStatus |= 4;
 }
 GameBoyAdvanceSWI.prototype.IntrWait = function () {
-	
+	this.IOCore.irq.IME = true;
+    if ((this.CPUCore.registers[0] & 0x1) == 0x1) {
+        this.IOCore.irq.interruptsRequested = 0;
+    }
+    this.IOCore.irq.interruptsEnabled = this.CPUCore.registers[1] & 0x3FFF;
+    this.Halt();
 }
 GameBoyAdvanceSWI.prototype.VBlankIntrWait = function () {
-	
+	this.IOCore.irq.IME = true;
+    this.IOCore.irq.interruptsRequested = 0;
+    this.IOCore.irq.interruptsEnabled = 0x1;
+    this.Halt();
 }
 GameBoyAdvanceSWI.prototype.Div = function () {
-	
+	var numerator = this.CPUCore.registers[0];
+    var denominator = this.CPUCore.registers[1];
+    if (denominator == 0) {
+        throw(new Error("Division by 0 called."));
+    }
+    var result = (numerator / denominator) | 0;
+    this.CPUCore.registers[0] = result;
+    this.CPUCore.registers[1] = (numerator % denominator) | 0;
+    this.CPUCore.registers[3] = Math.abs(result) | 0;
 }
 GameBoyAdvanceSWI.prototype.DivArm = function () {
-	
+	var numerator = this.CPUCore.registers[1];
+    var denominator = this.CPUCore.registers[0];
+    if (denominator == 0) {
+        throw(new Error("Division by 0 called."));
+    }
+    var result = (numerator / denominator) | 0;
+    this.CPUCore.registers[0] = result;
+    this.CPUCore.registers[1] = (numerator % denominator) | 0;
+    this.CPUCore.registers[3] = Math.abs(result) | 0;
 }
 GameBoyAdvanceSWI.prototype.Sqrt = function () {
-	
+	this.CPUCore.registers[0] = Math.sqrt(this.CPUCore.registers[0] >>> 0) | 0;
 }
 GameBoyAdvanceSWI.prototype.ArcTan = function () {
-	
+    var a = (-(this.CPUCore.performMUL32(this.CPUCore.registers[0], this.CPUCore.registers[0], 0) >> 14)) | 0;
+    var b = ((this.CPUCore.performMUL32(0xA9, a, 0) >> 14) + 0x390) | 0;
+    b = ((this.CPUCore.performMUL32(b, a, 0) >> 14) + 0x91C) | 0;
+    b = ((this.CPUCore.performMUL32(b, a, 0) >> 14) + 0xFB6) | 0;
+    b = ((this.CPUCore.performMUL32(b, a, 0) >> 14) + 0x16AA) | 0;
+    b = ((this.CPUCore.performMUL32(b, a, 0) >> 14) + 0x2081) | 0;
+    b = ((this.CPUCore.performMUL32(b, a, 0) >> 14) + 0x3651) | 0;
+    b = ((this.CPUCore.performMUL32(b, a, 0) >> 14) + 0xA2F9) | 0;
+    a = this.CPUCore.performMUL32(this.CPUCore.registers[0], b, 0) >> 16;
+    this.CPUCore.registers[0] = a;
 }
 GameBoyAdvanceSWI.prototype.ArcTan2 = function () {
-	
+	var x = this.CPUCore.registers[0];
+    var y = this.CPUCore.registers[1];
+    var result = 0;
+    if (y == 0) {
+        result = (x >> 16) & 0x8000;
+    }
+    else {
+        if (x == 0) {
+            result = ((y >> 16) & 0x8000) + 0x4000;
+        }
+        else {
+            if ((Math.abs(x) > Math.abs(y)) || (Math.abs(x) == Math.abs(y) && (x >= 0 || y >= 0))) {
+                this.CPUCore.registers[1] = x;
+                this.CPUCore.registers[0] = y << 14;
+                this.Div();
+                this.ArcTan();
+                if (x < 0) {
+                    result = 0x8000 + this.CPUCore.registers[0];
+                }
+                else {
+                    result = (((y >> 16) & 0x8000) << 1) + this.CPUCore.registers[0];
+                }
+            }
+            else {
+                this.CPUCore.registers[0] = x << 14;
+                this.Div();
+                this.ArcTan();
+                result = (0x4000 + ((y >> 16) & 0x8000)) - this.CPUCore.registers[0];
+            }
+        }
+    }
+    this.CPUCore.registers[0] = result | 0;
 }
 GameBoyAdvanceSWI.prototype.CpuSet = function () {
 	
@@ -292,7 +356,7 @@ GameBoyAdvanceSWI.prototype.HardReset = function () {
 	
 }
 GameBoyAdvanceSWI.prototype.CustomHalt = function () {
-	
+	this.IOCore.wait.writeHALTCNT(this.CPUCore.registers[2]);
 }
 GameBoyAdvanceSWI.prototype.SoundDriverVSyncOff = function () {
 	

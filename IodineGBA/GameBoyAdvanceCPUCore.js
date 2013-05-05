@@ -26,6 +26,7 @@ GameBoyAdvanceCPU.prototype.initialize = function () {
 	this.initializeRegisters();
 	this.ARM = new ARMInstructionSet(this);
 	this.THUMB = new THUMBInstructionSet(this);
+    this.swi = new GameBoyAdvanceSWI(this);
 	this.instructionHandle = this.ARM;
 }
 GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
@@ -104,9 +105,9 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 			//IRQ mode exit handling:
 			case 0x130:
 				this.ARM.execute = 0xE8BD500F;
-				this.ARM.LDMIAW(this, this.ARM.guardMultiRegisterWrite);
+				this.ARM.LDMIAW(this.ARM, this.ARM.guardMultiRegisterWrite);
 				this.ARM.execute = 0xE25EF004;
-				this.ARM.SUBS(this, this.ARM.imm);
+				this.ARM.SUBS(this.ARM, this.ARM.imm);
 				break;
 			default:
 				throw(new Error("Could not handle branch to: " + branchTo.toString(16)));
