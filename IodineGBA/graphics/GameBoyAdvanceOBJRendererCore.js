@@ -68,41 +68,47 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
 			//Correct line number for mosaic:
 			line -= this.gfx.mosaicRenderer.getOBJMosaicYOffset(line);
 		}
-		//Obtain vertical size info:
+        //Obtain horizontal size info:
+        var xSize = this.lookupXSize[(sprite.shape << 2) | sprite.size] << ((sprite.doubleSizeOrDisabled) ? 1 : 0);
+        //Obtain vertical size info:
 		var ySize = this.lookupYSize[(sprite.shape << 2) | sprite.size] << ((sprite.doubleSizeOrDisabled) ? 1 : 0);
-		var ycoord = sprite.ycoord - ((sprite.matrix2D) ? (ySize >> 1) : 0);
+		//Obtain some offsets:
+        var ycoord = sprite.ycoord;
+        if (sprite.matrix2D) {
+            ycoord += ySize >> 1;
+        }
 		var yOffset = line - ycoord;
-		//Simulate y-coord wrap around logic:
-		if (ycoord > 0x100) {
-			yOffset += 0x100;
-		}
-		//Make a sprite line:
-		if ((yOffset & --ySize) == yOffset) {
-			//Obtain horizontal size info:
-			var xSize = this.lookupXSize[(sprite.shape << 2) | sprite.size] << ((sprite.doubleSizeOrDisabled) ? 1 : 0);
-			if (sprite.matrix2D) {
-				//Scale & Rotation:
-				this.renderMatrixSprite(sprite, xSize, ySize + 1, yOffset);
-			}
-			else {
-				//Regular Scrolling:
-				this.renderNormalSprite(sprite, xSize, ySize, yOffset);
-			}
-			//Mark for semi-transparent:
-			if (sprite.mode == 1) {
-				this.markSemiTransparent(xSize);
-			}
-			//Copy OBJ scratch buffer to scratch line buffer:
-			this.outputSpriteToScratch(sprite, xSize);
-		}
+        //Overflow Correction:
+        if (ycoord + ySize > 0x1FF) {
+            yOffset -= 0x200;
+        }
+        //Make a sprite line:
+        if ((yOffset & --ySize) == yOffset) {
+            if (sprite.matrix2D) {
+                //Scale & Rotation:
+                this.renderMatrixSprite(sprite, xSize, ySize + 1, yOffset);
+            }
+            else {
+                //Regular Scrolling:
+                this.renderNormalSprite(sprite, xSize, ySize, yOffset);
+            }
+            //Mark for semi-transparent:
+            if (sprite.mode == 1) {
+                this.markSemiTransparent(xSize);
+            }
+            //Copy OBJ scratch buffer to scratch line buffer:
+            this.outputSpriteToScratch(sprite, xSize);
+        }
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
-	var params = this.gfx.OBJMatrixParameters[sprite.matrixParameters];
-	var pa = 0;
-	var pb = params[1] * yOffset;
-	var pc = 0;
-	var pd = params[3] * yOffset;
+    var xDiff = - (xSize >> 1);
+    var yDiff = (yOffset - (ySize >> 1));
+    var params = this.gfx.OBJMatrixParameters[sprite.matrixParameters];
+	var pa = params[0] * xDiff;
+	var pb = params[1] * yDiff;
+	var pc = params[2] * xDiff;
+	var pd = params[3] * yDiff;
 	var x = 0;
 	var y = 0;
 	var tileNumber = sprite.tileNumber;
@@ -112,7 +118,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 		y = pc + pd;
 		if (x >= 0 && y >= 0 && x < xSize && y < ySize) {
 			//Coordinates in range, fetch pixel:
-			this.scratchOBJBuffer[position] = this.fetchMatrixPixel(sprite, tileNumber, x | 0, y | 0, xSize, yOffset);
+			this.scratchOBJBuffer[position] = this.fetchMatrixPixel(sprite, tileNumber, x | 0, y | 0, xSize);
 		}
 		else {
 			//Coordinates outside of range, transparency defaulted:
@@ -123,8 +129,8 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 		pc += params[2];
 	}
 }
-GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNumber, x, y, xSize, yOffset) {
-	var address = this.tileNumberToAddress(sprite, tileNumber, xSize, yOffset);
+GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNumber, x, y, xSize) {
+	var address = this.tileNumberToAddress(sprite, tileNumber, xSize, y);
 	if (sprite.monolithicPalette) {
 		//256 Colors / 1 Palette:
 		address += ((y & 7) << 3) + x;
@@ -211,7 +217,10 @@ GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
 }
 GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xSize) {
 	//Simulate x-coord wrap around logic:
-	var xcoord = sprite.xcoord - ((sprite.matrix2D) ? (xSize >> 1) : 0);
+	var xcoord = sprite.xcoord;
+    if (sprite.matrix2D && sprite.doubleSizeOrDisabled) {
+        xcoord -= (xSize >> 1);
+    }
 	if (xcoord > (0x200 - xSize)) {
 		xcoord -= 0x200;
 	}

@@ -38,7 +38,7 @@ GameBoyAdvanceBG3MatrixRenderer.prototype.renderScanLine = function (line) {
 		//Correct line number for mosaic:
 		this.shadowPB = this.pb;
 		this.shadowPD = this.pd;
-		this.pb -= this.gfx.actualBG3dmx * this.gfx.mosaicRenderer.getMosaicYOffset(line);
+		this.pb -= this.gfx.actualBG3dmx * this.gfx.mosaicRenderer.getMosaicXOffset(line);
 		this.pd -= this.gfx.actualBG3dmy * this.gfx.mosaicRenderer.getMosaicYOffset(line);
 	}
 	var x = 0;
@@ -69,7 +69,7 @@ GameBoyAdvanceBG3MatrixRenderer.prototype.incrementReferenceCounters = function 
 	this.pd += this.gfx.actualBG3dmy;
 }
 GameBoyAdvanceBG3MatrixRenderer.prototype.resetReferenceCounters = function () {
-	this.pb = this.gfx.actualBG3ReferenceY;
+	this.pb = this.gfx.actualBG3ReferenceX;
 	this.pd = this.gfx.actualBG3ReferenceY;
 }
 GameBoyAdvanceBG3MatrixRenderer.prototype.fetchTile = function (tileNumber) {

@@ -829,12 +829,12 @@ GameBoyAdvanceGraphics.prototype.writeBG2PC1 = function (data) {
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PD0 = function (data) {
 	this.midScanLineJIT();
-	this.BG2dmy = (this.BG2dmx & 0xFF00) | data;
+	this.BG2dmy = (this.BG2dmy & 0xFF00) | data;
 	this.actualBG2dmy = (this.BG2dmy << 16) / 0x1000000;
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PD1 = function (data) {
 	this.midScanLineJIT();
-	this.BG2dmy = (data << 8) | (this.BG2dmx & 0xFF);
+	this.BG2dmy = (data << 8) | (this.BG2dmy & 0xFF);
 	this.actualBG2dmy = (this.BG2dmy << 16) / 0x1000000;
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PA0 = function (data) {
@@ -869,12 +869,12 @@ GameBoyAdvanceGraphics.prototype.writeBG3PC1 = function (data) {
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PD0 = function (data) {
 	this.midScanLineJIT();
-	this.BG3dmy = (this.BG3dmx & 0xFF00) | data;
+	this.BG3dmy = (this.BG3dmy & 0xFF00) | data;
 	this.actualBG3dmy = (this.BG3dmy << 16) / 0x1000000;
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PD1 = function (data) {
 	this.midScanLineJIT();
-	this.BG3dmy = (data << 8) | (this.BG3dmx & 0xFF);
+	this.BG3dmy = (data << 8) | (this.BG3dmy & 0xFF);
 	this.actualBG3dmy = (this.BG3dmy << 16) / 0x1000000;
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_L0 = function (data) {
