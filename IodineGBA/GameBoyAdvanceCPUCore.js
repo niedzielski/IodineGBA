@@ -53,13 +53,6 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 	this.registersIRQ = getInt32Array(2);
 	//Undefined mode registers (R13-R14):
 	this.registersUND = getInt32Array(2);
-	//Pre-initialize stack pointers if no BIOS loaded:
-	if (!this.IOCore.BIOSFound || this.IOCore.emulatorCore.SKIPBoot) {
-		this.registersSVC[0] = 0x3007FE0;
-		this.registersIRQ[0] = 0x3007FA0;
-		this.registers[13] = 0x3007F00;
-		this.registers[15] = 0x8000000;
-	}
 	//CPSR Register:
 	this.CPSRNegative = false;		//N Bit
 	this.CPSRZero = false;			//Z Bit
@@ -77,6 +70,14 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 	this.SPSRUND = [false, false, false, false, true, true, false, 0x13];	//Undefined
 	this.triggeredIRQ = false;		//Pending IRQ found.
 	this.pipelineInvalid = 0x4;		//Mark pipeline as invalid.
+    //Pre-initialize stack pointers if no BIOS loaded:
+	if (!this.IOCore.BIOSFound || this.IOCore.emulatorCore.SKIPBoot) {
+		this.registersSVC[0] = 0x3007FE0;
+		this.registersIRQ[0] = 0x3007FA0;
+		this.registers[13] = 0x3007F00;
+		this.registers[15] = 0x8000000;
+        this.MODEBits = 0x1F;
+	}
 }
 GameBoyAdvanceCPU.prototype.executeIteration = function () {
 	//Check for pending IRQ:
