@@ -243,7 +243,7 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
 	}
 	else {
 		//Flipped Horizontally:
-		for (var xSource = xSize; xcoord < xcoordEnd; ++xcoord, --xSource) {
+		for (var xSource = xSize - 1; xcoord < xcoordEnd; ++xcoord, --xSource) {
 			//Only overwrite transparency:
 			if (xcoord > -1 && (this.targetBuffer[xcoord] & 0x3000000) == 0x3000000) {
 				this.targetBuffer[xcoord] = bitFlags | this.scratchOBJBuffer[xSource];

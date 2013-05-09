@@ -284,13 +284,59 @@ GameBoyAdvanceSWI.prototype.ArcTan2 = function () {
     this.CPUCore.registers[0] = result | 0;
 }
 GameBoyAdvanceSWI.prototype.CpuSet = function () {
-	
+	var source = this.CPUCore.registers[0];
+    var destination = this.CPUCore.registers[1];
+    var control = this.CPUCore.registers[2];
+    var count = control & 0x1FFFFF;
+    var isFixed = ((control & 0x1000000) != 0);
+    var is32 = ((control & 0x4000000) != 0);
+    if (is32) {
+        while (count-- > 0) {
+            if (source >= 0x4000 && destination >= 0x4000) {
+                this.IOCore.memoryWrite32(destination, this.IOCore.memoryRead32(source));
+            }
+            if (!isFixed) {
+                source += 0x4;
+            }
+            destination += 0x4;
+        }
+    }
+    else {
+        while (count-- > 0) {
+            if (source >= 0x4000 && destination >= 0x4000) {
+                this.IOCore.memoryWrite16(destination, this.IOCore.memoryRead16(source));
+            }
+            if (!isFixed) {
+                source += 0x2;
+            }
+            destination += 0x2;
+        }
+    }
 }
 GameBoyAdvanceSWI.prototype.CpuFastSet = function () {
-	
+	var source = this.CPUCore.registers[0];
+    var destination = this.CPUCore.registers[1];
+    var control = this.CPUCore.registers[2];
+    var count = control & 0x1FFFFF;
+    var isFixed = ((control & 0x1000000) != 0);
+    var currentRead = 0;
+    while (count-- > 0) {
+        if (source >= 0x4000) {
+            currentRead = this.IOCore.memoryRead32(source);
+            for (var i = 0; i < 0x8; ++i) {
+                if (destination >= 0x4000) {
+                    this.IOCore.memoryWrite32(destination, currentRead);
+                }
+                destination += 0x4;
+            }
+        }
+        if (!isFixed) {
+            source += 0x20;
+        }
+    }
 }
 GameBoyAdvanceSWI.prototype.GetBiosChecksum = function () {
-	
+	this.CPUCore.registers[0] = 0xBAAE187F;
 }
 GameBoyAdvanceSWI.prototype.BgAffineSet = function () {
 	
