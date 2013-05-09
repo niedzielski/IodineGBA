@@ -339,10 +339,71 @@ GameBoyAdvanceSWI.prototype.GetBiosChecksum = function () {
 	this.CPUCore.registers[0] = 0xBAAE187F;
 }
 GameBoyAdvanceSWI.prototype.BgAffineSet = function () {
-	
+	var source = this.CPUCore.registers[0];
+    var destination = this.CPUCore.registers[1];
+    var numberCalculations = this.CPUCore.registers[2];
+    while (numberCalculations-- > 0) {
+        var cx = this.IOCore.memoryRead32(source);
+        source += 0x4;
+        var cy = this.IOCore.memoryRead32(source);
+        source += 0x4;
+        var dispx = (this.IOCore.memoryRead16(source) << 16) >> 16;
+        source += 0x2;
+        var dispy = (this.IOCore.memoryRead16(source) << 16) >> 16;
+        source += 0x2;
+        var rx = (this.IOCore.memoryRead16(source) << 16) >> 16;
+        source += 0x2;
+        var ry = (this.IOCore.memoryRead16(source) << 16) >> 16;
+        source += 0x2;
+        var theta = this.IOCore.memoryRead16(source) / 0x8000 * Math.PI;
+        source += 0x4;
+        var cosAngle = Math.cos(theta);
+        var sineAngle = Math.sin(theta);
+        var dx = rx * cosAngle;
+        var dmx = rx * sineAngle;
+        var dy = ry * sineAngle;
+        var dmy = ry * cosAngle;
+        this.IOCore.memoryWrite16(destination, dx);
+        destination += 2;
+        this.IOCore.memoryWrite16(destination, -dmx);
+        destination += 2;
+        this.IOCore.memoryWrite16(destination, dy);
+        destination += 2;
+        this.IOCore.memoryWrite16(destination, dmy);
+        destination += 2;
+        this.IOCore.memoryWrite32(destination, cx - dx * dispx + dmx * dispy);
+        destination += 4;
+        this.IOCore.memoryWrite32(destination, cy - dy * dispx + dmy * dispy);
+        destination += 4;
+    }
 }
 GameBoyAdvanceSWI.prototype.ObjAffineSet = function () {
-	
+	var source = this.CPUCore.registers[0];
+    var destination = this.CPUCore.registers[1];
+    var numberCalculations = this.CPUCore.registers[2];
+    var offset = this.CPUCore.registers[3];
+    while (numberCalculations-- > 0) {
+        var rx = (this.IOCore.memoryRead16(source) << 16) >> 16;
+        source += 0x2;
+        var ry = (this.IOCore.memoryRead16(source) << 16) >> 16;
+        source += 0x2;
+        var theta = this.IOCore.memoryRead16(source) / 0x8000 * Math.PI;
+        source += 0x4;
+        var cosAngle = Math.cos(theta);
+        var sineAngle = Math.sin(theta);
+        var dx = rx * cosAngle;
+        var dmx = rx * sineAngle;
+        var dy = ry * sineAngle;
+        var dmy = ry * cosAngle;
+        this.IOCore.memoryWrite16(destination, dx);
+        destination += offset;
+        this.IOCore.memoryWrite16(destination, -dmx);
+        destination += offset;
+        this.IOCore.memoryWrite16(destination, dy);
+        destination += offset;
+        this.IOCore.memoryWrite16(destination, dmy);
+        destination += offset;
+    }
 }
 GameBoyAdvanceSWI.prototype.BitUnPack = function () {
 	
