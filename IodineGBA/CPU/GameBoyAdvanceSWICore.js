@@ -331,7 +331,7 @@ GameBoyAdvanceSWI.prototype.CpuFastSet = function () {
             }
         }
         if (!isFixed) {
-            source += 0x20;
+            source += 0x4;
         }
     }
 }
