@@ -38,22 +38,12 @@ GameBoyAdvanceBG3MatrixRenderer.prototype.renderScanLine = function (line) {
 		//Correct line number for mosaic:
 		this.shadowPB = this.pb;
 		this.shadowPD = this.pd;
-		this.pb -= this.gfx.actualBG3dmx * this.gfx.mosaicRenderer.getMosaicXOffset(line);
+		this.pb -= this.gfx.actualBG3dmx * this.gfx.mosaicRenderer.getMosaicYOffset(line);
 		this.pd -= this.gfx.actualBG3dmy * this.gfx.mosaicRenderer.getMosaicYOffset(line);
 	}
-	var x = 0;
-	var y = 0;
-	var pa = 0;
-	var pc = 0;
-	for (var position = 0; position < 240; ++position) {
-		//Find (X, Y):
-		x = pa + this.pb;
-		y = pc + this.pd;
+	for (var position = 0, x = this.pb, y = this.pd; position < 240; ++position, x += this.gfx.actualBG3dx, y += this.gfx.actualBG3dy) {
 		//Fetch pixel:
 		this.scratchBuffer[position] = this.priorityFlag | this.fetchPixel(x | 0, y | 0);
-		//Increment PA & PC for each X:
-		pa += this.gfx.actualBG3dx;
-		pc += this.gfx.actualBG3dy;
 	}
 	if (this.gfx.BG3Mosaic) {
 		//Pixelize the line horizontally:

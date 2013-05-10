@@ -355,7 +355,7 @@ GameBoyAdvanceSWI.prototype.BgAffineSet = function () {
         source += 0x2;
         var ry = (this.IOCore.memoryRead16(source) << 16) >> 16;
         source += 0x2;
-        var theta = this.IOCore.memoryRead16(source) / 0x8000 * Math.PI;
+        var theta = (this.IOCore.memoryRead16(source) >> 8) / 0x80 * Math.PI;
         source += 0x4;
         var cosAngle = Math.cos(theta);
         var sineAngle = Math.sin(theta);
@@ -387,7 +387,7 @@ GameBoyAdvanceSWI.prototype.ObjAffineSet = function () {
         source += 0x2;
         var ry = (this.IOCore.memoryRead16(source) << 16) >> 16;
         source += 0x2;
-        var theta = this.IOCore.memoryRead16(source) / 0x8000 * Math.PI;
+        var theta = (this.IOCore.memoryRead16(source) >> 8) / 0x80 * Math.PI;
         source += 0x4;
         var cosAngle = Math.cos(theta);
         var sineAngle = Math.sin(theta);
@@ -406,7 +406,8 @@ GameBoyAdvanceSWI.prototype.ObjAffineSet = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.BitUnPack = function () {
-	
+	var source = this.CPUCore.registers[0];
+    var destination = this.CPUCore.registers[1];
 }
 GameBoyAdvanceSWI.prototype.LZ77UnCompWram = function () {
 	
