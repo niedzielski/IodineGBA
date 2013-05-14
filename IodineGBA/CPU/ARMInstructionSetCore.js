@@ -1238,6 +1238,12 @@ ARMInstructionSet.prototype.rrrs = function (parentObj, operand) {
             parentObj.CPUCore.CPSRCarry = (register < 0);
         }
     }
+    else {
+        //RRX
+        var rrx =  (parentObj.CPUCore.CPSRCarry ? 0x80000000 : 0) | (register >>> 1);
+        parentObj.CPUCore.CPSRCarry = ((register & 0x1) == 0x1);
+        return rrx;
+    }
     //If shift is 0, just return the register without mod:
     return register;
 }

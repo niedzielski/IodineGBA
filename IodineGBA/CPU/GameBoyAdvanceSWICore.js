@@ -190,7 +190,43 @@ GameBoyAdvanceSWI.prototype.SoftReset = function () {
 	
 }
 GameBoyAdvanceSWI.prototype.RegisterRAMReset = function () {
-	
+	var control = this.CPUCore.registers[0];
+    if ((control & 0x1) == 0x1) {
+        //Clear 256K on-board WRAM
+        for (var address = 0x200000; address < 0x2040000; address += 4) {
+            this.IOCore.memoryWrite32(address, 0);
+        }
+    }
+    if ((control & 0x2) == 0x2) {
+        //Clear 32K in-chip WRAM
+        for (var address = 0x300000; address < 0x3008000; address += 4) {
+            this.IOCore.memoryWrite32(address, 0);
+        }
+    }
+    if ((control & 0x4) == 0x4) {
+        //Clear Palette
+        
+    }
+    if ((control & 0x8) == 0x8) {
+        //Clear VRAM
+        
+    }
+    if ((control & 0x10) == 0x10) {
+        //Clear OAM
+        
+    }
+    if ((control & 0x20) == 0x20) {
+        //Reset SIO registers
+        
+    }
+    if ((control & 0x40) == 0x40) {
+        //Reset Sound registers
+        
+    }
+    if ((control & 0x80) == 0x80) {
+        //Reset all other registers
+        
+    }
 }
 GameBoyAdvanceSWI.prototype.Halt = function () {
 	this.IOCore.systemStatus |= 2;
@@ -408,6 +444,42 @@ GameBoyAdvanceSWI.prototype.ObjAffineSet = function () {
 GameBoyAdvanceSWI.prototype.BitUnPack = function () {
 	var source = this.CPUCore.registers[0];
     var destination = this.CPUCore.registers[1];
+    var unpackSource = this.CPUCore.registers[2];
+    var length = this.IOCore.memoryRead16(unpackSource);
+    unpackSource += 0x2;
+    var widthSource = this.IOCore.memoryRead16(unpackSource);
+    unpackSource += 0x1;
+    var widthDestination = this.IOCore.memoryRead8(unpackSource);
+    unpackSource += 0x1;
+    var offset = this.IOCore.memoryRead32(unpackSource);
+    var dataOffset = offset & 0x7FFFFFFF;
+    var zeroData = (offset < 0);
+    var bitDiff = widthDestination - widthSource;
+    if (bitDiff >= 0) {
+        var resultWidth = 0;
+        while (length > 0) {
+            var result = 0;
+            var readByte = this.IOCore.memoryRead8(source++);
+            for (var index = 0, widthIndex = 0; index < 8; index += widthSource, widthIndex += widthDestination) {
+                var temp = (readByte >> index) & ((widthSource << 1) - 1);
+                if (temp > 0 || zeroData) {
+                    temp += dataOffset;
+                }
+                temp <<= widthIndex;
+                result |= temp;
+            }
+            resultWidth += widthIndex;
+            if (resultWidth == 32) {
+                resultWidth = 0;
+                this.IOCore.memoryWrite32(destination, result);
+                destination += 4;
+                length -= 4;
+            }
+        }
+        if (resultWidth > 0) {
+            this.IOCore.memoryWrite32(destination, result);
+        }
+    }
 }
 GameBoyAdvanceSWI.prototype.LZ77UnCompWram = function () {
 	
@@ -434,7 +506,12 @@ GameBoyAdvanceSWI.prototype.Diff16bitUnFilter = function () {
 	
 }
 GameBoyAdvanceSWI.prototype.SoundBias = function () {
-	
+	if (this.CPUCore.registers[0] == 0) {
+        this.IOCore.memoryWrite16(0x4000088, 0);
+    }
+    else {
+        this.IOCore.memoryWrite16(0x4000088, 0x200);
+    }
 }
 GameBoyAdvanceSWI.prototype.SoundDriverInit = function () {
 	
@@ -452,7 +529,10 @@ GameBoyAdvanceSWI.prototype.SoundChannelClear = function () {
 	
 }
 GameBoyAdvanceSWI.prototype.MidiKey2Freq = function () {
-	
+	var frequency = this.CPUCore.memoryRead32(this.CPUCore.registers[0] + 4);
+    var temp = (180 - this.CPUCore.registers[1]) - (this.CPUCore.registers[2] / 0x100);
+    temp = Math.pow(2, temp / 12);
+    this.CPUCore.registers[0] = (frequency / temp) | 0;
 }
 GameBoyAdvanceSWI.prototype.SoundDriverUnknown = function () {
 	

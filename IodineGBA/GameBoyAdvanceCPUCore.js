@@ -76,7 +76,6 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 		this.registersIRQ[0] = 0x3007FA0;
 		this.registers[13] = 0x3007F00;
 		this.registers[15] = 0x8000000;
-        this.MODEBits = 0x1F;
 	}
 }
 GameBoyAdvanceCPU.prototype.executeIteration = function () {

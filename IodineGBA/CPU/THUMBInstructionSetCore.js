@@ -300,6 +300,11 @@ THUMBInstructionSet.prototype.ROR = function (parentObj) {
             parentObj.CPUCore.CPSRCarry = (source < 0);
         }
     }
+    else {
+        var rrx =  (parentObj.CPUCore.CPSRCarry ? 0x80000000 : 0) | (source >>> 1);
+        parentObj.CPUCore.CPSRCarry = ((source & 0x1) == 0x1);
+        source = rrx;
+    }
 	//Perform CPSR updates for N and Z (But not V):
 	parentObj.CPUCore.CPSRNegative = (source < 0);
 	parentObj.CPUCore.CPSRZero = (source == 0);
@@ -361,7 +366,7 @@ THUMBInstructionSet.prototype.BIC = function (parentObj) {
 	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7];
 	var destination = parentObj.registers[parentObj.execute & 0x7];
 	//Perform bitwise AND with a bitwise NOT on source:
-	var result = ~source & destination;
+	var result = (~source) & destination;
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register:

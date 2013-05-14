@@ -49,10 +49,10 @@ GameBoyAdvanceColorEffectsRenderer.prototype.process = function (lowerPixel, top
 	return topPixel;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlend = function (topPixel, lowerPixel) {
-	var b1 = topPixel >> 10;
+	var b1 = (topPixel >> 10) & 0x1F;
 	var g1 = (topPixel >> 5) & 0x1F;
 	var r1 = (topPixel & 0x1F);
-	var b2 = lowerPixel >> 10;
+	var b2 = (lowerPixel >> 10) & 0x1F;
 	var g2 = (lowerPixel >> 5) & 0x1F;
 	var r2 = lowerPixel & 0x1F;
 	b1 *= this.gfx.alphaBlendAmountTarget1;
@@ -64,7 +64,7 @@ GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlend = function (topPixel, lo
 	return (Math.min(b1 + b2, 0x1F) << 10) | (Math.min(g1 + g2, 0x1F) << 5) | Math.min(r1 + r2, 0x1F);
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.brightnessIncrease = function (topPixel) {
-	var b1 = topPixel >> 10;
+	var b1 = (topPixel >> 10) & 0x1F;
 	var g1 = (topPixel >> 5) & 0x1F;
 	var r1 = (topPixel & 0x1F);
 	b1 += (0x1F - b1) * this.gfx.brightnessEffectAmount;
@@ -73,7 +73,7 @@ GameBoyAdvanceColorEffectsRenderer.prototype.brightnessIncrease = function (topP
 	return (b1 << 10) | (g1 << 5) | r1;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.brightnessDecrease = function (topPixel) {
-	var b1 = topPixel >> 10;
+	var b1 = (topPixel >> 10) & 0x1F;
 	var g1 = (topPixel >> 5) & 0x1F;
 	var r1 = (topPixel & 0x1F);
 	var decreaseMultiplier = 1 - this.gfx.brightnessEffectAmount;

@@ -105,6 +105,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
     var xDiff = -(xSize >> 1);
     var yDiff = (yOffset - (ySize >> 1));
     var xSizeOriginal = xSize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0);
+    var ySizeOriginal = ySize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0);
     var params = this.gfx.OBJMatrixParameters[sprite.matrixParameters];
     var dx = params[0];
     var dmx = params[1];
@@ -114,11 +115,11 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 	var pb = dmx * yDiff;
 	var pc = dy * xDiff;
 	var pd = dmy * yDiff;
-	var x = pa + pb;
-	var y = pc + pd;
+	var x = pa + pb + (xSizeOriginal >> 1);
+	var y = pc + pd + (ySizeOriginal >> 1);
 	var tileNumber = sprite.tileNumber;
 	for (var position = 0; position < xSize; ++position, x += dx, y += dy) {
-		if (x >= 0 && y >= 0 && x < xSize && y < ySize) {
+		if (x >= 0 && y >= 0 && x < xSizeOriginal && y < ySizeOriginal) {
 			//Coordinates in range, fetch pixel:
 			this.scratchOBJBuffer[position] = this.fetchMatrixPixel(sprite, tileNumber, x | 0, y | 0, xSizeOriginal);
 		}
@@ -234,18 +235,20 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
 	if (!sprite.horizontalFlip || sprite.matrix2D) {
 		//Normal:
 		for (var xSource = 0; xcoord < xcoordEnd; ++xcoord, ++xSource) {
-			//Only overwrite transparency:
-			if (xcoord > -1 && (this.targetBuffer[xcoord] & 0x3000000) == 0x3000000) {
-				this.targetBuffer[xcoord] = bitFlags | this.scratchOBJBuffer[xSource];
+			var pixel = bitFlags | this.scratchOBJBuffer[xSource];
+            //Overwrite by priority:
+			if (xcoord > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord] & 0x3800000)) {
+				this.targetBuffer[xcoord] = pixel;
 			}
 		}
 	}
 	else {
 		//Flipped Horizontally:
 		for (var xSource = xSize - 1; xcoord < xcoordEnd; ++xcoord, --xSource) {
-			//Only overwrite transparency:
-			if (xcoord > -1 && (this.targetBuffer[xcoord] & 0x3000000) == 0x3000000) {
-				this.targetBuffer[xcoord] = bitFlags | this.scratchOBJBuffer[xSource];
+			var pixel = bitFlags | this.scratchOBJBuffer[xSource];
+            //Overwrite by priority:
+			if (xcoord > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord] & 0x3800000)) {
+				this.targetBuffer[xcoord] = pixel;
 			}
 		}
 	}

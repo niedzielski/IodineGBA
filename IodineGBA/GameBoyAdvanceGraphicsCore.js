@@ -281,7 +281,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
 GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
 	if (!this.inHBlank) {											//If we were last in HBlank, don't run this again.
 		this.inHBlank = true;										//Mark HBlank.
-		if (this.IRQHBlank) {										//Check for HBlank IRQ.
+		if (this.IRQHBlank && this.currentScanLine < 160) {			//Check for HBlank IRQ.
 			this.IOCore.irq.requestIRQ(0x2);
 		}
 	}
