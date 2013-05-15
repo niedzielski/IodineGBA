@@ -17,22 +17,9 @@
  */
 function GameBoyAdvanceBG2FrameBufferRenderer(gfx) {
 	this.gfx = gfx;
-	this.initialize();
-}
-GameBoyAdvanceBG2FrameBufferRenderer.prototype.tileMapSize = [
-	0x80,
-	0x100,
-	0x200,
-	0x400
-];
-GameBoyAdvanceBG2FrameBufferRenderer.prototype.initialize = function () {
-	this.scratchBuffer = getInt32Array(240);
-	this.pb = 0;
-	this.pd = 0;
-	this.shadowPB = 0;
-	this.shadowPD = 0;
-	this.fetchPixel = this.fetchMode3Pixel;
-	this.preprocess();
+    this.fetchPixel = this.fetchMode3Pixel;
+	this.bgAffineRenderer = this.gfx.bgAffineRenderer[0];
+    this.frameSelect = 0;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.selectMode = function (mode) {
 	switch (mode) {
@@ -47,37 +34,7 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.selectMode = function (mode) {
 	}
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) {
-	if (this.gfx.BG2Mosaic) {
-		//Correct line number for mosaic:
-		this.shadowPB = this.pb;
-		this.shadowPD = this.pd;
-		this.pb -= this.gfx.actualBG2dmx * this.gfx.mosaicRenderer.getMosaicYOffset(line);
-		this.pd -= this.gfx.actualBG2dmy * this.gfx.mosaicRenderer.getMosaicYOffset(line);
-	}
-	for (var position = 0, x = this.pb, y = this.pd; position < 240; ++position, x += this.gfx.actualBG2dx, y += this.gfx.actualBG2dy) {
-		//Fetch pixel:
-		this.scratchBuffer[position] = this.priorityFlag | this.fetchPixel(x | 0, y | 0);
-	}
-	if (this.gfx.BG2Mosaic) {
-		//Pixelize the line horizontally:
-		this.pb = this.shadowPB;
-		this.pd = this.shadowPD;
-		this.gfx.mosaicRenderer.renderMosaicHorizontal(this.scratchBuffer);
-	}
-	this.incrementReferenceCounters();
-	return this.scratchBuffer;
-}
-GameBoyAdvanceBG2FrameBufferRenderer.prototype.incrementReferenceCounters = function () {
-	this.pb += this.gfx.actualBG2dmx;
-	this.pd += this.gfx.actualBG2dmy;
-}
-GameBoyAdvanceBG2FrameBufferRenderer.prototype.resetReferenceCounters = function () {
-	this.pb = this.gfx.actualBG2ReferenceX;
-	this.pd = this.gfx.actualBG2ReferenceY;
-}
-GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchTile = function (tileNumber) {
-	//Find the tile code to locate the tile block:
-	return this.gfx.VRAM[(tileNumber | (this.BG2ScreenBaseBlock << 11)) & 0xFFFF];
+	return this.bgAffineRenderer.renderScanLine(line, this);
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
 	//Output pixel:
@@ -92,16 +49,16 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode4Pixel = function (x, y)
 	if (x > 239 || y > 159) {
         return this.gfx.transparency;
 	}
-	return this.gfx.palette256[this.gfx.VRAM[this.gfx.frameSelect + (y * 240) + x]];
+	return this.gfx.palette256[this.gfx.VRAM[this.frameSelect + (y * 240) + x]];
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5Pixel = function (x, y) {
 	//Output pixel:
 	if (x > 159 || y > 127) {
 		return this.gfx.transparency;
 	}
-	var address = this.gfx.frameSelect + (y * 480) + (x << 1);
+	var address = this.frameSelect + (y * 480) + (x << 1);
 	return ((this.gfx.VRAM[address | 1] << 8) | this.gfx.VRAM[address]) & 0x7FFF;
 }
-GameBoyAdvanceBG2FrameBufferRenderer.prototype.preprocess = function () {
-	this.priorityFlag = (this.gfx.BG2Priority << 23) | 0x40000;
+GameBoyAdvanceBG2FrameBufferRenderer.prototype.writeFrameSelect = function (frameSelect) {
+    this.frameSelect = frameSelect * 0xA000;
 }

@@ -15,9 +15,9 @@
  * GNU General Public License for more details.
  *
  */
-function getInt32Array(size_t) {
+function getInt8Array(size_t) {
 	try {
-		return new Int32Array(size_t);
+		return new Int8Array(size_t);
 	}
 	catch (error) {
 		return getArray(size_t);
@@ -39,9 +39,25 @@ function getInt16Array(size_t) {
 		return getArray(size_t);
 	}
 }
-function getInt8Array(size_t) {
+function getUint16Array(size_t) {
 	try {
-		return new Int8Array(size_t);
+		return new Uint16Array(size_t);
+	}
+	catch (error) {
+		return getArray(size_t);
+	}
+}
+function getInt32Array(size_t) {
+	try {
+		return new Int32Array(size_t);
+	}
+	catch (error) {
+		return getArray(size_t);
+	}
+}
+function getUint32Array(size_t) {
+	try {
+		return new Uint32Array(size_t);
 	}
 	catch (error) {
 		return getArray(size_t);
