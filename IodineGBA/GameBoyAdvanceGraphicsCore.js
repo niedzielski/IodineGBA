@@ -863,75 +863,75 @@ GameBoyAdvanceGraphics.prototype.writeBG3Y_H1 = function (data) {
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0H0 = function (data) {
 	this.midScanLineJIT();
-	this.window0renderer.WINXCoordRight = data;		//Window x-coord goes up to this minus 1.
+	this.window0Renderer.WINXCoordRight = data;		//Window x-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0H1 = function (data) {
 	this.midScanLineJIT();
-	this.window0renderer.WINXCoordLeft = data;
+	this.window0Renderer.WINXCoordLeft = data;
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1H0 = function (data) {
 	this.midScanLineJIT();
-	this.window1renderer.WINXCoordRight = data;		//Window x-coord goes up to this minus 1.
+	this.window1Renderer.WINXCoordRight = data;		//Window x-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1H1 = function (data) {
 	this.midScanLineJIT();
-	this.window1renderer.WINXCoordLeft = data;
+	this.window1Renderer.WINXCoordLeft = data;
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0V0 = function (data) {
 	this.midScanLineJIT();
-	this.window0renderer.WINYCoordBottom = data;		//Window y-coord goes up to this minus 1.
+	this.window0Renderer.WINYCoordBottom = data;		//Window y-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0V1 = function (data) {
 	this.midScanLineJIT();
-	this.window0renderer.WINYCoordTop = data;
+	this.window0Renderer.WINYCoordTop = data;
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1V0 = function (data) {
 	this.midScanLineJIT();
-	this.window1renderer.WINYCoordBottom = data;		//Window y-coord goes up to this minus 1.
+	this.window1Renderer.WINYCoordBottom = data;		//Window y-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1V1 = function (data) {
 	this.midScanLineJIT();
-	this.window1renderer.WINYCoordTop = data;
+	this.window1Renderer.WINYCoordTop = data;
 }
 GameBoyAdvanceGraphics.prototype.writeWININ0 = function (data) {
 	//Window 0:
 	this.midScanLineJIT();
-	this.window0renderer.WINBG0 = ((data & 0x01) == 0x01);
-	this.window0renderer.WINBG1 = ((data & 0x02) == 0x02);
-	this.window0renderer.WINBG2 = ((data & 0x04) == 0x04);
-	this.window0renderer.WINBG3 = ((data & 0x08) == 0x08);
-	this.window0renderer.WINOBJ = ((data & 0x10) == 0x10);
-	this.window0renderer.WINEffects = ((data & 0x20) == 0x20);
+	this.window0Renderer.WINBG0 = ((data & 0x01) == 0x01);
+	this.window0Renderer.WINBG1 = ((data & 0x02) == 0x02);
+	this.window0Renderer.WINBG2 = ((data & 0x04) == 0x04);
+	this.window0Renderer.WINBG3 = ((data & 0x08) == 0x08);
+	this.window0Renderer.WINOBJ = ((data & 0x10) == 0x10);
+	this.window0Renderer.WINEffects = ((data & 0x20) == 0x20);
 	this.window0Renderer.preprocess();
 }
 GameBoyAdvanceGraphics.prototype.readWININ0 = function () {
 	//Window 0:
-	return ((window0renderer.WINBG0 ? 0x1 : 0) |
-	(this.window0renderer.WINBG1 ? 0x2 : 0) |
-	(this.window0renderer.WINBG2 ? 0x4 : 0) |
-	(this.window0renderer.WINBG3 ? 0x8 : 0) |
-	(this.window0renderer.WINOBJ ? 0x10 : 0) |
-	(this.window0renderer.WINEffects ? 0x20 : 0));
+	return ((window0Renderer.WINBG0 ? 0x1 : 0) |
+	(this.window0Renderer.WINBG1 ? 0x2 : 0) |
+	(this.window0Renderer.WINBG2 ? 0x4 : 0) |
+	(this.window0Renderer.WINBG3 ? 0x8 : 0) |
+	(this.window0Renderer.WINOBJ ? 0x10 : 0) |
+	(this.window0Renderer.WINEffects ? 0x20 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeWININ1 = function (data) {
 	//Window 1:
 	this.midScanLineJIT();
-	this.window1renderer.WINBG0 = ((data & 0x01) == 0x01);
-	this.window1renderer.WINBG1 = ((data & 0x02) == 0x02);
-	this.window1renderer.WINBG2 = ((data & 0x04) == 0x04);
-	this.window1renderer.WINBG3 = ((data & 0x08) == 0x08);
-	this.window1renderer.WINOBJ = ((data & 0x10) == 0x10);
-	this.window1renderer.WINEffects = ((data & 0x20) == 0x20);
+	this.window1Renderer.WINBG0 = ((data & 0x01) == 0x01);
+	this.window1Renderer.WINBG1 = ((data & 0x02) == 0x02);
+	this.window1Renderer.WINBG2 = ((data & 0x04) == 0x04);
+	this.window1Renderer.WINBG3 = ((data & 0x08) == 0x08);
+	this.window1Renderer.WINOBJ = ((data & 0x10) == 0x10);
+	this.window1Renderer.WINEffects = ((data & 0x20) == 0x20);
 	this.window1Renderer.preprocess();
 }
 GameBoyAdvanceGraphics.prototype.readWININ1 = function () {
 	//Window 1:
-	return ((this.window1renderer.WINBG0 ? 0x1 : 0) |
-	(this.window1renderer.WINBG1 ? 0x2 : 0) |
-	(this.window1renderer.WINBG2 ? 0x4 : 0) |
-	(this.window1renderer.WINBG3 ? 0x8 : 0) |
-	(this.window1renderer.WINOBJ ? 0x10 : 0) |
-	(this.window1renderer.WINEffects ? 0x20 : 0));
+	return ((this.window1Renderer.WINBG0 ? 0x1 : 0) |
+	(this.windowRrenderer.WINBG1 ? 0x2 : 0) |
+	(this.windowRrenderer.WINBG2 ? 0x4 : 0) |
+	(this.windowRrenderer.WINBG3 ? 0x8 : 0) |
+	(this.windowRrenderer.WINOBJ ? 0x10 : 0) |
+	(this.windowRrenderer.WINEffects ? 0x20 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeWINOUT0 = function (data) {
 	this.midScanLineJIT();
