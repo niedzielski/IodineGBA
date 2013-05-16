@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012 Grant Galitz
+ * Copyright (C) 2012-2013 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,6 +17,9 @@
  */
 function GameBoyAdvanceBGTEXTRenderer(gfx, BGLayer) {
 	this.gfx = gfx;
+    this.VRAM = this.gfx.VRAM;
+    this.VRAM16 = this.gfx.VRAM16;
+    this.fetchTile = (this.VRAM16) ? this.fetchTileOptimized : this.fetchTileNormal;
     this.BGLayer = BGLayer;
 	this.initialize();
 }
@@ -24,8 +27,11 @@ GameBoyAdvanceBGTEXTRenderer.prototype.initialize = function (line) {
 	this.scratchBuffer = getInt32Array(248);
 	this.BGXCoord = 0;
 	this.BGYCoord = 0;
-    this.preprocess();
+    this.palettePreprocess();
+    this.screenSizePreprocess();
     this.priorityPreprocess();
+    this.screenBaseBlockPreprocess();
+    this.characterBaseBlockPreprocess();
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
 	if (this.gfx.BGMosaic[this.BGLayer]) {
@@ -49,17 +55,25 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
 	}
 	return this.scratchBuffer;
 }
-GameBoyAdvanceBGTEXTRenderer.prototype.fetchTile = function (yTileStart, xTileStart) {
+GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileNormal = function (yTileStart, xTileStart) {
 	//Find the tile code to locate the tile block:
-	var address = this.computeScreenMapAddress(this.computeTileNumber(yTileStart, xTileStart));
-	return (this.gfx.VRAM[address | 1] << 8) | this.gfx.VRAM[address];
+	var address = this.computeScreenMapAddress8(this.computeTileNumber(yTileStart, xTileStart));
+	return (this.VRAM[address | 1] << 8) | this.VRAM[address];
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileOptimized = function (yTileStart, xTileStart) {
+	//Find the tile code to locate the tile block:
+	var address = this.computeScreenMapAddress16(this.computeTileNumber(yTileStart, xTileStart));
+	return this.VRAM16[address];
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.computeTileNumber = function (yTile, xTile) {
 	//Return the true tile number:
     return (((yTile & this.tileHeight) << 5) + ((xTile & this.tileWidth) << 5)) | (xTile & 0x1F);
 }
-GameBoyAdvanceBGTEXTRenderer.prototype.computeScreenMapAddress = function (tileNumber) {
-	return ((tileNumber << 1) | (this.gfx.BGScreenBaseBlock[this.BGLayer] << 11)) & 0xFFFF;
+GameBoyAdvanceBGTEXTRenderer.prototype.computeScreenMapAddress8 = function (tileNumber) {
+	return ((tileNumber << 1) | this.BGScreenBaseBlock8) & 0xFFFF;
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.computeScreenMapAddress16 = function (tileNumber) {
+	return (tileNumber | this.BGScreenBaseBlock16) & 0x7FFF;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffset, yOffset) {
 	//Parse flip attributes, grab palette, and then output pixel:
@@ -68,9 +82,9 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffse
 	address += (((chrData & 0x800) == 0x800) ? (0x7 - yOffset) : yOffset) << 2;
 	address += (((chrData & 0x400) == 0x400) ? (0x7 - xOffset) : xOffset) >> 1;
 	if ((xOffset & 0x1) == ((chrData & 0x400) >> 10)) {
-		return this.palette[chrData >> 12][this.gfx.VRAM[address] & 0xF];
+		return this.palette[chrData >> 12][this.VRAM[address] & 0xF];
 	}
-	return this.palette[chrData >> 12][this.gfx.VRAM[address] >> 4];
+	return this.palette[chrData >> 12][this.VRAM[address] >> 4];
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetch8BitVRAM = function (chrData, xOffset, yOffset) {
 	//Parse flip attributes and output pixel:
@@ -78,9 +92,9 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetch8BitVRAM = function (chrData, xOffse
 	address += this.baseBlockOffset;
 	address += (((chrData & 0x800) == 0x800) ? (0x7 - yOffset) : yOffset) << 3;
 	address += ((chrData & 0x400) == 0x400) ? (0x7 - xOffset) : xOffset;
-	return this.palette[this.gfx.VRAM[address]];
+	return this.palette[this.VRAM[address]];
 }
-GameBoyAdvanceBGTEXTRenderer.prototype.preprocess = function () {
+GameBoyAdvanceBGTEXTRenderer.prototype.palettePreprocess = function () {
 	if (this.gfx.BGPalette256[this.BGLayer]) {
 		this.palette = this.gfx.palette256;
 		this.fetchVRAM = this.fetch8BitVRAM;
@@ -89,12 +103,20 @@ GameBoyAdvanceBGTEXTRenderer.prototype.preprocess = function () {
 		this.palette = this.gfx.palette16;
 		this.fetchVRAM = this.fetch4BitVRAM;
 	}
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.screenSizePreprocess = function () {
     this.tileWidth = (this.gfx.BGScreenSize[this.BGLayer] & 0x1) << 0x5;
     this.tileHeight = (0x20 << ((this.gfx.BGScreenSize[this.BGLayer] & 0x2) - 1)) - 1;
-	this.baseBlockOffset = this.gfx.BGCharacterBaseBlock[this.BGLayer] << 14;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.priorityPreprocess = function () {
 	this.priorityFlag = (this.gfx.BGPriority[this.BGLayer] << 23) | (1 << (this.BGLayer + 0x10));
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.screenBaseBlockPreprocess = function () {
+	this.BGScreenBaseBlock8 = this.gfx.BGScreenBaseBlock[this.BGLayer] << 11;
+    this.BGScreenBaseBlock16 = this.BGScreenBaseBlock8 >> 1;
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.characterBaseBlockPreprocess = function () {
+	this.baseBlockOffset = this.gfx.BGCharacterBaseBlock[this.BGLayer] << 14;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.writeBGHOFS0 = function (data) {
 	this.BGXCoord = (this.BGXCoord & 0x100) | data;

@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012 Grant Galitz
+ * Copyright (C) 2012-2013 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,8 +18,14 @@
 function GameBoyAdvanceBGMatrixRenderer(gfx, BGLayer) {
 	this.gfx = gfx;
     this.BGLayer = BGLayer;
+    this.VRAM = this.gfx.VRAM;
+    this.palette = this.gfx.palette256;
+    this.transparency = this.gfx.transparency;
     this.bgAffineRenderer = this.gfx.bgAffineRenderer[BGLayer & 0x1];
-	this.preprocess();
+	this.screenSizePreprocess();
+    this.screenBaseBlockPreprocess();
+    this.characterBaseBlockPreprocess();
+    this.displayOverflowPreprocess();
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.tileMapSize = [
 	0x80,
@@ -32,28 +38,36 @@ GameBoyAdvanceBGMatrixRenderer.prototype.renderScanLine = function (line) {
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.fetchTile = function (tileNumber) {
 	//Find the tile code to locate the tile block:
-	return this.gfx.VRAM[(tileNumber + (this.gfx.BGScreenBaseBlock[this.BGLayer] << 11)) & 0xFFFF];
+	return this.VRAM[(tileNumber + this.BGScreenBaseBlock) & 0xFFFF];
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
 	//Output pixel:
 	if (x > this.mapSizeComparer || y > this.mapSizeComparer) {
 		//Overflow Handling:
-		if (this.gfx.BGDisplayOverflow[this.BGLayer]) {
+		if (this.BGDisplayOverflow) {
 			x &= this.mapSizeComparer;
 			y &= this.mapSizeComparer;
 		}
 		else {
-			return this.gfx.transparency;
+			return this.transparency;
 		}
 	}
 	var address = this.fetchTile((x >> 3) + ((y >> 3) * this.mapSize)) << 6;
 	address += this.baseBlockOffset;
 	address += (y & 0x7) << 3;
 	address += x & 0x7;
-	return this.gfx.palette256[this.gfx.VRAM[address]];
+	return this.palette[this.VRAM[address]];
 }
-GameBoyAdvanceBGMatrixRenderer.prototype.preprocess = function () {
+GameBoyAdvanceBGMatrixRenderer.prototype.screenSizePreprocess = function () {
 	this.mapSize = this.tileMapSize[this.gfx.BGScreenSize[this.BGLayer]];
 	this.mapSizeComparer = this.mapSize - 1;
+}
+GameBoyAdvanceBGMatrixRenderer.prototype.screenBaseBlockPreprocess = function () {
+	this.BGScreenBaseBlock = this.gfx.BGScreenBaseBlock[this.BGLayer] << 11;
+}
+GameBoyAdvanceBGMatrixRenderer.prototype.characterBaseBlockPreprocess = function () {
 	this.baseBlockOffset = this.gfx.BGCharacterBaseBlock[this.BGLayer] << 14;
+}
+GameBoyAdvanceBGMatrixRenderer.prototype.displayOverflowPreprocess = function () {
+	this.BGDisplayOverflow = this.gfx.BGDisplayOverflow[this.BGLayer];
 }

@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012 Grant Galitz
+ * Copyright (C) 2012-2013 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -283,10 +283,10 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		//Update source address:
 		switch (control[4]) {
 			case 0:	//Increment
-				this.sourceShadow[dmaChannel] = (source + transferred) & -1;
+				this.sourceShadow[dmaChannel] = (source + transferred) | 0;
 				break;
 			case 1:	//Decrement
-				this.sourceShadow[dmaChannel] = (source - transferred) & -1;
+				this.sourceShadow[dmaChannel] = (source - transferred) | 0;
 				break;
 			case 3:	//Reload
 				//Prohibited code, should not get here:
@@ -295,10 +295,10 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		//Update destination address:
 		switch (control[5]) {
 			case 0:	//Increment
-				this.destinationShadow[dmaChannel] = (destination + transferred) & -1;
+				this.destinationShadow[dmaChannel] = (destination + transferred) | 0;
 				break;
 			case 1:	//Decrement
-				this.destinationShadow[dmaChannel] = (destination - transferred) & -1;
+				this.destinationShadow[dmaChannel] = (destination - transferred) | 0;
 				break;
 			case 3:	//Reload
 				this.destinationShadow[dmaChannel] = this.destination[dmaChannel];
@@ -309,19 +309,19 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		switch (control[4]) {
 			case 0:	//Increment
 			case 3:	//Prohibited code...
-				this.sourceShadow[dmaChannel] = (source + transferred) & -1;
+				this.sourceShadow[dmaChannel] = (source + transferred) | 0;
 				break;
 			case 1:
-				this.sourceShadow[dmaChannel] = (source - transferred) & -1;
+				this.sourceShadow[dmaChannel] = (source - transferred) | 0;
 		}
 		//Update destination address:
 		switch (control[5]) {
 			case 0:	//Increment
 			case 3:	//Increment
-				this.destinationShadow[dmaChannel] = (destination + transferred) & -1;
+				this.destinationShadow[dmaChannel] = (destination + transferred) | 0;
 				break;
 			case 1:	//Decrement
-				this.destinationShadow[dmaChannel] = (destination - transferred) & -1;
+				this.destinationShadow[dmaChannel] = (destination - transferred) | 0;
 		}
 	}
 	//Save the new word count:

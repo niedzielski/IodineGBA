@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012 Grant Galitz
+ * Copyright (C) 2012-2013 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -95,7 +95,8 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.brightnessEffectAmount = 0;
 	this.paletteRAM = getUint8Array(0x400);
 	this.VRAM = getUint8Array(0x18000);
-	this.OAMRAM = getUint8Array(0x400);
+	this.VRAM16 = getUint16View(this.VRAM);
+    this.OAMRAM = getUint8Array(0x400);
 	this.lineBuffer = getInt32Array(240);
 	this.frameBuffer = this.emulatorCore.frameBuffer;
 	this.LCDTicks = 0;
@@ -138,8 +139,8 @@ GameBoyAdvanceGraphics.prototype.initializeMatrixStorage = function () {
 	this.OBJMatrixParametersRaw = [];
 	this.OBJMatrixParameters = [];
 	for (var index = 0; index < 0x20;) {
-		this.OBJMatrixParametersRaw[index] = [0, 0, 0, 0];
-		this.OBJMatrixParameters[index++] = [0, 0, 0, 0];
+		this.OBJMatrixParametersRaw[index] = getUint16Array(0x4);
+		this.OBJMatrixParameters[index++] = getFloat32Array(0x4);
 	}
 }
 GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
@@ -160,23 +161,7 @@ GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
 GameBoyAdvanceGraphics.prototype.initializeOAMTable = function () {
 	this.OAMTable = [];
 	for (var spriteNumber = 0; spriteNumber < 128; ++spriteNumber) {
-		var OAMTable = {};
-		OAMTable.ycoord = 0;
-		OAMTable.matrix2D = false;
-		OAMTable.doubleSizeOrDisabled = false;
-		OAMTable.mode = 0;
-		OAMTable.mosaic = false;
-		OAMTable.monolithicPalette = false;
-		OAMTable.shape = 0;
-		OAMTable.xcoord = 0;
-		OAMTable.matrixParameters = 0;
-		OAMTable.horizontalFlip = false;
-		OAMTable.verticalFlip = false;
-		OAMTable.size = 0;
-		OAMTable.tileNumber = 0;
-		OAMTable.priority = 0;
-		OAMTable.paletteNumber = 0;
-		this.OAMTable[spriteNumber] = OAMTable;
+		this.OAMTable[spriteNumber] = new GameBoyAdvanceOAMAttributeTable();
 	}
 }
 GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {
@@ -580,8 +565,9 @@ GameBoyAdvanceGraphics.prototype.writeBG0CNT0 = function (data) {
 	//Bits 5-6 always 0.
 	this.BGMosaic[0] = ((data & 0x40) == 0x40);
 	this.BGPalette256[0] = ((data & 0x80) == 0x80);
-	this.bg0Renderer.preprocess();
+	this.bg0Renderer.palettePreprocess();
     this.bg0Renderer.priorityPreprocess();
+    this.bg0Renderer.characterBaseBlockPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG0CNT0 = function () {
 	return (this.BGPriority[0] |
@@ -594,7 +580,8 @@ GameBoyAdvanceGraphics.prototype.writeBG0CNT1 = function (data) {
 	this.BGScreenBaseBlock[0] = data & 0x1F;
 	this.BGDisplayOverflow[0] = ((data & 0x20) == 0x20);	//Note: Only applies to BG2/3 supposedly.
 	this.BGScreenSize[0] = (data & 0xC0) >> 6;
-	this.bg0Renderer.preprocess();
+	this.bg0Renderer.screenSizePreprocess();
+    this.bg0Renderer.screenBaseBlockPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG0CNT1 = function () {
 	return (this.BG0ScreenBaseBlock |
@@ -608,8 +595,9 @@ GameBoyAdvanceGraphics.prototype.writeBG1CNT0 = function (data) {
 	//Bits 5-6 always 0.
 	this.BGMosaic[1] = ((data & 0x40) == 0x40);
 	this.BGPalette256[1] = ((data & 0x80) == 0x80);
-	this.bg1Renderer.preprocess();
+	this.bg1Renderer.palettePreprocess();
     this.bg1Renderer.priorityPreprocess();
+    this.bg1Renderer.characterBaseBlockPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG1CNT0 = function () {
 	return (this.BGPriority[1] |
@@ -622,7 +610,8 @@ GameBoyAdvanceGraphics.prototype.writeBG1CNT1 = function (data) {
 	this.BGScreenBaseBlock[1] = data & 0x1F;
 	this.BGDisplayOverflow[1] = ((data & 0x20) == 0x20);	//Note: Only applies to BG2/3 supposedly.
 	this.BGScreenSize[1] = (data & 0xC0) >> 6;
-	this.bg1Renderer.preprocess();
+	this.bg1Renderer.screenSizePreprocess();
+    this.bg1Renderer.screenBaseBlockPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG1CNT1 = function () {
 	return (this.BGScreenBaseBlock[1] |
@@ -636,10 +625,11 @@ GameBoyAdvanceGraphics.prototype.writeBG2CNT0 = function (data) {
 	//Bits 5-6 always 0.
 	this.BGMosaic[2] = ((data & 0x40) == 0x40);
 	this.BGPalette256[2] = ((data & 0x80) == 0x80);
-	this.bg2TextRenderer.preprocess();
+	this.bg2TextRenderer.palettePreprocess();
     this.bg2TextRenderer.priorityPreprocess();
-	this.bg2MatrixRenderer.preprocess();
 	this.bgAffineRenderer[0].priorityPreprocess();
+    this.bg2TextRenderer.characterBaseBlockPreprocess();
+    this.bg2MatrixRenderer.characterBaseBlockPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG2CNT0 = function () {
 	return (this.BGPriority[2] |
@@ -652,8 +642,11 @@ GameBoyAdvanceGraphics.prototype.writeBG2CNT1 = function (data) {
 	this.BGScreenBaseBlock[2] = data & 0x1F;
 	this.BGDisplayOverflow[2] = ((data & 0x20) == 0x20);
 	this.BGScreenSize[2] = (data & 0xC0) >> 6;
-	this.bg2TextRenderer.preprocess();
-	this.bg2MatrixRenderer.preprocess();
+	this.bg2TextRenderer.screenSizePreprocess();
+	this.bg2MatrixRenderer.screenSizePreprocess();
+    this.bg2TextRenderer.screenBaseBlockPreprocess();
+    this.bg2MatrixRenderer.screenBaseBlockPreprocess();
+    this.bg2MatrixRenderer.displayOverflowPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG2CNT1 = function () {
 	return (this.BGScreenBaseBlock[2] |
@@ -667,10 +660,11 @@ GameBoyAdvanceGraphics.prototype.writeBG3CNT0 = function (data) {
 	//Bits 5-6 always 0.
 	this.BGMosaic[3] = ((data & 0x40) == 0x40);
 	this.BGPalette256[3] = ((data & 0x80) == 0x80);
-	this.bg3TextRenderer.preprocess();
+	this.bg3TextRenderer.palettePreprocess();
     this.bg3TextRenderer.priorityPreprocess();
-	this.bg3MatrixRenderer.preprocess();
 	this.bgAffineRenderer[1].priorityPreprocess();
+    this.bg3TextRenderer.characterBaseBlockPreprocess();
+    this.bg3MatrixRenderer.characterBaseBlockPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG3CNT0 = function () {
 	return (this.BGPriority[3] |
@@ -683,8 +677,11 @@ GameBoyAdvanceGraphics.prototype.writeBG3CNT1 = function (data) {
 	this.BGScreenBaseBlock[3] = data & 0x1F;
 	this.BGDisplayOverflow[3] = ((data & 0x20) == 0x20);
 	this.BGScreenSize[3] = (data & 0xC0) >> 6;
-	this.bg3TextRenderer.preprocess();
-	this.bg3MatrixRenderer.preprocess();
+	this.bg3TextRenderer.screenSizePreprocess();
+	this.bg3MatrixRenderer.screenSizePreprocess();
+    this.bg3TextRenderer.screenBaseBlockPreprocess();
+    this.bg3MatrixRenderer.screenBaseBlockPreprocess();
+    this.bg3MatrixRenderer.displayOverflowPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG3CNT1 = function () {
 	return (this.BGScreenBaseBlock[3] |
