@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceWindow0Renderer(gfx) {
+function GameBoyAdvanceWindowRenderer(gfx) {
 	this.gfx = gfx;
     this.transparency = this.gfx.transparency;
     this.WINXCoordRight = 0;
