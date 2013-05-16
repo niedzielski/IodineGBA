@@ -103,7 +103,8 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.totalLinesPassed = 0;
 	this.queuedScanLines = 0;
 	this.lastUnrenderedLine = 0;
-	this.transparency = 0x3A00000;
+	this.transparency = 0x3800000;
+    this.backdrop = this.transparency;
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 	this.initializeMatrixStorage();
@@ -355,7 +356,7 @@ GameBoyAdvanceGraphics.prototype.compositeLayersNormal = function (OBJBuffer, BG
 	//Loop through each pixel on the line:
 	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; ++pixelPosition) {
 		//Start with backdrop color:
-		lowerPixel = currentPixel = this.transparency;
+		lowerPixel = currentPixel = this.backdrop;
 		//Loop through all layers each pixel to resolve priority:
 		for (stackIndex = 0; stackIndex < stackDepth; ++stackIndex) {
 			workingPixel = layerStack[stackIndex][pixelPosition];
@@ -396,7 +397,7 @@ GameBoyAdvanceGraphics.prototype.compositeLayersWithEffects = function (OBJBuffe
 	//Loop through each pixel on the line:
 	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; ++pixelPosition) {
 		//Start with backdrop color:
-		lowerPixel = currentPixel = this.transparency;
+		lowerPixel = currentPixel = this.backdrop;
 		//Loop through all layers each pixel to resolve priority:
 		for (stackIndex = 0; stackIndex < stackDepth; ++stackIndex) {
 			workingPixel = layerStack[stackIndex][pixelPosition];
@@ -1093,6 +1094,9 @@ GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
 	address >>= 1;
 	if ((address & 0xFF) == 0) {
 		palette |= this.transparency;
+        if (address == 0) {
+            this.backdrop = palette;
+        }
 	}
 	if (address < 0x100) {
 		this.palette256[address] = palette;
