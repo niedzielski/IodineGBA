@@ -83,7 +83,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.totalLinesPassed = 0;
 	this.queuedScanLines = 0;
 	this.lastUnrenderedLine = 0;
-	this.transparency = 0x3A00000;
+	this.transparency = 0x3800000;
     this.backdrop = this.transparency;
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
@@ -1075,7 +1075,7 @@ GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
 	if ((address & 0xFF) == 0) {
 		palette |= this.transparency;
         if (address == 0) {
-            this.backdrop = palette;
+            this.backdrop = palette | 0x200000;
         }
 	}
 	if (address < 0x100) {
