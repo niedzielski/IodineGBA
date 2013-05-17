@@ -83,7 +83,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.totalLinesPassed = 0;
 	this.queuedScanLines = 0;
 	this.lastUnrenderedLine = 0;
-	this.transparency = 0x3800000;
+	this.transparency = 0x3A00000;
     this.backdrop = this.transparency;
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
