@@ -906,7 +906,7 @@ GameBoyAdvanceGraphics.prototype.writeWININ0 = function (data) {
 }
 GameBoyAdvanceGraphics.prototype.readWININ0 = function () {
 	//Window 0:
-	return ((window0Renderer.WINBG0 ? 0x1 : 0) |
+	return ((this.window0Renderer.WINBG0 ? 0x1 : 0) |
 	(this.window0Renderer.WINBG1 ? 0x2 : 0) |
 	(this.window0Renderer.WINBG2 ? 0x4 : 0) |
 	(this.window0Renderer.WINBG3 ? 0x8 : 0) |
