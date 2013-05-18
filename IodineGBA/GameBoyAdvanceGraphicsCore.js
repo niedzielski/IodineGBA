@@ -927,11 +927,11 @@ GameBoyAdvanceGraphics.prototype.writeWININ1 = function (data) {
 GameBoyAdvanceGraphics.prototype.readWININ1 = function () {
 	//Window 1:
 	return ((this.window1Renderer.WINBG0 ? 0x1 : 0) |
-	(this.windowRrenderer.WINBG1 ? 0x2 : 0) |
-	(this.windowRrenderer.WINBG2 ? 0x4 : 0) |
-	(this.windowRrenderer.WINBG3 ? 0x8 : 0) |
-	(this.windowRrenderer.WINOBJ ? 0x10 : 0) |
-	(this.windowRrenderer.WINEffects ? 0x20 : 0));
+	(this.window1Renderer.WINBG1 ? 0x2 : 0) |
+	(this.window1Renderer.WINBG2 ? 0x4 : 0) |
+	(this.window1Renderer.WINBG3 ? 0x8 : 0) |
+	(this.window1Renderer.WINOBJ ? 0x10 : 0) |
+	(this.window1Renderer.WINEffects ? 0x20 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeWINOUT0 = function (data) {
 	this.midScanLineJIT();
