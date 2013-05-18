@@ -33,7 +33,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderNormalScanLine = function (line,
 	//Loop through each pixel on the line:
 	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; ++pixelPosition) {
 		//If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-		if ((OBJWindowBuffer[pixelPosition] & this.gfx.transparency) != this.gfx.transparency) {
+		if (OBJWindowBuffer[pixelPosition] < this.gfx.transparency) {
 			//Start with backdrop color:
 			lowerPixel = currentPixel = this.gfx.backdrop;
 			//Loop through all layers each pixel to resolve priority:
@@ -80,7 +80,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderScanLineWithEffects = function (
 	//Loop through each pixel on the line:
 	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; ++pixelPosition) {
 		//If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-		if ((OBJWindowBuffer[pixelPosition] & this.gfx.transparency) != this.gfx.transparency) {
+		if (OBJWindowBuffer[pixelPosition] < this.gfx.transparency) {
 			//Start with backdrop color:
 			lowerPixel = currentPixel = this.gfx.backdrop;
 			//Loop through all layers each pixel to resolve priority:
