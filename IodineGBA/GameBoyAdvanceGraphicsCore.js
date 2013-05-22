@@ -63,16 +63,6 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.WINOBJBG3Outside = false;
 	this.WINOBJOBJOutside = false;
 	this.WINOBJEffectsOutside = false;
-	this.BGMosaicHSize = 0;
-	this.BGMosaicVSize = 0;
-	this.OBJMosaicHSize = 0;
-	this.OBJMosaicVSize = 0;
-	this.effectsTarget1 = 0;
-	this.colorEffectsType = 0;
-	this.effectsTarget2 = 0;
-	this.alphaBlendAmountTarget1 = 0;
-	this.alphaBlendAmountTarget2 = 0;
-	this.brightnessEffectAmount = 0;
 	this.paletteRAM = getUint8Array(0x400);
 	this.VRAM = getUint8Array(0x18000);
 	this.VRAM16 = getUint16View(this.VRAM);
@@ -106,7 +96,7 @@ GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 	this.window1Renderer = new GameBoyAdvanceWindowRenderer(this);
 	this.objWindowRenderer = new GameBoyAdvanceOBJWindowRenderer(this);
 	this.mosaicRenderer = new GameBoyAdvanceMosaicRenderer(this);
-	this.colorEffectsRenderer = new GameBoyAdvanceColorEffectsRenderer(this);
+	this.colorEffectsRenderer = new GameBoyAdvanceColorEffectsRenderer();
 	this.mode0Renderer = new GameBoyAdvanceMode0Renderer(this);
 	this.mode1Renderer = new GameBoyAdvanceMode1Renderer(this);
 	this.mode2Renderer = new GameBoyAdvanceMode2Renderer(this);
@@ -971,42 +961,42 @@ GameBoyAdvanceGraphics.prototype.readWINOUT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeMOSAIC0 = function (data) {
 	this.midScanLineJIT();
-	this.BGMosaicHSize = data & 0xF;
-	this.BGMosaicVSize = data >> 4;
+	this.mosaicRenderer.BGMosaicHSize = data & 0xF;
+	this.mosaicRenderer.BGMosaicVSize = data >> 4;
 }
 GameBoyAdvanceGraphics.prototype.writeMOSAIC1 = function (data) {
 	this.midScanLineJIT();
-	this.OBJMosaicHSize = data & 0xF;
-	this.OBJMosaicVSize = data >> 4;
+	this.mosaicRenderer.OBJMosaicHSize = data & 0xF;
+	this.mosaicRenderer.OBJMosaicVSize = data >> 4;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT0 = function (data) {
 	//Select target 1 and color effects mode:
 	this.midScanLineJIT();
-	this.effectsTarget1 = (data & 0x3F) << 16;
-	this.colorEffectsType = data >> 6;
+	this.colorEffectsRenderer.effectsTarget1 = (data & 0x3F) << 16;
+	this.colorEffectsRenderer.colorEffectsType = data >> 6;
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT0 = function () {
-	return (this.effectsTarget1 >> 16) | (this.colorEffectsType << 6);
+	return (this.colorEffectsRenderer.effectsTarget1 >> 16) | (this.colorEffectsRenderer.colorEffectsType << 6);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT1 = function (data) {
 	//Select target 2:
 	this.midScanLineJIT();
-	this.effectsTarget2 = (data & 0x3F) << 16;
+	this.colorEffectsRenderer.effectsTarget2 = (data & 0x3F) << 16;
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT1 = function () {
-	return this.effectsTarget2 >> 16;
+	return this.colorEffectsRenderer.effectsTarget2 >> 16;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA0 = function (data) {
 	this.midScanLineJIT();
-	this.alphaBlendAmountTarget1 = Math.min((data & 0x1F) / 0x10, 1);
+	this.colorEffectsRenderer.alphaBlendAmountTarget1 = Math.min((data & 0x1F) / 0x10, 1);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA1 = function (data) {
 	this.midScanLineJIT();
-	this.alphaBlendAmountTarget2 = Math.min((data & 0x1F) / 0x10, 1);
+	this.colorEffectsRenderer.alphaBlendAmountTarget2 = Math.min((data & 0x1F) / 0x10, 1);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
 	this.midScanLineJIT();
-	this.brightnessEffectAmount = Math.min((data & 0x1F) / 0x10, 1);
+	this.colorEffectsRenderer.brightnessEffectAmount = Math.min((data & 0x1F) / 0x10, 1);
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM = function (address, data) {
 	this.midScanLineJIT();

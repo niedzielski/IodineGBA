@@ -16,11 +16,15 @@
  *
  */
 function GameBoyAdvanceMosaicRenderer(gfx) {
-	this.gfx = gfx;
+    this.transparency = gfx.transparency;
+    this.BGMosaicHSize = 0;
+	this.BGMosaicVSize = 0;
+	this.OBJMosaicHSize = 0;
+	this.OBJMosaicVSize = 0;
 }
 GameBoyAdvanceMosaicRenderer.prototype.renderMosaicHorizontal = function (layer) {
 	var currentPixel = 0;
-	var mosaicBlur = this.gfx.BGMosaicHSize + 1;
+	var mosaicBlur = this.BGMosaicHSize + 1;
 	if (mosaicBlur > 1) {	//Don't perform a useless loop.
 		for (var position = 0; position < 240; ++position) {
 			if ((position % mosaicBlur) == 0) {
@@ -33,8 +37,8 @@ GameBoyAdvanceMosaicRenderer.prototype.renderMosaicHorizontal = function (layer)
 	}
 }
 GameBoyAdvanceMosaicRenderer.prototype.renderOBJMosaicHorizontal = function (layer, xOffset, xSize) {
-	var currentPixel = this.gfx.transparency;
-	var mosaicBlur = this.gfx.OBJMosaicHSize + 1;
+	var currentPixel = this.transparency;
+	var mosaicBlur = this.OBJMosaicHSize + 1;
 	if (mosaicBlur > 1) {	//Don't perform a useless loop.
 		for (var position = xOffset % mosaicBlur; position < xSize; ++position) {
 			if ((position % mosaicBlur) == 0) {
@@ -45,8 +49,8 @@ GameBoyAdvanceMosaicRenderer.prototype.renderOBJMosaicHorizontal = function (lay
 	}
 }
 GameBoyAdvanceMosaicRenderer.prototype.getMosaicYOffset = function (line) {
-	return line % (this.gfx.BGMosaicVSize + 1);
+	return line % (this.BGMosaicVSize + 1);
 }
 GameBoyAdvanceMosaicRenderer.prototype.getOBJMosaicYOffset = function (line) {
-	return line % (this.gfx.OBJMosaicVSize + 1);
+	return line % (this.OBJMosaicVSize + 1);
 }

@@ -215,7 +215,7 @@ GameBoyAdvanceTimer.prototype.writeTM2CNT_H = function (data) {
 	this.timer2Control = data;
 	this.timer2Enabled = (data > 0x7F);
 	this.timer2IRQ = ((data & 0x40) == 0x40);
-    this.timer1CountUp = ((data & 0x4) == 0x4);
+    this.timer2CountUp = ((data & 0x4) == 0x4);
 	this.timer2Prescalar = this.prescalarLookup[data & 0x03];
 }
 GameBoyAdvanceTimer.prototype.readTM2CNT_L0 = function () {
@@ -239,7 +239,7 @@ GameBoyAdvanceTimer.prototype.writeTM3CNT_H = function (data) {
 	this.timer3Control = data;
 	this.timer3Enabled = (data > 0x7F);
 	this.timer3IRQ = ((data & 0x40) == 0x40);
-    this.timer1CountUp = ((data & 0x4) == 0x4);
+    this.timer3CountUp = ((data & 0x4) == 0x4);
 	this.timer3Prescalar = this.prescalarLookup[data & 0x03];
 }
 GameBoyAdvanceTimer.prototype.readTM3CNT_L0 = function () {
