@@ -27,12 +27,13 @@ ARMInstructionSet.prototype.initialize = function () {
 	this.decode = 0;
 	this.execute = 0;
 	this.compileInstructionMap();
+    this.compileReducedInstructionMap();
 }
 ARMInstructionSet.prototype.executeIteration = function () {
 	//Push the new fetch access:
 	this.fetch = this.wait.CPUGetOpcode32(this.registers[15]);
 	//Execute Conditional Instruction:
-	this.executeARM(this.instructionMap[(this.execute >> 20) & 0xFF][(this.execute >> 4) & 0xF]);
+	this.executeARM(this.instructionMapReduced[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]);
 	//Update the pipelining state:
 	this.execute = this.decode;
 	this.decode = this.fetch;
@@ -180,6 +181,36 @@ ARMInstructionSet.prototype.guardMultiRegisterWriteSpecial = function (parentObj
 				parentObj.CPUCore.registersUSR[address - 8] = data;
 			}
 	}
+}
+ARMInstructionSet.prototype.guardRegisterReadSpecial = function (address, userMode) {
+	address &= 0xF;
+    if (!userMode) {
+        return this.registers[address];
+    }
+    else {
+        switch (this.CPUCore.MODEBits) {
+            case 0x10:
+            case 0x1F:
+                return this.registers[address];
+            case 0x11:
+                if (address < 8 || address == 15) {
+                    return this.registers[address];
+                }
+                else {
+                    //User-Mode Register Read Inside Non-User-Mode:
+                    return this.CPUCore.registersUSR[address - 8];
+                }
+                break;
+            default:
+                if (address < 13 || address == 15) {
+                    return this.registers[address];
+                }
+                else {
+                    //User-Mode Register Read Inside Non-User-Mode:
+                    return this.CPUCore.registersUSR[address - 8];
+                }
+        }
+    }
 }
 ARMInstructionSet.prototype.guardMultiRegisterReadSpecial = function (parentObj, address) {
 	address &= 0xF;
@@ -1460,61 +1491,61 @@ ARMInstructionSet.prototype.prip = function (parentObj, operand) {
 }
 ARMInstructionSet.prototype.ptrmll = function (parentObj, operand, userMode) {
 	var offset = parentObj.lli(parentObj, operand);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.ptrmlr = function (parentObj, operand, userMode) {
 	var offset = parentObj.lri(parentObj, operand);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.ptrmar = function (parentObj, operand, userMode) {
 	var offset = parentObj.ari(parentObj, operand);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.ptrmrr = function (parentObj, operand, userMode) {
 	var offset = parentObj.rri(parentObj, operand);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.sptim = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.ptrpll = function (parentObj, operand, userMode) {
 	var offset = parentObj.lli(parentObj, operand);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.ptrplr = function (parentObj, operand, userMode) {
 	var offset = parentObj.lri(parentObj, operand);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.ptrpar = function (parentObj, operand, userMode) {
 	var offset = parentObj.ari(parentObj, operand);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.ptrprr = function (parentObj, operand, userMode) {
 	var offset = parentObj.rri(parentObj, operand);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
 	return base;
 }
 ARMInstructionSet.prototype.sptip = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
-	var base = parentObj.registers[(operand >> 16) & 0xF];
+    var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
 	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
 	return base;
 }
@@ -4390,4 +4421,14 @@ ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function () {
 		}
 		this.instructionMap.push(lowMap);
 	}
+}
+ARMInstructionSet.prototype.compileReducedInstructionMap = function () {
+    //Flatten the multi-dimensional decode array:
+    this.instructionMapReduced = [];
+    for (var range1 = 0; range1 < 0x100; ++range1) {
+        var instrDecoded = this.instructionMap[range1];
+        for (var range2 = 0; range2 < 0x10; ++range2) {
+            this.instructionMapReduced.push(instrDecoded[range2]);
+        }
+    }
 }

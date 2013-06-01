@@ -23,7 +23,9 @@ var keyZones = [
 	["a", [88, 74]],
 	["b", [90, 81, 89]],
 	["select", [16]],
-	["start", [13]]
+	["start", [13]],
+    ["r", [50]],
+    ["l", [49]]
 ];
 var emuSpeed = 1;
 var emuVolume = 1;

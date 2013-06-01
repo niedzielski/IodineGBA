@@ -234,7 +234,7 @@ GameBoyAdvanceGraphics.prototype.nextDisplaySyncEventTime = function () {
 		return 1232 - this.LCDTicks;
 	}
 	else {
-		return ((68 - this.currentScanLine) * 1232) - this.LCDTicks;
+		return ((230 - this.currentScanLine) * 1232) - this.LCDTicks;
 	}
 }
 GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
