@@ -24,10 +24,10 @@ function GameBoyAdvanceColorEffectsRenderer() {
 	this.brightnessEffectAmount = 0;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.processOAMSemiTransparent = function (lowerPixel, topPixel) {
-	if ((lowerPixel & this.effectsTarget2) > 0) {
+	if ((lowerPixel & this.effectsTarget2) != 0) {
 		return this.alphaBlend(topPixel, lowerPixel);
 	}
-	else if ((topPixel & this.effectsTarget1) > 0) {
+	else if ((topPixel & this.effectsTarget1) != 0) {
 		switch (this.colorEffectsType) {
 			case 2:
 				return this.brightnessIncrease(topPixel);
@@ -38,10 +38,10 @@ GameBoyAdvanceColorEffectsRenderer.prototype.processOAMSemiTransparent = functio
 	return topPixel;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.process = function (lowerPixel, topPixel) {
-	if ((topPixel & this.effectsTarget1) > 0) {
+	if ((topPixel & this.effectsTarget1) != 0) {
 		switch (this.colorEffectsType) {
 			case 1:
-				if ((lowerPixel & this.effectsTarget2) > 0) {
+				if ((lowerPixel & this.effectsTarget2) != 0) {
 					return this.alphaBlend(topPixel, lowerPixel);
 				}
 				break;

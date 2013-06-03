@@ -178,7 +178,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
 					this.incrementScanLineQueue();
 				}
 		}
-		this.checkDisplaySync();
+        this.checkDisplaySync();                                    //Check for display sync.
 		this.checkVCounter();										//We're on a new scan line, so check the VCounter for match.
 		//Recursive clocking of the LCD state:
 		this.clockLCDState();
@@ -187,9 +187,12 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
 GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
 	if (!this.inHBlank) {											//If we were last in HBlank, don't run this again.
 		this.inHBlank = true;										//Mark HBlank.
-		if (this.IRQHBlank && this.currentScanLine < 160) {			//Check for HBlank IRQ.
-			this.IOCore.irq.requestIRQ(0x2);
-		}
+        if (this.currentScanLine < 160) {
+            if (this.IRQHBlank) {                                   //Check for HBlank IRQ (Don't do in VBlank).
+                this.IOCore.irq.requestIRQ(0x2);
+            }
+        }
+        this.IOCore.dma.gfxHBlankRequest();                         //Check for HDMA Trigger (Check if done in VBlank too).
 	}
 }
 GameBoyAdvanceGraphics.prototype.checkDisplaySync = function () {
@@ -218,7 +221,16 @@ GameBoyAdvanceGraphics.prototype.nextHBlankEventTime = function () {
 	return (2238 - this.LCDTicks) % 1232;
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankIRQEventTime = function () {
-	return (this.IRQHBlank) ? this.nextHBlankEventTime() : -1;
+	if (this.IRQHBlank) {
+        //Go to next HBlank time inside screen draw:
+        if (this.currentScanLine < 159 || (this.inHBlank && this.currentScanLine == 159)) {
+            return this.nextHBlankEventTime();
+        }
+        //No HBlank IRQ in VBlank:
+        return ((228 - this.currentScanLine) * 1232) + 1006 - this.LCDTicks;
+    }
+    //No HBlank IRQ Possible:
+    return -1;
 }
 GameBoyAdvanceGraphics.prototype.nextVCounterEventTime = function () {
 	return ((1 + ((227 + this.VCounter - this.currentScanLine) % 228)) * 1232) - this.LCDTicks;
@@ -228,13 +240,16 @@ GameBoyAdvanceGraphics.prototype.nextVCounterIRQEventTime = function () {
 }
 GameBoyAdvanceGraphics.prototype.nextDisplaySyncEventTime = function () {
 	if (this.currentScanLine < 2) {
-		return ((2 - this.currentScanLine) * 1232) - this.LCDTicks;
+		//Doesn't start until line 2:
+        return ((2 - this.currentScanLine) * 1232) - this.LCDTicks;
 	}
 	else if (this.currentScanLine < 161) {
-		return 1232 - this.LCDTicks;
+		//Line 2 through line 161:
+        return 1232 - this.LCDTicks;
 	}
 	else {
-		return ((230 - this.currentScanLine) * 1232) - this.LCDTicks;
+		//Skip to line 2 metrics:
+        return ((230 - this.currentScanLine) * 1232) - this.LCDTicks;
 	}
 }
 GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
@@ -251,6 +266,7 @@ GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
 	}
 	this.bgAffineRenderer[0].resetReferenceCounters();
     this.bgAffineRenderer[1].resetReferenceCounters();
+    this.IOCore.dma.gfxVBlankRequest();
 }
 GameBoyAdvanceGraphics.prototype.graphicsJIT = function () {
 	this.totalLinesPassed = 0;			//Mark frame for ensuring a JIT pass for the next framebuffer output.
