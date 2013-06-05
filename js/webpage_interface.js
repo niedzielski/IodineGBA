@@ -47,11 +47,11 @@ function registerGUIEvents() {
 			case 82:
 				raiseVolume();
 				break;
-			case 49:
+			case 51:
 				emuSpeed = Math.min(emuSpeed + 0.25, 4);
 				Iodine.setSpeed(emuSpeed);
 				break;
-			case 50:
+			case 52:
 				emuSpeed = Math.max(emuSpeed - 0.10, 0.10);
 				Iodine.setSpeed(emuSpeed);
 				break;

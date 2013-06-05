@@ -191,8 +191,8 @@ GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
             if (this.IRQHBlank) {                                   //Check for HBlank IRQ (Don't do in VBlank).
                 this.IOCore.irq.requestIRQ(0x2);
             }
+			this.IOCore.dma.gfxHBlankRequest();                     //Check for HDMA Trigger (Check if done in VBlank too).
         }
-        this.IOCore.dma.gfxHBlankRequest();                         //Check for HDMA Trigger (Check if done in VBlank too).
 	}
 }
 GameBoyAdvanceGraphics.prototype.checkDisplaySync = function () {
