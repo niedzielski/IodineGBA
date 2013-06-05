@@ -1146,6 +1146,12 @@ ARMInstructionSet.prototype.ari = function (parentObj, operand) {
 	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
+	//Get the shift amount:
+	var shifter = (operand >> 7) & 0x1F;
+	if (shifter == 0) {
+		//Shift full length if shifter is zero:
+		shifter = 0x20;
+	}
 	//Shift the register data right:
 	return register >> ((operand >> 7) & 0x1F);
 }
@@ -1159,7 +1165,12 @@ ARMInstructionSet.prototype.aris = function (parentObj, operand) {
 	var shifter = (operand >> 7) & 0x1F;
 	//Check to see if we need to update CPSR:
 	if (shifter > 0) {
-		parentObj.CPUCore.CPSRCarry = (((register >>> (shifter - 1)) & 0x1) == 0x1); 
+		parentObj.CPUCore.CPSRCarry = (((register >>> (shifter - 1)) & 0x1) == 0x1);
+	}
+	else {
+		//Shift full length if shifter is zero:
+		shifter = 0x20;
+		parentObj.CPUCore.CPSRCarry = (register < 0);
 	}
 	//Shift the register data right:
 	return register >> shifter;
@@ -1172,7 +1183,7 @@ ARMInstructionSet.prototype.arr = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Shift the register data right:
-	return register >> Math.min(parentObj.registers[(operand >> 8) & 0xF] & 0xFF, 0x1F);
+	return register >> Math.min(parentObj.registers[(operand >> 8) & 0xF] & 0xFF, 0x20);
 }
 ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
 	//Arithmetic Right Shift with Register and CPSR:
@@ -1212,8 +1223,10 @@ ARMInstructionSet.prototype.rri = function (parentObj, operand) {
         //ROR
         return (register << (0x20 - shifter)) | (register >>> shifter);
     }
-    //If shift is 0, just return the register without mod:
-    return register;
+	else {
+		//RRX
+		return ((parentObj.CPUCore.CPSRCarry) ? 0x80000000 : 0) | (register >>> 0x1);
+	}
 }
 ARMInstructionSet.prototype.rris = function (parentObj, operand) {
 	//Rotate Right with Immediate and CPSR:
@@ -1229,8 +1242,12 @@ ARMInstructionSet.prototype.rris = function (parentObj, operand) {
         parentObj.CPUCore.CPSRCarry = (((register >>> (shifter - 1)) & 0x1) == 0x1);
         return (register << (0x20 - shifter)) | (register >>> shifter);
     }
-    //If shift is 0, just return the register without mod:
-    return register;
+	else {
+		//RRX
+		var rrxValue = ((parentObj.CPUCore.CPSRCarry) ? 0x80000000 : 0) | (register >>> 0x1);
+		parentObj.CPUCore.CPSRCarry = ((register & 0x1) != 0);
+		return rrxValue;
+	}
 }
 ARMInstructionSet.prototype.rrr = function (parentObj, operand) {
 	//Rotate Right with Register:
@@ -1265,7 +1282,7 @@ ARMInstructionSet.prototype.rrrs = function (parentObj, operand) {
             return (register << (0x20 - shifter)) | (register >>> shifter);
         }
         else {
-            //RRX
+            //No shift, but make carry set to bit 31:
             parentObj.CPUCore.CPSRCarry = (register < 0);
         }
     }
