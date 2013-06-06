@@ -108,7 +108,7 @@ GameBoyAdvanceSerial.prototype.clockSerial = function () {
 			this.SIOTransferStarted = false;
 			this.serialBitsShifted = 0;
 			if (this.SIOCNT_IRQ) {
-				this.IOCore.irq.requestIRQ(0x80);
+				//this.IOCore.irq.requestIRQ(0x80);
 			}
 		}
 	}
@@ -122,7 +122,7 @@ GameBoyAdvanceSerial.prototype.clockSerial = function () {
 			this.SIOTransferStarted = false;
 			this.serialBitsShifted = 0;
 			if (this.SIOCNT_IRQ) {
-				this.IOCore.irq.requestIRQ(0x80);
+				//this.IOCore.irq.requestIRQ(0x80);
 			}
 		}
 	}
@@ -136,7 +136,7 @@ GameBoyAdvanceSerial.prototype.clockMultiplayer = function () {
 	this.SIOTransferStarted = false;
 	this.SIOCOMMERROR = true;
 	if (this.SIOCNT_IRQ) {
-		this.IOCore.irq.requestIRQ(0x80);
+		//this.IOCore.irq.requestIRQ(0x80);
 	}
 }
 GameBoyAdvanceSerial.prototype.clockUART = function () {
@@ -146,7 +146,7 @@ GameBoyAdvanceSerial.prototype.clockUART = function () {
 			this.serialBitsShifted = 0;
 			this.SIOCNT_UART_FIFO = Math.max(this.SIOCNT_UART_FIFO - 1, 0);
 			if (this.SIOCNT_UART_FIFO == 0 && this.SIOCNT_IRQ) {
-				this.IOCore.irq.requestIRQ(0x80);
+				//this.IOCore.irq.requestIRQ(0x80);
 			}
 		}
 	}
@@ -154,7 +154,7 @@ GameBoyAdvanceSerial.prototype.clockUART = function () {
 		if (this.serialBitsShifted == 8) {
 			this.serialBitsShifted = 0;
 			if (this.SIOCNT_IRQ) {
-				this.IOCore.irq.requestIRQ(0x80);
+				//this.IOCore.irq.requestIRQ(0x80);
 			}
 		}
 	}

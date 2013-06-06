@@ -2126,15 +2126,15 @@ GameBoyAdvanceIO.prototype.runIterator = function () {
 		}
 	}
 }
-GameBoyAdvanceIO.prototype.updateCore = function () {
+GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
 	//This is used during normal/dma modes of operation:
 	//Decrement the clocks per iteration counter:
-	this.cyclesToIterate -= this.clocks;
+	this.cyclesToIterate -= clocks;
 	//Clock all components:
-	this.gfx.addClocks(this.clocks);
-	this.sound.addClocks(this.clocks);
-	this.timer.addClocks(this.clocks);
-	this.clocks = 0;
+	this.gfx.addClocks(clocks);
+	this.sound.addClocks(clocks);
+	this.timer.addClocks(clocks);
+    this.serial.addClocks(clocks);
 }
 GameBoyAdvanceIO.prototype.handleCPUStallEvents = function () {
 	switch (this.systemStatus) {
@@ -2163,8 +2163,7 @@ GameBoyAdvanceIO.prototype.handleHalt = function () {
 		var clocks = this.irq.nextEventTime();
 		var dmaClocks = this.dma.nextEventTime();
 		clocks = (clocks > -1) ? ((dmaClocks > -1) ? Math.min(clocks, dmaClocks) : clocks) : dmaClocks;
-		this.clocks = (clocks == -1 || clocks > this.cyclesToIterate) ? this.cyclesToIterate : clocks;
-		this.updateCore();
+		this.updateCore((clocks == -1 || clocks > this.cyclesToIterate) ? this.cyclesToIterate : clocks);
 	}
 	else {
 		//Exit HALT promptly:

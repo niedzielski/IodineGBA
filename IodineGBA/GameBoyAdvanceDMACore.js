@@ -278,7 +278,16 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, 
 		}
 		//Check to see if we should flag for IRQ:
 		if (control[0]) {
-			this.IOCore.irq.requestIRQ(dmaChannel << 8);
+			var dmaIRQFlag = 0x100;
+			switch (dmaChannel) {
+				case 3:
+					dmaIRQFlag <<= 1;
+				case 2:
+					dmaIRQFlag <<= 1;
+				case 1:
+					dmaIRQFlag <<= 1;
+			}
+			this.IOCore.irq.requestIRQ(dmaIRQFlag);
 		}
 		//Update source address:
 		switch (control[4]) {
@@ -338,7 +347,7 @@ GameBoyAdvanceDMA.prototype.nextEventTime = function () {
 				break;
 			//H_BLANK:
 			case 0x4:
-				workbench = this.IOCore.gfx.nextHBlankEventTime();
+				workbench = this.IOCore.gfx.nextHBlankDMAEventTime();
 				break;
 			//FIFO_A:
 			case 0x8:
@@ -368,7 +377,7 @@ GameBoyAdvanceDMA.prototype.nextIRQEventTime = function () {
 					break;
 				//H_BLANK:
 				case 0x4:
-					workbench = this.IOCore.gfx.nextHBlankEventTime();
+					workbench = this.IOCore.gfx.nextHBlankDMAEventTime();
 					break;
 				//FIFO_A:
 				case 0x8:
