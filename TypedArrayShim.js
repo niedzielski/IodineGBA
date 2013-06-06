@@ -84,5 +84,5 @@ function getArray(size_t) {
 	for (var size_index = 0; size_index < size_t; ++size_index) {
 		genericArray[size_index] = 0;
 	}
-    return [];
+    return genericArray;
 }
