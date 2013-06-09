@@ -82,6 +82,9 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
         if (ycoord + ySize > 0x1FF) {
             yOffset -= 0x200;
         }
+        else if (yOffset < 0) {
+            yOffset += 228;
+        }
         //Make a sprite line:
         if ((yOffset & --ySize) == yOffset) {
             if (sprite.matrix2D) {
