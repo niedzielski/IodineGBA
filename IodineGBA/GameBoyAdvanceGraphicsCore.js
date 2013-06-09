@@ -225,7 +225,7 @@ GameBoyAdvanceGraphics.prototype.nextHBlankIRQEventTime = function () {
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankDMAEventTime = function () {
     //Go to next HBlank time inside screen draw:
-    if (this.currentScanLine < 159 || (this.inHBlank && this.currentScanLine == 159)) {
+    if (this.currentScanLine < 159 || (!this.inHBlank && this.currentScanLine == 159)) {
         return this.nextHBlankEventTime();
     }
     //No HBlank DMA in VBlank:

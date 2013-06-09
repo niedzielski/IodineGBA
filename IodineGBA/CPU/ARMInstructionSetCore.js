@@ -1319,20 +1319,18 @@ ARMInstructionSet.prototype.rc = function (parentObj) {
 	);
 }
 ARMInstructionSet.prototype.rcs = function (parentObj, operand) {
-	operand = parentObj.registers[operand & 0xF];
-	parentObj.CPUCore.CPSRNegative = (operand < 0);
-	parentObj.CPUCore.CPSRZero = ((operand & 0x40000000) != 0);
-	parentObj.CPUCore.CPSRCarry = ((operand & 0x20000000) != 0);
-	parentObj.CPUCore.CPSROverflow = ((operand & 0x10000000) != 0);
-	switch (parentObj.CPUCore.MODEBits) {
-		case 0x10:
-			return;
-		default:
-			parentObj.CPUCore.IRQDisabled = ((operand & 0x80) != 0);
-			parentObj.CPUCore.FIQDisabled = ((operand & 0x40) != 0);
-			parentObj.CPUCore.THUMBBitModify((operand & 0x20) != 0);
-			parentObj.CPUCore.switchRegisterBank(operand & 0x1F);
-	}
+	var newcpsr = parentObj.registers[operand & 0xF];
+	parentObj.CPUCore.CPSRNegative = (newcpsr < 0);
+	parentObj.CPUCore.CPSRZero = ((newcpsr & 0x40000000) != 0);
+	parentObj.CPUCore.CPSRCarry = ((newcpsr & 0x20000000) != 0);
+	parentObj.CPUCore.CPSROverflow = ((newcpsr & 0x10000000) != 0);
+    if ((operand & 0x10000) == 0x10000 && parentObj.CPUCore.MODEBits != 0x10) {
+        parentObj.CPUCore.IRQDisabled = ((newcpsr & 0x80) != 0);
+        parentObj.CPUCore.FIQDisabled = ((newcpsr & 0x40) != 0);
+        //parentObj.CPUCore.THUMBBitModify((newcpsr & 0x20) != 0);
+        //ARMWrestler test rom triggers THUMB mode, but expects it to remain in ARM mode, so ignore.
+        parentObj.CPUCore.switchRegisterBank(newcpsr & 0x1F);
+    }
 }
 ARMInstructionSet.prototype.rs = function (parentObj) {
 	switch (parentObj.CPUCore.MODEBits) {
@@ -1367,7 +1365,7 @@ ARMInstructionSet.prototype.rs = function (parentObj) {
 	);
 }
 ARMInstructionSet.prototype.rss = function (parentObj, operand) {
-	operand = parentObj.registers[operand & 0xF];
+	var newspsr = parentObj.registers[operand & 0xF];
 	switch (parentObj.CPUCore.MODEBits) {
 		case 0x11:	//FIQ
 			var spsr = parentObj.CPUCore.SPSRFIQ;
@@ -1387,14 +1385,16 @@ ARMInstructionSet.prototype.rss = function (parentObj, operand) {
 		default:
 			return;
 	}
-	spsr[0] = (operand < 0);
-	spsr[1] = ((operand & 0x40000000) != 0);
-	spsr[2] = ((operand & 0x20000000) != 0);
-	spsr[3] = ((operand & 0x10000000) != 0);
-	spsr[4] = ((operand & 0x80) != 0);
-	spsr[5] = ((operand & 0x40) != 0);
-	spsr[6] = ((operand & 0x20) != 0);
-	spsr[7] = operand & 0x1F;
+	spsr[0] = (newspsr < 0);
+	spsr[1] = ((newspsr & 0x40000000) != 0);
+	spsr[2] = ((newspsr & 0x20000000) != 0);
+	spsr[3] = ((newspsr & 0x10000000) != 0);
+	if ((operand & 0x10000) == 0x10000) {
+        spsr[4] = ((newspsr & 0x80) != 0);
+        spsr[5] = ((newspsr & 0x40) != 0);
+        spsr[6] = ((newspsr & 0x20) != 0);
+        spsr[7] = newspsr & 0x1F;
+    }
 }
 ARMInstructionSet.prototype.ic = function (parentObj, operand) {
 	operand = parentObj.imm(parentObj, operand);
@@ -1402,15 +1402,6 @@ ARMInstructionSet.prototype.ic = function (parentObj, operand) {
 	parentObj.CPUCore.CPSRZero = ((operand & 0x40000000) != 0);
 	parentObj.CPUCore.CPSRCarry = ((operand & 0x20000000) != 0);
 	parentObj.CPUCore.CPSROverflow = ((operand & 0x10000000) != 0);
-	switch (parentObj.CPUCore.MODEBits) {
-		case 0x10:
-			return;
-		default:
-			parentObj.CPUCore.IRQDisabled = ((operand & 0x80) != 0);
-			parentObj.CPUCore.FIQDisabled = ((operand & 0x40) != 0);
-			parentObj.CPUCore.THUMBBitModify((operand & 0x20) != 0);
-			parentObj.CPUCore.switchRegisterBank(operand & 0x1F);
-	}
 }
 ARMInstructionSet.prototype.is = function (parentObj, operand) {
 	operand = parentObj.imm(parentObj, operand);
@@ -1437,10 +1428,6 @@ ARMInstructionSet.prototype.is = function (parentObj, operand) {
 	spsr[1] = ((operand & 0x40000000) != 0);
 	spsr[2] = ((operand & 0x20000000) != 0);
 	spsr[3] = ((operand & 0x10000000) != 0);
-	spsr[4] = ((operand & 0x80) != 0);
-	spsr[5] = ((operand & 0x40) != 0);
-	spsr[6] = ((operand & 0x20) != 0);
-	spsr[7] = operand & 0x1F;
 }
 ARMInstructionSet.prototype.ptrm = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];

@@ -16,17 +16,17 @@
  *
  */
 function GameBoyAdvanceEmulator() {
-	this.SKIPBoot = false;					//Skip the BIOS boot screen.
+	this.SKIPBoot = true;					//Skip the BIOS boot screen.
 	this.emulatorSpeed = 1;					//Speed multiplier of the emulator.
-	this.timerIntervalRate = 4;				//How often the emulator core is called into (in milliseconds).
+	this.timerIntervalRate = 16;			//How often the emulator core is called into (in milliseconds).
 	this.graphicsFound = false;				//Do we have graphics output sink found yet?
 	this.audioFound = false;				//Do we have audio output sink found yet?
 	this.romFound = false;					//Do we have a ROM loaded in?
 	this.faultFound = false;				//Did we run into a fatal error?
 	this.paused = true;						//Are we paused?
 	this.audioVolume = 1;					//Starting audio volume.
-	this.audioBufferUnderrunLimit = 25;		//Audio buffer minimum span amount over x interpreter iterations.
-	this.audioBufferSize = 50;				//Audio buffer maximum span amount over x interpreter iterations.
+	this.audioBufferUnderrunLimit = 8;		//Audio buffer minimum span amount over x interpreter iterations.
+	this.audioBufferSize = 20;				//Audio buffer maximum span amount over x interpreter iterations.
 	this.offscreenWidth = 240;				//Width of the GBA screen.
 	this.offscreenHeight = 160;				//Height of the GBA screen.
 	this.BIOS = [];							//Initialize BIOS as not existing.
