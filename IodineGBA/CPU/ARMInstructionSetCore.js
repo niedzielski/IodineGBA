@@ -1052,7 +1052,7 @@ ARMInstructionSet.prototype.UNDEFINED = function (parentObj, operand2OP) {
 	parentObj.CPUCore.UNDEFINED();
 }
 ARMInstructionSet.prototype.lli = function (parentObj, operand) {
-	return parentObjc.lli2(operand);
+	return parentObj.lli2(operand);
 }
 ARMInstructionSet.prototype.lli2 = function (operand) {
 	var registerSelected = operand & 0xF;
