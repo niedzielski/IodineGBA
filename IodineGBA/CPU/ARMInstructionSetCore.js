@@ -237,6 +237,46 @@ ARMInstructionSet.prototype.guardMultiRegisterReadSpecial = function (parentObj,
 			}
 	}
 }
+ARMInstructionSet.prototype.updateBasePostDecrement = function (operand, offset, userMode) {
+    var baseRegisterNumber = (operand >> 16) & 0xF;
+    var base = this.guardRegisterReadSpecial(baseRegisterNumber, userMode);
+    var result = (base - offset) | 0;
+	this.guardRegisterWriteSpecial(baseRegisterNumber, result, userMode);
+    return base;
+}
+ARMInstructionSet.prototype.updateBasePostIncrement = function (operand, offset, userMode) {
+    var baseRegisterNumber = (operand >> 16) & 0xF;
+    var base = this.guardRegisterReadSpecial(baseRegisterNumber, userMode);
+    var result = (base + offset) | 0;
+	this.guardRegisterWriteSpecial(baseRegisterNumber, result, userMode);
+    return base;
+}
+ARMInstructionSet.prototype.updateNoBaseDecrement = function (operand, offset) {
+    var baseRegisterNumber = (operand >> 16) & 0xF;
+    var base = this.registers[baseRegisterNumber];
+    var result = (base - offset) | 0;
+    return result;
+}
+ARMInstructionSet.prototype.updateNoBaseIncrement = function (operand, offset) {
+    var baseRegisterNumber = (operand >> 16) & 0xF;
+    var base = this.registers[baseRegisterNumber];
+    var result = (base + offset) | 0;
+    return result;
+}
+ARMInstructionSet.prototype.updateBasePreDecrement = function (operand, offset) {
+    var baseRegisterNumber = (operand >> 16) & 0xF;
+    var base = this.registers[baseRegisterNumber];
+    base = (base - offset) | 0;
+    this.guardRegisterWrite(baseRegisterNumber, base);
+    return base;
+}
+ARMInstructionSet.prototype.updateBasePreIncrement = function (operand, offset) {
+    var baseRegisterNumber = (operand >> 16) & 0xF;
+    var base = this.registers[baseRegisterNumber];
+    base = (base + offset) | 0;
+	this.guardRegisterWrite(baseRegisterNumber, base);
+    return base;
+}
 ARMInstructionSet.prototype.getLR = function () {
 	return (this.registers[15] - 4) | 0;
 }
@@ -1012,11 +1052,14 @@ ARMInstructionSet.prototype.UNDEFINED = function (parentObj, operand2OP) {
 	parentObj.CPUCore.UNDEFINED();
 }
 ARMInstructionSet.prototype.lli = function (parentObj, operand) {
+	return parentObjc.lli2(operand);
+}
+ARMInstructionSet.prototype.lli2 = function (operand) {
 	var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.getDelayedRegisterRead(registerSelected);
+	var register = this.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
+	this.wait.CPUInternalCyclePrefetch(this.fetch, 1);
 	//Shift the register data left:
 	var shifter = (operand >> 7) & 0x1F;
 	return register << shifter;
@@ -1077,11 +1120,14 @@ ARMInstructionSet.prototype.llrs = function (parentObj, operand) {
     return register;
 }
 ARMInstructionSet.prototype.lri = function (parentObj, operand) {
+	return parentObj.lri2(operand);
+}
+ARMInstructionSet.prototype.lri2 = function (operand) {
 	var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.getDelayedRegisterRead(registerSelected);
+	var register = this.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
+	this.wait.CPUInternalCyclePrefetch(this.fetch, 1);
 	//Shift the register data right logically:
 	var shifter = (operand >> 7) & 0x1F;
 	return (shifter < 0x20) ? ((register >>> shifter) | 0) : 0;
@@ -1141,11 +1187,14 @@ ARMInstructionSet.prototype.lrrs = function (parentObj, operand) {
     return register;
 }
 ARMInstructionSet.prototype.ari = function (parentObj, operand) {
+	return parentObj.ari2(operand);
+}
+ARMInstructionSet.prototype.ari2 = function (operand) {
 	var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.getDelayedRegisterRead(registerSelected);
+	var register = this.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
+	this.wait.CPUInternalCyclePrefetch(this.fetch, 1);
 	//Get the shift amount:
 	var shifter = (operand >> 7) & 0x1F;
 	if (shifter == 0) {
@@ -1211,12 +1260,15 @@ ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
     return register;
 }
 ARMInstructionSet.prototype.rri = function (parentObj, operand) {
+	return parentObj.rri2(operand);
+}
+ARMInstructionSet.prototype.rri2 = function (operand) {
 	//Rotate Right with Immediate:
     var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.getDelayedRegisterRead(registerSelected);
+	var register = this.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
+	this.wait.CPUInternalCyclePrefetch(this.fetch, 1);
 	//Rotate the register right:
 	var shifter = (operand >> 7) & 0x1F;
     if (shifter > 0) {
@@ -1225,7 +1277,7 @@ ARMInstructionSet.prototype.rri = function (parentObj, operand) {
     }
 	else {
 		//RRX
-		return ((parentObj.CPUCore.CPSRCarry) ? 0x80000000 : 0) | (register >>> 0x1);
+		return ((this.CPUCore.CPSRCarry) ? 0x80000000 : 0) | (register >>> 0x1);
 	}
 }
 ARMInstructionSet.prototype.rris = function (parentObj, operand) {
@@ -1431,227 +1483,171 @@ ARMInstructionSet.prototype.is = function (parentObj, operand) {
 }
 ARMInstructionSet.prototype.ptrm = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
-	var base = parentObj.registers[(operand >> 16) & 0xF];
-	parentObj.guardRegisterWrite((operand >> 16) & 0xF, (base - offset) | 0);
-	return base;
+	return parentObj.updateBasePostDecrement(operand, offset, false);
 }
 ARMInstructionSet.prototype.ptim = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
-	parentObj.guardRegisterWrite((operand >> 16) & 0xF, (base - offset) | 0);
-	return base;
+	return parentObj.updateBasePostDecrement(operand, offset, false);
 }
 ARMInstructionSet.prototype.ptrp = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
-	var base = parentObj.registers[(operand >> 16) & 0xF];
-	parentObj.guardRegisterWrite((operand >> 16) & 0xF, (base + offset) | 0);
-	return base;
+	return parentObj.updateBasePostIncrement(operand, offset, false);
 }
 ARMInstructionSet.prototype.ptip = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	var base = parentObj.registers[(operand >> 16) & 0xF];
-	parentObj.guardRegisterWrite((operand >> 16) & 0xF, (base + offset) | 0);
-	return base;
+	return parentObj.updateBasePostIncrement(operand, offset, false);
 }
 ARMInstructionSet.prototype.ofrm = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
-	return (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
+	return parentObj.updateNoBaseDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrm = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
-	var base = (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
-	parentObj.guardRegisterWrite((operand >> 16) & 0xF, base);
-	return base;
+	return parentObj.updateBasePreDecrement(operand, offset, false);
 }
 ARMInstructionSet.prototype.ofim = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	return (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
+	return parentObj.updateNoBaseDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.prim = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
-	parentObj.guardRegisterWrite((operand >> 16) & 0xF, base);
-	return base;
+	return parentObj.updateBasePreDecrement(operand, offset, false);
 }
 ARMInstructionSet.prototype.ofrp = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
-	return (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
+	return parentObj.updateNoBaseIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrp = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
-	var base = (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
-	parentObj.guardRegisterWrite((operand >> 16) & 0xF, base);
-	return base;
+	return parentObj.updateBasePreIncrement(operand, offset, false);
 }
 ARMInstructionSet.prototype.ofip = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	return (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
+	return parentObj.updateNoBaseIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.prip = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
-	parentObj.guardRegisterWrite((operand >> 16) & 0xF, base);
-	return base;
+    return parentObj.updateBasePreIncrement(operand, offset, false);
 }
 ARMInstructionSet.prototype.ptrmll = function (parentObj, operand, userMode) {
-	var offset = parentObj.lli(parentObj, operand);
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
-	return base;
+	var offset = parentObj.lli2(operand);
+	return parentObj.updateBasePostDecrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ptrmlr = function (parentObj, operand, userMode) {
-	var offset = parentObj.lri(parentObj, operand);
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
-	return base;
+	var offset = parentObj.lri2(operand);
+	return parentObj.updateBasePostDecrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ptrmar = function (parentObj, operand, userMode) {
-	var offset = parentObj.ari(parentObj, operand);
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
-	return base;
+	var offset = parentObj.ari2(operand);
+	return parentObj.updateBasePostDecrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ptrmrr = function (parentObj, operand, userMode) {
-	var offset = parentObj.rri(parentObj, operand);
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
-	return base;
+	var offset = parentObj.rri2(operand);
+	return parentObj.updateBasePostDecrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.sptim = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base - offset) | 0, userMode);
-	return base;
+	return parentObj.updateBasePostDecrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ptrpll = function (parentObj, operand, userMode) {
-	var offset = parentObj.lli(parentObj, operand);
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
-	return base;
+	var offset = parentObj.lli2(operand);
+	return parentObj.updateBasePostIncrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ptrplr = function (parentObj, operand, userMode) {
-	var offset = parentObj.lri(parentObj, operand);
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
-	return base;
+	var offset = parentObj.lri2(operand);
+	return parentObj.updateBasePostIncrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ptrpar = function (parentObj, operand, userMode) {
-	var offset = parentObj.ari(parentObj, operand);
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
-	return base;
+	var offset = parentObj.ari2(operand);
+	return parentObj.updateBasePostIncrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ptrprr = function (parentObj, operand, userMode) {
-	var offset = parentObj.rri(parentObj, operand);
-	var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
-	return base;
+	var offset = parentObj.rri2(operand);
+	return parentObj.updateBasePostIncrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.sptip = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
-    var base = parentObj.guardRegisterReadSpecial((operand >> 16) & 0xF, userMode);
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, (base + offset) | 0, userMode);
-	return base;
+    return parentObj.updateBasePostIncrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ofrmll = function (parentObj, operand, userMode) {
-	var offset = parentObj.lli(parentObj, operand);
-	return (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
+	var offset = parentObj.lli2(operand);
+	return parentObj.updateNoBaseDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofrmlr = function (parentObj, operand, userMode) {
-	var offset = parentObj.lri(parentObj, operand);
-	return (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
+	var offset = parentObj.lri2(operand);
+	return parentObj.updateNoBaseDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofrmar = function (parentObj, operand, userMode) {
-	var offset = parentObj.ari(parentObj, operand);
-	return (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
+	var offset = parentObj.ari2(operand);
+	return parentObj.updateNoBaseDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofrmrr = function (parentObj, operand, userMode) {
-	var offset = parentObj.rri(parentObj, operand);
-	return (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
+	var offset = parentObj.rri2(operand);
+	return parentObj.updateNoBaseDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrmll = function (parentObj, operand, userMode) {
-	var offset = parentObj.lli(parentObj, operand);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	var offset = parentObj.lli2(operand);
+	return parentObj.updateBasePreDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrmlr = function (parentObj, operand, userMode) {
-	var offset = parentObj.lri(parentObj, operand);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	var offset = parentObj.lri2(operand);
+	return parentObj.updateBasePreDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrmar = function (parentObj, operand, userMode) {
-	var offset = parentObj.ari(parentObj, operand);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	var offset = parentObj.ari2(operand);
+	return parentObj.updateBasePreDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrmrr = function (parentObj, operand, userMode) {
-	var offset = parentObj.rri(parentObj, operand);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	var offset = parentObj.rri2(operand);
+	return parentObj.updateBasePreDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.sofim = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
-	return (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
+	return parentObj.updateNoBaseDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.sprim = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
-	var base = (parentObj.registers[(operand >> 16) & 0xF] - offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	return parentObj.updateBasePreDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofrpll = function (parentObj, operand, userMode) {
-	var offset = parentObj.lli(parentObj, operand);
-	return (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
+	var offset = parentObj.lli2(operand);
+	return parentObj.updateNoBaseIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofrplr = function (parentObj, operand, userMode) {
-	var offset = parentObj.lri(parentObj, operand);
-	return (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
+	var offset = parentObj.lri2(operand);
+	return parentObj.updateNoBaseIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofrpar = function (parentObj, operand, userMode) {
-	var offset = parentObj.ari(parentObj, operand);
-	return (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
+	var offset = parentObj.ari2(operand);
+	return parentObj.updateNoBaseIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofrprr = function (parentObj, operand, userMode) {
-	var offset = parentObj.rri(parentObj, operand);
-	return (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
+	var offset = parentObj.rri2(operand);
+	return parentObj.updateNoBaseIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrpll = function (parentObj, operand, userMode) {
-	var offset = parentObj.lli(parentObj, operand);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	var offset = parentObj.lli2(operand);
+	return parentObj.updateBasePreIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrplr = function (parentObj, operand, userMode) {
-	var offset = parentObj.lri(parentObj, operand);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	var offset = parentObj.lri2(operand);
+	return parentObj.updateBasePreIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrpar = function (parentObj, operand, userMode) {
-	var offset = parentObj.ari(parentObj, operand);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	var offset = parentObj.ari2(operand);
+	return parentObj.updateBasePreIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.prrprr = function (parentObj, operand, userMode) {
-	var offset = parentObj.rri(parentObj, operand);
-	var base = (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	var offset = parentObj.rri2(operand);
+	return parentObj.updateBasePreIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.sofip = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
-	return (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
+    return parentObj.updateNoBaseIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.sprip = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
-	var base = (parentObj.registers[(operand >> 16) & 0xF] + offset) | 0;
-	parentObj.guardRegisterWriteSpecial((operand >> 16) & 0xF, base, userMode);
-	return base;
+	return parentObj.updateBasePreIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.NOP = function (parentObj, operand) {
 	//nothing...

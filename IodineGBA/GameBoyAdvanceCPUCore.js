@@ -628,7 +628,7 @@ GameBoyAdvanceCPU.prototype.read32 = function (address) {
 	//Updating the address bus away from PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
 	var data = this.IOCore.memoryRead32(address);
-    var real_output = (data << ((address & 0x3) << 3)) | (data >>> ((4 -(address & 0x3)) << 3));
+    var real_output = (data << ((address & 0x3) << 3)) | (data >>> (((4 -(address & 0x3)) << 3) & 0x1F));
 	//Updating the address bus back to PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
 	return real_output;
