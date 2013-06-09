@@ -23,9 +23,3 @@ Screenshots
 * **ARMWrester:**
 
 	![ARMWrestler](http://cdn.grantgalitz.org/t.png "Fails")
-    
-* **3 Balls By Darkfader:**
-    ![3 Balls](http://i.imgur.com/vWHra5O.png "3 Balls")
-    
-* **Mario Pinball Land:**
-    ![Mario Pinball Land](http://i.imgur.com/WjwmJh9.png "Pinball Land")
