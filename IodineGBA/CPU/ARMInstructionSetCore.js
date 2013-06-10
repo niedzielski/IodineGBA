@@ -124,7 +124,7 @@ ARMInstructionSet.prototype.guardMultiRegisterWrite = function (parentObj, addre
 	parentObj.guardRegisterWrite(address, data);
 }
 ARMInstructionSet.prototype.guardMultiRegisterRead = function (parentObj, address) {
-	return parentObj.registers[address];
+    return parentObj.getDelayedRegisterRead(address);
 }
 ARMInstructionSet.prototype.baseRegisterWrite = function (address, data, userMode) {
 	if (!userMode) {
@@ -211,29 +211,36 @@ ARMInstructionSet.prototype.baseRegisterRead = function (address, userMode) {
     }
 }
 ARMInstructionSet.prototype.guardMultiRegisterReadSpecial = function (parentObj, address) {
-	address &= 0xF;
-	switch (parentObj.CPUCore.MODEBits) {
-		case 0x10:
-		case 0x1F:
-			return parentObj.registers[address];
-		case 0x11:
-			if (address < 8 || address == 15) {
-				return parentObj.registers[address];
-			}
-			else {
-				//User-Mode Register Read Inside Non-User-Mode:
-				return parentObj.CPUCore.registersUSR[address - 8];
-			}
-			break;
-		default:
-			if (address < 13 || address == 15) {
-				return parentObj.registers[address];
-			}
-			else {
-				//User-Mode Register Read Inside Non-User-Mode:
-				return parentObj.CPUCore.registersUSR[address - 8];
-			}
-	}
+	//Handle user mode write condition:
+    address &= 0xF;
+    if (address < 0xF) {
+        switch (parentObj.CPUCore.MODEBits) {
+            case 0x10:
+            case 0x1F:
+                return parentObj.registers[address];
+            case 0x11:
+                if (address < 8) {
+                    return parentObj.registers[address];
+                }
+                else {
+                    //User-Mode Register Read Inside Non-User-Mode:
+                    return parentObj.CPUCore.registersUSR[address - 8];
+                }
+                break;
+            default:
+                if (address < 13) {
+                    return parentObj.registers[address];
+                }
+                else {
+                    //User-Mode Register Read Inside Non-User-Mode:
+                    return parentObj.CPUCore.registersUSR[address - 8];
+                }
+        }
+    }
+    else {
+        //STM type instruction saves 12 ahead:
+        return (parentObj.registers[0xF] + 4) | 0;
+    }
 }
 ARMInstructionSet.prototype.updateBasePostDecrement = function (operand, offset, userMode) {
     var baseRegisterNumber = (operand >> 16) & 0xF;
