@@ -531,7 +531,7 @@ ARMInstructionSet.prototype.MULS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, result);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, result);
 }
 ARMInstructionSet.prototype.MLA = function (parentObj, operand2OP) {
 	//Perform multiplication:
@@ -550,7 +550,7 @@ ARMInstructionSet.prototype.MLAS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, result | 0);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, result | 0);
 }
 ARMInstructionSet.prototype.UMULL = function (parentObj, operand2OP) {
 	//Perform multiplication:
@@ -566,8 +566,8 @@ ARMInstructionSet.prototype.UMULLS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRNegative = (parentObj.CPUCore.mul64ResultHigh < 0);
 	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
 }
 ARMInstructionSet.prototype.UMLAL = function (parentObj, operand2OP) {
 	//Perform multiplication:
@@ -583,8 +583,8 @@ ARMInstructionSet.prototype.UMLALS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRNegative = (parentObj.CPUCore.mul64ResultHigh < 0);
 	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
 }
 ARMInstructionSet.prototype.SMULL = function (parentObj, operand2OP) {
 	//Perform multiplication:
@@ -600,8 +600,8 @@ ARMInstructionSet.prototype.SMULLS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRNegative = (parentObj.CPUCore.mul64ResultHigh < 0);
 	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
 }
 ARMInstructionSet.prototype.SMLAL = function (parentObj, operand2OP) {
 	//Perform multiplication:
@@ -617,8 +617,8 @@ ARMInstructionSet.prototype.SMLALS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRNegative = (parentObj.CPUCore.mul64ResultHigh < 0);
 	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
 }
 ARMInstructionSet.prototype.STRH = function (parentObj, operand2OP) {
 	//Perform halfword store calculations:
