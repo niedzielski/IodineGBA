@@ -83,10 +83,6 @@ THUMBInstructionSet.prototype.LSLimm = function (parentObj) {
 		//Perform shift:
 		source <<= offset;
 	}
-	else {
-		//CPSR Carry is not set due to no shifted bits:
-		parentObj.CPUCore.CPSRCarry = false;
-	}
 	//Perform CPSR updates for N and Z (But not V):
 	parentObj.CPUCore.CPSRNegative = (source < 0);
 	parentObj.CPUCore.CPSRZero = (source == 0);
@@ -123,7 +119,7 @@ THUMBInstructionSet.prototype.ASRimm = function (parentObj) {
 	}
     else {
         parentObj.CPUCore.CPSRCarry = (source < 0);
-        source >>= 31;
+        source >>= 0x1F;
     }
 	//Perform CPSR updates for N and Z (But not V):
 	parentObj.CPUCore.CPSRNegative = (source < 0);
@@ -257,16 +253,20 @@ THUMBInstructionSet.prototype.LSR = function (parentObj) {
 }
 THUMBInstructionSet.prototype.ASR = function (parentObj) {
 	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7];
-	var destination = parentObj.registers[parentObj.execute & 0x7] & 0x1F;
+	var destination = parentObj.registers[parentObj.execute & 0x7] & 0xFF;
     //Check to see if we need to update CPSR:
 	if (destination > 0) {
-        //Shift the register data right arithmetically:
-        parentObj.CPUCore.CPSRCarry = (((source >> (destination - 1)) & 0x1) == 0x1);
-        source >>= destination;
+		if (destination < 0x20) {
+			//Shift the register data right arithmetically:
+			parentObj.CPUCore.CPSRCarry = (((source >> (destination - 1)) & 0x1) == 0x1);
+			source >>= destination;
+		}
+		else {
+			//Set all bits with bit 31:
+            parentObj.CPUCore.CPSRCarry = (source < 0);
+            source >>= 0x1F;
+		}
     }
-	else {
-		parentObj.CPUCore.CPSRCarry = false;
-	}
 	//Perform CPSR updates for N and Z (But not V):
 	parentObj.CPUCore.CPSRNegative = (source < 0);
 	parentObj.CPUCore.CPSRZero = (source == 0);
@@ -299,11 +299,6 @@ THUMBInstructionSet.prototype.ROR = function (parentObj) {
         else {
             parentObj.CPUCore.CPSRCarry = (source < 0);
         }
-    }
-    else {
-        var rrx =  (parentObj.CPUCore.CPSRCarry ? 0x80000000 : 0) | (source >>> 1);
-        parentObj.CPUCore.CPSRCarry = ((source & 0x1) == 0x1);
-        source = rrx;
     }
 	//Perform CPSR updates for N and Z (But not V):
 	parentObj.CPUCore.CPSRNegative = (source < 0);
