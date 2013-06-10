@@ -126,8 +126,7 @@ ARMInstructionSet.prototype.guardMultiRegisterWrite = function (parentObj, addre
 ARMInstructionSet.prototype.guardMultiRegisterRead = function (parentObj, address) {
 	return parentObj.registers[address];
 }
-ARMInstructionSet.prototype.guardRegisterWriteSpecial = function (address, data, userMode) {
-	address &= 0xF;
+ARMInstructionSet.prototype.baseRegisterWrite = function (address, data, userMode) {
 	if (!userMode) {
 		this.guardRegisterWrite(address, data);
 	}
@@ -182,8 +181,7 @@ ARMInstructionSet.prototype.guardMultiRegisterWriteSpecial = function (parentObj
 			}
 	}
 }
-ARMInstructionSet.prototype.guardRegisterReadSpecial = function (address, userMode) {
-	address &= 0xF;
+ARMInstructionSet.prototype.baseRegisterRead = function (address, userMode) {
     if (!userMode) {
         return this.registers[address];
     }
@@ -239,16 +237,16 @@ ARMInstructionSet.prototype.guardMultiRegisterReadSpecial = function (parentObj,
 }
 ARMInstructionSet.prototype.updateBasePostDecrement = function (operand, offset, userMode) {
     var baseRegisterNumber = (operand >> 16) & 0xF;
-    var base = this.guardRegisterReadSpecial(baseRegisterNumber, userMode);
+    var base = this.baseRegisterRead(baseRegisterNumber, userMode);
     var result = (base - offset) | 0;
-	this.guardRegisterWriteSpecial(baseRegisterNumber, result, userMode);
+	this.baseRegisterWrite(baseRegisterNumber, result, userMode);
     return base;
 }
 ARMInstructionSet.prototype.updateBasePostIncrement = function (operand, offset, userMode) {
     var baseRegisterNumber = (operand >> 16) & 0xF;
-    var base = this.guardRegisterReadSpecial(baseRegisterNumber, userMode);
+    var base = this.baseRegisterRead(baseRegisterNumber, userMode);
     var result = (base + offset) | 0;
-	this.guardRegisterWriteSpecial(baseRegisterNumber, result, userMode);
+	this.baseRegisterWrite(baseRegisterNumber, result, userMode);
     return base;
 }
 ARMInstructionSet.prototype.updateNoBaseDecrement = function (operand, offset) {
