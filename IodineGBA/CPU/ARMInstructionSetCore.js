@@ -1088,7 +1088,7 @@ ARMInstructionSet.prototype.llr = function (parentObj, operand) {
 	//Logical Left Shift with Register:
     var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.registers[registerSelected];
+	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Shift the register data left:
@@ -1099,7 +1099,7 @@ ARMInstructionSet.prototype.llrs = function (parentObj, operand) {
 	//Logical Left Shift with Register and CPSR:
     var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.registers[registerSelected];
+	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Get the shift amount:
@@ -1155,7 +1155,7 @@ ARMInstructionSet.prototype.lris = function (parentObj, operand) {
 ARMInstructionSet.prototype.lrr = function (parentObj, operand) {
 	var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.registers[registerSelected];
+	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Shift the register data right logically:
@@ -1166,7 +1166,7 @@ ARMInstructionSet.prototype.lrrs = function (parentObj, operand) {
 	//Logical Right Shift with Register and CPSR:
     var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.registers[registerSelected];
+	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Get the shift amount:
@@ -1233,7 +1233,7 @@ ARMInstructionSet.prototype.arr = function (parentObj, operand) {
 	//Arithmetic Right Shift with Register:
     var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.registers[registerSelected];
+	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Shift the register data right:
@@ -1243,7 +1243,7 @@ ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
 	//Arithmetic Right Shift with Register and CPSR:
     var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.registers[registerSelected];
+	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Get the shift amount:
@@ -1310,7 +1310,7 @@ ARMInstructionSet.prototype.rrr = function (parentObj, operand) {
 	//Rotate Right with Register:
     var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.registers[registerSelected];
+	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Rotate the register right:
@@ -1326,7 +1326,7 @@ ARMInstructionSet.prototype.rrrs = function (parentObj, operand) {
 	//Rotate Right with Register and CPSR:
     var registerSelected = operand & 0xF;
 	//Get the register data to be shifted:
-	var register = parentObj.registers[registerSelected];
+	var register = parentObj.getDelayedRegisterRead(registerSelected);
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Rotate the register right:
