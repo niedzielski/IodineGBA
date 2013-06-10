@@ -22,4 +22,4 @@ Screenshots
 
 * **ARMWrester:**
 
-	![ARMWrestler](http://cdn.grantgalitz.org/t.png "Fails")
+	![ARMWrestler](http://i.imgur.com/U64E6Qh.png "Fails")
