@@ -308,7 +308,7 @@ ARMInstructionSet.prototype.B = function (parentObj) {
 ARMInstructionSet.prototype.BL = function (parentObj) {
 	//Branch with Link:
 	parentObj.registers[14] = (parentObj.registers[15] - 4) & -4;
-	parentObj.CPUCore.branch((parentObj.registers[15] + ((parentObj.execute << 8) >> 6)) | 0);
+	parentObj.B(parentObj);
 }
 ARMInstructionSet.prototype.AND = function (parentObj, operand2OP) {
 	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
@@ -539,7 +539,7 @@ ARMInstructionSet.prototype.MLA = function (parentObj, operand2OP) {
 	//Perform addition:
 	result += parentObj.registers[(parentObj.execute >> 12) & 0xF];
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 16, result);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, result | 0);
 }
 ARMInstructionSet.prototype.MLAS = function (parentObj, operand2OP) {
 	//Perform multiplication:
@@ -550,7 +550,7 @@ ARMInstructionSet.prototype.MLAS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, result | 0);
 }
 ARMInstructionSet.prototype.UMULL = function (parentObj, operand2OP) {
 	//Perform multiplication:
@@ -564,7 +564,7 @@ ARMInstructionSet.prototype.UMULLS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.performUMUL64(parentObj.registers[parentObj.execute & 0xF], parentObj.registers[(parentObj.execute >> 8) & 0xF]);
 	parentObj.CPUCore.CPSRCarry = false;
 	parentObj.CPUCore.CPSRNegative = (parentObj.CPUCore.mul64ResultHigh < 0);
-	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow);
+	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow == 0);
 	//Update destination register and guard CPSR for PC:
 	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
 	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
@@ -581,7 +581,7 @@ ARMInstructionSet.prototype.UMLALS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.performUMLA64(parentObj.registers[parentObj.execute & 0xF], parentObj.registers[(parentObj.execute >> 8) & 0xF], parentObj.registers[(parentObj.execute >> 16) & 0xF], parentObj.registers[(parentObj.execute >> 12) & 0xF]);
 	parentObj.CPUCore.CPSRCarry = false;
 	parentObj.CPUCore.CPSRNegative = (parentObj.CPUCore.mul64ResultHigh < 0);
-	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow);
+	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow == 0);
 	//Update destination register and guard CPSR for PC:
 	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
 	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
@@ -598,7 +598,7 @@ ARMInstructionSet.prototype.SMULLS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.performMUL64(parentObj.registers[parentObj.execute & 0xF], parentObj.registers[(parentObj.execute >> 8) & 0xF]);
 	parentObj.CPUCore.CPSRCarry = false;
 	parentObj.CPUCore.CPSRNegative = (parentObj.CPUCore.mul64ResultHigh < 0);
-	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow);
+	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow == 0);
 	//Update destination register and guard CPSR for PC:
 	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
 	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
@@ -615,7 +615,7 @@ ARMInstructionSet.prototype.SMLALS = function (parentObj, operand2OP) {
 	parentObj.CPUCore.performMLA64(parentObj.registers[parentObj.execute & 0xF], parentObj.registers[(parentObj.execute >> 8) & 0xF], parentObj.registers[(parentObj.execute >> 16) & 0xF], parentObj.registers[(parentObj.execute >> 12) & 0xF]);
 	parentObj.CPUCore.CPSRCarry = false;
 	parentObj.CPUCore.CPSRNegative = (parentObj.CPUCore.mul64ResultHigh < 0);
-	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow);
+	parentObj.CPUCore.CPSRZero = (parentObj.CPUCore.mul64ResultHigh == 0 && parentObj.CPUCore.mul64ResultLow == 0);
 	//Update destination register and guard CPSR for PC:
 	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 16, parentObj.CPUCore.mul64ResultHigh);
 	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.mul64ResultLow);
@@ -4436,4 +4436,6 @@ ARMInstructionSet.prototype.compileReducedInstructionMap = function () {
             this.instructionMapReduced.push(instrDecoded[range2]);
         }
     }
+	//Reduce memory usage by nulling the temporary multi array:
+	this.instructionMap = null;
 }
