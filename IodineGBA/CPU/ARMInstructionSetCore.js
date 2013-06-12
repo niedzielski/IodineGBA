@@ -1533,6 +1533,30 @@ ARMInstructionSet.prototype.prip = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
     return parentObj.updateBasePreIncrement(operand, offset, false);
 }
+ARMInstructionSet.prototype.sptim = function (parentObj, operand, userMode) {
+	var offset = operand & 0xFFF;
+	return parentObj.updateBasePostDecrement(operand, offset, userMode);
+}
+ARMInstructionSet.prototype.sptip = function (parentObj, operand, userMode) {
+	var offset = operand & 0xFFF;
+    return parentObj.updateBasePostIncrement(operand, offset, userMode);
+}
+ARMInstructionSet.prototype.sofim = function (parentObj, operand, userMode) {
+	var offset = operand & 0xFFF;
+	return parentObj.updateNoBaseDecrement(operand, offset);
+}
+ARMInstructionSet.prototype.sprim = function (parentObj, operand, userMode) {
+	var offset = operand & 0xFFF;
+	return parentObj.updateBasePreDecrement(operand, offset);
+}
+ARMInstructionSet.prototype.sofip = function (parentObj, operand, userMode) {
+	var offset = operand & 0xFFF;
+    return parentObj.updateNoBaseIncrement(operand, offset);
+}
+ARMInstructionSet.prototype.sprip = function (parentObj, operand, userMode) {
+	var offset = operand & 0xFFF;
+	return parentObj.updateBasePreIncrement(operand, offset);
+}
 ARMInstructionSet.prototype.ptrmll = function (parentObj, operand, userMode) {
 	var offset = parentObj.lli2(operand);
 	return parentObj.updateBasePostDecrement(operand, offset, userMode);
@@ -1547,10 +1571,6 @@ ARMInstructionSet.prototype.ptrmar = function (parentObj, operand, userMode) {
 }
 ARMInstructionSet.prototype.ptrmrr = function (parentObj, operand, userMode) {
 	var offset = parentObj.rri2(operand);
-	return parentObj.updateBasePostDecrement(operand, offset, userMode);
-}
-ARMInstructionSet.prototype.sptim = function (parentObj, operand, userMode) {
-	var offset = operand & 0xFFF;
 	return parentObj.updateBasePostDecrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ptrpll = function (parentObj, operand, userMode) {
@@ -1568,10 +1588,6 @@ ARMInstructionSet.prototype.ptrpar = function (parentObj, operand, userMode) {
 ARMInstructionSet.prototype.ptrprr = function (parentObj, operand, userMode) {
 	var offset = parentObj.rri2(operand);
 	return parentObj.updateBasePostIncrement(operand, offset, userMode);
-}
-ARMInstructionSet.prototype.sptip = function (parentObj, operand, userMode) {
-	var offset = operand & 0xFFF;
-    return parentObj.updateBasePostIncrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ofrmll = function (parentObj, operand, userMode) {
 	var offset = parentObj.lli2(operand);
@@ -1605,14 +1621,6 @@ ARMInstructionSet.prototype.prrmrr = function (parentObj, operand, userMode) {
 	var offset = parentObj.rri2(operand);
 	return parentObj.updateBasePreDecrement(operand, offset);
 }
-ARMInstructionSet.prototype.sofim = function (parentObj, operand, userMode) {
-	var offset = operand & 0xFFF;
-	return parentObj.updateNoBaseDecrement(operand, offset);
-}
-ARMInstructionSet.prototype.sprim = function (parentObj, operand, userMode) {
-	var offset = operand & 0xFFF;
-	return parentObj.updateBasePreDecrement(operand, offset);
-}
 ARMInstructionSet.prototype.ofrpll = function (parentObj, operand, userMode) {
 	var offset = parentObj.lli2(operand);
 	return parentObj.updateNoBaseIncrement(operand, offset);
@@ -1643,14 +1651,6 @@ ARMInstructionSet.prototype.prrpar = function (parentObj, operand, userMode) {
 }
 ARMInstructionSet.prototype.prrprr = function (parentObj, operand, userMode) {
 	var offset = parentObj.rri2(operand);
-	return parentObj.updateBasePreIncrement(operand, offset);
-}
-ARMInstructionSet.prototype.sofip = function (parentObj, operand, userMode) {
-	var offset = operand & 0xFFF;
-    return parentObj.updateNoBaseIncrement(operand, offset);
-}
-ARMInstructionSet.prototype.sprip = function (parentObj, operand, userMode) {
-	var offset = operand & 0xFFF;
 	return parentObj.updateBasePreIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.NOP = function (parentObj, operand) {
