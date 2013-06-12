@@ -271,16 +271,16 @@ ARMInstructionSet.prototype.updateNoBaseIncrement = function (operand, offset) {
 ARMInstructionSet.prototype.updateBasePreDecrement = function (operand, offset) {
     var baseRegisterNumber = (operand >> 16) & 0xF;
     var base = this.registers[baseRegisterNumber];
-    base = (base - offset) | 0;
-    this.guardRegisterWrite(baseRegisterNumber, base);
-    return base;
+    var result = (base - offset) | 0;
+    this.guardRegisterWrite(baseRegisterNumber, result);
+    return result;
 }
 ARMInstructionSet.prototype.updateBasePreIncrement = function (operand, offset) {
     var baseRegisterNumber = (operand >> 16) & 0xF;
     var base = this.registers[baseRegisterNumber];
-    base = (base + offset) | 0;
-	this.guardRegisterWrite(baseRegisterNumber, base);
-    return base;
+    var result = (base + offset) | 0;
+	this.guardRegisterWrite(baseRegisterNumber, result);
+    return result;
 }
 ARMInstructionSet.prototype.getLR = function () {
 	return (this.registers[15] - 4) | 0;

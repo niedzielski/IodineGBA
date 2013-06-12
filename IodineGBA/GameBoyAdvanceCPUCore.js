@@ -121,7 +121,7 @@ GameBoyAdvanceCPU.prototype.checkPendingIRQ = function () {
 			//Clear our Pending IRQ acknowledge:
 			this.IOCore.irq.checkForIRQFire();
 			//Branch for IRQ now:
-			this.IRQ(this.instructionHandle.getLR());
+			this.IRQ();
 		}
 	}
 }
@@ -173,7 +173,7 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
 			//Save link register:
 			this.registers[14] = 0x130;
 			//Skip BIOS ROM processing:
-			this.branch(0x3FFFFFC);
+			this.branch(this.read32(0x3FFFFFC));
 		}
 	}
 }
