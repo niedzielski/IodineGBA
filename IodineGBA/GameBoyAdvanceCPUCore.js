@@ -213,9 +213,6 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
 GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
 	//Used for leaving an exception and returning to the previous state:
 	switch (this.MODEBits) {
-		case 0x10:	//User
-		case 0x1F:	//System
-			return;
 		case 0x11:	//FIQ
 			var spsr = this.SPSRFIQ;
 			break;
@@ -230,6 +227,9 @@ GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
 			break;
 		case 0x1B:	//Undefined
 			var spsr = this.SPSRUND;
+            break;
+        default:
+            return;
 	}
 	this.CPSRNegative = spsr[0];
 	this.CPSRZero = spsr[1];
