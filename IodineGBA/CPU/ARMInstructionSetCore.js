@@ -4374,12 +4374,8 @@ ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function () {
 	var instrMap = [
 		this.STR,
 		this.LDR,
-		this.STR,
-		this.LDR,
 		this.STRB,
-		this.LDRB,
-		this.STRB,
-		this.LDRB,
+		this.LDRB
 	];
 	var dataMap = [
 		[
@@ -4412,7 +4408,7 @@ ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function () {
 		for (var dataIndex = 0; dataIndex < 0x10; ++dataIndex) {
 			if ((dataIndex & 0x1) == 0) {
 				lowMap.push([
-					instrMap[instrIndex & 0x7],
+					instrMap[((instrIndex >> 1) & 0x2) | (instrIndex & 0x1)],
 					dataMap[((instrIndex & 0x8) >> 2) | ((instrIndex & 0x2) >> 1)][(dataIndex >> 1) & 0x3]
 				]);
 			}

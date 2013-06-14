@@ -53,7 +53,7 @@ THUMBInstructionSet.prototype.getLR = function () {
 	return (this.registers[15] - 2) | 0;
 }
 THUMBInstructionSet.prototype.getIRQLR = function () {
-	return (this.registers[15]) | 0;
+	return this.registers[15];
 }
 THUMBInstructionSet.prototype.executeIteration = function () {
 	//Push the new fetch access:
