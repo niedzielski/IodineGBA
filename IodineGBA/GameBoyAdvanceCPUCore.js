@@ -173,7 +173,7 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
 			//Save link register:
 			this.registers[14] = 0x130;
 			//Skip BIOS ROM processing:
-			this.branch(this.read32(0x3FFFFFC));
+			this.branch(this.read32(0x3FFFFFC) & -0x4);
 		}
 	}
 }

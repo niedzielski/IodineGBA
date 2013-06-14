@@ -1355,7 +1355,7 @@ ARMInstructionSet.prototype.imm = function (parentObj, operand) {
 	//Get the immediate data to be shifted:
 	var immediate = operand & 0xFF;
 	//Rotate the immediate right:
-	var shifter = ((operand >> 8) & 0xF) << 1;
+	var shifter = (operand >> 7) & 0x1E;
 	if (shifter > 0) {
 		return (immediate << (0x20 - shifter)) | (immediate >>> shifter);
 	}

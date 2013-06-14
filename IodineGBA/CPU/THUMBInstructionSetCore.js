@@ -42,7 +42,7 @@ THUMBInstructionSet.prototype.guardHighRegisterWrite = function (data) {
 THUMBInstructionSet.prototype.writePC = function (data) {
 	//We performed a branch:
 	//Update the program counter to branch address:
-	this.CPUCore.branch(data & -2);
+	this.CPUCore.branch(data);
 }
 THUMBInstructionSet.prototype.offsetPC = function (data) {
 	//We performed a branch:
@@ -448,14 +448,12 @@ THUMBInstructionSet.prototype.BX_L = function (parentObj) {
 	var address = parentObj.registers[(parentObj.execute >> 3) & 0x7];
 	if ((address & 0x1) == 0) {
 		//Enter ARM mode:
-		address &= -4;
-		parentObj.CPUCore.branch(address);
+		parentObj.CPUCore.branch(address & -0x4);
 		parentObj.CPUCore.enterARM();
 	}
 	else {
 		//Stay in THUMB mode:
-		address &= -2;
-		parentObj.CPUCore.branch(address);
+		parentObj.CPUCore.branch(address & -0x2);
 	}
 }
 THUMBInstructionSet.prototype.BX_H = function (parentObj) {
@@ -463,14 +461,12 @@ THUMBInstructionSet.prototype.BX_H = function (parentObj) {
 	var address = parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)];
 	if ((address & 0x1) == 0) {
 		//Enter ARM mode:
-		address &= -4;
-		parentObj.CPUCore.branch(address);
+		parentObj.CPUCore.branch(address & -0x4);
 		parentObj.CPUCore.enterARM();
 	}
 	else {
 		//Stay in THUMB mode:
-		address &= -2;
-		parentObj.CPUCore.branch(address);
+		parentObj.CPUCore.branch(address & -0x2);
 	}
 }
 THUMBInstructionSet.prototype.LDRPC = function (parentObj) {
@@ -774,7 +770,7 @@ THUMBInstructionSet.prototype.BLoff = function (parentObj) {
 	//Copy LR to PC:
 	var oldPC = parentObj.registers[15];
 	//Flush Pipeline & Block PC Increment:
-	parentObj.CPUCore.branch(parentObj.registers[14]);
+	parentObj.CPUCore.branch(parentObj.registers[14] & -0x2);
 	//Set bit 0 of LR high:
 	parentObj.registers[14] = (oldPC - 0x2) | 0x1;
 }
