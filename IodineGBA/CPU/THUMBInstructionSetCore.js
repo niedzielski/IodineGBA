@@ -42,7 +42,7 @@ THUMBInstructionSet.prototype.guardHighRegisterWrite = function (data) {
 THUMBInstructionSet.prototype.writePC = function (data) {
 	//We performed a branch:
 	//Update the program counter to branch address:
-	this.CPUCore.branch(data);
+	this.CPUCore.branch(data & -2);
 }
 THUMBInstructionSet.prototype.offsetPC = function (data) {
 	//We performed a branch:
