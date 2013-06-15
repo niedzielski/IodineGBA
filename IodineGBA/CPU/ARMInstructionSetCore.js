@@ -622,25 +622,25 @@ ARMInstructionSet.prototype.SMLALS = function (parentObj, operand2OP) {
 }
 ARMInstructionSet.prototype.STRH = function (parentObj, operand2OP) {
 	//Perform halfword store calculations:
-	var address = operand2OP(parentObj, parentObj.execute);
+	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Write to memory location:
 	parentObj.CPUCore.write16(address, parentObj.getDelayedRegisterRead((parentObj.execute >> 12) & 0xF));
 }
 ARMInstructionSet.prototype.LDRH = function (parentObj, operand2OP) {
 	//Perform word store calculations:
-	var address = operand2OP(parentObj, parentObj.execute);
+	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read16(address));
 }
 ARMInstructionSet.prototype.LDRSH = function (parentObj, operand2OP) {
 	//Perform word store calculations:
-	var address = operand2OP(parentObj, parentObj.execute);
+	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read16(address) << 16) >> 16);
 }
 ARMInstructionSet.prototype.LDRSB = function (parentObj, operand2OP) {
 	//Perform word store calculations:
-	var address = operand2OP(parentObj, parentObj.execute);
+	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read8(address) << 24) >> 24);
 }
@@ -667,6 +667,30 @@ ARMInstructionSet.prototype.LDRB = function (parentObj, operand2OP) {
 	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read8(address));
+}
+ARMInstructionSet.prototype.STRHT = function (parentObj, operand2OP) {
+	//Perform halfword store calculations:
+	var address = operand2OP(parentObj, parentObj.execute, true);
+	//Write to memory location:
+	parentObj.CPUCore.write16(address, parentObj.getDelayedRegisterRead((parentObj.execute >> 12) & 0xF));
+}
+ARMInstructionSet.prototype.LDRHT = function (parentObj, operand2OP) {
+	//Perform word store calculations:
+	var address = operand2OP(parentObj, parentObj.execute, true);
+	//Read from memory location:
+	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read16(address));
+}
+ARMInstructionSet.prototype.LDRSHT = function (parentObj, operand2OP) {
+	//Perform word store calculations:
+	var address = operand2OP(parentObj, parentObj.execute, true);
+	//Read from memory location:
+	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read16(address) << 16) >> 16);
+}
+ARMInstructionSet.prototype.LDRSBT = function (parentObj, operand2OP) {
+	//Perform word store calculations:
+	var address = operand2OP(parentObj, parentObj.execute, true);
+	//Read from memory location:
+	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read8(address) << 24) >> 24);
 }
 ARMInstructionSet.prototype.STRT = function (parentObj, operand2OP) {
 	//Perform word store calculations:
@@ -1494,21 +1518,21 @@ ARMInstructionSet.prototype.is = function (parentObj, operand) {
 	spsr[2] = ((operand & 0x20000000) != 0);
 	spsr[3] = ((operand & 0x10000000) != 0);
 }
-ARMInstructionSet.prototype.ptrm = function (parentObj, operand) {
+ARMInstructionSet.prototype.ptrm = function (parentObj, operand, userMode) {
 	var offset = parentObj.registers[operand & 0xF];
-	return parentObj.updateBasePostDecrement(operand, offset, false);
+	return parentObj.updateBasePostDecrement(operand, offset, userMode);
 }
-ARMInstructionSet.prototype.ptim = function (parentObj, operand) {
+ARMInstructionSet.prototype.ptim = function (parentObj, operand, userMode) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	return parentObj.updateBasePostDecrement(operand, offset, false);
+	return parentObj.updateBasePostDecrement(operand, offset, userMode);
 }
-ARMInstructionSet.prototype.ptrp = function (parentObj, operand) {
+ARMInstructionSet.prototype.ptrp = function (parentObj, operand, userMode) {
 	var offset = parentObj.registers[operand & 0xF];
-	return parentObj.updateBasePostIncrement(operand, offset, false);
+	return parentObj.updateBasePostIncrement(operand, offset, userMode);
 }
-ARMInstructionSet.prototype.ptip = function (parentObj, operand) {
+ARMInstructionSet.prototype.ptip = function (parentObj, operand, userMode) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	return parentObj.updateBasePostIncrement(operand, offset, false);
+	return parentObj.updateBasePostIncrement(operand, offset, userMode);
 }
 ARMInstructionSet.prototype.ofrm = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
@@ -1516,7 +1540,7 @@ ARMInstructionSet.prototype.ofrm = function (parentObj, operand) {
 }
 ARMInstructionSet.prototype.prrm = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
-	return parentObj.updateBasePreDecrement(operand, offset, false);
+	return parentObj.updateBasePreDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofim = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
@@ -1524,7 +1548,7 @@ ARMInstructionSet.prototype.ofim = function (parentObj, operand) {
 }
 ARMInstructionSet.prototype.prim = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-	return parentObj.updateBasePreDecrement(operand, offset, false);
+	return parentObj.updateBasePreDecrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofrp = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
@@ -1532,7 +1556,7 @@ ARMInstructionSet.prototype.ofrp = function (parentObj, operand) {
 }
 ARMInstructionSet.prototype.prrp = function (parentObj, operand) {
 	var offset = parentObj.registers[operand & 0xF];
-	return parentObj.updateBasePreIncrement(operand, offset, false);
+	return parentObj.updateBasePreIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.ofip = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
@@ -1540,7 +1564,7 @@ ARMInstructionSet.prototype.ofip = function (parentObj, operand) {
 }
 ARMInstructionSet.prototype.prip = function (parentObj, operand) {
 	var offset = ((operand & 0xF00) >> 4) | (operand & 0xF);
-    return parentObj.updateBasePreIncrement(operand, offset, false);
+    return parentObj.updateBasePreIncrement(operand, offset);
 }
 ARMInstructionSet.prototype.sptim = function (parentObj, operand, userMode) {
 	var offset = operand & 0xFFF;
@@ -1848,7 +1872,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.lri
 			],
 			[
-				this.STRH,
+				this.STRHT,
 				this.ptrm
 			],
 			[
@@ -1915,7 +1939,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.lris
 			],
 			[
-				this.LDRH,
+				this.LDRHT,
 				this.ptrm
 			],
 			[
@@ -1923,7 +1947,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.aris
 			],
 			[
-				this.LDRSB,
+				this.LDRSBT,
 				this.ptrm
 			],
 			[
@@ -1931,7 +1955,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.rris
 			],
 			[
-				this.LDRSH,
+				this.LDRSHT,
 				this.ptrm
 			]
 		],
@@ -2116,7 +2140,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.lri
 			],
 			[
-				this.STRH,
+				this.STRHT,
 				this.ptim
 			],
 			[
@@ -2183,7 +2207,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.lri
 			],
 			[
-				this.LDRH,
+				this.LDRHT,
 				this.ptim
 			],
 			[
@@ -2191,7 +2215,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.ari
 			],
 			[
-				this.LDRSB,
+				this.LDRSBT,
 				this.ptim
 			],
 			[
@@ -2199,7 +2223,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.rri
 			],
 			[
-				this.LDRSH,
+				this.LDRSHT,
 				this.ptim
 			]
 		],
@@ -2384,7 +2408,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.lri
 			],
 			[
-				this.STRH,
+				this.STRHT,
 				this.ptrp
 			],
 			[
@@ -2451,7 +2475,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.lri
 			],
 			[
-				this.LDRH,
+				this.LDRHT,
 				this.ptrp
 			],
 			[
@@ -2459,7 +2483,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.ari
 			],
 			[
-				this.LDRSB,
+				this.LDRSBT,
 				this.ptrp
 			],
 			[
@@ -2467,7 +2491,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.rri
 			],
 			[
-				this.LDRSH,
+				this.LDRSHT,
 				this.ptrp
 			]
 		],
@@ -2652,7 +2676,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.lri
 			],
 			[
-				this.STRH,
+				this.STRHT,
 				this.ptip
 			],
 			[
@@ -2719,7 +2743,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.lri
 			],
 			[
-				this.LDRH,
+				this.LDRHT,
 				this.ptip
 			],
 			[
@@ -2727,7 +2751,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.ari
 			],
 			[
-				this.LDRSB,
+				this.LDRSBT,
 				this.ptip
 			],
 			[
@@ -2735,7 +2759,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 				this.rri
 			],
 			[
-				this.LDRSH,
+				this.LDRSHT,
 				this.ptip
 			]
 		],
