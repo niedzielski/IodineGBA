@@ -1092,7 +1092,7 @@ ARMInstructionSet.prototype.llr = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Shift the register data left:
-	var shifter = parentObj.registers[(operand >> 8) & 0xF] & 0xFF;
+	var shifter = parentObj.getDelayedRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	return (shifter < 0x20) ? (register << shifter) : 0;
 }
 ARMInstructionSet.prototype.llrs = function (parentObj, operand) {
@@ -1103,7 +1103,7 @@ ARMInstructionSet.prototype.llrs = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Get the shift amount:
-	var shifter = parentObj.registers[(operand >> 8) & 0xF] & 0xFF;
+	var shifter = parentObj.getDelayedRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
     if (shifter > 0) {
         if (shifter < 32) {
@@ -1164,7 +1164,7 @@ ARMInstructionSet.prototype.lrr = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Shift the register data right logically:
-	var shifter = parentObj.registers[(operand >> 8) & 0xF] & 0xFF;
+	var shifter = parentObj.getDelayedRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	return (shifter < 0x20) ? ((register >>> shifter) | 0) : 0;
 }
 ARMInstructionSet.prototype.lrrs = function (parentObj, operand) {
@@ -1175,7 +1175,7 @@ ARMInstructionSet.prototype.lrrs = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Get the shift amount:
-	var shifter = parentObj.registers[(operand >> 8) & 0xF] & 0xFF;
+	var shifter = parentObj.getDelayedRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
 	if (shifter > 0) {
         if (shifter < 32) {
@@ -1242,7 +1242,7 @@ ARMInstructionSet.prototype.arr = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Shift the register data right:
-	return register >> Math.min(parentObj.registers[(operand >> 8) & 0xF] & 0xFF, 0x1F);
+	return register >> Math.min(parentObj.getDelayedRegisterRead((operand >> 8) & 0xF) & 0xFF, 0x1F);
 }
 ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
 	//Arithmetic Right Shift with Register and CPSR:
@@ -1252,7 +1252,7 @@ ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Get the shift amount:
-	var shifter = parentObj.registers[(operand >> 8) & 0xF] & 0xFF;
+	var shifter = parentObj.getDelayedRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
 	if (shifter > 0) {
         if (shifter < 32) {
@@ -1319,7 +1319,7 @@ ARMInstructionSet.prototype.rrr = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Rotate the register right:
-	var shifter = parentObj.registers[(operand >> 8) & 0xF] & 0x1F;
+	var shifter = parentObj.getDelayedRegisterRead((operand >> 8) & 0xF) & 0x1F;
 	if (shifter > 0) {
         //ROR
         return (register << (0x20 - shifter)) | (register >>> shifter);
@@ -1335,7 +1335,7 @@ ARMInstructionSet.prototype.rrrs = function (parentObj, operand) {
 	//Clock a cycle for the shift delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(parentObj.fetch, 1);
 	//Rotate the register right:
-	var shifter = parentObj.registers[(operand >> 8) & 0xF] & 0xFF;
+	var shifter = parentObj.getDelayedRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	if (shifter > 0) {
 		shifter &= 0x1F;
         if (shifter > 0) {
@@ -1357,11 +1357,20 @@ ARMInstructionSet.prototype.imm = function (parentObj, operand) {
 	//Rotate the immediate right:
 	var shifter = (operand >> 7) & 0x1E;
 	if (shifter > 0) {
-		return (immediate << (0x20 - shifter)) | (immediate >>> shifter);
+		immediate = (immediate << (0x20 - shifter)) | (immediate >>> shifter);
 	}
-	else {
-		return immediate;
+    return immediate;
+}
+ARMInstructionSet.prototype.imms = function (parentObj, operand) {
+	//Get the immediate data to be shifted:
+	var immediate = operand & 0xFF;
+	//Rotate the immediate right:
+	var shifter = (operand >> 7) & 0x1E;
+	if (shifter > 0) {
+		immediate = (immediate << (0x20 - shifter)) | (immediate >>> shifter);
+        parentObj.CPSRCarry = (immediate < 0);
 	}
+    return immediate;
 }
 ARMInstructionSet.prototype.rc = function (parentObj) {
 	return (
@@ -3805,11 +3814,11 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 		//20
 		this.generateLowMap(this.AND, this.imm),
 		//21
-		this.generateLowMap(this.ANDS, this.imm),
+		this.generateLowMap(this.ANDS, this.imms),
 		//22
 		this.generateLowMap(this.EOR, this.imm),
 		//23
-		this.generateLowMap(this.EORS, this.imm),
+		this.generateLowMap(this.EORS, this.imms),
 		//24
 		this.generateLowMap(this.SUB, this.imm),
 		//25
@@ -3837,11 +3846,11 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 		//30
 		this.generateLowMap(this.UNDEFINED, this.NOP),
 		//31
-		this.generateLowMap(this.TSTS, this.imm),
+		this.generateLowMap(this.TSTS, this.imms),
 		//32
 		this.generateLowMap(this.MSR, this.ic),
 		//33
-		this.generateLowMap(this.TEQS, this.imm),
+		this.generateLowMap(this.TEQS, this.imms),
 		//34
 		this.generateLowMap(this.UNDEFINED, this.NOP),
 		//35
@@ -3853,19 +3862,19 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 		//38
 		this.generateLowMap(this.ORR, this.imm),
 		//39
-		this.generateLowMap(this.ORRS, this.imm),
+		this.generateLowMap(this.ORRS, this.imms),
 		//3A
 		this.generateLowMap(this.MOV, this.imm),
 		//3B
-		this.generateLowMap(this.MOVS, this.imm),
+		this.generateLowMap(this.MOVS, this.imms),
 		//3C
 		this.generateLowMap(this.BIC, this.imm),
 		//3D
-		this.generateLowMap(this.BICS, this.imm),
+		this.generateLowMap(this.BICS, this.imms),
 		//3E
 		this.generateLowMap(this.MVN, this.imm),
 		//3F
-		this.generateLowMap(this.MVNS, this.imm),
+		this.generateLowMap(this.MVNS, this.imms),
 		//40
 		this.generateLowMap(this.STR, this.sptim),
 		//41
