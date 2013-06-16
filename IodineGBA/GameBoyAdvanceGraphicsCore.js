@@ -141,48 +141,44 @@ GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {
 	this.clockLCDState();
 }
 GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
-	if (this.LCDTicks < 1006) {
-		this.inHBlank = false;                                          //Un-mark HBlank.
-	}
-	else if (this.LCDTicks < 1232) {
-		this.updateHBlank();
-	}
-	else {
-		/*We've now overflowed the LCD scan line state machine counter,
-		which tells us we need to be on a new scan-line and refresh over.*/
-		//Make sure we ran the h-blank check this scan line:
-		this.updateHBlank();
-        this.inHBlank = false;                                          //Un-mark HBlank.
-		//De-clock for starting on new scan-line:
-		this.LCDTicks -= 1232;                                          //We start out at the beginning of the next line.
-        //Increment scanline counter:
-		++this.currentScanLine;                                         //Increment to the next scan line.
-        //Handle switching in/out of vblank:
-        if (this.currentScanLine < 160) {
-            //Display drawing still:
-            this.incrementScanLineQueue();                              //Tell the gfx JIT to queue another line to draw.
-        }
-        else {
-            //Handle special case scan lines of vblank:
-            switch (this.currentScanLine) {
-                case 160:
-                    this.incrementScanLineQueue();                      //Tell the gfx JIT to queue another line to draw.
-                    this.updateVBlankStart();                           //Update state for start of vblank.
-                    break;
-                case 162:
-                    this.IOCore.dma.gfxDisplaySyncKillRequest();		//Display Sync. DMA reset on start of line 162.
-                    break;
-                case 227:
-                    this.inVBlank = false;								//Un-mark VBlank on start of last vblank line.
-                    break;
-                case 228:
-                    this.currentScanLine = 0;							//Reset scan-line to zero (First line of draw).
+	if (this.LCDTicks >= 1006) {
+		//HBlank Event Occurred:
+        this.updateHBlank();
+        if (this.LCDTicks >= 1232) {
+            /*We've now overflowed the LCD scan line state machine counter,
+             which tells us we need to be on a new scan-line and refresh over.*/
+            this.inHBlank = false;                                          //Un-mark HBlank.
+            //De-clock for starting on new scan-line:
+            this.LCDTicks -= 1232;                                          //We start out at the beginning of the next line.
+            //Increment scanline counter:
+            ++this.currentScanLine;                                         //Increment to the next scan line.
+            //Handle switching in/out of vblank:
+            if (this.currentScanLine < 160) {
+                //Display drawing still:
+                this.incrementScanLineQueue();                              //Tell the gfx JIT to queue another line to draw.
             }
+            else {
+                //Handle special case scan lines of vblank:
+                switch (this.currentScanLine) {
+                    case 160:
+                        this.incrementScanLineQueue();                      //Tell the gfx JIT to queue another line to draw.
+                        this.updateVBlankStart();                           //Update state for start of vblank.
+                        break;
+                    case 162:
+                        this.IOCore.dma.gfxDisplaySyncKillRequest();		//Display Sync. DMA reset on start of line 162.
+                        break;
+                    case 227:
+                        this.inVBlank = false;								//Un-mark VBlank on start of last vblank line.
+                        break;
+                    case 228:
+                        this.currentScanLine = 0;							//Reset scan-line to zero (First line of draw).
+                }
+            }
+            this.checkDisplaySync();                                        //Check for display sync.
+            this.checkVCounter();                                           //We're on a new scan line, so check the VCounter for match.
+            //Recursive clocking of the LCD state:
+            this.clockLCDState();
         }
-        this.checkDisplaySync();                                        //Check for display sync.
-		this.checkVCounter();                                           //We're on a new scan line, so check the VCounter for match.
-		//Recursive clocking of the LCD state:
-		this.clockLCDState();
 	}
 }
 GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
