@@ -120,10 +120,20 @@ function registerGUIEvents() {
     ,500);
 }
 function attachBIOS(BIOS) {
-	Iodine.attachBIOS(new Uint8Array(BIOS));
+	try {
+        Iodine.attachBIOS(new Uint8Array(BIOS));
+    }
+    catch (error) {
+        Iodine.attachBIOS(BIOS);
+    }
 }
 function attachROM(ROM) {
-	Iodine.attachROM(new Uint8Array(ROM));
+	try {
+        Iodine.attachROM(new Uint8Array(ROM));
+    }
+    catch (error) {
+        Iodine.attachROM(ROM);
+    }
 }
 function lowerVolume() {
 	emuVolume = Math.max(emuVolume - 0.04, 0);
