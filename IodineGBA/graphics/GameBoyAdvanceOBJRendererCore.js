@@ -136,12 +136,12 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNum
 	var address = this.tileNumberToAddress(sprite, tileNumber, xSize, y);
 	if (sprite.monolithicPalette) {
 		//256 Colors / 1 Palette:
-		address += ((y & 7) << 3) + x;
+		address += this.tileRelativeAddressOffset(x,y);
 		return this.gfx.paletteOBJ256[this.gfx.VRAM[address]];
 	}
 	else {
 		//16 Colors / 16 palettes:
-		address += (((y & 7) << 3) + x) >> 1;
+		address += this.tileRelativeAddressOffset(x,y) >> 1;
 		if ((x & 0x1) == 0) {
 			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address] & 0xF];
 		}
@@ -149,6 +149,9 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNum
 			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address] >> 4];
 		}
 	}
+}
+GameBoyAdvanceOBJRenderer.prototype.tileRelativeAddressOffset = function (x, y) {
+    return (((y & 7) + (x & -8)) << 3) + (x & 0x7);
 }
 GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize, ySize, yOffset) {
 	if (sprite.verticalFlip) {
