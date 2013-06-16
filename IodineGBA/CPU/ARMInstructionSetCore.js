@@ -627,19 +627,19 @@ ARMInstructionSet.prototype.STRH = function (parentObj, operand2OP) {
 	parentObj.CPUCore.write16(address, parentObj.getDelayedRegisterRead((parentObj.execute >> 12) & 0xF));
 }
 ARMInstructionSet.prototype.LDRH = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform halfword load calculations:
 	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read16(address));
 }
 ARMInstructionSet.prototype.LDRSH = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform signed halfword load calculations:
 	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read16(address) << 16) >> 16);
 }
 ARMInstructionSet.prototype.LDRSB = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform signed byte load calculations:
 	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read8(address) << 24) >> 24);
@@ -651,7 +651,7 @@ ARMInstructionSet.prototype.STR = function (parentObj, operand2OP) {
 	parentObj.CPUCore.write32(address, parentObj.getDelayedRegisterRead((parentObj.execute >> 12) & 0xF));
 }
 ARMInstructionSet.prototype.LDR = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform word load calculations:
 	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read32(address));
@@ -663,55 +663,55 @@ ARMInstructionSet.prototype.STRB = function (parentObj, operand2OP) {
 	parentObj.CPUCore.write8(address, parentObj.getDelayedRegisterRead((parentObj.execute >> 12) & 0xF));
 }
 ARMInstructionSet.prototype.LDRB = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform byte store calculations:
 	var address = operand2OP(parentObj, parentObj.execute, false);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read8(address));
 }
 ARMInstructionSet.prototype.STRHT = function (parentObj, operand2OP) {
-	//Perform halfword store calculations:
+	//Perform halfword store calculations (forced user-mode):
 	var address = operand2OP(parentObj, parentObj.execute, true);
 	//Write to memory location:
 	parentObj.CPUCore.write16(address, parentObj.getDelayedRegisterRead((parentObj.execute >> 12) & 0xF));
 }
 ARMInstructionSet.prototype.LDRHT = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform halfword load calculations (forced user-mode):
 	var address = operand2OP(parentObj, parentObj.execute, true);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read16(address));
 }
 ARMInstructionSet.prototype.LDRSHT = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform signed halfword load calculations (forced user-mode):
 	var address = operand2OP(parentObj, parentObj.execute, true);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read16(address) << 16) >> 16);
 }
 ARMInstructionSet.prototype.LDRSBT = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform signed byte load calculations (forced user-mode):
 	var address = operand2OP(parentObj, parentObj.execute, true);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read8(address) << 24) >> 24);
 }
 ARMInstructionSet.prototype.STRT = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform word store calculations (forced user-mode):
 	var address = operand2OP(parentObj, parentObj.execute, true);
 	//Write to memory location:
 	parentObj.CPUCore.write32(address, parentObj.getDelayedRegisterRead((parentObj.execute >> 12) & 0xF));
 }
 ARMInstructionSet.prototype.LDRT = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform word load calculations (forced user-mode):
 	var address = operand2OP(parentObj, parentObj.execute, true);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read32(address));
 }
 ARMInstructionSet.prototype.STRBT = function (parentObj, operand2OP) {
-	//Perform byte store calculations:
+	//Perform byte store calculations (forced user-mode):
 	var address = operand2OP(parentObj, parentObj.execute, true);
 	//Write to memory location:
 	parentObj.CPUCore.write8(address, parentObj.getDelayedRegisterRead((parentObj.execute >> 12) & 0xF));
 }
 ARMInstructionSet.prototype.LDRBT = function (parentObj, operand2OP) {
-	//Perform word store calculations:
+	//Perform byte load calculations (forced user-mode):
 	var address = operand2OP(parentObj, parentObj.execute, true);
 	//Read from memory location:
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read8(address));
