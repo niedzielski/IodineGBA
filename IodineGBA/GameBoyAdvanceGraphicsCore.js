@@ -142,7 +142,7 @@ GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {
 }
 GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
 	if (this.LCDTicks < 1006) {
-		this.inHBlank = false;										//Un-mark HBlank.
+		this.inHBlank = false;                                          //Un-mark HBlank.
 	}
 	else if (this.LCDTicks < 1232) {
 		this.updateHBlank();
@@ -152,6 +152,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
 		which tells us we need to be on a new scan-line and refresh over.*/
 		//Make sure we ran the h-blank check this scan line:
 		this.updateHBlank();
+        this.inHBlank = false;                                          //Un-mark HBlank.
 		//De-clock for starting on new scan-line:
 		this.LCDTicks -= 1232;                                          //We start out at the beginning of the next line.
         //Increment scanline counter:

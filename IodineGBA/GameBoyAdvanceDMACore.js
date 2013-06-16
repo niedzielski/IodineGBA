@@ -340,7 +340,7 @@ GameBoyAdvanceDMA.prototype.nextEventTime = function () {
 	var clocks = -1;
 	var workbench = -1;
 	for (var dmaChannel = 0; dmaChannel < 4; ++dmaChannel) {
-		switch (this.enabled[dmaChannel]) {
+		switch (this.enabled[dmaChannel] & 0x3F) {
 			//V_BLANK
 			case 0x2:
 				workbench = this.IOCore.gfx.nextVBlankEventTime();
@@ -370,7 +370,7 @@ GameBoyAdvanceDMA.prototype.nextIRQEventTime = function () {
 	var workbench = -1;
 	for (var dmaChannel = 0; dmaChannel < 4; ++dmaChannel) {
 		if (this.controlShadow[dmaChannel][0]) {
-			switch (this.enabled[dmaChannel]) {
+			switch (this.enabled[dmaChannel] & 0x3F) {
 				//V_BLANK
 				case 0x2:
 					workbench = this.IOCore.gfx.nextVBlankEventTime();
