@@ -73,7 +73,7 @@ GameBoyAdvanceWait.prototype.writeHALTCNT = function (data) {
 	//HALT/STOP mode entrance:
 	this.IOCore.systemStatus |= (data < 0x80) ? 2 : 4;
 }
-GameBoyAdvanceIO.prototype.writeConfigureWRAM = function (address, data) {
+GameBoyAdvanceWait.prototype.writeConfigureWRAM = function (address, data) {
 	switch (address & 0x3) {
 		case 3:
 			this.WRAMConfiguration[1] = data & 0x2F;
