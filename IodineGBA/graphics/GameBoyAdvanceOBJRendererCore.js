@@ -74,9 +74,6 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
 		var ySize = this.lookupYSize[(sprite.shape << 2) | sprite.size] << ((sprite.doubleSizeOrDisabled) ? 1 : 0);
 		//Obtain some offsets:
         var ycoord = sprite.ycoord;
-        if (sprite.matrix2D && sprite.doubleSizeOrDisabled) {
-            ycoord -= ySize >> 2;
-        }
 		var yOffset = line - ycoord;
         //Overflow Correction:
         if (ycoord + ySize > 0x1FF) {
@@ -224,9 +221,6 @@ GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
 GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xSize) {
 	//Simulate x-coord wrap around logic:
 	var xcoord = sprite.xcoord;
-    if (sprite.matrix2D && sprite.doubleSizeOrDisabled) {
-        xcoord -= (xSize >> 2);
-    }
 	if (xcoord > (0x200 - xSize)) {
 		xcoord -= 0x200;
 	}

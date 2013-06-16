@@ -93,7 +93,7 @@ ARMInstructionSet.prototype.guardRegisterWrite = function (address, data) {
 	address &= 0xF;
 	if (address == 15) {
 		//We performed a branch:
-		this.CPUCore.branch(data);
+		this.CPUCore.branch(data & -2);//Emulation bug, should be -4, but we break stuff.
 	}
 	else {
 		this.registers[address] = data;
@@ -103,7 +103,7 @@ ARMInstructionSet.prototype.guardRegisterWriteCPSR = function (address, data) {
 	address &= 0xF;
 	if (address == 15) {
 		//We performed a branch:
-		this.CPUCore.branch(data);
+		this.CPUCore.branch(data & -2);//Emulation bug, should be -4, but we break stuff.
 		//Restore SPSR to CPSR:
 		this.CPUCore.SPSRtoCPSR();
 	}
