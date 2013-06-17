@@ -333,33 +333,33 @@ GameBoyAdvanceGraphics.prototype.compositeLayersNormal = function (OBJBuffer, BG
 		BG3Buffer = (this.WINBG3Outside) ? BG3Buffer : null;
 	}
 	var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	var stackDepth = layerStack.length;
+	var stackDepth = layerStack.length | 0;
 	var stackIndex = 0;
 	//Loop through each pixel on the line:
-	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; ++pixelPosition) {
+	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; pixelPosition = (pixelPosition + 1) | 0) {
 		//Start with backdrop color:
-		lowerPixel = currentPixel = this.backdrop;
+		lowerPixel = currentPixel = this.backdrop | 0;
 		//Loop through all layers each pixel to resolve priority:
-		for (stackIndex = 0; stackIndex < stackDepth; ++stackIndex) {
-			workingPixel = layerStack[stackIndex][pixelPosition];
+		for (stackIndex = 0; stackIndex < stackDepth; stackIndex = (stackIndex + 1) | 0) {
+			workingPixel = layerStack[stackIndex | 0][pixelPosition | 0] | 0;
 			if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
 				/*
 					If higher priority than last pixel and not transparent.
 					Also clear any plane layer bits other than backplane for
 					transparency.
 				*/
-				lowerPixel = currentPixel;
-				currentPixel = workingPixel;
+				lowerPixel = currentPixel | 0;
+				currentPixel = workingPixel | 0;
 			}
 		}
 		if ((currentPixel & 0x400000) == 0) {
 			//Normal Pixel:
-			this.lineBuffer[pixelPosition] = currentPixel;
+			this.lineBuffer[pixelPosition | 0] = currentPixel | 0;
 		}
 		else {
 			//OAM Pixel Processing:
 			//Pass the highest two pixels to be arbitrated in the color effects processing:
-			this.lineBuffer[pixelPosition] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel, currentPixel);
+			this.lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
 		}
 	}
 }
@@ -374,15 +374,15 @@ GameBoyAdvanceGraphics.prototype.compositeLayersWithEffects = function (OBJBuffe
 		BG3Buffer = (this.WINBG3Outside) ? BG3Buffer : null;
 	}
 	var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	var stackDepth = layerStack.length;
+	var stackDepth = layerStack.length | 0;
 	var stackIndex = 0;
 	//Loop through each pixel on the line:
-	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; ++pixelPosition) {
+	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; pixelPosition = (pixelPosition + 1) | 0) {
 		//Start with backdrop color:
-		lowerPixel = currentPixel = this.backdrop;
+		lowerPixel = currentPixel = this.backdrop | 0;
 		//Loop through all layers each pixel to resolve priority:
-		for (stackIndex = 0; stackIndex < stackDepth; ++stackIndex) {
-			workingPixel = layerStack[stackIndex][pixelPosition];
+		for (stackIndex = 0; stackIndex < stackDepth; stackIndex = (stackIndex + 1) | 0) {
+			workingPixel = layerStack[stackIndex | 0][pixelPosition | 0] | 0;
 			if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
 				/*
 					If higher priority than last pixel and not transparent.
@@ -391,19 +391,19 @@ GameBoyAdvanceGraphics.prototype.compositeLayersWithEffects = function (OBJBuffe
 					
 					Keep a copy of the previous pixel (backdrop or non-transparent) for the color effects:
 				*/
-				lowerPixel = currentPixel;
-				currentPixel = workingPixel;
+				lowerPixel = currentPixel | 0;
+				currentPixel = workingPixel | 0;
 			}
 		}
 		if ((currentPixel & 0x400000) == 0) {
 			//Normal Pixel:
 			//Pass the highest two pixels to be arbitrated in the color effects processing:
-			this.lineBuffer[pixelPosition] = this.colorEffectsRenderer.process(lowerPixel, currentPixel);
+			this.lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
 		}
 		else {
 			//OAM Pixel Processing:
 			//Pass the highest two pixels to be arbitrated in the color effects processing:
-			this.lineBuffer[pixelPosition] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel, currentPixel);
+			this.lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
 		}
 	}
 }
@@ -428,21 +428,26 @@ GameBoyAdvanceGraphics.prototype.cleanLayerStack = function (OBJBuffer, BG0Buffe
 	return layerStack;
 }
 GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
-	var offsetStart = line * 240;
+    line = line | 0;
+    var offsetStart = (line * 240) | 0;
 	var position = 0;
 	if (!this.greenSwap) {
-		for (; position < 240; ++offsetStart) {
-			this.frameBuffer[offsetStart] = this.lineBuffer[position++];
+		for (; position < 240; offsetStart = (offsetStart + 1) | 0, position = (position + 1) | 0) {
+			this.frameBuffer[offsetStart | 0] = this.lineBuffer[position | 0] | 0;
 		}
 	}
 	else {
 		var pixel0 = 0;
 		var pixel1 = 0;
 		while (position < 240) {
-			pixel0 = this.lineBuffer[position++];
-			pixel1 = this.lineBuffer[position++];
-			this.frameBuffer[offsetStart++] = (pixel0 & 0x7C1F) | (pixel1 & 0x3E0);
-			this.frameBuffer[offsetStart++] = (pixel1 & 0x7C1F) | (pixel0 & 0x3E0);
+			pixel0 = this.lineBuffer[position | 0] | 0;
+            position = (position + 1) | 0;
+			pixel1 = this.lineBuffer[position | 0] | 0;
+            position = (position + 1) | 0;
+			this.frameBuffer[offsetStart | 0] = (pixel0 & 0x7C1F) | (pixel1 & 0x3E0);
+            offsetStart = (offsetStart + 1) | 0;
+			this.frameBuffer[offsetStart | 0] = (pixel1 & 0x7C1F) | (pixel0 & 0x3E0);
+            offsetStart = (offsetStart + 1) | 0;
 		}
 	}
 }

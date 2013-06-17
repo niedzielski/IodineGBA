@@ -34,29 +34,34 @@ GameBoyAdvanceBGMatrixRenderer.prototype.tileMapSize = [
 	0x400
 ];
 GameBoyAdvanceBGMatrixRenderer.prototype.renderScanLine = function (line) {
-	return this.bgAffineRenderer.renderScanLine(line, this);
+	return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.fetchTile = function (tileNumber) {
 	//Find the tile code to locate the tile block:
 	return this.VRAM[(tileNumber + this.BGScreenBaseBlock) & 0xFFFF];
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
-	//Output pixel:
-	if (x > this.mapSizeComparer || y > this.mapSizeComparer) {
+    //Tell JS Engines it's int32:
+    x = x | 0;
+    y = y | 0;
+    var mapSizeComparer = this.mapSizeComparer | 0;
+    //Output pixel:
+	if (x > mapSizeComparer || y > mapSizeComparer) {
 		//Overflow Handling:
 		if (this.BGDisplayOverflow) {
-			x &= this.mapSizeComparer;
-			y &= this.mapSizeComparer;
+			x &= mapSizeComparer | 0;
+			y &= mapSizeComparer | 0;
 		}
 		else {
-			return this.transparency;
+			return this.transparency | 0;
 		}
 	}
-	var address = this.fetchTile((x >> 3) + ((y >> 3) * this.mapSize)) << 6;
-	address += this.baseBlockOffset;
+    var mapSize = this.mapSize | 0;
+	var address = this.fetchTile((x >> 3) + ((y >> 3) * mapSize)) << 6;
+	address += this.baseBlockOffset | 0;
 	address += (y & 0x7) << 3;
 	address += x & 0x7;
-	return this.palette[this.VRAM[address]];
+	return this.palette[this.VRAM[address | 0] | 0] | 0;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.screenSizePreprocess = function () {
 	this.mapSize = this.tileMapSize[this.gfx.BGScreenSize[this.BGLayer]];

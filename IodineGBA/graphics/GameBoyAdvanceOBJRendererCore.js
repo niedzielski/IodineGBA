@@ -130,32 +130,44 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNumber, x, y, xSize) {
-	var address = this.tileNumberToAddress(sprite, tileNumber, xSize, y);
+	//Tell JS Engines it's int32:
+    tileNumber = tileNumber | 0;
+    x = x | 0;
+    y = y | 0;
+    xSize = xSize | 0;
+    var address = this.tileNumberToAddress(sprite, tileNumber, xSize, y) | 0;
 	if (sprite.monolithicPalette) {
 		//256 Colors / 1 Palette:
-		address += this.tileRelativeAddressOffset(x,y);
-		return this.gfx.paletteOBJ256[this.gfx.VRAM[address]];
+		address += this.tileRelativeAddressOffset(x,y) | 0;
+		return this.gfx.paletteOBJ256[this.gfx.VRAM[address | 0] | 0] | 0;
 	}
 	else {
 		//16 Colors / 16 palettes:
 		address += this.tileRelativeAddressOffset(x,y) >> 1;
 		if ((x & 0x1) == 0) {
-			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address] & 0xF];
+			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address | 0] & 0xF] | 0;
 		}
 		else {
-			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address] >> 4];
+			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address | 0] >> 4] | 0;
 		}
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.tileRelativeAddressOffset = function (x, y) {
-    return (((y & 7) + (x & -8)) << 3) + (x & 0x7);
+    //Tell JS Engines it's int32:
+    var x = x | 0;
+    var y = y | 0;
+    return ((((y & 7) + (x & -8)) << 3) + (x & 0x7)) | 0;
 }
 GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize, ySize, yOffset) {
-	if (sprite.verticalFlip) {
+	//Tell JS Engines it's int32:
+    xSize = xSize | 0;
+    ySize = ySize | 0;
+    yOffset = yOffset | 0;
+    if (sprite.verticalFlip) {
 		//Flip y-coordinate offset:
-		yOffset = ySize - yOffset;
+		yOffset = (ySize - yOffset) | 0;
 	}
-	var address = this.tileNumberToAddress(sprite, sprite.tileNumber, xSize, yOffset);
+	var address = this.tileNumberToAddress(sprite, sprite.tileNumber, xSize, yOffset) | 0;
 	var vram = this.gfx.VRAM;
     var data = 0;
 	var objBufferPosition = 0;
@@ -164,14 +176,14 @@ GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize
 		address += (yOffset & 7) << 3;
 		var palette = this.gfx.paletteOBJ256;
 		while (objBufferPosition < xSize) {
-			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++]];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++]];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++]];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++]];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++]];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++]];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++]];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address]];
+			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
+			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
+			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
+			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
+			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
+			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
+			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
+			this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address] | 0] | 0;
 			address += 0x39;
 		}
 	}
@@ -181,23 +193,27 @@ GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize
 		var palette = this.gfx.paletteOBJ16[sprite.paletteNumber];
 		while (objBufferPosition < xSize) {
 			data = vram[address++];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF];
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
+			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF] | 0;
+            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4] | 0;
 			data = vram[address++];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF];
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
+			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF] | 0;
+            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4] | 0;
 			data = vram[address++];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF];
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
+			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF] | 0;
+            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4] | 0;
 			data = vram[address];
-			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF];
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4];
+			this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF] | 0;
+            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4] | 0;
 			address += 0x1D;
 		}
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tileNumber, xSize, yOffset) {
-	if (!this.gfx.VRAMOneDimensional) {
+	//Tell JS Engines it's int32:
+    tileNumber = tileNumber | 0;
+    xSize = xSize | 0;
+    yOffset = yOffset | 0;
+    if (!this.gfx.VRAMOneDimensional) {
 		//2D Mapping (32 8x8 tiles by 32 8x8 tiles):
 		if (sprite.monolithicPalette) {
 			//Hardware ignores the LSB in this case:
@@ -210,7 +226,7 @@ GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tile
 		tileNumber += (yOffset >> 3) * (xSize >> 3);
 	}
 	//Starting address of currently drawing sprite line:
-	return (tileNumber << 5) + 0x10000;
+	return ((tileNumber << 5) + 0x10000) | 0;
 }
 GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
 	//Mark sprite pixels as semi-transparent:
@@ -219,8 +235,10 @@ GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xSize) {
-	//Simulate x-coord wrap around logic:
-	var xcoord = sprite.xcoord;
+	//Tell JS Engines it's int32:
+    xSize = xSize | 0;
+    //Simulate x-coord wrap around logic:
+	var xcoord = sprite.xcoord | 0;
 	if (xcoord > (0x200 - xSize)) {
 		xcoord -= 0x200;
 	}
@@ -229,7 +247,7 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
 		this.gfx.mosaicRenderer.renderOBJMosaicHorizontal(this.scratchOBJBuffer, xcoord, xSize);
 	}
 	//Resolve end point:
-	var xcoordEnd = Math.min(xcoord + xSize, 240);
+	var xcoordEnd = Math.min(xcoord + xSize, 240) | 0;
 	//Flag for compositor to ID the pixels as OBJ:
 	var bitFlags = (sprite.priority << 23) | 0x100000;
 	if (!sprite.horizontalFlip || sprite.matrix2D) {

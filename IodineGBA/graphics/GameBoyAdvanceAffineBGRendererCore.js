@@ -36,26 +36,24 @@ GameBoyAdvanceAffineBGRenderer.prototype.initialize = function () {
 	this.actualBGReferenceY = 0;
     this.pb = 0;
 	this.pd = 0;
-	this.shadowPB = 0;
-	this.shadowPD = 0;
 	this.priorityPreprocess();
 }
 GameBoyAdvanceAffineBGRenderer.prototype.renderScanLine = function (line, BGObject) {
-	if (this.gfx.BGMosaic[this.BGLayer]) {
+    //Tell JS Engines it's int32:
+    line = line | 0;
+    var x = +this.pb;
+    var y = +this.pd;
+    if (this.gfx.BGMosaic[this.BGLayer]) {
 		//Correct line number for mosaic:
-		this.shadowPB = this.pb;
-		this.shadowPD = this.pd;
-		this.pb -= this.actualBGdmx * this.gfx.mosaicRenderer.getMosaicYOffset(line);
-		this.pd -= this.actualBGdmy * this.gfx.mosaicRenderer.getMosaicYOffset(line);
+		x -= this.actualBGdmx * this.gfx.mosaicRenderer.getMosaicYOffset(line);
+		y -= this.actualBGdmy * this.gfx.mosaicRenderer.getMosaicYOffset(line);
 	}
-	for (var position = 0, x = this.pb, y = this.pd; position < 240; ++position, x += this.actualBGdx, y += this.actualBGdy) {
+	for (var position = 0; position < 240; position = (position + 1) | 0, x += this.actualBGdx, y += this.actualBGdy) {
 		//Fetch pixel:
 		this.scratchBuffer[position] = this.priorityFlag | BGObject.fetchPixel(x | 0, y | 0);
 	}
 	if (this.gfx.BGMosaic[this.BGLayer]) {
 		//Pixelize the line horizontally:
-		this.pb = this.shadowPB;
-		this.pd = this.shadowPD;
 		this.gfx.mosaicRenderer.renderMosaicHorizontal(this.scratchBuffer);
 	}
 	this.incrementReferenceCounters();

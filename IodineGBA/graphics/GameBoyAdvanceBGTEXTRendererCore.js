@@ -34,18 +34,24 @@ GameBoyAdvanceBGTEXTRenderer.prototype.initialize = function (line) {
     this.characterBaseBlockPreprocess();
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
-	if (this.gfx.BGMosaic[this.BGLayer]) {
+    //Tell JS Engines it's int32:
+    line = line | 0;
+    if (this.gfx.BGMosaic[this.BGLayer]) {
 		//Correct line number for mosaic:
-		line -= this.gfx.mosaicRenderer.getMosaicYOffset(line);
+		line -= this.gfx.mosaicRenderer.getMosaicYOffset(line | 0);
+        line = (line | 0) | 0;
 	}
 	var yTileOffset = (line + this.BGYCoord) & 0x7;
 	var pixelPipelinePosition = this.BGXCoord & 0x7;
     var yTileStart = (line + this.BGYCoord) >> 3;
     var xTileStart = this.BGXCoord >> 3;
 	for (var position = 0; position < 240;) {
-		var chrData = this.fetchTile(yTileStart, xTileStart++);
+		var chrData = this.fetchTile(yTileStart | 0, xTileStart | 0) | 0;
+        xTileStart = (xTileStart + 1) | 0;
 		while (pixelPipelinePosition < 0x8) {
-			this.scratchBuffer[position++] = this.priorityFlag | this.fetchVRAM(chrData, pixelPipelinePosition++, yTileOffset);
+			this.scratchBuffer[position | 0] = this.priorityFlag | this.fetchVRAM(chrData | 0, pixelPipelinePosition | 0, yTileOffset | 0);
+            pixelPipelinePosition = (pixelPipelinePosition + 1) | 0;
+            position = (position + 1) | 0;
 		}
 		pixelPipelinePosition &= 0x7;
 	}
@@ -56,18 +62,24 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
 	return this.scratchBuffer;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileNormal = function (yTileStart, xTileStart) {
-	//Find the tile code to locate the tile block:
-	var address = this.computeScreenMapAddress8(this.computeTileNumber(yTileStart, xTileStart));
-	return (this.VRAM[address | 1] << 8) | this.VRAM[address];
+	//Tell JS Engines it's int32:
+    yTileStart = yTileStart | 0;
+    xTileStart = xTileStart | 0;
+    //Find the tile code to locate the tile block:
+	var address = this.computeScreenMapAddress8(this.computeTileNumber(yTileStart | 0, xTileStart | 0) | 0) | 0;
+	return (this.VRAM[address | 1] << 8) | this.VRAM[address | 0];
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileOptimized = function (yTileStart, xTileStart) {
-	//Find the tile code to locate the tile block:
-	var address = this.computeScreenMapAddress16(this.computeTileNumber(yTileStart, xTileStart));
-	return this.VRAM16[address];
+	//Tell JS Engines it's int32:
+    yTileStart = yTileStart | 0;
+    xTileStart = xTileStart | 0;
+    //Find the tile code to locate the tile block:
+	var address = this.computeScreenMapAddress16(this.computeTileNumber(yTileStart | 0, xTileStart | 0) | 0) | 0;
+	return this.VRAM16[address | 0] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.computeTileNumber = function (yTile, xTile) {
 	//Return the true tile number:
-    return (((yTile & this.tileHeight) << 5) + ((xTile & this.tileWidth) << 5)) | (xTile & 0x1F);
+    return ((((yTile & this.tileHeight) << 5) + ((xTile & this.tileWidth) << 5)) | (xTile & 0x1F)) | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.computeScreenMapAddress8 = function (tileNumber) {
 	return ((tileNumber << 1) | this.BGScreenBaseBlock8) & 0xFFFF;
@@ -76,23 +88,31 @@ GameBoyAdvanceBGTEXTRenderer.prototype.computeScreenMapAddress16 = function (til
 	return (tileNumber | this.BGScreenBaseBlock16) & 0x7FFF;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffset, yOffset) {
-	//Parse flip attributes, grab palette, and then output pixel:
+	//Tell JS Engines it's int32:
+    chrData = chrData | 0;
+    xOffset = xOffset | 0;
+    yOffset = yOffset | 0;
+    //Parse flip attributes, grab palette, and then output pixel:
 	var address = (chrData & 0x3FF) << 5;
 	address += this.baseBlockOffset;
 	address += (((chrData & 0x800) == 0x800) ? (0x7 - yOffset) : yOffset) << 2;
 	address += (((chrData & 0x400) == 0x400) ? (0x7 - xOffset) : xOffset) >> 1;
 	if ((xOffset & 0x1) == ((chrData & 0x400) >> 10)) {
-		return this.palette[chrData >> 12][this.VRAM[address] & 0xF];
+		return this.palette[chrData >> 12][this.VRAM[address] & 0xF] | 0;
 	}
-	return this.palette[chrData >> 12][this.VRAM[address] >> 4];
+	return this.palette[chrData >> 12][this.VRAM[address] >> 4] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetch8BitVRAM = function (chrData, xOffset, yOffset) {
-	//Parse flip attributes and output pixel:
+	//Tell JS Engines it's int32:
+    chrData = chrData | 0;
+    xOffset = xOffset | 0;
+    yOffset = yOffset | 0;
+    //Parse flip attributes and output pixel:
 	var address = (chrData & 0x3FF) << 6;
 	address += this.baseBlockOffset;
 	address += (((chrData & 0x800) == 0x800) ? (0x7 - yOffset) : yOffset) << 3;
 	address += ((chrData & 0x400) == 0x400) ? (0x7 - xOffset) : xOffset;
-	return this.palette[this.VRAM[address]];
+	return this.palette[this.VRAM[address] | 0] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.palettePreprocess = function () {
 	if (this.gfx.BGPalette256[this.BGLayer]) {

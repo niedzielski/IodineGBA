@@ -41,43 +41,60 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) 
 	return this.bgAffineRenderer.renderScanLine(line, this);
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
-	//Output pixel:
-	if (x > 239 || y > 159) {
-		return this.transparency;
-	}
-	var address = (y * 480) + (x << 1);
-	return ((this.VRAM[address | 1] << 8) | this.VRAM[address]) & 0x7FFF;
+    //Output pixel:
+	if (x < 240 && y < 160) {
+        var address = ((y * 240) + x) << 1;
+        return ((this.VRAM[address | 1] << 8) | this.VRAM[address]) & 0x7FFF;
+    }
+    //Out of range, output transparency:
+    return this.transparency;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3PixelOptimized = function (x, y) {
-	//Output pixel:
-	if (x > 239 || y > 159) {
-		return this.transparency;
-	}
-	var address = (y * 240) + x;
-	return this.VRAM16[address] & 0x7FFF;
+    //Tell JS Engines it's int32:
+    x = x | 0;
+    y = y | 0;
+    //Output pixel:
+	if (x < 240 && y < 160) {
+        var address = ((y * 240) + x) | 0;
+        return this.VRAM16[address | 0] & 0x7FFF;
+    }
+    //Out of range, output transparency:
+    return this.transparency | 0;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode4Pixel = function (x, y) {
+    //Tell JS Engines it's int32:
+    x = x | 0;
+    y = y | 0;
     //Output pixel:
-	if (x > 239 || y > 159) {
-        return this.transparency;
-	}
-	return this.palette[this.VRAM[this.frameSelect + (y * 240) + x]];
+	if (x < 240 && y < 160) {
+        var frameSelect = this.frameSelect | 0;
+        var address = (this.frameSelect + (y * 240) + x) | 0;
+        return this.palette[this.VRAM[address | 0] | 0] | 0;
+    }
+    //Out of range, output transparency:
+    return this.transparency | 0;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5Pixel = function (x, y) {
-	//Output pixel:
-	if (x > 159 || y > 127) {
-		return this.transparency;
-	}
-	var address = this.frameSelect + (y * 480) + (x << 1);
-	return ((this.VRAM[address | 1] << 8) | this.VRAM[address]) & 0x7FFF;
+    //Output pixel:
+	if (x < 160 && y < 128) {
+        var address = this.frameSelect + (((y * 240) + x) << 1);
+        return ((this.VRAM[address | 1] << 8) | this.VRAM[address]) & 0x7FFF;
+    }
+    //Out of range, output transparency:
+    return this.transparency;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5PixelOptimized = function (x, y) {
-	//Output pixel:
-	if (x > 159 || y > 127) {
-		return this.transparency;
-	}
-	var address = this.frameSelect + (y * 240) + x;
-	return this.VRAM16[address] & 0x7FFF;
+    //Tell JS Engines it's int32:
+    x = x | 0;
+    y = y | 0;
+    //Output pixel:
+	if (x < 160 && y < 128) {
+        var frameSelect = this.frameSelect | 0;
+        var address = (frameSelect + (y * 240) + x) | 0;
+        return this.VRAM16[address | 0] & 0x7FFF;
+    }
+    //Out of range, output transparency:
+    return this.transparency | 0;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.writeFrameSelect = function (frameSelect) {
     this.frameSelect = frameSelect * 0xA000;
