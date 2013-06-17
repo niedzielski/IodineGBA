@@ -109,6 +109,10 @@ function registerGUIEvents() {
 			Iodine.disableAudio();
 		}
 	});
+    document.getElementById("skip_boot").checked = true;
+    addEvent("click", document.getElementById("skip_boot"), function () {
+             Iodine.toggleSkipBootROM(this.checked);
+    });
     setInterval(
             function () {
                 if (!Iodine.paused) {
@@ -120,7 +124,8 @@ function registerGUIEvents() {
     ,500);
 }
 function attachBIOS(BIOS) {
-	try {
+	resetPlayButton();
+    try {
         Iodine.attachBIOS(new Uint8Array(BIOS));
     }
     catch (error) {
@@ -128,12 +133,17 @@ function attachBIOS(BIOS) {
     }
 }
 function attachROM(ROM) {
-	try {
+	resetPlayButton();
+    try {
         Iodine.attachROM(new Uint8Array(ROM));
     }
     catch (error) {
         Iodine.attachROM(ROM);
     }
+}
+function resetPlayButton() {
+    document.getElementById("pause").style.display = "none";
+    document.getElementById("play").style.display = "inline";
 }
 function lowerVolume() {
 	emuVolume = Math.max(emuVolume - 0.04, 0);

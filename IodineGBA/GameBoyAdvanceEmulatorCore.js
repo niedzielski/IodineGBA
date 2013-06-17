@@ -332,3 +332,9 @@ GameBoyAdvanceEmulator.prototype.reinitializeAudio = function () {
 		this.enableAudio();
 	}
 }
+GameBoyAdvanceEmulator.prototype.toggleSkipBootROM = function (skipBoot) {
+	this.SKIPBoot = !!skipBoot;
+    if (this.romFound && this.paused) {
+        this.initializeCore();
+    }
+}
