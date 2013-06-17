@@ -31,12 +31,12 @@ ARMInstructionSet.prototype.initialize = function () {
 }
 ARMInstructionSet.prototype.executeIteration = function () {
 	//Push the new fetch access:
-	this.fetch = this.wait.CPUGetOpcode32(this.registers[15]);
+	this.fetch = this.wait.CPUGetOpcode32(this.registers[15] | 0) | 0;
 	//Execute Conditional Instruction:
 	this.executeARM(this.instructionMapReduced[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]);
 	//Update the pipelining state:
-	this.execute = this.decode;
-	this.decode = this.fetch;
+	this.execute = this.decode | 0;
+	this.decode = this.fetch | 0;
 }
 ARMInstructionSet.prototype.executeARM = function (instruction) {
 	//Don't execute if the pipeline is still invalid:

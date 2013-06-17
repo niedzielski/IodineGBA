@@ -132,7 +132,8 @@ GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (address, clock
 	}
 }
 GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
-	if (address >= -0x80000000 && address <= -0x20000000) {
+	address = address | 0;
+    if (address >= -0x80000000 && address <= -0x20000000) {
 		if (this.prefetchEnabled) {
 			if (this.ROMPrebuffer > 0) {
 				--this.ROMPrebuffer;
@@ -145,10 +146,11 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 			this.NonSequentialBroadcast();
 		}
 	}
-	return this.IOCore.memoryRead16(address);
+	return this.IOCore.memoryRead16(address | 0) | 0;
 }
 GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
-	if (address >= -0x80000000 && address <= -0x20000000) {
+	address = address | 0;
+    if (address >= -0x80000000 && address <= -0x20000000) {
 		if (this.prefetchEnabled) {
 			if (this.ROMPrebuffer > 1) {
 				this.ROMPrebuffer -= 2;
@@ -167,7 +169,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
 			this.NonSequentialBroadcast();
 		}
 	}
-	return this.IOCore.memoryRead32(address);
+	return this.IOCore.memoryRead32(address | 0) | 0;
 }
 GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
 	this.nonSequential = true;
