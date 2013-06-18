@@ -34,7 +34,6 @@ GameBoyAdvanceBGTEXTRenderer.prototype.initialize = function () {
     this.characterBaseBlockPreprocess();
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
-    //Tell JS Engines it's int32:
     line = line | 0;
     if (this.gfx.BGMosaic[this.BGLayer | 0]) {
 		//Correct line number for mosaic:
@@ -45,11 +44,11 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
 	var pixelPipelinePosition = this.BGXCoord & 0x7;
     var yTileStart = ((line | 0) + (this.BGYCoord | 0)) >> 3;
     var xTileStart = this.BGXCoord >> 3;
-	for (var position = 0; position < 240;) {
+	for (var position = 0; (position | 0) < 240;) {
 		var chrData = this.fetchTile(yTileStart | 0, xTileStart | 0) | 0;
         xTileStart = (xTileStart + 1) | 0;
-		while (pixelPipelinePosition < 0x8) {
-			this.scratchBuffer[position | 0] = this.priorityFlag | this.fetchVRAM(chrData | 0, pixelPipelinePosition | 0, yTileOffset | 0);
+		while ((pixelPipelinePosition | 0) < 0x8) {
+			this.scratchBuffer[position | 0] = (this.priorityFlag | 0) | (this.fetchVRAM(chrData | 0, pixelPipelinePosition | 0, yTileOffset | 0) | 0);
             pixelPipelinePosition = (pixelPipelinePosition + 1) | 0;
             position = (position + 1) | 0;
 		}
@@ -62,7 +61,6 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
 	return this.scratchBuffer;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileNormal = function (yTileStart, xTileStart) {
-	//Tell JS Engines it's int32:
     yTileStart = yTileStart | 0;
     xTileStart = xTileStart | 0;
     //Find the tile code to locate the tile block:
@@ -70,7 +68,6 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileNormal = function (yTileStart, x
 	return (this.VRAM[address | 1] << 8) | this.VRAM[address | 0];
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileOptimized = function (yTileStart, xTileStart) {
-	//Tell JS Engines it's int32:
     yTileStart = yTileStart | 0;
     xTileStart = xTileStart | 0;
     //Find the tile code to locate the tile block:

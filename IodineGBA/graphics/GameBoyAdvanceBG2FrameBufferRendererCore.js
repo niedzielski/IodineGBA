@@ -26,7 +26,8 @@ function GameBoyAdvanceBG2FrameBufferRenderer(gfx) {
     this.frameSelect = 0;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.selectMode = function (mode) {
-	switch (mode) {
+	mode = mode | 0;
+    switch (mode | 0) {
 		case 3:
 			this.fetchPixel = (this.VRAM16) ? this.fetchMode3PixelOptimized : this.fetchMode3Pixel;
 			break;
@@ -38,7 +39,8 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.selectMode = function (mode) {
 	}
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) {
-	return this.bgAffineRenderer.renderScanLine(line, this);
+	line = line | 0;
+    return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
     //Output pixel:
@@ -53,8 +55,8 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3PixelOptimized = functi
     x = x | 0;
     y = y | 0;
     //Output pixel:
-	if (x < 240 && y < 160) {
-        var address = ((y * 240) + x) | 0;
+	if ((x | 0) < 240 && (y | 0) < 160) {
+        var address = (((y * 240) | 0) + (x | 0)) | 0;
         return this.VRAM16[address | 0] & 0x7FFF;
     }
     //Out of range, output transparency:
@@ -64,9 +66,8 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode4Pixel = function (x, y)
     x = x | 0;
     y = y | 0;
     //Output pixel:
-	if (x < 240 && y < 160) {
-        var frameSelect = this.frameSelect | 0;
-        var address = (this.frameSelect + (y * 240) + x) | 0;
+	if ((x | 0) < 240 && (y | 0) < 160) {
+        var address = ((this.frameSelect | 0) + ((y * 240) | 0) + (x | 0)) | 0;
         return this.palette[this.VRAM[address | 0] | 0] | 0;
     }
     //Out of range, output transparency:
@@ -85,14 +86,14 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5PixelOptimized = functi
     x = x | 0;
     y = y | 0;
     //Output pixel:
-	if (x < 160 && y < 128) {
-        var frameSelect = this.frameSelect | 0;
-        var address = (frameSelect + (y * 240) + x) | 0;
+	if ((x | 0) < 160 && (y | 0) < 128) {
+        var address = ((this.frameSelect | 0) + ((y * 240) | 0) + (x | 0)) | 0;
         return this.VRAM16[address | 0] & 0x7FFF;
     }
     //Out of range, output transparency:
     return this.transparency | 0;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.writeFrameSelect = function (frameSelect) {
-    this.frameSelect = frameSelect * 0xA000;
+    frameSelect = frameSelect | 0;
+    this.frameSelect = (frameSelect * 0xA000) | 0;
 }

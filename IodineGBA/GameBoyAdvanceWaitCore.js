@@ -36,9 +36,11 @@ GameBoyAdvanceWait.prototype.initialize = function () {
 	this.width = 8;
 	this.nonSequential = true;
 	this.ROMPrebuffer = 0;
-	this.prefetchEnabled = false;
+	this.prefetchEnabled = true;
 	this.WAITCNT0 = 0;
 	this.WAITCNT1 = 0;
+    this.CPUGetOpcode16 = (this.IOCore.cartridge.ROM16) ? this.CPUGetOpcode16Optimized : this.CPUGetOpcode16Slow;
+    this.CPUGetOpcode32 = (this.IOCore.cartridge.ROM32) ? this.CPUGetOpcode32Optimized : this.CPUGetOpcode32Slow;
 }
 GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
 	this.SRAMWaitState = this.GAMEPAKWaitStateTable[data & 0x3];
@@ -131,9 +133,9 @@ GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (address, clock
 		}
 	}
 }
-GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
+GameBoyAdvanceWait.prototype.CPUGetOpcode16Slow = function (address) {
 	address = address | 0;
-    if (address >= -0x80000000 && address <= -0x20000000) {
+    if (address >= 0x8000000 && address < 0xE000000) {
 		if (this.prefetchEnabled) {
 			if (this.ROMPrebuffer > 0) {
 				--this.ROMPrebuffer;
@@ -148,9 +150,46 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 	}
 	return this.IOCore.memoryRead16(address | 0) | 0;
 }
-GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
+GameBoyAdvanceWait.prototype.CPUGetOpcode16Optimized = function (address) {
 	address = address | 0;
-    if (address >= -0x80000000 && address <= -0x20000000) {
+    if (address >= 0x8000000 && address < 0xE000000) {
+		var clocks = 0;
+        if (this.prefetchEnabled) {
+			if (this.ROMPrebuffer > 0) {
+				--this.ROMPrebuffer;
+				this.FASTAccess();
+				return this.IOCore.cartridge.readROM16(address >> 1) | 0;
+			}
+            if (address < 0xA000000) {
+                clocks = ((this.nonSequential) ? this.CARTWaitState0First : this.CARTWaitState0Second);
+            }
+            else if (address < 0xC000000) {
+                clocks = ((this.nonSequential) ? this.CARTWaitState1First : this.CARTWaitState1Second);
+            }
+            else {
+                clocks = ((this.nonSequential) ? this.CARTWaitState2First : this.CARTWaitState2Second);
+            }
+		}
+		else {
+            if (address < 0xA000000) {
+                clocks = this.CARTWaitState0First;
+            }
+            else if (address < 0xC000000) {
+                clocks = this.CARTWaitState1First;
+            }
+            else {
+                clocks = this.CARTWaitState2First;
+            }
+		}
+        this.IOCore.updateCore(clocks);
+        this.nonSequential = false;
+        return this.IOCore.cartridge.readROM16(address >> 1) | 0;
+	}
+	return this.IOCore.memoryRead16(address | 0) | 0;
+}
+GameBoyAdvanceWait.prototype.CPUGetOpcode32Slow = function (address) {
+	address = address | 0;
+    if (address >= 0x8000000 && address < 0xE000000) {
 		if (this.prefetchEnabled) {
 			if (this.ROMPrebuffer > 1) {
 				this.ROMPrebuffer -= 2;
@@ -168,6 +207,47 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
 		else {
 			this.NonSequentialBroadcast();
 		}
+	}
+	return this.IOCore.memoryRead32(address | 0) | 0;
+}
+GameBoyAdvanceWait.prototype.CPUGetOpcode32Optimized = function (address) {
+	address = address | 0;
+    if (address >= 0x8000000 && address < 0xE000000) {
+		var clocks = 0;
+        if (this.prefetchEnabled) {
+			if (this.ROMPrebuffer > 1) {
+				this.ROMPrebuffer -= 2;
+				this.FASTAccess();
+				return this.IOCore.cartridge.readROM32(address >> 2) | 0;
+			}
+			else if (this.ROMPrebuffer == 1) {
+				//Buffer miss if only 16 bits out of 32 bits stored:
+				--this.ROMPrebuffer;
+			}
+            if (address < 0xA000000) {
+                clocks = ((this.nonSequential) ? this.CARTWaitState0First : this.CARTWaitState0Second) + this.CARTWaitState0Second;
+            }
+            else if (address < 0xC000000) {
+                clocks = ((this.nonSequential) ? this.CARTWaitState1First : this.CARTWaitState1Second) + this.CARTWaitState1Second;
+            }
+            else {
+                clocks = ((this.nonSequential) ? this.CARTWaitState2First : this.CARTWaitState2Second) + this.CARTWaitState2Second;
+            }
+		}
+		else {
+            if (address < 0xA000000) {
+                clocks = this.CARTWaitState0First + this.CARTWaitState0Second;
+            }
+            else if (address < 0xC000000) {
+                clocks = this.CARTWaitState1First + this.CARTWaitState1Second;
+            }
+            else {
+                clocks = this.CARTWaitState2First + this.CARTWaitState2Second;
+            }
+		}
+        this.IOCore.updateCore(clocks);
+        this.nonSequential = false;
+        return this.IOCore.cartridge.readROM32(address >> 2) | 0;
 	}
 	return this.IOCore.memoryRead32(address | 0) | 0;
 }

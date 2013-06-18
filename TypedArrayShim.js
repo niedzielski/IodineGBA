@@ -63,6 +63,14 @@ function getInt32Array(size_t) {
 		return getArray(size_t);
 	}
 }
+function getInt32View(typed_array) {
+	try {
+		return new Int32Array(typed_array.buffer);
+	}
+	catch (error) {
+		return null;
+	}
+}
 function getUint32Array(size_t) {
 	try {
 		return new Uint32Array(size_t);

@@ -20,14 +20,25 @@ function GameBoyAdvanceCartridge(IOCore) {
 	this.initialize();
 }
 GameBoyAdvanceCartridge.prototype.initialize = function () {
-	this.ROM = this.IOCore.emulatorCore.ROM;
+	this.ROM = this.getROMArray(this.IOCore.emulatorCore.ROM);
+    this.ROM16 = getUint16View(this.ROM);
+    this.ROM32 = getInt32View(this.ROM);
 	this.saveType = 0;
 	this.saveSize = 0;
 	this.saveRTC = false;
 	this.lookupCartridgeType();
 }
+GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
+    var length = old_array.length;
+    var newArray = getUint8Array(0x2000000);
+    for (var index = 0; index < length; ++index) {
+        newArray[index] = old_array[index];
+    }
+    return newArray;
+}
 GameBoyAdvanceCartridge.prototype.readROM = function (address) {
-	if (!this.saveRTC) {
+	return this.ROM[address];
+    /*if (!this.saveRTC) {
 		return this.ROM[address];
 	}
 	else {
@@ -48,7 +59,43 @@ GameBoyAdvanceCartridge.prototype.readROM = function (address) {
 			default:
 				return this.ROM[address];
 		}
+	}*/
+}
+GameBoyAdvanceCartridge.prototype.readROM16 = function (address) {
+    return this.ROM16[address & 0xFFFFFF] | 0;
+    /*if (!this.saveRTC) {
+		return this.ROM16[address];
 	}
+	else {
+		//GPIO Chip (RTC):
+		switch (address) {
+			case 0x62:
+				return this.rtc.read0();
+			case 0x63:
+				return this.rtc.read1();
+			case 0x64:
+				return this.rtc.read2();
+			default:
+				return this.ROM16[address];
+		}
+	}*/
+}
+GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
+    return this.ROM32[address & 0x7FFFFF] | 0;
+    /*if (!this.saveRTC) {
+		return this.ROM32[address];
+	}
+	else {
+		//GPIO Chip (RTC):
+		switch (address) {
+			case 0x31:
+				return this.rtc.read0() | (this.rtc.read1() << 16);
+			case 0x32:
+				return this.rtc.read2();
+			default:
+				return this.ROM32[address];
+		}
+	}*/
 }
 GameBoyAdvanceCartridge.prototype.writeROM = function (address, data) {
 	if (this.saveRTC) {

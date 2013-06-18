@@ -131,8 +131,8 @@ GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
 }
 GameBoyAdvanceGraphics.prototype.initializeOAMTable = function () {
 	this.OAMTable = [];
-	for (var spriteNumber = 0; spriteNumber < 128; ++spriteNumber) {
-		this.OAMTable[spriteNumber] = new GameBoyAdvanceOAMAttributeTable();
+	for (var spriteNumber = 0; spriteNumber < 128; spriteNumber = (spriteNumber + 1) | 0) {
+		this.OAMTable[spriteNumber | 0] = new GameBoyAdvanceOAMAttributeTable();
 	}
 }
 GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {

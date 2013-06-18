@@ -102,30 +102,33 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
-    var xDiff = -(xSize >> 1);
-    var yDiff = (yOffset - (ySize >> 1));
-    var xSizeOriginal = xSize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0);
-    var ySizeOriginal = ySize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0);
-    var params = this.gfx.OBJMatrixParameters[sprite.matrixParameters];
-    var dx = params[0];
-    var dmx = params[1];
-    var dy = params[2];
-    var dmy = params[3];
-	var pa = dx * xDiff;
-	var pb = dmx * yDiff;
-	var pc = dy * xDiff;
-	var pd = dmy * yDiff;
-	var x = pa + pb + (xSizeOriginal >> 1);
-	var y = pc + pd + (ySizeOriginal >> 1);
+    xSize = xSize | 0;
+    ySize = ySize | 0;
+    yOffset = yOffset | 0;
+    var xDiff = -((xSize | 0) >> 1);
+    var yDiff = ((yOffset | 0) - (ySize >> 1)) | 0;
+    var xSizeOriginal = ((xSize | 0) >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
+    var ySizeOriginal = ((ySize | 0) >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
+    var params = this.gfx.OBJMatrixParameters[sprite.matrixParameters | 0];
+    var dx = +params[0];
+    var dmx = +params[1];
+    var dy = +params[2];
+    var dmy = +params[3];
+	var pa = +(+dx * (xDiff | 0));
+	var pb = +(+dmx * (yDiff | 0));
+	var pc = +(+dy * (xDiff | 0));
+	var pd = +(+dmy * (yDiff | 0));
+	var x = +((+pa) + (+pb) + ((xSizeOriginal | 0) >> 1));
+	var y = +((+pc) + (+pd) + ((ySizeOriginal | 0) >> 1));
 	var tileNumber = sprite.tileNumber;
-	for (var position = 0; position < xSize; ++position, x += dx, y += dy) {
-		if (x >= 0 && y >= 0 && x < xSizeOriginal && y < ySizeOriginal) {
+	for (var position = 0; (position | 0) < (xSize | 0); position = (position + 1) | 0, x = (+x) + (+dx), y = (+y) + (+dy)) {
+		if ((+x) >= 0 && (+y) >= 0 && (+x) < (xSizeOriginal | 0) && (+y) < (ySizeOriginal | 0)) {
 			//Coordinates in range, fetch pixel:
-			this.scratchOBJBuffer[position] = this.fetchMatrixPixel(sprite, tileNumber, x | 0, y | 0, xSizeOriginal);
+			this.scratchOBJBuffer[position | 0] = this.fetchMatrixPixel(sprite, tileNumber | 0, x | 0, y | 0, xSizeOriginal | 0) | 0;
 		}
 		else {
 			//Coordinates outside of range, transparency defaulted:
-			this.scratchOBJBuffer[position] = this.gfx.transparency;
+			this.scratchOBJBuffer[position | 0] = this.gfx.transparency | 0;
 		}
 	}
 }
@@ -134,15 +137,15 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNum
     x = x | 0;
     y = y | 0;
     xSize = xSize | 0;
-    var address = this.tileNumberToAddress(sprite, tileNumber, xSize, y) | 0;
+    var address = this.tileNumberToAddress(sprite, tileNumber | 0, xSize | 0, y | 0) | 0;
 	if (sprite.monolithicPalette) {
 		//256 Colors / 1 Palette:
-		address += this.tileRelativeAddressOffset(x,y) | 0;
+		address = (address | 0) + (this.tileRelativeAddressOffset(x | 0, y | 0) | 0);
 		return this.gfx.paletteOBJ256[this.gfx.VRAM[address | 0] | 0] | 0;
 	}
 	else {
 		//16 Colors / 16 palettes:
-		address += this.tileRelativeAddressOffset(x,y) >> 1;
+		address = ((address | 0) + ((this.tileRelativeAddressOffset(x,y) >> 1) | 0));
 		if ((x & 0x1) == 0) {
 			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address | 0] & 0xF] | 0;
 		}
@@ -227,7 +230,7 @@ GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tile
 GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
 	//Mark sprite pixels as semi-transparent:
 	while (--xSize > -1) {
-		this.scratchOBJBuffer[xSize] |= 0x400000;
+		this.scratchOBJBuffer[xSize | 0] |= 0x400000;
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xSize) {
@@ -248,20 +251,20 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
 	if (!sprite.horizontalFlip || sprite.matrix2D) {
 		//Normal:
 		for (var xSource = 0; xcoord < xcoordEnd; ++xcoord, ++xSource) {
-			var pixel = bitFlags | this.scratchOBJBuffer[xSource];
+			var pixel = (bitFlags | this.scratchOBJBuffer[xSource | 0]) | 0;
             //Overwrite by priority:
-			if (xcoord > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord] & 0x3800000)) {
-				this.targetBuffer[xcoord] = pixel;
+			if (xcoord > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
+				this.targetBuffer[xcoord | 0] = pixel | 0;
 			}
 		}
 	}
 	else {
 		//Flipped Horizontally:
 		for (var xSource = xSize - 1; xcoord < xcoordEnd; ++xcoord, --xSource) {
-			var pixel = bitFlags | this.scratchOBJBuffer[xSource];
+			var pixel = (bitFlags | this.scratchOBJBuffer[xSource | 0]) | 0;
             //Overwrite by priority:
-			if (xcoord > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord] & 0x3800000)) {
-				this.targetBuffer[xcoord] = pixel;
+			if (xcoord > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
+				this.targetBuffer[xcoord | 0] = pixel | 0;
 			}
 		}
 	}

@@ -66,22 +66,22 @@ GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlend = function (topPixel, lo
 	var b2 = (lowerPixel >> 10) & 0x1F;
 	var g2 = (lowerPixel >> 5) & 0x1F;
 	var r2 = lowerPixel & 0x1F;
-	b1 *= this.alphaBlendAmountTarget1;
-	g1 *= this.alphaBlendAmountTarget1;
-	r1 *= this.alphaBlendAmountTarget1;
-	b2 *= this.alphaBlendAmountTarget2;
-	g2 *= this.alphaBlendAmountTarget2;
-	r2 *= this.alphaBlendAmountTarget2;
-	return (Math.min(b1 + b2, 0x1F) << 10) | (Math.min(g1 + g2, 0x1F) << 5) | Math.min(r1 + r2, 0x1F);
+	b1 = +((b1 | 0) * (+this.alphaBlendAmountTarget1));
+	g1 = +((g1 | 0) * (+this.alphaBlendAmountTarget1));
+	r1 = +((r1 | 0) * (+this.alphaBlendAmountTarget1));
+	b2 = +((b2 | 0) * (+this.alphaBlendAmountTarget2));
+	g2 = +((g2 | 0) * (+this.alphaBlendAmountTarget2));
+	r2 = +((r2 | 0) * (+this.alphaBlendAmountTarget2));
+	return (Math.min((+b1) + (+b2), 0x1F) << 10) | (Math.min((+g1) + (+g2), 0x1F) << 5) | Math.min((+r1) + (+r2), 0x1F);
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.brightnessIncrease = function (topPixel) {
 	topPixel = topPixel | 0;
     var b1 = (topPixel >> 10) & 0x1F;
 	var g1 = (topPixel >> 5) & 0x1F;
 	var r1 = (topPixel & 0x1F);
-	b1 += (0x1F - b1) * this.brightnessEffectAmount;
-	g1 += (0x1F - g1) * this.brightnessEffectAmount;
-	r1 += (0x1F - r1) * this.brightnessEffectAmount;
+	b1 += (0x1F - b1) * (+this.brightnessEffectAmount);
+	g1 += (0x1F - g1) * (+this.brightnessEffectAmount);
+	r1 += (0x1F - r1) * (+this.brightnessEffectAmount);
 	return (b1 << 10) | (g1 << 5) | r1;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.brightnessDecrease = function (topPixel) {
@@ -89,9 +89,9 @@ GameBoyAdvanceColorEffectsRenderer.prototype.brightnessDecrease = function (topP
     var b1 = (topPixel >> 10) & 0x1F;
 	var g1 = (topPixel >> 5) & 0x1F;
 	var r1 = (topPixel & 0x1F);
-	var decreaseMultiplier = 1 - this.brightnessEffectAmount;
-	b1 *= decreaseMultiplier;
-	g1 *= decreaseMultiplier;
-	r1 *= decreaseMultiplier;
+	var decreaseMultiplier = +(1 - (+this.brightnessEffectAmount));
+	b1 = (b1 | 0) * +decreaseMultiplier;
+	g1 = (g1 | 0) * +decreaseMultiplier;
+	r1 = (r1 | 0) * +decreaseMultiplier;
 	return (b1 << 10) | (g1 << 5) | r1;
 }

@@ -34,18 +34,20 @@ GameBoyAdvanceBGMatrixRenderer.prototype.tileMapSize = [
 	0x400
 ];
 GameBoyAdvanceBGMatrixRenderer.prototype.renderScanLine = function (line) {
-	return this.bgAffineRenderer.renderScanLine(line | 0, this);
+	line = line | 0;
+    return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.fetchTile = function (tileNumber) {
-	//Find the tile code to locate the tile block:
-	return this.VRAM[(tileNumber + this.BGScreenBaseBlock) & 0xFFFF];
+	tileNumber = tileNumber | 0;
+    //Find the tile code to locate the tile block:
+	return this.VRAM[((tileNumber | 0) + (this.BGScreenBaseBlock | 0)) & 0xFFFF];
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
     x = x | 0;
     y = y | 0;
     var mapSizeComparer = this.mapSizeComparer | 0;
     //Output pixel:
-	if (x > mapSizeComparer || y > mapSizeComparer) {
+	if ((x | 0) > (mapSizeComparer | 0) || (y | 0) > (mapSizeComparer | 0)) {
 		//Overflow Handling:
 		if (this.BGDisplayOverflow) {
 			x &= mapSizeComparer | 0;
@@ -57,21 +59,21 @@ GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
 	}
     var mapSize = this.mapSize | 0;
 	var address = this.fetchTile((x >> 3) + ((y >> 3) * mapSize)) << 6;
-	address += this.baseBlockOffset | 0;
-	address += (y & 0x7) << 3;
-	address += x & 0x7;
+	address = ((address | 0) + (this.baseBlockOffset | 0)) | 0;
+	address = ((address | 0) + ((y & 0x7) << 3)) | 0;
+	address = ((address | 0) + (x & 0x7)) | 0;
 	return this.palette[this.VRAM[address | 0] | 0] | 0;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.screenSizePreprocess = function () {
-	this.mapSize = this.tileMapSize[this.gfx.BGScreenSize[this.BGLayer]];
-	this.mapSizeComparer = this.mapSize - 1;
+	this.mapSize = this.tileMapSize[this.gfx.BGScreenSize[this.BGLayer | 0] | 0] | 0;
+	this.mapSizeComparer = ((this.mapSize | 0) - 1) | 0;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.screenBaseBlockPreprocess = function () {
-	this.BGScreenBaseBlock = this.gfx.BGScreenBaseBlock[this.BGLayer] << 11;
+	this.BGScreenBaseBlock = this.gfx.BGScreenBaseBlock[this.BGLayer | 0] << 11;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.characterBaseBlockPreprocess = function () {
-	this.baseBlockOffset = this.gfx.BGCharacterBaseBlock[this.BGLayer] << 14;
+	this.baseBlockOffset = this.gfx.BGCharacterBaseBlock[this.BGLayer | 0] << 14;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.displayOverflowPreprocess = function () {
-	this.BGDisplayOverflow = this.gfx.BGDisplayOverflow[this.BGLayer];
+	this.BGDisplayOverflow = this.gfx.BGDisplayOverflow[this.BGLayer | 0];
 }
