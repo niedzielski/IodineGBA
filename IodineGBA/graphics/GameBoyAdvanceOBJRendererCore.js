@@ -130,7 +130,6 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNumber, x, y, xSize) {
-	//Tell JS Engines it's int32:
     tileNumber = tileNumber | 0;
     x = x | 0;
     y = y | 0;
@@ -153,13 +152,11 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNum
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.tileRelativeAddressOffset = function (x, y) {
-    //Tell JS Engines it's int32:
     var x = x | 0;
     var y = y | 0;
     return ((((y & 7) + (x & -8)) << 3) + (x & 0x7)) | 0;
 }
 GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize, ySize, yOffset) {
-	//Tell JS Engines it's int32:
     xSize = xSize | 0;
     ySize = ySize | 0;
     yOffset = yOffset | 0;
@@ -209,7 +206,6 @@ GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tileNumber, xSize, yOffset) {
-	//Tell JS Engines it's int32:
     tileNumber = tileNumber | 0;
     xSize = xSize | 0;
     yOffset = yOffset | 0;
@@ -235,7 +231,6 @@ GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xSize) {
-	//Tell JS Engines it's int32:
     xSize = xSize | 0;
     //Simulate x-coord wrap around logic:
 	var xcoord = sprite.xcoord | 0;

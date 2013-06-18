@@ -39,7 +39,6 @@ GameBoyAdvanceAffineBGRenderer.prototype.initialize = function () {
 	this.priorityPreprocess();
 }
 GameBoyAdvanceAffineBGRenderer.prototype.renderScanLine = function (line, BGObject) {
-    //Tell JS Engines it's int32:
     line = line | 0;
     var x = +this.pb;
     var y = +this.pd;

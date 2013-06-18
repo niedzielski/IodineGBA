@@ -40,7 +40,7 @@ ARMInstructionSet.prototype.executeIteration = function () {
 }
 ARMInstructionSet.prototype.executeARM = function (instruction) {
 	//Don't execute if the pipeline is still invalid:
-	if (this.CPUCore.pipelineInvalid == 0) {
+	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
 		//Check the condition code:
 		if (this.conditionCodeTest()) {
 			instruction[0](this, instruction[1]);
@@ -91,121 +91,132 @@ ARMInstructionSet.prototype.conditionCodeTest = function () {
 }
 ARMInstructionSet.prototype.guardRegisterWrite = function (address, data) {
 	address &= 0xF;
-	if (address == 15) {
+    data = data | 0;
+	if ((address | 0) == 15) {
 		//We performed a branch:
 		this.CPUCore.branch(data & -2);//Emulation bug, should be -4, but we break stuff.
 	}
 	else {
-		this.registers[address] = data;
+		this.registers[address | 0] = data | 0;
 	}
 }
 ARMInstructionSet.prototype.guardRegisterWriteCPSR = function (address, data) {
 	address &= 0xF;
-	if (address == 15) {
+    data = data | 0;
+	if ((address | 0) == 15) {
 		//We performed a branch:
 		this.CPUCore.branch(data & -2);//Emulation bug, should be -4, but we break stuff.
 		//Restore SPSR to CPSR:
 		this.CPUCore.SPSRtoCPSR();
 	}
 	else {
-		this.registers[address] = data;
+		this.registers[address | 0] = data | 0;
 	}
 }
 ARMInstructionSet.prototype.getDelayedRegisterRead = function (registerSelected) {
 	//Get the register data (After PC is updated during function execution):
-	var register = this.registers[registerSelected];
-	if (registerSelected == 15) {
+	registerSelected = registerSelected | 0;
+    var register = this.registers[registerSelected | 0] | 0;
+	if ((registerSelected | 0) == 15) {
 		//Adjust PC for it being incremented before end of instr:
 		register = (register + 4) | 0;
 	}
-	return register;
+	return register | 0;
 }
 ARMInstructionSet.prototype.guardMultiRegisterWrite = function (parentObj, address, data) {
-	parentObj.guardRegisterWrite(address, data);
+    address = address | 0;
+    data = data | 0;
+	parentObj.guardRegisterWrite(address | 0, data | 0);
 }
 ARMInstructionSet.prototype.guardMultiRegisterRead = function (parentObj, address) {
-    return parentObj.getDelayedRegisterRead(address);
+    address = address | 0;
+    return parentObj.getDelayedRegisterRead(address | 0) | 0;
 }
 ARMInstructionSet.prototype.baseRegisterWrite = function (address, data, userMode) {
-	if (!userMode) {
-		this.guardRegisterWrite(address, data);
+	address = address | 0;
+    data = data | 0;
+    if (!userMode) {
+		this.guardRegisterWrite(address | 0, data | 0);
 	}
 	else {
-		switch (this.CPUCore.MODEBits) {
+		switch (this.CPUCore.MODEBits | 0) {
 			case 0x10:
 			case 0x1F:
-				this.guardRegisterWrite(address, data);
+				this.guardRegisterWrite(address | 0, data | 0);
 				break;
 			case 0x11:
-				if (address < 8 || address == 15) {
-					this.guardRegisterWrite(address, data);
+				if ((address | 0) < 8 || (address | 0) == 15) {
+					this.guardRegisterWrite(address | 0, data | 0);
 				}
 				else {
 					//User-Mode Register Write Inside Non-User-Mode:
-					this.CPUCore.registersUSR[address - 8] = data;
+					this.CPUCore.registersUSR[((address | 0) - 8) | 0] = data | 0;
 				}
 				break;
 			default:
-				if (address < 13 || address == 15) {
-					this.guardRegisterWrite(address, data);
+				if ((address | 0) < 13 || (address | 0) == 15) {
+					this.guardRegisterWrite(address | 0, data | 0);
 				}
 				else {
 					//User-Mode Register Write Inside Non-User-Mode:
-					this.CPUCore.registersUSR[address - 8] = data;
+					this.CPUCore.registersUSR[((address | 0) - 8) | 0] = data | 0;
 				}
 		}
 	}
 }
 ARMInstructionSet.prototype.guardMultiRegisterWriteSpecial = function (parentObj, address, data) {
-	switch (parentObj.CPUCore.MODEBits) {
+	address = address | 0;
+    data = data | 0;
+    switch (parentObj.CPUCore.MODEBits | 0) {
 		case 0x10:
 		case 0x1F:
-			parentObj.guardRegisterWriteCPSR(address, data);
+			parentObj.guardRegisterWriteCPSR(address | 0, data | 0);
 			break;
 		case 0x11:
-			if (address < 8 || address == 15) {
-				parentObj.guardRegisterWriteCPSR(address, data);
+			if ((address | 0) < 8 || (address | 0) == 15) {
+				parentObj.guardRegisterWriteCPSR(address | 0, data | 0);
 			}
 			else {
 				//User-Mode Register Write Inside Non-User-Mode:
-				parentObj.CPUCore.registersUSR[address - 8] = data;
+				parentObj.CPUCore.registersUSR[((address | 0) - 8) | 0] = data | 0;
 			}
 			break;
 		default:
-			if (address < 13 || address == 15) {
-				parentObj.guardRegisterWriteCPSR(address, data);
+			if ((address | 0) < 13 || (address | 0) == 15) {
+				parentObj.guardRegisterWriteCPSR(address | 0, data | 0);
 			}
 			else {
 				//User-Mode Register Write Inside Non-User-Mode:
-				parentObj.CPUCore.registersUSR[address - 8] = data;
+				parentObj.CPUCore.registersUSR[((address | 0) - 8) | 0] = data | 0;
 			}
 	}
 }
 ARMInstructionSet.prototype.baseRegisterRead = function (address, userMode) {
+    address = address | 0;
     if (!userMode) {
-        return this.registers[address];
+        return this.registers[address | 0] | 0;
     }
     else {
-        switch (this.CPUCore.MODEBits) {
+        switch (this.CPUCore.MODEBits | 0) {
             case 0x10:
             case 0x1F:
-                return this.registers[address];
+                return this.registers[address | 0] | 0;
             case 0x11:
-                if (address < 8 || address == 15) {
-                    return this.registers[address];
+                if ((address | 0) < 8 || (address | 0) == 15) {
+                    return this.registers[address | 0] | 0;
                 }
                 else {
                     //User-Mode Register Read Inside Non-User-Mode:
-                    return this.CPUCore.registersUSR[address - 8];
+                    return this.CPUCore.registersUSR[((address | 0) - 8) | 0] | 0;
                 }
                 break;
             default:
-                if (address < 13 || address == 15) {
-                    return this.registers[address];
+                if ((address | 0) < 13 || (address | 0) == 15) {
+                    return this.registers[address | 0] | 0;
                 }
                 else {
                     //User-Mode Register Read Inside Non-User-Mode:
-                    return this.CPUCore.registersUSR[address - 8];
+                    return this.CPUCore.registersUSR[((address | 0) - 8) | 0] | 0;
                 }
         }
     }
@@ -213,84 +224,96 @@ ARMInstructionSet.prototype.baseRegisterRead = function (address, userMode) {
 ARMInstructionSet.prototype.guardMultiRegisterReadSpecial = function (parentObj, address) {
 	//Handle user mode write condition:
     address &= 0xF;
-    if (address < 0xF) {
-        switch (parentObj.CPUCore.MODEBits) {
+    if ((address | 0) < 0xF) {
+        switch (parentObj.CPUCore.MODEBits | 0) {
             case 0x10:
             case 0x1F:
-                return parentObj.registers[address];
+                return parentObj.registers[address | 0] | 0;
             case 0x11:
-                if (address < 8) {
-                    return parentObj.registers[address];
+                if ((address | 0) < 8) {
+                    return parentObj.registers[address | 0] | 0;
                 }
                 else {
                     //User-Mode Register Read Inside Non-User-Mode:
-                    return parentObj.CPUCore.registersUSR[address - 8];
+                    return parentObj.CPUCore.registersUSR[((address | 0) - 8) | 0] | 0;
                 }
                 break;
             default:
-                if (address < 13) {
-                    return parentObj.registers[address];
+                if ((address | 0) < 13) {
+                    return parentObj.registers[address | 0] | 0;
                 }
                 else {
                     //User-Mode Register Read Inside Non-User-Mode:
-                    return parentObj.CPUCore.registersUSR[address - 8];
+                    return parentObj.CPUCore.registersUSR[((address | 0) - 8) | 0] | 0;
                 }
         }
     }
     else {
         //STM type instruction saves 12 ahead:
-        return (parentObj.registers[0xF] + 4) | 0;
+        return ((parentObj.registers[0xF] | 0) + 4) | 0;
     }
 }
 ARMInstructionSet.prototype.updateBasePostDecrement = function (operand, offset, userMode) {
+    operand = operand | 0;
+    offset = offset | 0;
     var baseRegisterNumber = (operand >> 16) & 0xF;
-    var base = this.baseRegisterRead(baseRegisterNumber, userMode);
-    var result = (base - offset) | 0;
-	this.baseRegisterWrite(baseRegisterNumber, result, userMode);
-    return base;
+    var base = this.baseRegisterRead(baseRegisterNumber | 0, userMode) | 0;
+    var result = ((base | 0) - (offset | 0)) | 0;
+	this.baseRegisterWrite(baseRegisterNumber | 0, result | 0, userMode);
+    return base | 0;
 }
 ARMInstructionSet.prototype.updateBasePostIncrement = function (operand, offset, userMode) {
+    operand = operand | 0;
+    offset = offset | 0;
     var baseRegisterNumber = (operand >> 16) & 0xF;
-    var base = this.baseRegisterRead(baseRegisterNumber, userMode);
-    var result = (base + offset) | 0;
-	this.baseRegisterWrite(baseRegisterNumber, result, userMode);
-    return base;
+    var base = this.baseRegisterRead(baseRegisterNumber | 0, userMode) | 0;
+    var result = ((base | 0) + (offset | 0)) | 0;
+	this.baseRegisterWrite(baseRegisterNumber | 0, result | 0, userMode);
+    return base | 0;
 }
 ARMInstructionSet.prototype.updateNoBaseDecrement = function (operand, offset) {
+    operand = operand | 0;
+    offset = offset | 0;
     var baseRegisterNumber = (operand >> 16) & 0xF;
-    var base = this.registers[baseRegisterNumber];
-    var result = (base - offset) | 0;
-    return result;
+    var base = this.registers[baseRegisterNumber | 0] | 0;
+    var result = ((base | 0) - (offset | 0)) | 0;
+    return result | 0;
 }
 ARMInstructionSet.prototype.updateNoBaseIncrement = function (operand, offset) {
+    operand = operand | 0;
+    offset = offset | 0;
     var baseRegisterNumber = (operand >> 16) & 0xF;
-    var base = this.registers[baseRegisterNumber];
-    var result = (base + offset) | 0;
-    return result;
+    var base = this.registers[baseRegisterNumber | 0] | 0;
+    var result = ((base | 0) + (offset | 0)) | 0;
+    return result | 0;
 }
 ARMInstructionSet.prototype.updateBasePreDecrement = function (operand, offset) {
+    operand = operand | 0;
+    offset = offset | 0;
     var baseRegisterNumber = (operand >> 16) & 0xF;
-    var base = this.registers[baseRegisterNumber];
-    var result = (base - offset) | 0;
-    this.guardRegisterWrite(baseRegisterNumber, result);
-    return result;
+    var base = this.registers[baseRegisterNumber | 0] | 0;
+    var result = ((base | 0) - (offset | 0)) | 0;
+    this.guardRegisterWrite(baseRegisterNumber | 0, result | 0);
+    return result | 0;
 }
 ARMInstructionSet.prototype.updateBasePreIncrement = function (operand, offset) {
+    operand = operand | 0;
+    offset = offset | 0;
     var baseRegisterNumber = (operand >> 16) & 0xF;
-    var base = this.registers[baseRegisterNumber];
-    var result = (base + offset) | 0;
-	this.guardRegisterWrite(baseRegisterNumber, result);
-    return result;
+    var base = this.registers[baseRegisterNumber | 0] | 0;
+    var result = ((base | 0) + (offset | 0)) | 0;
+	this.guardRegisterWrite(baseRegisterNumber | 0, result | 0);
+    return result | 0;
 }
 ARMInstructionSet.prototype.getLR = function () {
 	return (this.registers[15] - 4) | 0;
 }
 ARMInstructionSet.prototype.getIRQLR = function () {
-	return this.getLR();
+	return this.getLR() | 0;
 }
 ARMInstructionSet.prototype.BX = function (parentObj) {
 	//Branch & eXchange:
-	var address = parentObj.registers[parentObj.execute & 0xF];
+	var address = parentObj.registers[parentObj.execute & 0xF] | 0;
 	if ((address & 0x1) == 0) {
 		//Stay in ARM mode:
 		parentObj.CPUCore.branch(address & -4);
@@ -303,235 +326,235 @@ ARMInstructionSet.prototype.BX = function (parentObj) {
 }
 ARMInstructionSet.prototype.B = function (parentObj) {
 	//Branch:
-	parentObj.CPUCore.branch((parentObj.registers[15] + ((parentObj.execute << 8) >> 6)) | 0);
+	parentObj.CPUCore.branch(((parentObj.registers[15] | 0) + ((parentObj.execute << 8) >> 6)) | 0);
 }
 ARMInstructionSet.prototype.BL = function (parentObj) {
 	//Branch with Link:
-	parentObj.registers[14] = (parentObj.registers[15] - 4) & -4;
+	parentObj.registers[14] = ((parentObj.registers[15] | 0) - 4) & -4;
 	parentObj.B(parentObj);
 }
 ARMInstructionSet.prototype.AND = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise AND:
 	//Update destination register:
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, operand1 & operand2);
 }
 ARMInstructionSet.prototype.ANDS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise AND:
 	var result = operand1 & operand2;
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result | 0);
 }
 ARMInstructionSet.prototype.EOR = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise EOR:
 	//Update destination register:
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, operand1 ^ operand2);
 }
 ARMInstructionSet.prototype.EORS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise EOR:
 	var result = operand1 ^ operand2;
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result | 0);
 }
 ARMInstructionSet.prototype.SUB = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform Subtraction:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 - operand2) | 0);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, ((operand1 | 0) - (operand2 | 0)) | 0);
 }
 ARMInstructionSet.prototype.SUBS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSUBFlags(operand1, operand2));
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSB = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform Subtraction:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand2 - operand1) | 0);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, ((operand2 | 0) - (operand1 | 0)) | 0);
 }
 ARMInstructionSet.prototype.RSBS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSUBFlags(operand2, operand1));
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADD = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform Addition:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 + operand2) | 0);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, ((operand1 | 0) + (operand2 | 0)) | 0);
 }
 ARMInstructionSet.prototype.ADDS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setADDFlags(operand1, operand2));
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADC = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform Addition w/ Carry:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 + operand2 + ((parentObj.CPUCore.CPSRCarry) ? 1 : 0)) | 0);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, ((operand1 | 0) + (operand2 | 0) + ((parentObj.CPUCore.CPSRCarry) ? 1 : 0)) | 0);
 }
 ARMInstructionSet.prototype.ADCS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setADCFlags(operand1, operand2));
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setADCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SBC = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform Subtraction w/ Carry:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand1 - operand2 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) | 0);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, ((operand1 | 0) - (operand2 | 0) - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) | 0);
 }
 ARMInstructionSet.prototype.SBCS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSBCFlags(operand1, operand2));
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSC = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform Reverse Subtraction w/ Carry:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, (operand2 - operand1 - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) | 0);
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, ((operand2 | 0) - (operand1 | 0) - ((parentObj.CPUCore.CPSRCarry) ? 0 : 1)) | 0);
 }
 ARMInstructionSet.prototype.RSCS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Update destination register:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSBCFlags(operand2, operand1));
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, parentObj.CPUCore.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.TSTS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise AND:
 	var result = operand1 & operand2;
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 }
 ARMInstructionSet.prototype.TEQS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise EOR:
 	var result = operand1 ^ operand2;
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 }
 ARMInstructionSet.prototype.CMPS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
-	parentObj.CPUCore.setCMPFlags(operand1, operand2);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+	parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 ARMInstructionSet.prototype.CMNS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
-	parentObj.CPUCore.setCMNFlags(operand1, operand2);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0);
+	parentObj.CPUCore.setCMNFlags(operand1 | 0, operand2 | 0);
 }
 ARMInstructionSet.prototype.ORR = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise OR:
 	//Update destination register:
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, operand1 | operand2);
 }
 ARMInstructionSet.prototype.ORRS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise OR:
 	var result = operand1 | operand2;
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result | 0);
 }
 ARMInstructionSet.prototype.MOV = function (parentObj, operand2OP) {
 	//Perform move:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, operand2OP(parentObj, parentObj.execute));
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, operand2OP(parentObj, parentObj.execute | 0) | 0);
 }
 ARMInstructionSet.prototype.MOVS = function (parentObj, operand2OP) {
-	var operand2 = operand2OP(parentObj, parentObj.execute);
+	var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform move:
 	parentObj.CPUCore.CPSRNegative = (operand2 < 0);
 	parentObj.CPUCore.CPSRZero = (operand2 == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, operand2);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, operand2 | 0);
 }
 ARMInstructionSet.prototype.BIC = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
 	//NOT operand 2:
-	var operand2 = ~operand2OP(parentObj, parentObj.execute);
+	var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise AND:
 	//Update destination register:
 	parentObj.guardRegisterWrite(parentObj.execute >> 12, operand1 & operand2);
 }
 ARMInstructionSet.prototype.BICS = function (parentObj, operand2OP) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF];
+	var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
 	//NOT operand 2:
-	var operand2 = ~operand2OP(parentObj, parentObj.execute);
+	var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform bitwise AND:
 	var result = operand1 & operand2;
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, result | 0);
 }
 ARMInstructionSet.prototype.MVN = function (parentObj, operand2OP) {
 	//Perform move negative:
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, ~operand2OP(parentObj, parentObj.execute));
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, ~operand2OP(parentObj, parentObj.execute | 0));
 }
 ARMInstructionSet.prototype.MVNS = function (parentObj, operand2OP) {
-	var operand2 = ~operand2OP(parentObj, parentObj.execute);
+	var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
 	//Perform move negative:
 	parentObj.CPUCore.CPSRNegative = (operand2 < 0);
 	parentObj.CPUCore.CPSRZero = (operand2 == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, operand2);
+	parentObj.guardRegisterWriteCPSR(parentObj.execute >> 12, operand2 | 0);
 }
 ARMInstructionSet.prototype.MRS = function (parentObj, operand2OP) {
 	//Transfer PSR to Register
-	parentObj.guardRegisterWrite(parentObj.execute >> 12, operand2OP(parentObj));
+	parentObj.guardRegisterWrite(parentObj.execute >> 12, operand2OP(parentObj) | 0);
 }
 ARMInstructionSet.prototype.MSR = function (parentObj, operand2OP) {
 	//Transfer Register/Immediate to PSR:
-	operand2OP(parentObj, parentObj.execute);
+	operand2OP(parentObj, parentObj.execute | 0);
 }
 ARMInstructionSet.prototype.MUL = function (parentObj, operand2OP) {
 	//Perform multiplication:
-	var result = parentObj.CPUCore.performMUL32(parentObj.registers[parentObj.execute & 0xF], parentObj.registers[(parentObj.execute >> 8) & 0xF], 0);
+	var result = parentObj.CPUCore.performMUL32(parentObj.registers[parentObj.execute & 0xF] | 0, parentObj.registers[(parentObj.execute >> 8) & 0xF] | 0, 0) | 0;
 	//Update destination register:
-	parentObj.guardRegisterWrite(parentObj.execute >> 16, result);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, result | 0);
 }
 ARMInstructionSet.prototype.MULS = function (parentObj, operand2OP) {
 	//Perform multiplication:
-	var result = parentObj.CPUCore.performMUL32(parentObj.registers[parentObj.execute & 0xF], parentObj.registers[(parentObj.execute >> 8) & 0xF], 0);
+	var result = parentObj.CPUCore.performMUL32(parentObj.registers[parentObj.execute & 0xF] | 0, parentObj.registers[(parentObj.execute >> 8) & 0xF] | 0, 0);
 	parentObj.CPUCore.CPSRCarry = false;
 	parentObj.CPUCore.CPSRNegative = (result < 0);
 	parentObj.CPUCore.CPSRZero = (result == 0);
 	//Update destination register and guard CPSR for PC:
-	parentObj.guardRegisterWrite(parentObj.execute >> 16, result);
+	parentObj.guardRegisterWrite(parentObj.execute >> 16, result | 0);
 }
 ARMInstructionSet.prototype.MLA = function (parentObj, operand2OP) {
 	//Perform multiplication:

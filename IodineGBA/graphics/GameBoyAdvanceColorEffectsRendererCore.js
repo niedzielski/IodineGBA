@@ -24,37 +24,43 @@ function GameBoyAdvanceColorEffectsRenderer() {
 	this.brightnessEffectAmount = 0;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.processOAMSemiTransparent = function (lowerPixel, topPixel) {
-	if ((lowerPixel & this.effectsTarget2) != 0) {
-		return this.alphaBlend(topPixel, lowerPixel);
+	lowerPixel = lowerPixel | 0;
+    topPixel = topPixel | 0;
+    if (((lowerPixel | 0) & (this.effectsTarget2 | 0)) != 0) {
+		return this.alphaBlend(topPixel | 0, lowerPixel | 0) | 0;
 	}
-	else if ((topPixel & this.effectsTarget1) != 0) {
-		switch (this.colorEffectsType) {
+	else if (((topPixel | 0) & (this.effectsTarget1 | 0)) != 0) {
+		switch (this.colorEffectsType | 0) {
 			case 2:
-				return this.brightnessIncrease(topPixel);
+				return this.brightnessIncrease(topPixel | 0) | 0;
 			case 3:
-				return this.brightnessDecrease(topPixel);
+				return this.brightnessDecrease(topPixel | 0) | 0;
 		}
 	}
-	return topPixel;
+	return topPixel | 0;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.process = function (lowerPixel, topPixel) {
-	if ((topPixel & this.effectsTarget1) != 0) {
-		switch (this.colorEffectsType) {
+	lowerPixel = lowerPixel | 0;
+    topPixel = topPixel | 0;
+    if (((topPixel | 0) & (this.effectsTarget1 | 0)) != 0) {
+		switch (this.colorEffectsType | 0) {
 			case 1:
-				if ((lowerPixel & this.effectsTarget2) != 0) {
-					return this.alphaBlend(topPixel, lowerPixel);
+				if (((lowerPixel | 0) & (this.effectsTarget2 | 0)) != 0) {
+					return this.alphaBlend(topPixel | 0, lowerPixel | 0) | 0;
 				}
 				break;
 			case 2:
-				return this.brightnessIncrease(topPixel);
+				return this.brightnessIncrease(topPixel | 0) | 0;
 			case 3:
-				return this.brightnessDecrease(topPixel);
+				return this.brightnessDecrease(topPixel | 0) | 0;
 		}
 	}
-	return topPixel;
+	return topPixel | 0;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlend = function (topPixel, lowerPixel) {
-	var b1 = (topPixel >> 10) & 0x1F;
+	topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b1 = (topPixel >> 10) & 0x1F;
 	var g1 = (topPixel >> 5) & 0x1F;
 	var r1 = (topPixel & 0x1F);
 	var b2 = (lowerPixel >> 10) & 0x1F;
@@ -69,7 +75,8 @@ GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlend = function (topPixel, lo
 	return (Math.min(b1 + b2, 0x1F) << 10) | (Math.min(g1 + g2, 0x1F) << 5) | Math.min(r1 + r2, 0x1F);
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.brightnessIncrease = function (topPixel) {
-	var b1 = (topPixel >> 10) & 0x1F;
+	topPixel = topPixel | 0;
+    var b1 = (topPixel >> 10) & 0x1F;
 	var g1 = (topPixel >> 5) & 0x1F;
 	var r1 = (topPixel & 0x1F);
 	b1 += (0x1F - b1) * this.brightnessEffectAmount;
@@ -78,7 +85,8 @@ GameBoyAdvanceColorEffectsRenderer.prototype.brightnessIncrease = function (topP
 	return (b1 << 10) | (g1 << 5) | r1;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.brightnessDecrease = function (topPixel) {
-	var b1 = (topPixel >> 10) & 0x1F;
+	topPixel = topPixel | 0;
+    var b1 = (topPixel >> 10) & 0x1F;
 	var g1 = (topPixel >> 5) & 0x1F;
 	var r1 = (topPixel & 0x1F);
 	var decreaseMultiplier = 1 - this.brightnessEffectAmount;

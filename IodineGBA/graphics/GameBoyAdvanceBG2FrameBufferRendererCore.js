@@ -50,7 +50,6 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y)
     return this.transparency;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3PixelOptimized = function (x, y) {
-    //Tell JS Engines it's int32:
     x = x | 0;
     y = y | 0;
     //Output pixel:
@@ -62,7 +61,6 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3PixelOptimized = functi
     return this.transparency | 0;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode4Pixel = function (x, y) {
-    //Tell JS Engines it's int32:
     x = x | 0;
     y = y | 0;
     //Output pixel:
@@ -84,7 +82,6 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5Pixel = function (x, y)
     return this.transparency;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5PixelOptimized = function (x, y) {
-    //Tell JS Engines it's int32:
     x = x | 0;
     y = y | 0;
     //Output pixel:

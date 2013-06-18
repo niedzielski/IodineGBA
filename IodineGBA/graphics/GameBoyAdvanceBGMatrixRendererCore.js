@@ -41,7 +41,6 @@ GameBoyAdvanceBGMatrixRenderer.prototype.fetchTile = function (tileNumber) {
 	return this.VRAM[(tileNumber + this.BGScreenBaseBlock) & 0xFFFF];
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
-    //Tell JS Engines it's int32:
     x = x | 0;
     y = y | 0;
     var mapSizeComparer = this.mapSizeComparer | 0;
