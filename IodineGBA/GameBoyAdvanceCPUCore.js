@@ -116,7 +116,7 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	}
 }
 GameBoyAdvanceCPU.prototype.checkPendingIRQ = function () {
-	if (!this.IRQDisabled) {
+	if (!this.IRQDisabled && this.pipelineInvalid == 0) {
 		if (this.triggeredIRQ) {
 			//Clear our Pending IRQ acknowledge:
 			this.IOCore.irq.checkForIRQFire();
