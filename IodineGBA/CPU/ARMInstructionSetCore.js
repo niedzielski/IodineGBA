@@ -90,6 +90,12 @@ ARMInstructionSet.prototype.conditionCodeTest = function () {
 			return false;
 	}
 }
+ARMInstructionSet.prototype.getLR = function () {
+	return ((this.readRegister(15) | 0) - 4) | 0;
+}
+ARMInstructionSet.prototype.getIRQLR = function () {
+	return this.getLR() | 0;
+}
 ARMInstructionSet.prototype.writeRegister = function (address, data) {
 	//Unguarded non-pc register write:
     address = address | 0;
@@ -321,12 +327,6 @@ ARMInstructionSet.prototype.updateBasePreIncrement = function (operand, offset) 
 	this.guardRegisterWrite(baseRegisterNumber | 0, result | 0);
     return result | 0;
 }
-ARMInstructionSet.prototype.getLR = function () {
-	return (this.registers[15] - 4) | 0;
-}
-ARMInstructionSet.prototype.getIRQLR = function () {
-	return this.getLR() | 0;
-}
 ARMInstructionSet.prototype.BX = function (parentObj) {
 	//Branch & eXchange:
 	var address = parentObj.registers[parentObj.execute & 0xF] | 0;
@@ -342,11 +342,11 @@ ARMInstructionSet.prototype.BX = function (parentObj) {
 }
 ARMInstructionSet.prototype.B = function (parentObj) {
 	//Branch:
-	parentObj.CPUCore.branch(((parentObj.registers[15] | 0) + ((parentObj.execute << 8) >> 6)) | 0);
+	parentObj.CPUCore.branch(((parentObj.readRegister(0xF) | 0) + ((parentObj.execute << 8) >> 6)) | 0);
 }
 ARMInstructionSet.prototype.BL = function (parentObj) {
 	//Branch with Link:
-	parentObj.registers[14] = ((parentObj.registers[15] | 0) - 4) & -4;
+    parentObj.writeRegister(0xE, parentObj.getLR() | 0);
 	parentObj.B(parentObj);
 }
 ARMInstructionSet.prototype.AND = function (parentObj, operand2OP) {
