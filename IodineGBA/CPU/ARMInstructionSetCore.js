@@ -1198,6 +1198,10 @@ ARMInstructionSet.prototype.lri2 = function (operand) {
 	this.wait.CPUInternalCyclePrefetch(this.fetch, 1);
 	//Shift the register data right logically:
 	var shifter = (operand >> 7) & 0x1F;
+    if (shifter == 0) {
+        //Return 0:
+        return 0;
+    }
 	return (register >>> shifter) | 0;
 }
 ARMInstructionSet.prototype.lris = function (parentObj, operand) {
