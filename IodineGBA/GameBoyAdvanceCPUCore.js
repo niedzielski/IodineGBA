@@ -80,10 +80,10 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 	}
 }
 GameBoyAdvanceCPU.prototype.executeIteration = function () {
-	//Check for pending IRQ:
-	this.checkPendingIRQ();
 	//Tick the pipeline and bubble out invalidity:
 	this.pipelineInvalid >>= 1;
+    //Check for pending IRQ:
+	this.checkPendingIRQ();
 	//Tick the pipeline of the selected instruction set:
 	this.instructionHandle.executeIteration();
 	//Increment the program counter if we didn't just branch:
