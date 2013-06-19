@@ -80,10 +80,10 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 	}
 }
 GameBoyAdvanceCPU.prototype.executeIteration = function () {
+	//Check for pending IRQ:
+	this.checkPendingIRQ();
 	//Tick the pipeline and bubble out invalidity:
 	this.pipelineInvalid >>= 1;
-    //Check for pending IRQ:
-	this.checkPendingIRQ();
 	//Tick the pipeline of the selected instruction set:
 	this.instructionHandle.executeIteration();
 	//Increment the program counter if we didn't just branch:
@@ -116,7 +116,7 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	}
 }
 GameBoyAdvanceCPU.prototype.checkPendingIRQ = function () {
-	if (!this.IRQDisabled && this.pipelineInvalid == 0) {
+	if (!this.IRQDisabled) {
 		if (this.triggeredIRQ) {
 			//Clear our Pending IRQ acknowledge:
 			this.IOCore.irq.checkForIRQFire();
@@ -141,6 +141,18 @@ GameBoyAdvanceCPU.prototype.getLR = function () {
 	//Get the previous instruction address:
 	return this.instructionHandle.getLR();
 }
+GameBoyAdvanceCPU.prototype.getIRQLR = function () {
+	//Get the previous instruction address:
+	var lr = this.instructionHandle.getIRQLR();
+    var modeOffset = (this.InTHUMB) ? 2 : 4;
+    if (this.pipelineInvalid > 1) {
+        while (this.pipelineInvalid > 1) {
+            lr = (lr + modeOffset) | 0;
+            this.pipelineInvalid >>= 1;
+        }
+    }
+    return lr;
+}
 GameBoyAdvanceCPU.prototype.THUMBBitModify = function (isThumb) {
 	this.InTHUMB = isThumb;
 	if (isThumb) {
@@ -155,7 +167,7 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
 		//Mode bits are set to IRQ:
 		this.switchMode(0x12);
 		//Save link register:
-		this.registers[14] = this.instructionHandle.getIRQLR();
+		this.registers[14] = this.getIRQLR();
 		//Disable IRQ:
 		this.IRQDisabled = true;
 		if (this.IOCore.BIOSFound) {
