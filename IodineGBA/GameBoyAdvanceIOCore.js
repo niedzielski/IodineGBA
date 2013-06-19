@@ -1950,14 +1950,11 @@ GameBoyAdvanceIO.prototype.writeIODispatch = function (parentObj, address, data,
 }
 GameBoyAdvanceIO.prototype.writeVRAM = function (parentObj, address, data, busReqNumber) {
 	parentObj.wait.VRAMAccess(busReqNumber);
-	if (address < 0x6018000) {
-		parentObj.gfx.writeVRAM(address & 0x1FFFF, data);
-	}
-	else if ((address & 0x1F000) > 0x17000) {
+    if ((address & 0x10000) != 0) {
 		parentObj.gfx.writeVRAM(address & 0x17FFF, data);
 	}
 	else {
-		parentObj.gfx.writeVRAM(address & 0x1FFFF, data);
+		parentObj.gfx.writeVRAM(address & 0xFFFF, data);
 	}
 }
 GameBoyAdvanceIO.prototype.writeOAM = function (parentObj, address, data, busReqNumber) {
@@ -2047,14 +2044,11 @@ GameBoyAdvanceIO.prototype.readIODispatch = function (parentObj, address, busReq
 }
 GameBoyAdvanceIO.prototype.readVRAM = function (parentObj, address, busReqNumber) {
 	parentObj.wait.VRAMAccess(busReqNumber);
-	if (address < 0x6018000) {
-		return parentObj.gfx.readVRAM(address & 0x1FFFF);
-	}
-	else if ((address & 0x1F000) > 0x17000) {
+	if ((address & 0x10000) != 0) {
 		return parentObj.gfx.readVRAM(address & 0x17FFF);
 	}
 	else {
-		return parentObj.gfx.readVRAM(address & 0x1FFFF);
+		return parentObj.gfx.readVRAM(address & 0xFFFF);
 	}
 }
 GameBoyAdvanceIO.prototype.readOAM = function (parentObj, address, busReqNumber) {
