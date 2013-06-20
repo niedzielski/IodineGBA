@@ -433,7 +433,7 @@ GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
     line = line | 0;
     var offsetStart = (line * 240) | 0;
 	var position = 0;
-	if (forcedBlank) {
+	if (this.forcedBlank) {
         for (; position < 240; offsetStart = (offsetStart + 1) | 0, position = (position + 1) | 0) {
 			this.frameBuffer[offsetStart | 0] = 0x7FFF;
 		}
