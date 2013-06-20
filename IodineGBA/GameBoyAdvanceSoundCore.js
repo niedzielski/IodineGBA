@@ -172,7 +172,7 @@ GameBoyAdvanceSound.prototype.audioDisabled = function () {
 	//Clear NR14:
 	this.nr14 = 0;
 	this.channel1consecutive = true;
-	this.channel1ShadowFrequency = 0x2000;
+	this.channel1ShadowFrequency = 0x8000;
 	this.channel1canPlay = false;
 	this.channel1Enabled = false;
 	this.channel1envelopeSweeps = 0;

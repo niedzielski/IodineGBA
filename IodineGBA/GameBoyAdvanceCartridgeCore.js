@@ -69,22 +69,12 @@ GameBoyAdvanceCartridge.prototype.readROM16 = function (address) {
         address <<= 1;
         return this.ROM[address] | (this.ROM[address | 1] << 8);
     }
-    /*if (!this.saveRTC) {
-		return this.ROM16[address];
-	}
-	else {
-		//GPIO Chip (RTC):
-		switch (address) {
-			case 0x62:
-				return this.rtc.read0();
-			case 0x63:
-				return this.rtc.read1();
-			case 0x64:
-				return this.rtc.read2();
-			default:
-				return this.ROM16[address];
-		}
-	}*/
+}
+GameBoyAdvanceCartridge.prototype.readROM16Slow = function (address) {
+    return this.ROM[address] | (this.ROM[address | 1] << 8);
+}
+GameBoyAdvanceCartridge.prototype.readROM16Optimized = function (address) {
+    return this.ROM16[(address >> 1) & 0xFFFFFF] | 0;
 }
 GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
     if (this.ROM32) {
@@ -94,20 +84,12 @@ GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
         address <<= 2;
         return this.ROM[address] | (this.ROM[address | 1] << 8) | (this.ROM[address | 2] << 16)  | (this.ROM[address | 3] << 24);
     }
-    /*if (!this.saveRTC) {
-		return this.ROM32[address];
-	}
-	else {
-		//GPIO Chip (RTC):
-		switch (address) {
-			case 0x31:
-				return this.rtc.read0() | (this.rtc.read1() << 16);
-			case 0x32:
-				return this.rtc.read2();
-			default:
-				return this.ROM32[address];
-		}
-	}*/
+}
+GameBoyAdvanceCartridge.prototype.readROM32Slow = function (address) {
+    return this.ROM[address] | (this.ROM[address | 1] << 8) | (this.ROM[address | 2] << 16)  | (this.ROM[address | 3] << 24);
+}
+GameBoyAdvanceCartridge.prototype.readROM32Optimized = function (address) {
+    return this.ROM32[(address >> 2) & 0x7FFFFF] | 0;
 }
 GameBoyAdvanceCartridge.prototype.writeROM = function (address, data) {
 	if (this.saveRTC) {
