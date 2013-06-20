@@ -62,7 +62,13 @@ GameBoyAdvanceCartridge.prototype.readROM = function (address) {
 	}*/
 }
 GameBoyAdvanceCartridge.prototype.readROM16 = function (address) {
-    return this.ROM16[address & 0xFFFFFF] | 0;
+    if (this.ROM16) {
+        return this.ROM16[address & 0xFFFFFF] | 0;
+    }
+    else {
+        address <<= 1;
+        return this.ROM[address] | (this.ROM[address | 1] << 8);
+    }
     /*if (!this.saveRTC) {
 		return this.ROM16[address];
 	}
@@ -81,7 +87,13 @@ GameBoyAdvanceCartridge.prototype.readROM16 = function (address) {
 	}*/
 }
 GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
-    return this.ROM32[address & 0x7FFFFF] | 0;
+    if (this.ROM32) {
+        return this.ROM32[address & 0x7FFFFF] | 0;
+    }
+    else {
+        address <<= 2;
+        return this.ROM[address] | (this.ROM[address | 1] << 8) | (this.ROM[address | 2] << 16)  | (this.ROM[address | 3] << 24);
+    }
     /*if (!this.saveRTC) {
 		return this.ROM32[address];
 	}

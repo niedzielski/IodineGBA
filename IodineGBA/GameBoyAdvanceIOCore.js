@@ -36,11 +36,17 @@ function GameBoyAdvanceIO(emulatorCore) {
 	this.cartridge = new GameBoyAdvanceCartridge(this);
 	this.wait = new GameBoyAdvanceWait(this);
 	this.cpu = new GameBoyAdvanceCPU(this);
-	//After all sub-objects initialized, initialize dispatches:
-	this.compileMemoryDispatches();
 	//Initialize Some RAM:
 	this.externalRAM = getUint8Array(0x40000);
-	this.internalRAM = getUint8Array(0x8000);
+    this.externalRAM16 = getUint16View(this.externalRAM);
+	this.externalRAM32 = getInt32View(this.externalRAM);
+    this.internalRAM = getUint8Array(0x8000);
+    this.internalRAM16 = getUint16View(this.internalRAM);
+	this.internalRAM32 = getInt32View(this.internalRAM);
+    //After all sub-objects initialized, initialize dispatches:
+	this.compileMemoryDispatches();
+    this.compileIOWriteDispatch();
+	this.compileIOReadDispatch();
 }
 GameBoyAdvanceIO.prototype.memoryWrite8 = function (address, data) {
 	//Byte Write:
@@ -49,259 +55,409 @@ GameBoyAdvanceIO.prototype.memoryWrite8 = function (address, data) {
 }
 GameBoyAdvanceIO.prototype.memoryWrite16 = function (address, data) {
 	//Half-Word Write:
-	this.wait.width = 16;
-	this.memoryWrite(address >>>= 0, data & 0xFF, 0);
-	this.memoryWrite(address + 1, (data >> 8) & 0xFF, 1);
+	if ((address & 0x1) == 0) {
+        //Use optimized path for aligned:
+        this.memoryWriteFast16(address | 0, data | 0);
+    }
+    else {
+        this.wait.width = 16;
+        this.memoryWrite(address >>>= 0, data & 0xFF, 0);
+        this.memoryWrite(address + 1, (data >> 8) & 0xFF, 1);
+    }
 }
 GameBoyAdvanceIO.prototype.memoryWrite32 = function (address, data) {
 	//Word Write:
-	this.wait.width = 32;
-	this.memoryWrite(address >>>= 0, data & 0xFF, 0);
-	this.memoryWrite(address + 1, (data >> 8) & 0xFF, 1);
-	this.memoryWrite(address + 2, (data >> 16) & 0xFF, 2);
-	this.memoryWrite(address + 3, data >>> 24, 3);
+	if ((address & 0x3) == 0) {
+        //Use optimized path for aligned:
+        this.memoryWriteFast32(address | 0, data | 0);
+    }
+    else {
+        this.wait.width = 32;
+        this.memoryWrite(address >>>= 0, data & 0xFF, 0);
+        this.memoryWrite(address + 1, (data >> 8) & 0xFF, 1);
+        this.memoryWrite(address + 2, (data >> 16) & 0xFF, 2);
+        this.memoryWrite(address + 3, data >>> 24, 3);
+    }
 }
 GameBoyAdvanceIO.prototype.memoryWrite = function (address, data, busReqNumber) {
-	this.memoryWriter[address >>> 24](this, address, data, busReqNumber);
+	this.memoryWriter8[address >>> 24](this, address | 0, data | 0, busReqNumber | 0);
+}
+GameBoyAdvanceIO.prototype.memoryWriteFast16 = function (address, data) {
+	this.memoryWriter16[address >>> 24](this, address | 0, data | 0);
+}
+GameBoyAdvanceIO.prototype.memoryWriteFast32 = function (address, data) {
+	this.memoryWriter32[address >>> 24](this, address | 0, data | 0);
 }
 GameBoyAdvanceIO.prototype.memoryRead8 = function (address) {
-	//Byte Write:
+	//Byte Read:
 	this.wait.width = 8;
 	return this.memoryRead(address >>> 0, 0);
 }
 GameBoyAdvanceIO.prototype.memoryRead16 = function (address) {
-	//Half-Word Write:
-	this.wait.width = 16;
-	var data16 = this.memoryRead(address >>>= 0, 0);
-	data16 |= this.memoryRead(address + 1, 1) << 8;
-	return data16;
+	//Half-Word Read:
+    if ((address & 0x1) == 0) {
+        //Use optimized path for aligned:
+        return this.memoryReadFast16(address | 0);
+    }
+    else {
+        this.wait.width = 16;
+        var data16 = this.memoryRead(address >>>= 0, 0);
+        data16 |= this.memoryRead(address + 1, 1) << 8;
+        return data16;
+    }
 }
 GameBoyAdvanceIO.prototype.memoryRead32 = function (address) {
-	//Word Write:
-	this.wait.width = 32;
-	var data32 = this.memoryRead(address >>>= 0, 0);
-	data32 |= this.memoryRead(address + 1, 1) << 8;
-	data32 |= this.memoryRead(address + 2, 2) << 16;
-	data32 |= this.memoryRead(address + 3, 3) << 24;
-	return data32;
+	//Word Read:
+	if ((address & 0x3) == 0) {
+        //Use optimized path for aligned:
+        return this.memoryReadFast32(address | 0);
+    }
+    else {
+        this.wait.width = 32;
+        var data32 = this.memoryRead(address >>>= 0, 0);
+        data32 |= this.memoryRead(address + 1, 1) << 8;
+        data32 |= this.memoryRead(address + 2, 2) << 16;
+        data32 |= this.memoryRead(address + 3, 3) << 24;
+        return data32;
+    }
 }
 GameBoyAdvanceIO.prototype.memoryRead = function (address, busReqNumber) {
-	return this.memoryReader[address >>> 24](this, address, busReqNumber);
+	return this.memoryReader8[address >>> 24](this, address | 0, busReqNumber | 0);
+}
+GameBoyAdvanceIO.prototype.memoryReadFast16 = function (address) {
+	return this.memoryReader16[address >>> 24](this, address | 0);
+}
+GameBoyAdvanceIO.prototype.memoryReadFast32 = function (address) {
+	return this.memoryReader32[address >>> 24](this, address | 0);
 }
 GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
-	/*
+    var writeCalls8 = [
+                      this.writeUnused,
+                      this.writeExternalWRAM,
+                      this.writeInternalWRAM,
+                      this.writeIODispatch,
+                      this.writePalette,
+                      this.writeVRAM,
+                      this.writeOAM,
+                      this.writeROM0,
+                      this.writeROM1,
+                      this.writeROM2,
+                      this.writeSRAM
+    ];
+    var readCalls8 = [
+                      this.readUnused,
+                      this.readExternalWRAM,
+                      this.readInternalWRAM,
+                      this.readIODispatch,
+                      this.readPalette,
+                      this.readVRAM,
+                      this.readOAM,
+                      this.readROM0,
+                      this.readROM1,
+                      this.readROM2,
+                      this.readSRAM,
+                      this.readBIOS
+    ];
+    var bus8 = this.compileMemoryDispatch(writeCalls8, readCalls8);
+    this.memoryWriter8 = bus8[0];
+    this.memoryReader8 = bus8[1];
+    var writeCalls16 = [
+                        this.writeUnused16,
+                        (this.externalRAM16) ? this.writeExternalWRAM16Optimized : this.writeExternalWRAM16Slow,
+                        (this.internalRAM16) ? this.writeInternalWRAM16Optimized : this.writeInternalWRAM16Slow,
+                        this.writeIODispatch16,
+                        this.writePalette16,
+                        this.writeVRAM16,
+                        this.writeOAM16,
+                        this.writeROM016,
+                        this.writeROM116,
+                        this.writeROM216,
+                        this.writeSRAM16
+    ];
+    var readCalls16 = [
+                       this.readUnused16,
+                       (this.externalRAM16) ? this.readExternalWRAM16Optimized : this.readExternalWRAM16Slow,
+                       (this.internalRAM16) ? this.readInternalWRAM16Optimized : this.readInternalWRAM16Slow,
+                       this.readIODispatch16,
+                       this.readPalette16,
+                       (this.gfx.VRAM16) ? this.readVRAM16Optimized : this.readVRAM16Slow,
+                       this.readOAM16,
+                       this.readROM016,
+                       this.readROM116,
+                       this.readROM216,
+                       this.readSRAM16,
+                       this.readBIOS16
+    ];
+    var bus16 = this.compileMemoryDispatch(writeCalls16, readCalls16);
+    this.memoryWriter16 = bus16[0];
+    this.memoryReader16 = bus16[1];
+    var writeCalls32 = [
+                        this.writeUnused32,
+                        (this.externalRAM32) ? this.writeExternalWRAM32Optimized : this.writeExternalWRAM32Slow,
+                        (this.internalRAM32) ? this.writeInternalWRAM32Optimized : this.writeInternalWRAM32Slow,
+                        this.writeIODispatch32,
+                        this.writePalette32,
+                        this.writeVRAM32,
+                        this.writeOAM32,
+                        this.writeROM032,
+                        this.writeROM132,
+                        this.writeROM232,
+                        this.writeSRAM32
+    ];
+    var readCalls32 = [
+                       this.readUnused32,
+                       (this.externalRAM32) ? this.readExternalWRAM32Optimized : this.readExternalWRAM32Slow,
+                       (this.internalRAM32) ? this.readInternalWRAM32Optimized : this.readInternalWRAM32Slow,
+                       this.readIODispatch32,
+                       this.readPalette32,
+                       (this.gfx.VRAM32) ? this.readVRAM32Optimized : this.readVRAM32Slow,
+                       this.readOAM32,
+                       this.readROM032,
+                       this.readROM132,
+                       this.readROM232,
+                       this.readSRAM32,
+                       this.readBIOS32
+    ];
+    var bus32 = this.compileMemoryDispatch(writeCalls32, readCalls32);
+    this.memoryWriter32 = bus32[0];
+    this.memoryReader32 = bus32[1];
+}
+GameBoyAdvanceIO.prototype.compileMemoryDispatch = function (writeCalls, readCalls) {
+	var writeUnused = writeCalls[0];
+    var writeExternalWRAM = writeCalls[1];
+    var writeInternalWRAM = writeCalls[2];
+    var writeIODispatch = writeCalls[3];
+    var writePalette = writeCalls[4];
+    var writeVRAM = writeCalls[5];
+    var writeOAM = writeCalls[6];
+    var writeROM0 = writeCalls[7];
+    var writeROM1 = writeCalls[8];
+    var writeROM2 = writeCalls[9];
+    var writeSRAM = writeCalls[10];
+    var readUnused = readCalls[0];
+    var readExternalWRAM = readCalls[1];
+    var readInternalWRAM = readCalls[2];
+    var readIODispatch = readCalls[3];
+    var readPalette = readCalls[4];
+    var readVRAM = readCalls[5];
+    var readOAM = readCalls[6];
+    var readROM0 = readCalls[7];
+    var readROM1 = readCalls[8];
+    var readROM2 = readCalls[9];
+    var readSRAM = readCalls[10];
+    var readBIOS = readCalls[11];
+    /*
 		Decoder for the nibble at bits 24-27
 			(Top 4 bits of the address is not used,
 			so the next nibble down is used for dispatch.):
 	*/
-	this.memoryWriter = [
+	var memoryWriter = [
 		/*
 			BIOS Area (00000000-00003FFF)
 			Unused (00004000-01FFFFFF)
 		*/
-		this.writeUnused,
+		writeUnused,
 		/*
 			Unused (00004000-01FFFFFF)
 		*/
-		this.writeUnused,
+		writeUnused,
 		/*
 			WRAM - On-board Work RAM (02000000-0203FFFF)
 			Unused (02040000-02FFFFFF)
 		*/
-		this.writeExternalWRAM,
+		writeExternalWRAM,
 		/*
 			WRAM - In-Chip Work RAM (03000000-03007FFF)
 			Unused (03008000-03FFFFFF)
 		*/
-		this.writeInternalWRAM,
+		writeInternalWRAM,
 		/*
 			I/O Registers (04000000-040003FE)
 			Unused (04000400-04FFFFFF)
 		*/
-		this.writeIODispatch,
+		writeIODispatch,
 		/*
 			BG/OBJ Palette RAM (05000000-050003FF)
 			Unused (05000400-05FFFFFF)
 		*/
-		this.writePalette,
+		writePalette,
 		/*
 			VRAM - Video RAM (06000000-06017FFF)
 			Unused (06018000-06FFFFFF)
 		*/
-		this.writeVRAM,
+		writeVRAM,
 		/*
 			OAM - OBJ Attributes (07000000-070003FF)
 			Unused (07000400-07FFFFFF)
 		*/
-		this.writeOAM,
+		writeOAM,
 		/*
 			Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
 		*/
-		this.writeROM0,
+		writeROM0,
 		/*
 			Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
 		*/
-		this.writeROM0,
+		writeROM0,
 		/*
 			Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
 		*/
-		this.writeROM1,
+		writeROM1,
 		/*
 			Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
 		*/
-		this.writeROM1,
+		writeROM1,
 		/*
 			Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
 		*/
-		this.writeROM2,
+		writeROM2,
 		/*
 			Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
 		*/
-		this.writeROM2,
+		writeROM2,
 		/*
 			Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
 		*/
-		this.writeSRAM,
+		writeSRAM,
 		/*
 			Unused (0E010000-FFFFFFFF)
 		*/
-		this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused,
-		this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused, this.writeUnused
+		writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
+		writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused
 	];
-	this.memoryReader = [
+	var memoryReader = [
 		/*
 			BIOS Area (00000000-00003FFF)
 			Unused (00004000-01FFFFFF)
 		*/
-		this.readBIOS,
+		readBIOS,
 		/*
 			Unused (00004000-01FFFFFF)
 		*/
-		this.readUnused,
+		readUnused,
 		/*
 			WRAM - On-board Work RAM (02000000-0203FFFF)
 			Unused (02040000-02FFFFFF)
 		*/
-		this.readExternalWRAM,
+		readExternalWRAM,
 		/*
 			WRAM - In-Chip Work RAM (03000000-03007FFF)
 			Unused (03008000-03FFFFFF)
 		*/
-		this.readInternalWRAM,
+		readInternalWRAM,
 		/*
 			I/O Registers (04000000-040003FE)
 			Unused (04000400-04FFFFFF)
 		*/
-		this.readIODispatch,
+		readIODispatch,
 		/*
 			BG/OBJ Palette RAM (05000000-050003FF)
 			Unused (05000400-05FFFFFF)
 		*/
-		this.readPalette,
+		readPalette,
 		/*
 			VRAM - Video RAM (06000000-06017FFF)
 			Unused (06018000-06FFFFFF)
 		*/
-		this.readVRAM,
+		readVRAM,
 		/*
 			OAM - OBJ Attributes (07000000-070003FF)
 			Unused (07000400-07FFFFFF)
 		*/
-		this.readOAM,
+		readOAM,
 		/*
 			Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
 		*/
-		this.readROM0,
+		readROM0,
 		/*
 			Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
 		*/
-		this.readROM0,
+		readROM0,
 		/*
 			Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
 		*/
-		this.readROM1,
+		readROM1,
 		/*
 			Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
 		*/
-		this.readROM1,
+		readROM1,
 		/*
 			Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
 		*/
-		this.readROM2,
+		readROM2,
 		/*
 			Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
 		*/
-		this.readROM2,
+		readROM2,
 		/*
 			Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
 		*/
-		this.readSRAM,
+		readSRAM,
 		/*
 			Unused (0E010000-FFFFFFFF)
 		*/
-		this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused,
-		this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused, this.readUnused
+		readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
+		readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused
 	];
-	this.compileIOWriteDispatch();
-	this.compileIOReadDispatch();
+    return [memoryWriter, memoryReader];
 }
 GameBoyAdvanceIO.prototype.compileIOWriteDispatch = function () {
 	this.writeIO = [];
@@ -1930,22 +2086,96 @@ GameBoyAdvanceIO.prototype.fillReadTableUnused = function (from, to) {
 GameBoyAdvanceIO.prototype.writeExternalWRAM = function (parentObj, address, data, busReqNumber) {
 	//External WRAM:
 	parentObj.wait.WRAMAccess(busReqNumber);
-	parentObj.externalRAM[address & 0x3FFFF] = data;
+	parentObj.externalRAM[address & 0x3FFFF] = data | 0;
+}
+GameBoyAdvanceIO.prototype.writeExternalWRAM16Slow = function (parentObj, address, data) {
+	//External WRAM:
+	parentObj.wait.WRAMAccess16();
+	parentObj.externalRAM[address & 0x3FFFF] = data & 0xFF;
+    parentObj.externalRAM[(address + 1) & 0x3FFFF] = data >> 8;
+}
+GameBoyAdvanceIO.prototype.writeExternalWRAM16Optimized = function (parentObj, address, data) {
+	//External WRAM:
+	parentObj.wait.WRAMAccess16();
+	parentObj.externalRAM16[(address & 0x3FFFF) >> 1] = data | 0;
+}
+GameBoyAdvanceIO.prototype.writeExternalWRAM32Slow = function (parentObj, address, data) {
+	//External WRAM:
+	parentObj.wait.WRAMAccess32();
+	parentObj.externalRAM[address & 0x3FFFF] = data & 0xFF;
+    parentObj.externalRAM[(address + 1) & 0x3FFFF] = (data >> 8) & 0xFF;
+    parentObj.externalRAM[(address + 2) & 0x3FFFF] = (data >> 16) & 0xFF;
+    parentObj.externalRAM[(address + 3) & 0x3FFFF] = (data >> 24) & 0xFF;
+}
+GameBoyAdvanceIO.prototype.writeExternalWRAM32Optimized = function (parentObj, address, data) {
+	//External WRAM:
+	parentObj.wait.WRAMAccess32();
+	parentObj.externalRAM32[(address & 0x3FFFF) >> 2] = data | 0;
 }
 GameBoyAdvanceIO.prototype.writeInternalWRAM = function (parentObj, address, data, busReqNumber) {
 	//Internal WRAM:
-	parentObj.wait.FASTAccess();
-	parentObj.internalRAM[address & 0x7FFF] = data;
+	parentObj.wait.FASTAccess(busReqNumber);
+	parentObj.internalRAM[address & 0x7FFF] = data | 0;
+}
+GameBoyAdvanceIO.prototype.writeInternalWRAM16Slow = function (parentObj, address, data) {
+	//Internal WRAM:
+	parentObj.wait.FASTAccess2();
+	parentObj.internalRAM[address & 0x7FFF] = data & 0xFF;
+    parentObj.internalRAM[(address + 1) & 0x7FFF] = data >> 8;
+}
+GameBoyAdvanceIO.prototype.writeInternalWRAM16Optimized = function (parentObj, address, data) {
+	//Internal WRAM:
+	parentObj.wait.FASTAccess2();
+	parentObj.internalRAM16[(address & 0x7FFF) >> 1] = data | 0;
+}
+GameBoyAdvanceIO.prototype.writeInternalWRAM32Slow = function (parentObj, address, data) {
+	//Internal WRAM:
+	parentObj.wait.FASTAccess2();
+	parentObj.internalRAM[address & 0x7FFF] = data & 0xFF;
+    parentObj.internalRAM[(address + 1) & 0x7FFF] = (data >> 8) & 0xFF;
+    parentObj.internalRAM[(address + 2) & 0x7FFF] = (data >> 16) & 0xFF;
+    parentObj.internalRAM[(address + 3) & 0x7FFF] = (data >> 24) & 0xFF;
+}
+GameBoyAdvanceIO.prototype.writeInternalWRAM32Optimized = function (parentObj, address, data) {
+	//Internal WRAM:
+	parentObj.wait.FASTAccess2();
+	parentObj.internalRAM32[(address & 0x7FFF) >> 2] = data | 0;
 }
 GameBoyAdvanceIO.prototype.writeIODispatch = function (parentObj, address, data, busReqNumber) {
-	parentObj.wait.FASTAccess();
+	parentObj.wait.FASTAccess(busReqNumber);
 	if (address < 0x4000304) {
 		//IO Write:
-		parentObj.writeIO[address & 0x3FF](parentObj, data);
+		parentObj.writeIO[address & 0x3FF](parentObj, data | 0);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
-		parentObj.wait.writeConfigureWRAM(address, data);
+		parentObj.wait.writeConfigureWRAM(address, data | 0);
+	}
+}
+GameBoyAdvanceIO.prototype.writeIODispatch16 = function (parentObj, address, data) {
+	parentObj.wait.FASTAccess2();
+	if (address < 0x4000304) {
+		//IO Write:
+		parentObj.writeIO[address & 0x3FF](parentObj, data & 0xFF);
+        parentObj.writeIO[(address + 1) & 0x3FF](parentObj, (data >> 8) & 0xFF);
+	}
+	else if ((address & 0x4FF0800) == 0x4000800) {
+		//WRAM wait state control:
+		parentObj.wait.writeConfigureWRAM(address | 0, data & 0xFF);
+	}
+}
+GameBoyAdvanceIO.prototype.writeIODispatch32 = function (parentObj, address, data) {
+	parentObj.wait.FASTAccess2();
+	if (address < 0x4000304) {
+		//IO Write:
+		parentObj.writeIO[address & 0x3FF](parentObj, data & 0xFF);
+        parentObj.writeIO[(address + 1) & 0x3FF](parentObj, (data >> 8) & 0xFF);
+        parentObj.writeIO[(address + 2) & 0x3FF](parentObj, (data >> 16) & 0xFF);
+        parentObj.writeIO[(address + 3) & 0x3FF](parentObj, (data >> 24) & 0xFF);
+	}
+	else if ((address & 0x4FF0800) == 0x4000800) {
+		//WRAM wait state control:
+		parentObj.wait.writeConfigureWRAM(address | 0, data & 0xFF);
 	}
 }
 GameBoyAdvanceIO.prototype.writeVRAM = function (parentObj, address, data, busReqNumber) {
@@ -1957,36 +2187,138 @@ GameBoyAdvanceIO.prototype.writeVRAM = function (parentObj, address, data, busRe
 		parentObj.gfx.writeVRAM(address & 0xFFFF, data);
 	}
 }
+GameBoyAdvanceIO.prototype.writeVRAM16 = function (parentObj, address, data) {
+	parentObj.wait.VRAMAccess16();
+    if ((address & 0x10000) != 0) {
+		parentObj.gfx.writeVRAM(address & 0x17FFF, data);
+        parentObj.gfx.writeVRAM((address + 1) & 0x17FFF, (data >> 8) & 0xFF);
+	}
+	else {
+		parentObj.gfx.writeVRAM(address & 0xFFFF, data);
+        parentObj.gfx.writeVRAM((address + 1) & 0xFFFF, (data >> 8) & 0xFF);
+	}
+}
+GameBoyAdvanceIO.prototype.writeVRAM32 = function (parentObj, address, data) {
+	parentObj.wait.VRAMAccess32();
+    if ((address & 0x10000) != 0) {
+		parentObj.gfx.writeVRAM(address & 0x17FFF, data);
+        parentObj.gfx.writeVRAM((address + 1) & 0x17FFF, (data >> 8) & 0xFF);
+        parentObj.gfx.writeVRAM((address + 2) & 0x17FFF, (data >> 16) & 0xFF);
+        parentObj.gfx.writeVRAM((address + 3) & 0x17FFF, (data >> 24) & 0xFF);
+	}
+	else {
+		parentObj.gfx.writeVRAM(address & 0xFFFF, data);
+        parentObj.gfx.writeVRAM((address + 1) & 0xFFFF, (data >> 8) & 0xFF);
+        parentObj.gfx.writeVRAM((address + 2) & 0xFFFF, (data >> 16) & 0xFF);
+        parentObj.gfx.writeVRAM((address + 3) & 0xFFFF, (data >> 24) & 0xFF);
+	}
+}
 GameBoyAdvanceIO.prototype.writeOAM = function (parentObj, address, data, busReqNumber) {
 	parentObj.wait.OAMAccess(busReqNumber);
 	parentObj.gfx.writeOAM(address & 0x3FF, data);
+}
+GameBoyAdvanceIO.prototype.writeOAM16 = function (parentObj, address, data) {
+	parentObj.wait.OAMAccess16();
+	parentObj.gfx.writeOAM(address & 0x3FF, data & 0xFF);
+    parentObj.gfx.writeOAM((address + 1) & 0x3FF, data >> 8);
+}
+GameBoyAdvanceIO.prototype.writeOAM32 = function (parentObj, address, data) {
+	parentObj.wait.OAMAccess32();
+	parentObj.gfx.writeOAM(address & 0x3FF, data & 0xFF);
+    parentObj.gfx.writeOAM((address + 1) & 0x3FF, (data >> 8) & 0xFF);
+    parentObj.gfx.writeOAM((address + 2) & 0x3FF, (data >> 16) & 0xFF);
+    parentObj.gfx.writeOAM((address + 3) & 0x3FF, (data >> 24) & 0xFF);
 }
 GameBoyAdvanceIO.prototype.writePalette = function (parentObj, address, data, busReqNumber) {
 	parentObj.wait.VRAMAccess(busReqNumber);
 	parentObj.gfx.writePalette(address & 0x3FF, data);
 }
+GameBoyAdvanceIO.prototype.writePalette16 = function (parentObj, address, data) {
+	parentObj.wait.VRAMAccess16();
+	parentObj.gfx.writePalette(address & 0x3FF, data & 0xFF);
+    parentObj.gfx.writePalette((address + 1) & 0x3FF, data >> 8);
+}
+GameBoyAdvanceIO.prototype.writePalette32 = function (parentObj, address, data) {
+	parentObj.wait.VRAMAccess32();
+	parentObj.gfx.writePalette(address & 0x3FF, data & 0xFF);
+    parentObj.gfx.writePalette((address + 1) & 0x3FF, (data >> 8) & 0xFF);
+    parentObj.gfx.writePalette((address + 2) & 0x3FF, (data >> 16) & 0xFF);
+    parentObj.gfx.writePalette((address + 3) & 0x3FF, (data >> 24) & 0xFF);
+}
 GameBoyAdvanceIO.prototype.writeROM0 = function (parentObj, address, data, busReqNumber) {
 	parentObj.wait.ROM0Access(busReqNumber);
 	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data);
+}
+GameBoyAdvanceIO.prototype.writeROM016 = function (parentObj, address, data) {
+	parentObj.wait.ROM0Access16();
+	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, data >> 8);
+}
+GameBoyAdvanceIO.prototype.writeROM032 = function (parentObj, address, data) {
+	parentObj.wait.ROM0Access32();
+    parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
+    parentObj.cartridge.writeROM((address + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
+    parentObj.cartridge.writeROM((address + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
 }
 GameBoyAdvanceIO.prototype.writeROM1 = function (parentObj, address, data, busReqNumber) {
 	parentObj.wait.ROM1Access(busReqNumber);
 	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data);
 }
+GameBoyAdvanceIO.prototype.writeROM116 = function (parentObj, address, data) {
+	parentObj.wait.ROM1Access16();
+	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, data >> 8);
+}
+GameBoyAdvanceIO.prototype.writeROM132 = function (parentObj, address, data) {
+	parentObj.wait.ROM1Access32();
+    parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
+    parentObj.cartridge.writeROM((address + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
+    parentObj.cartridge.writeROM((address + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
+}
 GameBoyAdvanceIO.prototype.writeROM2 = function (parentObj, address, data, busReqNumber) {
 	parentObj.wait.ROM2Access(busReqNumber);
 	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data);
 }
+GameBoyAdvanceIO.prototype.writeROM216 = function (parentObj, address, data) {
+	parentObj.wait.ROM2Access16();
+	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, data >> 8);
+}
+GameBoyAdvanceIO.prototype.writeROM232 = function (parentObj, address, data) {
+	parentObj.wait.ROM2Access32();
+    parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
+    parentObj.cartridge.writeROM((address + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
+    parentObj.cartridge.writeROM((address + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
+}
 GameBoyAdvanceIO.prototype.writeSRAM = function (parentObj, address, data, busReqNumber) {
 	parentObj.wait.SRAMAccess(busReqNumber);
-	parentObj.cartridge.writeSRAM(address & 0xFFFF, data);
+	parentObj.cartridge.writeSRAM(address & 0xFFFF, data & 0xFF);
+}
+GameBoyAdvanceIO.prototype.writeSRAM16 = function (parentObj, address, data) {
+	parentObj.wait.SRAMAccess(busReqNumber);
+	parentObj.cartridge.writeSRAM(address & 0xFFFF, data & 0xFF);
+}
+GameBoyAdvanceIO.prototype.writeSRAM32 = function (parentObj, address, data) {
+	parentObj.wait.SRAMAccess(busReqNumber);
+	parentObj.cartridge.writeSRAM(address & 0xFFFF, data & 0xFF);
 }
 GameBoyAdvanceIO.prototype.NOP = function (parentObj, data) {
 	//Ignore the data write...
 }
 GameBoyAdvanceIO.prototype.writeUnused = function (parentObj, address, data, busReqNumber) {
 	//Ignore the data write...
-	parentObj.wait.FASTAccess();
+	parentObj.wait.FASTAccess(busReqNumber);
+}
+GameBoyAdvanceIO.prototype.writeUnused16 = function (parentObj, address, data) {
+	//Ignore the data write...
+	parentObj.wait.FASTAccess2();
+}
+GameBoyAdvanceIO.prototype.writeUnused32 = function (parentObj, address, data) {
+	//Ignore the data write...
+	parentObj.wait.FASTAccess2();
 }
 GameBoyAdvanceIO.prototype.remapWRAM = function (data) {
 	if ((data & 0x01) == 0) {
@@ -2001,45 +2333,153 @@ GameBoyAdvanceIO.prototype.remapWRAM = function (data) {
 	}
 }
 GameBoyAdvanceIO.prototype.readBIOS = function (parentObj, address, busReqNumber) {
-	parentObj.wait.FASTAccess();
+	parentObj.wait.FASTAccess(busReqNumber);
 	if (address < 0x4000) {
 		if (parentObj.cpu.registers[15] < 0x4000) {
 			//If reading from BIOS while executing it:
-			parentObj.lastBIOSREAD[address & 0x3] = parentObj.cpu.registers[15];
-			return parentObj.BIOS[address];
+			parentObj.lastBIOSREAD[address & 0x3] = (parentObj.cpu.registers[15] >> ((address & 0x3) << 3)) & 0xFF;
+			return parentObj.BIOS[address | 0] | 0;
 		}
 		else {
 			//Not allowed to read from BIOS while executing outside of it:
-			return parentObj.lastBIOSREAD[address & 0x3];
+			return parentObj.lastBIOSREAD[address & 0x3] | 0;
 		}
 	}
 	else {
-		return parentObj.readUnused(parentObj, address);
+		return parentObj.readUnused(parentObj, address | 0) | 0;
+	}
+}
+GameBoyAdvanceIO.prototype.readBIOS16 = function (parentObj, address) {
+	parentObj.wait.FASTAccess2();
+	if (address < 0x4000) {
+		if (parentObj.cpu.registers[15] < 0x4000) {
+			//If reading from BIOS while executing it:
+			parentObj.lastBIOSREAD[address & 0x3] = (parentObj.cpu.registers[15] >> ((address & 0x3) << 3)) & 0xFF;
+			parentObj.lastBIOSREAD[(address + 1) & 0x3] = (parentObj.cpu.registers[15] >> (((address + 1) & 0x3) << 3)) & 0xFF;
+            return parentObj.BIOS[address] | (parentObj.BIOS[address | 1] << 8);
+		}
+		else {
+			//Not allowed to read from BIOS while executing outside of it:
+			return parentObj.lastBIOSREAD[address & 0x2] | (parentObj.lastBIOSREAD[(address & 0x2) | 1] << 8);
+		}
+	}
+	else {
+		return parentObj.readUnused16(parentObj, address) | 0;
+	}
+}
+GameBoyAdvanceIO.prototype.readBIOS32 = function (parentObj, address) {
+	parentObj.wait.FASTAccess2();
+	if (address < 0x4000) {
+		if (parentObj.cpu.registers[15] < 0x4000) {
+			//If reading from BIOS while executing it:
+			parentObj.lastBIOSREAD[0] = parentObj.cpu.registers[15] & 0xFF;
+			parentObj.lastBIOSREAD[1] = (parentObj.cpu.registers[15] >> 8) & 0xFF;
+			parentObj.lastBIOSREAD[2] = (parentObj.cpu.registers[15] >> 16) & 0xFF;
+			parentObj.lastBIOSREAD[3] = (parentObj.cpu.registers[15] >> 32) & 0xFF;
+            return parentObj.BIOS[address] | (parentObj.BIOS[address | 1] << 8) | (parentObj.BIOS[address | 2] << 16)  | (parentObj.BIOS[address | 3] << 24);
+		}
+		else {
+			//Not allowed to read from BIOS while executing outside of it:
+			return parentObj.lastBIOSREAD[0] | (parentObj.lastBIOSREAD[1] << 8) | (parentObj.lastBIOSREAD[2] << 16) | (parentObj.lastBIOSREAD[3] << 24);
+		}
+	}
+	else {
+		return parentObj.readUnused32(parentObj, address) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.readExternalWRAM = function (parentObj, address, busReqNumber) {
 	//External WRAM:
 	parentObj.wait.WRAMAccess(busReqNumber);
-	return parentObj.externalRAM[address & 0x3FFFF];
+	return parentObj.externalRAM[address & 0x3FFFF] | 0;
+}
+GameBoyAdvanceIO.prototype.readExternalWRAM16Slow = function (parentObj, address) {
+	//External WRAM:
+	parentObj.wait.WRAMAccess16();
+	return parentObj.externalRAM[address & 0x3FFFF] | (parentObj.externalRAM[(address + 1) & 0x3FFFF] << 8);
+}
+GameBoyAdvanceIO.prototype.readExternalWRAM16Optimized = function (parentObj, address) {
+	//External WRAM:
+	parentObj.wait.WRAMAccess16();
+	return parentObj.externalRAM16[(address & 0x3FFFF) >> 1] | 0;
+}
+GameBoyAdvanceIO.prototype.readExternalWRAM32Slow = function (parentObj, address) {
+	//External WRAM:
+	parentObj.wait.WRAMAccess32();
+	return parentObj.externalRAM[address & 0x3FFFF] | (parentObj.externalRAM[(address + 1) & 0x3FFFF] << 8) | (parentObj.externalRAM[(address + 2) & 0x3FFFF] << 16) | (parentObj.externalRAM[(address + 3) & 0x3FFFF] << 24);
+}
+GameBoyAdvanceIO.prototype.readExternalWRAM32Optimized = function (parentObj, address) {
+	//External WRAM:
+	parentObj.wait.WRAMAccess32();
+	return parentObj.externalRAM32[(address & 0x3FFFF) >> 2] | 0;
 }
 GameBoyAdvanceIO.prototype.readInternalWRAM = function (parentObj, address, busReqNumber) {
 	//Internal WRAM:
-	parentObj.wait.FASTAccess();
-	return parentObj.internalRAM[address & 0x7FFF];
+	parentObj.wait.FASTAccess(busReqNumber);
+	return parentObj.internalRAM[address & 0x7FFF] | 0;
+}
+GameBoyAdvanceIO.prototype.readInternalWRAM16Slow = function (parentObj, address) {
+	//Internal WRAM:
+	parentObj.wait.FASTAccess2();
+	return parentObj.internalRAM[address & 0x7FFF] | (parentObj.internalRAM[(address + 1) & 0x7FFF] << 8);
+}
+GameBoyAdvanceIO.prototype.readInternalWRAM16Optimized = function (parentObj, address) {
+	//Internal WRAM:
+	parentObj.wait.FASTAccess2();
+	return parentObj.internalRAM16[(address & 0x7FFF) >> 1] | 0;
+}
+GameBoyAdvanceIO.prototype.readInternalWRAM32Slow = function (parentObj, address) {
+	//Internal WRAM:
+	parentObj.wait.FASTAccess2();
+	return parentObj.internalRAM[address & 0x7FFF] | (parentObj.internalRAM[(address + 1) & 0x7FFF] << 8) | (parentObj.internalRAM[(address + 2) & 0x7FFF] << 16) | (parentObj.internalRAM[(address + 3) & 0x7FFF] << 24);
+}
+GameBoyAdvanceIO.prototype.readInternalWRAM32Optimized = function (parentObj, address) {
+	//Internal WRAM:
+	parentObj.wait.FASTAccess2();
+	return parentObj.internalRAM32[(address & 0x7FFF) >> 2] | 0;
 }
 GameBoyAdvanceIO.prototype.readIODispatch = function (parentObj, address, busReqNumber) {
 	if (address < 0x4000304) {
 		//IO Write:
-		parentObj.wait.FASTAccess();
+		parentObj.wait.FASTAccess(busReqNumber);
 		return parentObj.readIO[address & 0x3FF](parentObj);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
-		parentObj.wait.FASTAccess();
+		parentObj.wait.FASTAccess(busReqNumber);
 		return parentObj.wait.readConfigureWRAM(address);
 	}
 	else {
 		return parentObj.readUnused(parentObj, address, busReqNumber);
+	}
+}
+GameBoyAdvanceIO.prototype.readIODispatch16 = function (parentObj, address) {
+	if (address < 0x4000304) {
+		//IO Write:
+		parentObj.wait.FASTAccess2();
+		return parentObj.readIO[address & 0x3FF](parentObj) | (parentObj.readIO[(address + 1) & 0x3FF](parentObj) << 8);
+	}
+	else if ((address & 0x4FF0800) == 0x4000800) {
+		//WRAM wait state control:
+		parentObj.wait.FASTAccess2();
+		return parentObj.wait.readConfigureWRAM(0) | (parentObj.wait.readConfigureWRAM(1) << 8);
+	}
+	else {
+		return parentObj.readUnused16(parentObj, address);
+	}
+}
+GameBoyAdvanceIO.prototype.readIODispatch32 = function (parentObj, address) {
+	if (address < 0x4000304) {
+		//IO Write:
+		parentObj.wait.FASTAccess2();
+		return parentObj.readIO[address & 0x3FF](parentObj) | (parentObj.readIO[(address + 1) & 0x3FF](parentObj) << 8) | (parentObj.readIO[(address + 2) & 0x3FF](parentObj) << 16) | (parentObj.readIO[(address + 3) & 0x3FF](parentObj) << 24);
+	}
+	else if ((address & 0x4FF0800) == 0x4000800) {
+		//WRAM wait state control:
+		parentObj.wait.FASTAccess2();
+		return parentObj.wait.readConfigureWRAM(0) | (parentObj.wait.readConfigureWRAM(1) << 8) | (parentObj.wait.readConfigureWRAM(2) << 16)  | (parentObj.wait.readConfigureWRAM(3) << 24);
+	}
+	else {
+		return parentObj.readUnused32(parentObj, address);
 	}
 }
 GameBoyAdvanceIO.prototype.readVRAM = function (parentObj, address, busReqNumber) {
@@ -2051,29 +2491,113 @@ GameBoyAdvanceIO.prototype.readVRAM = function (parentObj, address, busReqNumber
 		return parentObj.gfx.readVRAM(address & 0xFFFF);
 	}
 }
+GameBoyAdvanceIO.prototype.readVRAM16Slow = function (parentObj, address) {
+	parentObj.wait.VRAMAccess16();
+	if ((address & 0x10000) != 0) {
+		return parentObj.gfx.readVRAM16Slow(address & 0x17FFF);
+	}
+	else {
+		return parentObj.gfx.readVRAM16Slow(address & 0xFFFF);
+	}
+}
+GameBoyAdvanceIO.prototype.readVRAM16Optimized = function (parentObj, address) {
+	parentObj.wait.VRAMAccess16();
+	if ((address & 0x10000) != 0) {
+		return parentObj.gfx.readVRAM16Optimized(address & 0x17FFF);
+	}
+	else {
+		return parentObj.gfx.readVRAM16Optimized(address & 0xFFFF);
+	}
+}
+GameBoyAdvanceIO.prototype.readVRAM32Slow = function (parentObj, address) {
+	parentObj.wait.VRAMAccess32();
+	if ((address & 0x10000) != 0) {
+		return parentObj.gfx.readVRAM32Slow(address & 0x17FFF);
+	}
+	else {
+		return parentObj.gfx.readVRAM32Slow(address & 0xFFFF);
+	}
+}
+GameBoyAdvanceIO.prototype.readVRAM32Optimized = function (parentObj, address) {
+	parentObj.wait.VRAMAccess32();
+	if ((address & 0x10000) != 0) {
+		return parentObj.gfx.readVRAM32Optimized(address & 0x17FFF);
+	}
+	else {
+		return parentObj.gfx.readVRAM32Optimized(address & 0xFFFF);
+	}
+}
 GameBoyAdvanceIO.prototype.readOAM = function (parentObj, address, busReqNumber) {
 	parentObj.wait.OAMAccess(busReqNumber);
 	return parentObj.gfx.readOAM(address & 0x3FF);
+}
+GameBoyAdvanceIO.prototype.readOAM16 = function (parentObj, address) {
+	parentObj.wait.OAMAccess16();
+	return parentObj.gfx.readOAM(address & 0x3FF) | (parentObj.gfx.readOAM((address + 1) & 0x3FF) << 8);
+}
+GameBoyAdvanceIO.prototype.readOAM32 = function (parentObj, address) {
+	parentObj.wait.OAMAccess32();
+	return parentObj.gfx.readOAM(address & 0x3FF) | (parentObj.gfx.readOAM((address + 1) & 0x3FF) << 8) | (parentObj.gfx.readOAM((address + 2) & 0x3FF) << 16) | (parentObj.gfx.readOAM((address + 3) & 0x3FF) << 24);
 }
 GameBoyAdvanceIO.prototype.readPalette = function (parentObj, address, busReqNumber) {
 	parentObj.wait.VRAMAccess(busReqNumber);
 	return parentObj.gfx.readPalette(address & 0x3FF);
 }
+GameBoyAdvanceIO.prototype.readPalette16 = function (parentObj, address) {
+	parentObj.wait.VRAMAccess16();
+	return parentObj.gfx.readPalette(address & 0x3FF) | (parentObj.gfx.readPalette((address + 1) & 0x3FF) << 8);
+}
+GameBoyAdvanceIO.prototype.readPalette32 = function (parentObj, address) {
+	parentObj.wait.VRAMAccess32();
+	return parentObj.gfx.readPalette(address & 0x3FF) | (parentObj.gfx.readPalette((address + 1) & 0x3FF) << 8) | (parentObj.gfx.readPalette((address + 2) & 0x3FF) << 16) | (parentObj.gfx.readPalette((address + 3) & 0x3FF) << 24);
+}
 GameBoyAdvanceIO.prototype.readROM0 = function (parentObj, address, busReqNumber) {
 	parentObj.wait.ROM0Access(busReqNumber);
-	return parentObj.cartridge.readROM(address & 0x1FFFFFF);
+	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
+}
+GameBoyAdvanceIO.prototype.readROM016 = function (parentObj, address) {
+	parentObj.wait.ROM0Access16();
+	return parentObj.cartridge.readROM16((address & 0x1FFFFFF) >> 1) | 0;
+}
+GameBoyAdvanceIO.prototype.readROM032 = function (parentObj, address) {
+	parentObj.wait.ROM0Access32();
+	return parentObj.cartridge.readROM32((address & 0x1FFFFFF) >> 2) | 0;
 }
 GameBoyAdvanceIO.prototype.readROM1 = function (parentObj, address, busReqNumber) {
 	parentObj.wait.ROM1Access(busReqNumber);
-	return parentObj.cartridge.readROM(address & 0x1FFFFFF);
+	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
+}
+GameBoyAdvanceIO.prototype.readROM116 = function (parentObj, address) {
+	parentObj.wait.ROM1Access16();
+	return parentObj.cartridge.readROM16((address & 0x1FFFFFF) >> 1) | 0;
+}
+GameBoyAdvanceIO.prototype.readROM132 = function (parentObj, address) {
+	parentObj.wait.ROM1Access32();
+	return parentObj.cartridge.readROM32((address & 0x1FFFFFF) >> 2) | 0;
 }
 GameBoyAdvanceIO.prototype.readROM2 = function (parentObj, address, busReqNumber) {
 	parentObj.wait.ROM2Access(busReqNumber);
-	return parentObj.cartridge.readROM(address & 0x1FFFFFF);
+	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
+}
+GameBoyAdvanceIO.prototype.readROM216 = function (parentObj, address) {
+	parentObj.wait.ROM2Access16();
+	return parentObj.cartridge.readROM16((address & 0x1FFFFFF) >> 1) | 0;
+}
+GameBoyAdvanceIO.prototype.readROM232 = function (parentObj, address) {
+	parentObj.wait.ROM2Access32();
+	return parentObj.cartridge.readROM32((address & 0x1FFFFFF) >> 2) | 0;
 }
 GameBoyAdvanceIO.prototype.readSRAM = function (parentObj, address, busReqNumber) {
 	parentObj.wait.SRAMAccess(busReqNumber);
-	return parentObj.cartridge.readSRAM(address & 0xFFFF);
+	return parentObj.cartridge.readSRAM(address & 0xFFFF) | 0;
+}
+GameBoyAdvanceIO.prototype.readSRAM16 = function (parentObj, address) {
+	parentObj.wait.SRAMAccess(busReqNumber);
+	return parentObj.cartridge.readSRAM(address & 0xFFFF) | 0;
+}
+GameBoyAdvanceIO.prototype.readSRAM32 = function (parentObj, address) {
+	parentObj.wait.SRAMAccess(busReqNumber);
+	return parentObj.cartridge.readSRAM(address & 0xFFFF) | 0;
 }
 GameBoyAdvanceIO.prototype.readZero = function (parentObj) {
 	return 0;
@@ -2082,8 +2606,16 @@ GameBoyAdvanceIO.prototype.readWriteOnly = function (parentObj) {
 	return 0xFF;
 }
 GameBoyAdvanceIO.prototype.readUnused = function (parentObj, address, busReqNumber) {
-	parentObj.wait.FASTAccess();
+	parentObj.wait.FASTAccess(busReqNumber);
 	return (parentObj.cpu.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
+}
+GameBoyAdvanceIO.prototype.readUnused16 = function (parentObj, address) {
+	parentObj.wait.FASTAccess2();
+	return (parentObj.cpu.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+}
+GameBoyAdvanceIO.prototype.readUnused32 = function (parentObj, address) {
+	parentObj.wait.FASTAccess2();
+	return parentObj.cpu.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceIO.prototype.readUnused0 = function (parentObj) {
 	return parentObj.cpu.getCurrentFetchValue() & 0xFF;
