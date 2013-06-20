@@ -433,25 +433,32 @@ GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
     line = line | 0;
     var offsetStart = (line * 240) | 0;
 	var position = 0;
-	if (!this.greenSwap) {
-		for (; position < 240; offsetStart = (offsetStart + 1) | 0, position = (position + 1) | 0) {
-			this.frameBuffer[offsetStart | 0] = this.lineBuffer[position | 0] | 0;
+	if (forcedBlank) {
+        for (; position < 240; offsetStart = (offsetStart + 1) | 0, position = (position + 1) | 0) {
+			this.frameBuffer[offsetStart | 0] = 0x7FFF;
 		}
-	}
-	else {
-		var pixel0 = 0;
-		var pixel1 = 0;
-		while (position < 240) {
-			pixel0 = this.lineBuffer[position | 0] | 0;
-            position = (position + 1) | 0;
-			pixel1 = this.lineBuffer[position | 0] | 0;
-            position = (position + 1) | 0;
-			this.frameBuffer[offsetStart | 0] = (pixel0 & 0x7C1F) | (pixel1 & 0x3E0);
-            offsetStart = (offsetStart + 1) | 0;
-			this.frameBuffer[offsetStart | 0] = (pixel1 & 0x7C1F) | (pixel0 & 0x3E0);
-            offsetStart = (offsetStart + 1) | 0;
-		}
-	}
+    }
+    else {
+        if (!this.greenSwap) {
+            for (; position < 240; offsetStart = (offsetStart + 1) | 0, position = (position + 1) | 0) {
+                this.frameBuffer[offsetStart | 0] = this.lineBuffer[position | 0] | 0;
+            }
+        }
+        else {
+            var pixel0 = 0;
+            var pixel1 = 0;
+            while (position < 240) {
+                pixel0 = this.lineBuffer[position | 0] | 0;
+                position = (position + 1) | 0;
+                pixel1 = this.lineBuffer[position | 0] | 0;
+                position = (position + 1) | 0;
+                this.frameBuffer[offsetStart | 0] = (pixel0 & 0x7C1F) | (pixel1 & 0x3E0);
+                offsetStart = (offsetStart + 1) | 0;
+                this.frameBuffer[offsetStart | 0] = (pixel1 & 0x7C1F) | (pixel0 & 0x3E0);
+                offsetStart = (offsetStart + 1) | 0;
+            }
+        }
+    }
 }
 GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
 	this.midScanLineJIT();

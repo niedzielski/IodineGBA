@@ -120,8 +120,10 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
 	control[1] = (data >> 4) & 0x3;
 	control[0] = ((data & 0x40) == 0x40);
 	if (data > 0x7F) {
-		this.enabled[dmaChannel] = this.DMA_ENABLE_TYPE[dmaChannel][control[1]];
-		this.enableDMAChannel(dmaChannel);
+		if (this.enabled[dmaChannel] == 0) {
+			this.enabled[dmaChannel] = this.DMA_ENABLE_TYPE[dmaChannel][control[1]];
+			this.enableDMAChannel(dmaChannel);
+		}
 	}
 	else {
 		this.enabled[dmaChannel] = 0;
@@ -256,7 +258,7 @@ GameBoyAdvanceDMA.prototype.handleDMACopy = function (dmaChannel) {
 	}
 }
 GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, source, destination, transferred) {
-	var wordCountShadow = (this.wordCountShadow[dmaChannel] - 1) & 0x3FFF;
+	var wordCountShadow = (this.wordCountShadow[dmaChannel] - 1) & ((dmaChannel < 3) ? 0x3FFF : 0xFFFF);
 	if (wordCountShadow == 0) {
 		if (!control[3]) {
 			//Disable the enable bit:
