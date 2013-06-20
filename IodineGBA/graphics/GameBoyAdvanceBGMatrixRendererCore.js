@@ -59,7 +59,7 @@ GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
 	}
     var mapSize = this.mapSize | 0;
 	var address = this.fetchTile((x >> 3) + ((y >> 3) * mapSize)) << 6;
-	address = ((address | 0) + (this.baseBlockOffset | 0)) | 0;
+	address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
 	address = ((address | 0) + ((y & 0x7) << 3)) | 0;
 	address = ((address | 0) + (x & 0x7)) | 0;
 	return this.palette[this.VRAM[address | 0] | 0] | 0;
@@ -72,7 +72,7 @@ GameBoyAdvanceBGMatrixRenderer.prototype.screenBaseBlockPreprocess = function ()
 	this.BGScreenBaseBlock = this.gfx.BGScreenBaseBlock[this.BGLayer | 0] << 11;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.characterBaseBlockPreprocess = function () {
-	this.baseBlockOffset = this.gfx.BGCharacterBaseBlock[this.BGLayer | 0] << 14;
+	this.BGCharacterBaseBlock = this.gfx.BGCharacterBaseBlock[this.BGLayer | 0] << 14;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.displayOverflowPreprocess = function () {
 	this.BGDisplayOverflow = this.gfx.BGDisplayOverflow[this.BGLayer | 0];

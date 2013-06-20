@@ -89,12 +89,13 @@ GameBoyAdvanceBGTEXTRenderer.prototype.computeScreenMapAddress16 = function (til
     return (tileNumber | this.BGScreenBaseBlock16) & 0x7FFF;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffset, yOffset) {
+    //16 color tile mode:
     chrData = chrData | 0;
     xOffset = xOffset | 0;
     yOffset = yOffset | 0;
     //Parse flip attributes, grab palette, and then output pixel:
 	var address = (chrData & 0x3FF) << 5;
-	address = ((address | 0) + (this.baseBlockOffset | 0)) | 0;
+	address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
 	address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 2));
 	address = ((address | 0) + ((((chrData & 0x400) == 0x400) ? (0x7 - (xOffset | 0)) : (xOffset | 0)) >> 1));
 	if ((xOffset & 0x1) == ((chrData & 0x400) >> 10)) {
@@ -103,18 +104,20 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffse
 	return this.palette[chrData >> 12][this.VRAM[address | 0] >> 4] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetch8BitVRAM = function (chrData, xOffset, yOffset) {
+    //256 color tile mode:
     chrData = chrData | 0;
     xOffset = xOffset | 0;
     yOffset = yOffset | 0;
     //Parse flip attributes and output pixel:
 	var address = (chrData & 0x3FF) << 6;
-	address = ((address | 0) + (this.baseBlockOffset | 0)) | 0;
+	address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
 	address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 3)) | 0;
 	address = ((address | 0) + ((((chrData & 0x400) == 0x400) ? (0x7 - (xOffset | 0)) : (xOffset | 0)) | 0)) | 0;
 	return this.palette[this.VRAM[address | 0] | 0] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.palettePreprocess = function () {
-	if (this.gfx.BGPalette256[this.BGLayer | 0]) {
+	//Make references:
+    if (this.gfx.BGPalette256[this.BGLayer | 0]) {
 		this.palette = this.gfx.palette256;
 		this.fetchVRAM = this.fetch8BitVRAM;
 	}
@@ -135,7 +138,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.screenBaseBlockPreprocess = function () {
     this.BGScreenBaseBlock16 = this.BGScreenBaseBlock8 >> 1;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.characterBaseBlockPreprocess = function () {
-	this.baseBlockOffset = this.gfx.BGCharacterBaseBlock[this.BGLayer | 0] << 14;
+	this.BGCharacterBaseBlock = this.gfx.BGCharacterBaseBlock[this.BGLayer | 0] << 14;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.writeBGHOFS0 = function (data) {
 	data = data | 0;

@@ -23,6 +23,7 @@ GameBoyAdvanceCartridge.prototype.initialize = function () {
 	this.ROM = this.getROMArray(this.IOCore.emulatorCore.ROM);
     this.ROM16 = getUint16View(this.ROM);
     this.ROM32 = getInt32View(this.ROM);
+    this.preprocessROMAccess();
 	this.saveType = 0;
 	this.saveSize = 0;
 	this.saveRTC = false;
@@ -35,6 +36,10 @@ GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
         newArray[index] = old_array[index];
     }
     return newArray;
+}
+GameBoyAdvanceCartridge.prototype.preprocessROMAccess = function () {
+    this.readROM16 = (this.ROM16) ? this.readROM16Optimized : this.readROM16Slow;
+    this.readROM32 = (this.ROM32) ? this.readROM32Optimized : this.readROM32Slow;
 }
 GameBoyAdvanceCartridge.prototype.readROM = function (address) {
 	return this.ROM[address];
@@ -61,29 +66,11 @@ GameBoyAdvanceCartridge.prototype.readROM = function (address) {
 		}
 	}*/
 }
-GameBoyAdvanceCartridge.prototype.readROM16 = function (address) {
-    if (this.ROM16) {
-        return this.ROM16[address & 0xFFFFFF] | 0;
-    }
-    else {
-        address <<= 1;
-        return this.ROM[address] | (this.ROM[address | 1] << 8);
-    }
-}
 GameBoyAdvanceCartridge.prototype.readROM16Slow = function (address) {
     return this.ROM[address] | (this.ROM[address | 1] << 8);
 }
 GameBoyAdvanceCartridge.prototype.readROM16Optimized = function (address) {
     return this.ROM16[(address >> 1) & 0xFFFFFF] | 0;
-}
-GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
-    if (this.ROM32) {
-        return this.ROM32[address & 0x7FFFFF] | 0;
-    }
-    else {
-        address <<= 2;
-        return this.ROM[address] | (this.ROM[address | 1] << 8) | (this.ROM[address | 2] << 16)  | (this.ROM[address | 3] << 24);
-    }
 }
 GameBoyAdvanceCartridge.prototype.readROM32Slow = function (address) {
     return this.ROM[address] | (this.ROM[address | 1] << 8) | (this.ROM[address | 2] << 16)  | (this.ROM[address | 3] << 24);

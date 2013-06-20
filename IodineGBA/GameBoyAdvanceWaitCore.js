@@ -39,8 +39,6 @@ GameBoyAdvanceWait.prototype.initialize = function () {
 	this.prefetchEnabled = true;
 	this.WAITCNT0 = 0;
 	this.WAITCNT1 = 0;
-    this.CPUGetOpcode16 = (this.IOCore.cartridge.ROM16) ? this.CPUGetOpcode16Optimized : this.CPUGetOpcode16Slow;
-    this.CPUGetOpcode32 = (this.IOCore.cartridge.ROM32) ? this.CPUGetOpcode32Optimized : this.CPUGetOpcode32Slow;
 }
 GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
 	this.SRAMWaitState = this.GAMEPAKWaitStateTable[data & 0x3];
@@ -133,15 +131,14 @@ GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (address, clock
 		}
 	}
 }
-GameBoyAdvanceWait.prototype.CPUGetOpcode16Slow = function (address) {
+GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 	address = address | 0;
     if (address >= 0x8000000 && address < 0xE000000) {
 		if (this.prefetchEnabled) {
 			if (this.ROMPrebuffer > 0) {
 				--this.ROMPrebuffer;
 				this.FASTAccess2();
-				return (this.IOCore.cartridge.readROM(address & 0x1FFFFFF) |
-					(this.IOCore.cartridge.readROM((address + 1) & 0x1FFFFFF) << 8));
+				return this.IOCore.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 			}
 		}
 		else {
@@ -150,67 +147,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode16Slow = function (address) {
 	}
 	return this.IOCore.memoryRead16(address | 0) | 0;
 }
-GameBoyAdvanceWait.prototype.CPUGetOpcode16Optimized = function (address) {
-	address = address | 0;
-    if (address >= 0x8000000 && address < 0xE000000) {
-		var clocks = 0;
-        if (this.prefetchEnabled) {
-			if (this.ROMPrebuffer > 0) {
-				--this.ROMPrebuffer;
-				this.FASTAccess2();
-				return this.IOCore.cartridge.readROM16(address >> 1) | 0;
-			}
-            if (address < 0xA000000) {
-                clocks = ((this.nonSequential) ? this.CARTWaitState0First : this.CARTWaitState0Second);
-            }
-            else if (address < 0xC000000) {
-                clocks = ((this.nonSequential) ? this.CARTWaitState1First : this.CARTWaitState1Second);
-            }
-            else {
-                clocks = ((this.nonSequential) ? this.CARTWaitState2First : this.CARTWaitState2Second);
-            }
-		}
-		else {
-            if (address < 0xA000000) {
-                clocks = this.CARTWaitState0First;
-            }
-            else if (address < 0xC000000) {
-                clocks = this.CARTWaitState1First;
-            }
-            else {
-                clocks = this.CARTWaitState2First;
-            }
-		}
-        this.IOCore.updateCore(clocks);
-        this.nonSequential = false;
-        return this.IOCore.cartridge.readROM16(address >> 1) | 0;
-	}
-	return this.IOCore.memoryRead16(address | 0) | 0;
-}
-GameBoyAdvanceWait.prototype.CPUGetOpcode32Slow = function (address) {
-	address = address | 0;
-    if (address >= 0x8000000 && address < 0xE000000) {
-		if (this.prefetchEnabled) {
-			if (this.ROMPrebuffer > 1) {
-				this.ROMPrebuffer -= 2;
-				this.FASTAccess2();
-				return (this.IOCore.cartridge.readROM(address & 0x1FFFFFF) |
-					(this.IOCore.cartridge.readROM((address + 1) & 0x1FFFFFF) << 8) |
-					(this.IOCore.cartridge.readROM((address + 2) & 0x1FFFFFF) << 16) |
-					(this.IOCore.cartridge.readROM((address + 3) & 0x1FFFFFF) << 24));
-			}
-			else if (this.ROMPrebuffer == 1) {
-				//Buffer miss if only 16 bits out of 32 bits stored:
-				--this.ROMPrebuffer;
-			}
-		}
-		else {
-			this.NonSequentialBroadcast();
-		}
-	}
-	return this.IOCore.memoryRead32(address | 0) | 0;
-}
-GameBoyAdvanceWait.prototype.CPUGetOpcode32Optimized = function (address) {
+GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
 	address = address | 0;
     if (address >= 0x8000000 && address < 0xE000000) {
 		var clocks = 0;
@@ -218,7 +155,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32Optimized = function (address) {
 			if (this.ROMPrebuffer > 1) {
 				this.ROMPrebuffer -= 2;
 				this.FASTAccess2();
-				return this.IOCore.cartridge.readROM32(address >> 2) | 0;
+				return this.IOCore.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 			}
 			else if (this.ROMPrebuffer == 1) {
 				//Buffer miss if only 16 bits out of 32 bits stored:
@@ -247,7 +184,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32Optimized = function (address) {
 		}
         this.IOCore.updateCore(clocks);
         this.nonSequential = false;
-        return this.IOCore.cartridge.readROM32(address >> 2) | 0;
+        return this.IOCore.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 	}
 	return this.IOCore.memoryRead32(address | 0) | 0;
 }

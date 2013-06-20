@@ -180,11 +180,11 @@ GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
                        (this.internalRAM16) ? this.readInternalWRAM16Optimized : this.readInternalWRAM16Slow,
                        this.readIODispatch16,
                        this.readPalette16,
-                       (this.gfx.VRAM16) ? this.readVRAM16Optimized : this.readVRAM16Slow,
+                       this.readVRAM16,
                        this.readOAM16,
-                       (this.cartridge.ROM16) ? this.readROM016Optimized : this.readROM016Slow,
-                       (this.cartridge.ROM16) ? this.readROM116Optimized : this.readROM116Slow,
-                       (this.cartridge.ROM16) ? this.readROM216Optimized : this.readROM216Slow,
+                       this.readROM016,
+                       this.readROM116,
+                       this.readROM216,
                        this.readSRAM16,
                        this.readBIOS16
     ];
@@ -210,11 +210,11 @@ GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
                        (this.internalRAM32) ? this.readInternalWRAM32Optimized : this.readInternalWRAM32Slow,
                        this.readIODispatch32,
                        this.readPalette32,
-                       (this.gfx.VRAM32) ? this.readVRAM32Optimized : this.readVRAM32Slow,
+                       this.readVRAM32,
                        this.readOAM32,
-                       (this.cartridge.ROM32) ? this.readROM032Optimized : this.readROM032Slow,
-                       (this.cartridge.ROM32) ? this.readROM132Optimized : this.readROM132Slow,
-                       (this.cartridge.ROM32) ? this.readROM232Optimized : this.readROM232Slow,
+                       this.readROM032,
+                       this.readROM132,
+                       this.readROM232,
                        this.readSRAM32,
                        this.readBIOS32
     ];
@@ -2190,27 +2190,19 @@ GameBoyAdvanceIO.prototype.writeVRAM = function (parentObj, address, data, busRe
 GameBoyAdvanceIO.prototype.writeVRAM16 = function (parentObj, address, data) {
 	parentObj.wait.VRAMAccess16();
     if ((address & 0x10000) != 0) {
-		parentObj.gfx.writeVRAM(address & 0x17FFF, data | 0);
-        parentObj.gfx.writeVRAM((address + 1) & 0x17FFF, (data >> 8) & 0xFF);
+		parentObj.gfx.writeVRAM16(address & 0x17FFF, data | 0);
 	}
 	else {
-		parentObj.gfx.writeVRAM(address & 0xFFFF, data | 0);
-        parentObj.gfx.writeVRAM((address + 1) & 0xFFFF, (data >> 8) & 0xFF);
+		parentObj.gfx.writeVRAM16(address & 0xFFFF, data | 0);
 	}
 }
 GameBoyAdvanceIO.prototype.writeVRAM32 = function (parentObj, address, data) {
 	parentObj.wait.VRAMAccess32();
     if ((address & 0x10000) != 0) {
-		parentObj.gfx.writeVRAM(address & 0x17FFF, data | 0);
-        parentObj.gfx.writeVRAM((address + 1) & 0x17FFF, (data >> 8) & 0xFF);
-        parentObj.gfx.writeVRAM((address + 2) & 0x17FFF, (data >> 16) & 0xFF);
-        parentObj.gfx.writeVRAM((address + 3) & 0x17FFF, (data >> 24) & 0xFF);
+		parentObj.gfx.writeVRAM32(address & 0x17FFF, data | 0);
 	}
 	else {
-		parentObj.gfx.writeVRAM(address & 0xFFFF, data | 0);
-        parentObj.gfx.writeVRAM((address + 1) & 0xFFFF, (data >> 8) & 0xFF);
-        parentObj.gfx.writeVRAM((address + 2) & 0xFFFF, (data >> 16) & 0xFF);
-        parentObj.gfx.writeVRAM((address + 3) & 0xFFFF, (data >> 24) & 0xFF);
+		parentObj.gfx.writeVRAM32(address & 0xFFFF, data | 0);
 	}
 }
 GameBoyAdvanceIO.prototype.writeOAM = function (parentObj, address, data, busReqNumber) {
@@ -2491,40 +2483,22 @@ GameBoyAdvanceIO.prototype.readVRAM = function (parentObj, address, busReqNumber
 		return parentObj.gfx.readVRAM(address & 0xFFFF) | 0;
 	}
 }
-GameBoyAdvanceIO.prototype.readVRAM16Slow = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readVRAM16 = function (parentObj, address) {
 	parentObj.wait.VRAMAccess16();
 	if ((address & 0x10000) != 0) {
-		return parentObj.gfx.readVRAM16Slow(address & 0x17FFF) | 0;
+		return parentObj.gfx.readVRAM16(address & 0x17FFF) | 0;
 	}
 	else {
-		return parentObj.gfx.readVRAM16Slow(address & 0xFFFF) | 0;
+		return parentObj.gfx.readVRAM16(address & 0xFFFF) | 0;
 	}
 }
-GameBoyAdvanceIO.prototype.readVRAM16Optimized = function (parentObj, address) {
-	parentObj.wait.VRAMAccess16();
-	if ((address & 0x10000) != 0) {
-		return parentObj.gfx.readVRAM16Optimized(address & 0x17FFF) | 0;
-	}
-	else {
-		return parentObj.gfx.readVRAM16Optimized(address & 0xFFFF) | 0;
-	}
-}
-GameBoyAdvanceIO.prototype.readVRAM32Slow = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readVRAM32 = function (parentObj, address) {
 	parentObj.wait.VRAMAccess32();
 	if ((address & 0x10000) != 0) {
-		return parentObj.gfx.readVRAM32Slow(address & 0x17FFF) | 0;
+		return parentObj.gfx.readVRAM32(address & 0x17FFF) | 0;
 	}
 	else {
-		return parentObj.gfx.readVRAM32Slow(address & 0xFFFF) | 0;
-	}
-}
-GameBoyAdvanceIO.prototype.readVRAM32Optimized = function (parentObj, address) {
-	parentObj.wait.VRAMAccess32();
-	if ((address & 0x10000) != 0) {
-		return parentObj.gfx.readVRAM32Optimized(address & 0x17FFF) | 0;
-	}
-	else {
-		return parentObj.gfx.readVRAM32Optimized(address & 0xFFFF) | 0;
+		return parentObj.gfx.readVRAM32(address & 0xFFFF) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.readOAM = function (parentObj, address, busReqNumber) {
@@ -2555,61 +2529,37 @@ GameBoyAdvanceIO.prototype.readROM0 = function (parentObj, address, busReqNumber
 	parentObj.wait.ROM0Access(busReqNumber);
 	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
 }
-GameBoyAdvanceIO.prototype.readROM016Slow = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readROM016 = function (parentObj, address) {
 	parentObj.wait.ROM0Access16();
-	return parentObj.cartridge.readROM16Slow(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 }
-GameBoyAdvanceIO.prototype.readROM016Optimized = function (parentObj, address) {
-	parentObj.wait.ROM0Access16();
-	return parentObj.cartridge.readROM16Optimized(address & 0x1FFFFFF) | 0;
-}
-GameBoyAdvanceIO.prototype.readROM032Slow = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readROM032 = function (parentObj, address) {
 	parentObj.wait.ROM0Access32();
-	return parentObj.cartridge.readROM32Slow(address & 0x1FFFFFF) | 0;
-}
-GameBoyAdvanceIO.prototype.readROM032Optimized = function (parentObj, address) {
-	parentObj.wait.ROM0Access32();
-	return parentObj.cartridge.readROM32Optimized(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceIO.prototype.readROM1 = function (parentObj, address, busReqNumber) {
 	parentObj.wait.ROM1Access(busReqNumber);
 	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
 }
-GameBoyAdvanceIO.prototype.readROM116Slow = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readROM116 = function (parentObj, address) {
 	parentObj.wait.ROM1Access16();
-	return parentObj.cartridge.readROM16Slow(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 }
-GameBoyAdvanceIO.prototype.readROM116Optimized = function (parentObj, address) {
-	parentObj.wait.ROM1Access16();
-	return parentObj.cartridge.readROM16Optimized(address & 0x1FFFFFF) | 0;
-}
-GameBoyAdvanceIO.prototype.readROM132Slow = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readROM132 = function (parentObj, address) {
 	parentObj.wait.ROM1Access32();
-	return parentObj.cartridge.readROM32Slow(address & 0x1FFFFFF) | 0;
-}
-GameBoyAdvanceIO.prototype.readROM132Optimized = function (parentObj, address) {
-	parentObj.wait.ROM1Access32();
-	return parentObj.cartridge.readROM32Optimized(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceIO.prototype.readROM2 = function (parentObj, address, busReqNumber) {
 	parentObj.wait.ROM2Access(busReqNumber);
 	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
 }
-GameBoyAdvanceIO.prototype.readROM216Slow = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readROM216 = function (parentObj, address) {
 	parentObj.wait.ROM2Access16();
-	return parentObj.cartridge.readROM16Slow(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 }
-GameBoyAdvanceIO.prototype.readROM216Optimized = function (parentObj, address) {
-	parentObj.wait.ROM2Access16();
-	return parentObj.cartridge.readROM16Optimized(address & 0x1FFFFFF) | 0;
-}
-GameBoyAdvanceIO.prototype.readROM232Slow = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readROM232 = function (parentObj, address) {
 	parentObj.wait.ROM2Access32();
-	return parentObj.cartridge.readROM32Slow(address & 0x1FFFFFF) | 0;
-}
-GameBoyAdvanceIO.prototype.readROM232Optimized = function (parentObj, address) {
-	parentObj.wait.ROM2Access32();
-	return parentObj.cartridge.readROM32Optimized(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceIO.prototype.readSRAM = function (parentObj, address, busReqNumber) {
 	parentObj.wait.SRAMAccess(busReqNumber);
