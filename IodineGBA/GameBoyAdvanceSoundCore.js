@@ -105,8 +105,10 @@ GameBoyAdvanceSound.prototype.initializeAudioStartState = function () {
 	//NOTE: NR 60-63 never get reset in audio halting:
 	this.nr60 = 0;
 	this.nr61 = 0;
-	this.nr62 = 0;
-	this.nr63 = 0;
+    this.nr62 = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0xFF;
+	this.nr63 = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0x2;
+    this.soundMasterEnabled = (!this.IOCore.BIOSFound || this.emulatorCore.SKIPBoot);
+    this.mixerSoundBIAS = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0x200;
 	this.channel1currentSampleLeft = 0;
 	this.channel1currentSampleLeftSecondary = 0;
 	this.channel1currentSampleLeftTrimary = 0;
@@ -143,16 +145,12 @@ GameBoyAdvanceSound.prototype.initializeAudioStartState = function () {
 	this.AGBDirectSoundBLeftCanPlay = false;
 	this.AGBDirectSoundARightCanPlay = false;
 	this.AGBDirectSoundBRightCanPlay = false;
-	this.mixerSoundBIAS = 0x200;
 	this.CGBOutputRatio = 2;
 	this.FIFOABuffer = new GameBoyAdvanceFIFO();
 	this.FIFOBBuffer = new GameBoyAdvanceFIFO();
 	this.AGBDirectSoundAFIFOClear();
 	this.AGBDirectSoundBFIFOClear();
-	//Clear legacy PAPU registers:
-	this.audioDisabled();
-    this.soundMasterEnabled = !this.IOCore.BIOSFound;
-    this.mixerSoundBIAS = (this.IOCore.BIOSFound) ? 0 : 0x200;
+    this.audioDisabled();       //Clear legacy PAPU registers:
 }
 GameBoyAdvanceSound.prototype.audioDisabled = function () {
 	//Clear NR10:
@@ -254,8 +252,8 @@ GameBoyAdvanceSound.prototype.audioDisabled = function () {
 	//Clear NR52:
 	this.nr52 = 0;
 	this.soundMasterEnabled = false;
-	this.mixerOutputCacheLeft = this.mixerSoundBIAS;
-	this.mixerOutputCacheRight = this.mixerSoundBIAS;
+	this.mixerOutputCacheLeft = this.mixerSoundBIAS | 0;
+	this.mixerOutputCacheRight = this.mixerSoundBIAS | 0;
     this.audioClocksUntilNextEventCounter = 0;
 	this.audioClocksUntilNextEvent = 0;
 	this.sequencePosition = 0;
@@ -884,10 +882,10 @@ GameBoyAdvanceSound.prototype.CGBFolder = function () {
 GameBoyAdvanceSound.prototype.mixerOutputLevelCache = function () {
 	this.mixerOutputCacheLeft = Math.min(Math.max(((this.AGBDirectSoundALeftCanPlay) ? this.AGBDirectSoundAFolded : 0) +
 	((this.AGBDirectSoundBLeftCanPlay) ? this.AGBDirectSoundBFolded : 0) +
-	this.CGBMixerOutputCacheLeftFolded + this.mixerSoundBIAS, 0), 0x3FF);
+	this.CGBMixerOutputCacheLeftFolded + this.mixerSoundBIAS, 0), 0x3FF) | 0;
 	this.mixerOutputCacheRight = Math.min(Math.max(((this.AGBDirectSoundARightCanPlay) ? this.AGBDirectSoundAFolded : 0) +
 	((this.AGBDirectSoundBRightCanPlay) ? this.AGBDirectSoundBFolded : 0) +
-	this.CGBMixerOutputCacheRightFolded + this.mixerSoundBIAS, 0), 0x3FF);
+	this.CGBMixerOutputCacheRightFolded + this.mixerSoundBIAS, 0), 0x3FF) | 0;
 }
 GameBoyAdvanceSound.prototype.readSOUND1CNT_L = function () {
 	//NR10:
