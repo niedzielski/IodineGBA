@@ -159,15 +159,10 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
             //Increment scanline counter:
             this.currentScanLine = (this.currentScanLine + 1) | 0;        //Increment to the next scan line.
             //Handle switching in/out of vblank:
-            if ((this.currentScanLine | 0) < 160) {
-                //Display drawing still:
-                this.incrementScanLineQueue();                              //Tell the gfx JIT to queue another line to draw.
-            }
-            else {
+            if ((this.currentScanLine | 0) >= 160) {
                 //Handle special case scan lines of vblank:
                 switch (this.currentScanLine | 0) {
                     case 160:
-                        this.incrementScanLineQueue();                      //Tell the gfx JIT to queue another line to draw.
                         this.updateVBlankStart();                           //Update state for start of vblank.
                         break;
                     case 162:
@@ -194,7 +189,8 @@ GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
             this.IOCore.irq.requestIRQ(0x2);                        //Check for IRQ.
         }
         if (this.currentScanLine < 160) {
-			this.IOCore.dma.gfxHBlankRequest();                     //Check for HDMA Trigger.
+            this.incrementScanLineQueue();                          //Tell the gfx JIT to queue another line to draw.
+            this.IOCore.dma.gfxHBlankRequest();                     //Check for HDMA Trigger.
         }
 	}
 }
