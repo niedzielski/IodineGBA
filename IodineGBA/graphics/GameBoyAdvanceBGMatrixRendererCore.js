@@ -47,7 +47,7 @@ GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
     y = y | 0;
     var mapSizeComparer = this.mapSizeComparer | 0;
     //Output pixel:
-	if ((x | 0) > (mapSizeComparer | 0) || (y | 0) > (mapSizeComparer | 0)) {
+	if ((x | 0) < 0 || (y | 0) < 0 || (x | 0) > (mapSizeComparer | 0) || (y | 0) > (mapSizeComparer | 0)) {
 		//Overflow Handling:
 		if (this.BGDisplayOverflow) {
 			x &= mapSizeComparer | 0;
