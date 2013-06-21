@@ -145,7 +145,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 			this.NonSequentialBroadcast();
 		}
 	}
-	return this.IOCore.memoryRead16(address | 0) | 0;
+	return this.IOCore.memoryReadFast16(address | 0) | 0;
 }
 GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
 	address = address | 0;
@@ -186,7 +186,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
         this.nonSequential = false;
         return this.IOCore.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 	}
-	return this.IOCore.memoryRead32(address | 0) | 0;
+	return this.IOCore.memoryReadFast32(address | 0) | 0;
 }
 GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
 	this.nonSequential = true;
