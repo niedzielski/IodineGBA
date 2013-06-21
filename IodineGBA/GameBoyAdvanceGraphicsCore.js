@@ -353,6 +353,14 @@ GameBoyAdvanceGraphics.prototype.compositeLayersNormal = function (OBJBuffer, BG
 				lowerPixel = currentPixel | 0;
 				currentPixel = workingPixel | 0;
 			}
+            else if ((workingPixel & 0x3800000) <= (lowerPixel & 0x1800000)) {
+				/*
+                 If higher priority than last pixel and not transparent.
+                 Also clear any plane layer bits other than backplane for
+                 transparency.
+                 */
+				lowerPixel = workingPixel | 0;
+			}
 		}
 		if ((currentPixel & 0x400000) == 0) {
 			//Normal Pixel:
@@ -396,6 +404,16 @@ GameBoyAdvanceGraphics.prototype.compositeLayersWithEffects = function (OBJBuffe
 				lowerPixel = currentPixel | 0;
 				currentPixel = workingPixel | 0;
 			}
+            else if ((workingPixel & 0x3800000) <= (lowerPixel & 0x1800000)) {
+                /*
+                 If higher priority than last secondary pixel and not transparent.
+                 Also clear any plane layer bits other than backplane for
+                 transparency.
+                 
+                 Keep a copy of the previous pixel (backdrop or non-transparent) for the color effects:
+                 */
+                lowerPixel = workingPixel | 0;
+            }
 		}
 		if ((currentPixel & 0x400000) == 0) {
 			//Normal Pixel:
