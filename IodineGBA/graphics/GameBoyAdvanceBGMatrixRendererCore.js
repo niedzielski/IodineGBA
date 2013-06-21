@@ -37,31 +37,45 @@ GameBoyAdvanceBGMatrixRenderer.prototype.renderScanLine = function (line) {
 	line = line | 0;
     return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
-GameBoyAdvanceBGMatrixRenderer.prototype.fetchTile = function (tileNumber) {
-	tileNumber = tileNumber | 0;
-    //Find the tile code to locate the tile block:
-	return this.VRAM[((tileNumber | 0) + (this.BGScreenBaseBlock | 0)) & 0xFFFF];
-}
-GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
+GameBoyAdvanceBGMatrixRenderer.prototype.fetchTile = function (x, y, mapSize) {
+	//Compute address for tile VRAM to address:
     x = x | 0;
     y = y | 0;
-    var mapSizeComparer = this.mapSizeComparer | 0;
-    //Output pixel:
-	if ((x | 0) < 0 || (y | 0) < 0 || (x | 0) > (mapSizeComparer | 0) || (y | 0) > (mapSizeComparer | 0)) {
-		//Overflow Handling:
-		if (this.BGDisplayOverflow) {
-			x &= mapSizeComparer | 0;
-			y &= mapSizeComparer | 0;
-		}
-		else {
-			return this.transparency | 0;
-		}
-	}
-    var mapSize = this.mapSize | 0;
-	var address = this.fetchTile((x >> 3) + ((y >> 3) * (mapSize >> 3))) << 6;
+    mapSize = mapSize | 0;
+	var tileNumber = x + (y * mapSize);
+    return this.VRAM[((tileNumber | 0) + (this.BGScreenBaseBlock | 0)) & 0xFFFF] | 0;
+}
+GameBoyAdvanceBGMatrixRenderer.prototype.computeScreenAddress = function (x, y) {
+	//Compute address for character VRAM to address:
+    x = x | 0;
+    y = y | 0;
+    var address = this.fetchTile(x >> 3, y >> 3, this.mapSize >> 3) << 6;
 	address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
 	address = ((address | 0) + ((y & 0x7) << 3)) | 0;
 	address = ((address | 0) + (x & 0x7)) | 0;
+    return address | 0;
+}
+GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
+    //Fetch the pixel:
+    x = x | 0;
+    y = y | 0;
+    var mapSizeComparer = this.mapSizeComparer | 0;
+    var overflowX = x & mapSizeComparer;
+    var overflowY = y & mapSizeComparer;
+    //Output pixel:
+	if ((x | 0) != (overflowX | 0) || (y | 0) != (overflowY | 0)) {
+		//Overflow Handling:
+		if (this.BGDisplayOverflow) {
+			//Overflow Back:
+            x = overflowX | 0;
+			y = overflowY | 0;
+		}
+		else {
+			//Out of bounds with no overflow allowed:
+            return this.transparency | 0;
+		}
+	}
+	var address = this.computeScreenAddress(x | 0, y | 0) | 0;
 	return this.palette[this.VRAM[address & 0xFFFF] | 0] | 0;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.screenSizePreprocess = function () {

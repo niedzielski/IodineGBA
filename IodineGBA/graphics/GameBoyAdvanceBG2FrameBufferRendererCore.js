@@ -44,7 +44,7 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) 
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
     //Output pixel:
-	if (x < 240 && y < 160) {
+	if (x > -1 && y > -1 && x < 240 && y < 160) {
         var address = ((y * 240) + x) << 1;
         return ((this.VRAM[address | 1] << 8) | this.VRAM[address]) & 0x7FFF;
     }
@@ -55,9 +55,9 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3PixelOptimized = functi
     x = x | 0;
     y = y | 0;
     //Output pixel:
-	if ((x | 0) < 240 && (y | 0) < 160) {
+	if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 240 && (y | 0) < 160) {
         var address = (((y * 240) | 0) + (x | 0)) | 0;
-        return this.VRAM16[address | 0] & 0x7FFF;
+        return this.VRAM16[address & 0x7FFF] & 0x7FFF;
     }
     //Out of range, output transparency:
     return this.transparency | 0;
@@ -66,16 +66,16 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode4Pixel = function (x, y)
     x = x | 0;
     y = y | 0;
     //Output pixel:
-	if ((x | 0) < 240 && (y | 0) < 160) {
+	if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 240 && (y | 0) < 160) {
         var address = ((this.frameSelect | 0) + ((y * 240) | 0) + (x | 0)) | 0;
-        return this.palette[this.VRAM[address | 0] | 0] | 0;
+        return this.palette[this.VRAM[address & 0xFFFF] | 0] | 0;
     }
     //Out of range, output transparency:
     return this.transparency | 0;
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5Pixel = function (x, y) {
     //Output pixel:
-	if (x < 160 && y < 128) {
+	if (x > -1 && y > -1 && x < 160 && y < 128) {
         var address = this.frameSelect + (((y * 240) + x) << 1);
         return ((this.VRAM[address | 1] << 8) | this.VRAM[address]) & 0x7FFF;
     }
@@ -86,9 +86,9 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5PixelOptimized = functi
     x = x | 0;
     y = y | 0;
     //Output pixel:
-	if ((x | 0) < 160 && (y | 0) < 128) {
+	if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 160 && (y | 0) < 128) {
         var address = ((this.frameSelect | 0) + ((y * 240) | 0) + (x | 0)) | 0;
-        return this.VRAM16[address | 0] & 0x7FFF;
+        return this.VRAM16[address & 0x7FFF] & 0x7FFF;
     }
     //Out of range, output transparency:
     return this.transparency | 0;

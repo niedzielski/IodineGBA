@@ -75,10 +75,27 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileOptimized = function (yTileStart
 	return this.VRAM16[address | 0] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.computeTileNumber = function (yTile, xTile) {
-	yTile = yTile | 0;
+	//Return the true tile number:
+    yTile = yTile | 0;
     xTile = xTile | 0;
-    //Return the true tile number:
-    return ((((yTile & this.tileHeight) << 5) + ((xTile & this.tileWidth) << 5)) | (xTile & 0x1F)) | 0;
+    //Compute sub-super-tile offsets:
+    var tile = xTile & 0x1F;
+    tile = (tile | 0) | ((yTile & 0x1F) << 5);
+    //Add super tile offsets:
+    switch (this.tileMode | 0) {
+        case 2:
+            //1x2
+            tile = ((tile | 0) + ((yTile & 0x20) << 5)) | 0;
+            break;
+        case 3:
+            //2x2
+            tile = ((tile | 0) + ((yTile & 0x20) << 6)) | 0;
+        case 1:
+            //2x1, 2x2
+            tile = ((tile | 0) + ((xTile & 0x20) << 5)) | 0;
+            
+    }
+    return tile | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.computeScreenMapAddress8 = function (tileNumber) {
 	tileNumber = tileNumber | 0;
@@ -127,8 +144,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.palettePreprocess = function () {
 	}
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.screenSizePreprocess = function () {
-    this.tileWidth = (this.gfx.BGScreenSize[this.BGLayer | 0] & 0x1) << 0x5;
-    this.tileHeight = ((0x20 << ((this.gfx.BGScreenSize[this.BGLayer | 0] & 0x2) >> 1)) - 1) | 0;
+    this.tileMode = this.gfx.BGScreenSize[this.BGLayer | 0] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.priorityPreprocess = function () {
 	this.priorityFlag = (this.gfx.BGPriority[this.BGLayer | 0] << 23) | (1 << ((this.BGLayer | 0) + 0x10));
