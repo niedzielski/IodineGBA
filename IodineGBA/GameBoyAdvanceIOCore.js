@@ -1109,7 +1109,7 @@ GameBoyAdvanceIO.prototype.compileIOWriteDispatch = function () {
 	}
 	//40000BFh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
 	this.writeIO[0xBF] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(1, 3, data & 0x7);	//Mask out the unused bits.
+		parentObj.dma.writeDMASource(1, 3, data & 0xF);	//Mask out the unused bits.
 	}
 	//40000C0h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
 	this.writeIO[0xC0] = function (parentObj, data) {
