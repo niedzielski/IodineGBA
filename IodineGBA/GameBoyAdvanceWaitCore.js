@@ -134,16 +134,37 @@ GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (address, clock
 GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 	address = address | 0;
     if (address >= 0x8000000 && address < 0xE000000) {
-		if (this.prefetchEnabled) {
+		var clocks = 0;
+        if (this.prefetchEnabled) {
 			if (this.ROMPrebuffer > 0) {
 				--this.ROMPrebuffer;
 				this.FASTAccess2();
 				return this.IOCore.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 			}
+            if (address < 0xA000000) {
+                clocks = ((this.nonSequential) ? this.CARTWaitState0First : this.CARTWaitState0Second) | 0;
+            }
+            else if (address < 0xC000000) {
+                clocks = ((this.nonSequential) ? this.CARTWaitState1First : this.CARTWaitState1Second) | 0;
+            }
+            else {
+                clocks = ((this.nonSequential) ? this.CARTWaitState2First : this.CARTWaitState2Second) | 0;
+            }
 		}
 		else {
-			this.NonSequentialBroadcast();
+			if (address < 0xA000000) {
+                clocks = this.CARTWaitState0First;
+            }
+            else if (address < 0xC000000) {
+                clocks = this.CARTWaitState1First;
+            }
+            else {
+                clocks = this.CARTWaitState2First;
+            }
 		}
+        this.IOCore.updateCore(clocks | 0);
+        this.nonSequential = false;
+        return this.IOCore.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 	}
 	return this.IOCore.memoryReadFast16(address | 0) | 0;
 }
@@ -162,27 +183,27 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
 				--this.ROMPrebuffer;
 			}
             if (address < 0xA000000) {
-                clocks = ((this.nonSequential) ? this.CARTWaitState0First : this.CARTWaitState0Second) + this.CARTWaitState0Second;
+                clocks = (((this.nonSequential) ? this.CARTWaitState0First : this.CARTWaitState0Second) + this.CARTWaitState0Second) | 0;
             }
             else if (address < 0xC000000) {
-                clocks = ((this.nonSequential) ? this.CARTWaitState1First : this.CARTWaitState1Second) + this.CARTWaitState1Second;
+                clocks = (((this.nonSequential) ? this.CARTWaitState1First : this.CARTWaitState1Second) + this.CARTWaitState1Second) | 0;
             }
             else {
-                clocks = ((this.nonSequential) ? this.CARTWaitState2First : this.CARTWaitState2Second) + this.CARTWaitState2Second;
+                clocks = (((this.nonSequential) ? this.CARTWaitState2First : this.CARTWaitState2Second) + this.CARTWaitState2Second) | 0;
             }
 		}
 		else {
             if (address < 0xA000000) {
-                clocks = this.CARTWaitState0First + this.CARTWaitState0Second;
+                clocks = this.CARTWaitState0First + this.CARTWaitState0Second | 0;
             }
             else if (address < 0xC000000) {
-                clocks = this.CARTWaitState1First + this.CARTWaitState1Second;
+                clocks = this.CARTWaitState1First + this.CARTWaitState1Second | 0;
             }
             else {
-                clocks = this.CARTWaitState2First + this.CARTWaitState2Second;
+                clocks = this.CARTWaitState2First + this.CARTWaitState2Second | 0;
             }
 		}
-        this.IOCore.updateCore(clocks);
+        this.IOCore.updateCore(clocks | 0);
         this.nonSequential = false;
         return this.IOCore.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 	}
