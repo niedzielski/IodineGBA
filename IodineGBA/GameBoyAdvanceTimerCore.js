@@ -60,7 +60,8 @@ GameBoyAdvanceTimer.prototype.initializeTimers = function (data) {
 	this.timer3CountUp = false;
 }
 GameBoyAdvanceTimer.prototype.addClocks = function (clocks) {
-	//See if timer channel 0 is enabled:
+	clocks = clocks | 0;
+    //See if timer channel 0 is enabled:
 	if (this.timer0Enabled) {
 		this.timer0Precounter += clocks;
 		while (this.timer0Precounter >= this.timer0Prescalar) {

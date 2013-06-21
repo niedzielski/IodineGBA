@@ -143,7 +143,7 @@ GameBoyAdvanceGraphics.prototype.initializeOAMTable = function () {
 GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {
 	clocks = clocks | 0;
     //Call this when clocking the state some more:
-	this.LCDTicks = ((this.LCDTicks | 0) + (clocks | 0));
+	this.LCDTicks = ((this.LCDTicks | 0) + (clocks | 0)) | 0;
 	this.clockLCDState();
 }
 GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
