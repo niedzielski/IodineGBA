@@ -262,7 +262,7 @@ GameBoyAdvanceEmulator.prototype.enableAudio = function () {
 	if (!this.audioFound) {
 		//Calculate the variables for the preliminary downsampler first:
 		this.audioResamplerFirstPassFactor = Math.max(Math.min(Math.floor(this.clocksPerSecond / 44100), Math.floor(0x7FFFFFFF / 0x3FF)), 1);
-		this.audioDownSampleInputDivider = 0.5 / this.audioResamplerFirstPassFactor;
+		this.audioDownSampleInputDivider = (2 / 0x3FF) / this.audioResamplerFirstPassFactor;
 		this.audioSetState(true);	//Set audio to 'found' by default.
 		//Attempt to enable audio:
 		var parentObj = this;

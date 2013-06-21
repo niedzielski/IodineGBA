@@ -151,6 +151,8 @@ GameBoyAdvanceSound.prototype.initializeAudioStartState = function () {
 	this.AGBDirectSoundBFIFOClear();
 	//Clear legacy PAPU registers:
 	this.audioDisabled();
+    this.soundMasterEnabled = !this.IOCore.BIOSFound;
+    this.mixerSoundBIAS = (this.IOCore.BIOSFound) ? 0 : 0x200;
 }
 GameBoyAdvanceSound.prototype.audioDisabled = function () {
 	//Clear NR10:
@@ -251,7 +253,7 @@ GameBoyAdvanceSound.prototype.audioDisabled = function () {
 	this.leftChannel4 = false;
 	//Clear NR52:
 	this.nr52 = 0;
-	this.soundMasterEnabled = true;
+	this.soundMasterEnabled = false;
 	this.mixerOutputCacheLeft = this.mixerSoundBIAS;
 	this.mixerOutputCacheRight = this.mixerSoundBIAS;
     this.audioClocksUntilNextEventCounter = 0;
