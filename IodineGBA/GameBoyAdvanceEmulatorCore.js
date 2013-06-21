@@ -261,7 +261,7 @@ GameBoyAdvanceEmulator.prototype.graphicsBlit = function () {
 GameBoyAdvanceEmulator.prototype.enableAudio = function () {
 	if (!this.audioFound) {
 		//Calculate the variables for the preliminary downsampler first:
-		this.audioResamplerFirstPassFactor = Math.max(Math.min(Math.floor(this.clocksPerSecond / 44100), Math.floor(0xFFFF / 0x3FF)), 1);
+		this.audioResamplerFirstPassFactor = Math.max(Math.min(Math.floor(this.clocksPerSecond / 44100), Math.floor(0x7FFFFFFF / 0x3FF)), 1);
 		this.audioDownSampleInputDivider = 0.5 / this.audioResamplerFirstPassFactor;
 		this.audioSetState(true);	//Set audio to 'found' by default.
 		//Attempt to enable audio:
@@ -294,9 +294,11 @@ GameBoyAdvanceEmulator.prototype.changeVolume = function (newVolume) {
 		this.audio.changeVolume(this.audioVolume);
 	}
 }
-GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInput) {
-	this.audioBuffer[this.audioDestinationPosition++] = (downsampleInput >>> 16) * this.audioDownSampleInputDivider - 1;
-	this.audioBuffer[this.audioDestinationPosition++] = (downsampleInput & 0xFFFF) * this.audioDownSampleInputDivider - 1;
+GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInputLeft, downsampleInputRight) {
+	downsampleInputLeft = downsampleInputLeft | 0;
+    downsampleInputRight = downsampleInputRight | 0;
+    this.audioBuffer[this.audioDestinationPosition++] = (downsampleInputLeft * this.audioDownSampleInputDivider) - 1;
+	this.audioBuffer[this.audioDestinationPosition++] = (downsampleInputRight * this.audioDownSampleInputDivider) - 1;
 	if (this.audioDestinationPosition == this.audioNumSamplesTotal) {
 		this.audio.writeAudioNoCallback(this.audioBuffer);
 		this.audioDestinationPosition = 0;
