@@ -33,5 +33,5 @@ GameBoyAdvanceSRAM.prototype.read = function (address) {
 	return this.SRAM[address & 0x7FFF];
 }
 GameBoyAdvanceSRAM.prototype.write = function (address, data) {
-	this.SRAM[address & 0x7FFF] = data;
+	this.SRAM[address & 0x7FFF] = data | 0;
 }

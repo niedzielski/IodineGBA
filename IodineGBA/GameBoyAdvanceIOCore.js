@@ -2286,16 +2286,18 @@ GameBoyAdvanceIO.prototype.writeROM232 = function (parentObj, address, data) {
     parentObj.cartridge.writeROM((address + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
 }
 GameBoyAdvanceIO.prototype.writeSRAM = function (parentObj, address, data, busReqNumber) {
-	parentObj.wait.SRAMAccess(busReqNumber);
-	parentObj.cartridge.writeSRAM(address & 0xFFFF, data & 0xFF);
+    if ((address & 0x3) == busReqNumber) {
+        parentObj.wait.SRAMAccess();
+        parentObj.cartridge.writeSRAM(address & 0xFFFF, data & 0xFF);
+    }
 }
 GameBoyAdvanceIO.prototype.writeSRAM16 = function (parentObj, address, data) {
-	parentObj.wait.SRAMAccess(busReqNumber);
-	parentObj.cartridge.writeSRAM(address & 0xFFFF, data & 0xFF);
+	parentObj.wait.SRAMAccess();
+	parentObj.cartridge.writeSRAM(address & 0xFFFF, (data >> ((address & 0x1) << 3)) & 0xFF);
 }
 GameBoyAdvanceIO.prototype.writeSRAM32 = function (parentObj, address, data) {
-	parentObj.wait.SRAMAccess(busReqNumber);
-	parentObj.cartridge.writeSRAM(address & 0xFFFF, data & 0xFF);
+	parentObj.wait.SRAMAccess();
+	parentObj.cartridge.writeSRAM(address & 0xFFFF, (data >> ((address & 0x3) << 3)) & 0xFF);
 }
 GameBoyAdvanceIO.prototype.NOP = function (parentObj, data) {
 	//Ignore the data write...
@@ -2562,16 +2564,16 @@ GameBoyAdvanceIO.prototype.readROM232 = function (parentObj, address) {
 	return parentObj.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceIO.prototype.readSRAM = function (parentObj, address, busReqNumber) {
-	parentObj.wait.SRAMAccess(busReqNumber);
+	parentObj.wait.SRAMAccess();
 	return parentObj.cartridge.readSRAM(address & 0xFFFF) | 0;
 }
 GameBoyAdvanceIO.prototype.readSRAM16 = function (parentObj, address) {
-	parentObj.wait.SRAMAccess(busReqNumber);
-	return parentObj.cartridge.readSRAM(address & 0xFFFF) | 0;
+	parentObj.wait.SRAMAccess();
+	return ((parentObj.cartridge.readSRAM(address & 0xFFFF) | 0) * 0x101) | 0;
 }
 GameBoyAdvanceIO.prototype.readSRAM32 = function (parentObj, address) {
-	parentObj.wait.SRAMAccess(busReqNumber);
-	return parentObj.cartridge.readSRAM(address & 0xFFFF) | 0;
+	parentObj.wait.SRAMAccess();
+	return ((parentObj.cartridge.readSRAM(address & 0xFFFF) | 0) * 0x1010101) | 0;
 }
 GameBoyAdvanceIO.prototype.readZero = function (parentObj) {
 	return 0;
@@ -2655,7 +2657,7 @@ GameBoyAdvanceIO.prototype.handleCPUStallEvents = function () {
 GameBoyAdvanceIO.prototype.handleDMA = function () {
 	if (this.dma.perform()) {
 		//If DMA is done, exit it:
-		this.systemStatus -= 0x1;
+		this.systemStatus = ((this.systemStatus | 0) - 0x1) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.handleHalt = function () {
@@ -2663,12 +2665,12 @@ GameBoyAdvanceIO.prototype.handleHalt = function () {
 		//Clock up to next IRQ match or DMA:
 		var clocks = this.irq.nextEventTime() | 0;
 		var dmaClocks = this.dma.nextEventTime() | 0;
-		clocks = ((clocks > -1) ? ((dmaClocks > -1) ? Math.min(clocks, dmaClocks) : clocks) : dmaClocks) | 0;
-		this.updateCore(((clocks == -1 || clocks > this.cyclesToIterate) ? this.cyclesToIterate : clocks) | 0);
+		clocks = ((clocks > -1) ? ((dmaClocks > -1) ? Math.min(clocks | 0, dmaClocks | 0) : (clocks | 0)) : (dmaClocks | 0)) | 0;
+		this.updateCore(((clocks == -1 || clocks > this.cyclesToIterate) ? (this.cyclesToIterate | 0) : (clocks | 0)) | 0);
 	}
 	else {
 		//Exit HALT promptly:
-		this.systemStatus -= 0x2;
+		this.systemStatus = ((this.systemStatus | 0) - 0x2) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.handleStop = function () {

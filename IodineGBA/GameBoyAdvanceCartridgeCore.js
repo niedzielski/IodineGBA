@@ -42,7 +42,7 @@ GameBoyAdvanceCartridge.prototype.preprocessROMAccess = function () {
     this.readROM32 = (this.ROM32) ? this.readROM32Optimized : this.readROM32Slow;
 }
 GameBoyAdvanceCartridge.prototype.readROM = function (address) {
-	return this.ROM[address];
+	return this.ROM[address & 0x1FFFFFF];
     /*if (!this.saveRTC) {
 		return this.ROM[address];
 	}
@@ -92,11 +92,14 @@ GameBoyAdvanceCartridge.prototype.writeROM = function (address, data) {
 	}
 }
 GameBoyAdvanceCartridge.prototype.readSRAM = function (address) {
-	return (this.saveType > 0) ? this.sram.read(address) : 0;
+	address = address | 0;
+    return (this.saveType > 0) ? this.sram.read(address | 0) : 0;
 }
 GameBoyAdvanceCartridge.prototype.writeSRAM = function (address, data) {
-	if (this.saveType > 0) {
-		this.sram.write(address, data);
+	address = address | 0;
+    data = data | 0;
+    if (this.saveType > 0) {
+		this.sram.write(address | 0, data | 0);
 	}
 }
 GameBoyAdvanceCartridge.prototype.lookupCartridgeType = function () {

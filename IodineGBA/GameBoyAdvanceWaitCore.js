@@ -326,7 +326,7 @@ GameBoyAdvanceWait.prototype.ROM2Access32 = function () {
         this.IOCore.updateCore(this.CARTWaitState2Second << 1);
     }
 }
-GameBoyAdvanceWait.prototype.SRAMAccess = function (reqByteNumber) {
+GameBoyAdvanceWait.prototype.SRAMAccess = function () {
 	this.IOCore.updateCore(this.SRAMWaitState | 0);
 	this.nonSequential = false;
 }

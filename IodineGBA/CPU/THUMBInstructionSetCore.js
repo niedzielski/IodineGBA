@@ -53,16 +53,16 @@ THUMBInstructionSet.prototype.getLR = function () {
 	return (this.registers[15] - 2) | 0;
 }
 THUMBInstructionSet.prototype.getIRQLR = function () {
-	return this.registers[15];
+	return this.registers[15] | 0;
 }
 THUMBInstructionSet.prototype.executeIteration = function () {
 	//Push the new fetch access:
-	this.fetch = this.wait.CPUGetOpcode16(this.registers[15]);
+	this.fetch = this.wait.CPUGetOpcode16(this.registers[15] | 0) | 0;
 	//Execute Instruction:
 	this.executeTHUMB();
 	//Update the pipelining state:
-	this.execute = this.decode;
-	this.decode = this.fetch;
+	this.execute = this.decode | 0;
+	this.decode = this.fetch | 0;
 }
 THUMBInstructionSet.prototype.executeTHUMB = function () {
 	if (this.CPUCore.pipelineInvalid == 0) {
@@ -75,7 +75,7 @@ THUMBInstructionSet.prototype.incrementProgramCounter = function () {
 	this.registers[15] = (this.registers[15] + 2) | 0;
 }
 THUMBInstructionSet.prototype.LSLimm = function (parentObj) {
-	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7];
+	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
 	var offset = (parentObj.execute >> 6) & 0x1F;
 	if (offset > 0) {
 		//CPSR Carry is set by the last bit shifted out:
@@ -87,7 +87,7 @@ THUMBInstructionSet.prototype.LSLimm = function (parentObj) {
 	parentObj.CPUCore.CPSRNegative = (source < 0);
 	parentObj.CPUCore.CPSRZero = (source == 0);
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = source;
+	parentObj.registers[parentObj.execute & 0x7] = source | 0;
 }
 THUMBInstructionSet.prototype.LSRimm = function (parentObj) {
 	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7];
