@@ -17,6 +17,7 @@
  */
 function GameBoyAdvanceCPU(IOCore) {
 	this.IOCore = IOCore;
+    this.emulatorCore = this.IOCore.emulatorCore;
 	this.wait = this.IOCore.wait;
 	this.mul64ResultHigh = 0;	//Scratch MUL64.
 	this.mul64ResultLow = 0;	//Scratch MUL64.
@@ -27,6 +28,7 @@ GameBoyAdvanceCPU.prototype.initialize = function () {
 	this.ARM = new ARMInstructionSet(this);
 	this.THUMB = new THUMBInstructionSet(this);
     this.swi = new GameBoyAdvanceSWI(this);
+    //this.dynarec = new DynarecBranchListenerCore(this);
 	this.instructionHandle = this.ARM;
 }
 GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
@@ -100,6 +102,9 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 		this.pipelineInvalid = 0x4;
 		//Next PC fetch has to update the address bus:
 		this.wait.NonSequentialBroadcast();
+        if (this.emulatorCore.dynarecEnabled) {
+            //this.dynarec.enter(branchTo | 0);
+        }
 	}
 	else {
 		//We're branching into BIOS, handle specially:
