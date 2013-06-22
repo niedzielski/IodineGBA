@@ -66,7 +66,9 @@ THUMBInstructionSet.prototype.executeIteration = function () {
 }
 THUMBInstructionSet.prototype.executeTHUMB = function () {
 	if (this.CPUCore.pipelineInvalid == 0) {
-		//No condition code:
+		//Record instruction information for the dynarec if requested:
+        //this.CPUCore.dynarec.listen(this.execute);
+        //No condition code:
 		this.instructionMap[this.execute >> 6](this);
 	}
 }

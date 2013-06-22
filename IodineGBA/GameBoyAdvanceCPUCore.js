@@ -96,15 +96,16 @@ GameBoyAdvanceCPU.prototype.executeIteration = function () {
 GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	branchTo = branchTo | 0;
     if (branchTo > 0x3FFF || this.IOCore.BIOSFound) {
-		//Branch to new address:
+		/*Tell the JIT information on the state before branch:
+         if (this.emulatorCore.dynarecEnabled) {
+            this.dynarec.enter(this.registers[15] | 0, branchTo | 0, this.MODEBits | 0, this.InTHUMB);
+        }*/
+        //Branch to new address:
 		this.registers[15] = branchTo | 0;
 		//Mark pipeline as invalid:
 		this.pipelineInvalid = 0x4;
 		//Next PC fetch has to update the address bus:
 		this.wait.NonSequentialBroadcast();
-        if (this.emulatorCore.dynarecEnabled) {
-            //this.dynarec.enter(branchTo | 0);
-        }
 	}
 	else {
 		//We're branching into BIOS, handle specially:
@@ -145,7 +146,7 @@ GameBoyAdvanceCPU.prototype.enterTHUMB = function () {
 }
 GameBoyAdvanceCPU.prototype.getLR = function () {
 	//Get the previous instruction address:
-	return this.instructionHandle.getLR();
+	return this.instructionHandle.getLR() | 0;
 }
 GameBoyAdvanceCPU.prototype.getIRQLR = function () {
 	//Get the previous instruction address:
@@ -157,7 +158,7 @@ GameBoyAdvanceCPU.prototype.getIRQLR = function () {
             this.pipelineInvalid >>= 1;
         }
     }
-    return lr;
+    return lr | 0;
 }
 GameBoyAdvanceCPU.prototype.THUMBBitModify = function (isThumb) {
 	this.InTHUMB = isThumb;
@@ -173,7 +174,7 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
 		//Mode bits are set to IRQ:
 		this.switchMode(0x12);
 		//Save link register:
-		this.registers[14] = this.getIRQLR();
+		this.registers[14] = this.getIRQLR() | 0;
 		//Disable IRQ:
 		this.IRQDisabled = true;
 		if (this.IOCore.BIOSFound) {
@@ -200,7 +201,7 @@ GameBoyAdvanceCPU.prototype.SWI = function () {
 		//Mode bits are set to SWI:
 		this.switchMode(0x13);
 		//Save link register:
-		this.registers[14] = this.getLR();
+		this.registers[14] = this.getLR() | 0;
 		//SWI exception vector:
 		this.branch(0x8);
 		//Disable IRQ:
@@ -219,7 +220,7 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
 		//Mode bits are set to SWI:
 		this.switchMode(0x1B);
 		//Save link register:
-		this.registers[14] = this.getLR();
+		this.registers[14] = this.getLR() | 0;
 		//SWI exception vector:
 		this.branch(0x4);
 		//Disable IRQ:
@@ -230,7 +231,7 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
 }
 GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
 	//Used for leaving an exception and returning to the previous state:
-	switch (this.MODEBits) {
+	switch (this.MODEBits | 0) {
 		case 0x11:	//FIQ
 			var spsr = this.SPSRFIQ;
 			break;
@@ -259,12 +260,13 @@ GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
 	this.switchRegisterBank(spsr[7]);
 }
 GameBoyAdvanceCPU.prototype.switchMode = function (newMode) {
-	this.CPSRtoSPSR(newMode);
-	this.switchRegisterBank(newMode);
+	newMode = newMode | 0;
+    this.CPSRtoSPSR(newMode | 0);
+	this.switchRegisterBank(newMode | 0);
 }
 GameBoyAdvanceCPU.prototype.CPSRtoSPSR = function (newMode) {
 	//Used for leaving an exception and returning to the previous state:
-	switch (newMode) {
+	switch (newMode | 0) {
 		case 0x11:	//FIQ
 			var spsr = this.SPSRFIQ;
 			break;

@@ -42,7 +42,9 @@ ARMInstructionSet.prototype.executeIteration = function () {
 ARMInstructionSet.prototype.executeARM = function (instruction) {
 	//Don't execute if the pipeline is still invalid:
 	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
-		//Check the condition code:
+		//Record instruction information for the dynarec if requested:
+        //this.CPUCore.dynarec.listen(this.execute);
+        //Check the condition code:
 		if (this.conditionCodeTest()) {
 			instruction[0](this, instruction[1]);
 		}
