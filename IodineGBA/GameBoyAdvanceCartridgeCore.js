@@ -42,9 +42,9 @@ GameBoyAdvanceCartridge.prototype.preprocessROMAccess = function () {
     this.readROM32 = (this.ROM32) ? this.readROM32Optimized : this.readROM32Slow;
 }
 GameBoyAdvanceCartridge.prototype.readROM = function (address) {
-	return this.ROM[address & 0x1FFFFFF];
+	return this.ROM[address & 0x1FFFFFF] | 0;
     /*if (!this.saveRTC) {
-		return this.ROM[address];
+		return this.ROM[address & 0x1FFFFFF] | 0;
 	}
 	else {
 		//GPIO Chip (RTC):
@@ -62,7 +62,7 @@ GameBoyAdvanceCartridge.prototype.readROM = function (address) {
 			case 0xC9:
 				return 0;
 			default:
-				return this.ROM[address];
+				return this.ROM[address & 0x1FFFFFF] | 0;
 		}
 	}*/
 }
