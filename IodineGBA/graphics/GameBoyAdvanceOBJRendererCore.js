@@ -218,7 +218,7 @@ GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tile
 			//Hardware ignores the LSB in this case:
 			tileNumber &= -2;
 		}
-		tileNumber += (yOffset >> 3) * ((sprite.monolithicPalette) ? 0x40 : 0x20);
+		tileNumber += (yOffset >> 3) * 0x20;
 	}
 	else {
 		//1D Mapping:
