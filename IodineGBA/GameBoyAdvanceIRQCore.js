@@ -34,26 +34,30 @@ GameBoyAdvanceIRQ.prototype.checkForIRQFire = function () {
 	this.IOCore.cpu.triggerIRQ((this.interruptsEnabled & this.interruptsRequested) != 0 && this.IME);
 }
 GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
-	this.interruptsRequested |= irqLineToSet;
+	irqLineToSet = irqLineToSet | 0;
+    this.interruptsRequested |= irqLineToSet | 0;
 	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.writeIME = function (data) {
-	this.IME = ((data & 0x1) == 0x1);
+	data = data | 0;
+    this.IME = ((data & 0x1) == 0x1);
 	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIME = function () {
 	return (this.IME ? 0xFF : 0xFE);
 }
 GameBoyAdvanceIRQ.prototype.writeIE0 = function (data) {
-	this.interruptsEnabled &= 0x3F00;
-	this.interruptsEnabled |= data;
+	data = data | 0;
+    this.interruptsEnabled &= 0x3F00;
+	this.interruptsEnabled |= data | 0;
 	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIE0 = function () {
 	return this.interruptsEnabled & 0xFF;
 }
 GameBoyAdvanceIRQ.prototype.writeIE1 = function (data) {
-	this.interruptsEnabled &= 0xFF;
+	data = data | 0;
+    this.interruptsEnabled &= 0xFF;
 	this.interruptsEnabled |= (data << 8) & 0x3F00;
 	this.checkForIRQFire();
 }
@@ -61,43 +65,48 @@ GameBoyAdvanceIRQ.prototype.readIE1 = function () {
 	return this.interruptsEnabled >> 8;
 }
 GameBoyAdvanceIRQ.prototype.writeIF0 = function (data) {
-	this.interruptsRequested &= ~data;
+	data = data | 0;
+    this.interruptsRequested &= ~data;
 	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF0 = function () {
 	return this.interruptsRequested & 0xFF;
 }
 GameBoyAdvanceIRQ.prototype.writeIF1 = function (data) {
-	this.interruptsRequested &= ~(data << 8);
+	data = data | 0;
+    this.interruptsRequested &= ~(data << 8);
 	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF1 = function () {
 	return this.interruptsRequested >> 8;
 }
 GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
-	var clocks = this.findClosestEvent(-1, this.IOCore.gfx.nextVBlankIRQEventTime(), 0x1);
-	clocks = this.findClosestEvent(clocks, this.IOCore.gfx.nextHBlankIRQEventTime(), 0x2);
-	clocks = this.findClosestEvent(clocks, this.IOCore.gfx.nextVCounterIRQEventTime(),0x4);
-	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer0IRQEventTime(), 0x8);
-	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer1IRQEventTime(), 0x10);
-	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer2IRQEventTime(), 0x20);
-	clocks = this.findClosestEvent(clocks, this.IOCore.timer.nextTimer3IRQEventTime(), 0x40);
-	clocks = this.findClosestEvent(clocks, this.IOCore.serial.nextIRQEventTime(), 0x80);
-	clocks = this.findClosestEvent(clocks, this.IOCore.dma.nextIRQEventTime(), 0xF00);
+	var clocks = this.findClosestEvent(-1, this.IOCore.gfx.nextVBlankIRQEventTime() | 0, 0x1) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.gfx.nextHBlankIRQEventTime() | 0, 0x2) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.gfx.nextVCounterIRQEventTime() | 0, 0x4) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.timer.nextTimer0IRQEventTime() | 0, 0x8) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.timer.nextTimer1IRQEventTime() | 0, 0x10) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.timer.nextTimer2IRQEventTime() | 0, 0x20) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.timer.nextTimer3IRQEventTime() | 0, 0x40) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.serial.nextIRQEventTime() | 0, 0x80) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.dma.nextIRQEventTime() | 0, 0xF00) | 0;
 	//JoyPad input state should never update while we're in halt:
-	//clocks = this.findClosestEvent(clocks, this.IOCore.joypad.nextIRQEventTime(), 0x1000);
-	clocks = this.findClosestEvent(clocks, this.IOCore.cartridge.nextIRQEventTime(), 0x2000);
-	return clocks;
+	//clocks = this.findClosestEvent(clocks | 0, this.IOCore.joypad.nextIRQEventTime() | 0, 0x1000) | 0;
+	clocks = this.findClosestEvent(clocks | 0, this.IOCore.cartridge.nextIRQEventTime() | 0, 0x2000) | 0;
+	return clocks | 0;
 }
 GameBoyAdvanceIRQ.prototype.findClosestEvent = function (oldClocks, newClocks, flagID) {
-	if ((this.interruptsEnabled & flagID) == 0) {
-        return oldClocks;
+	oldClocks = oldClocks | 0;
+    newClocks = newClocks | 0;
+    flagID = flagID | 0;
+    if ((this.interruptsEnabled & flagID) == 0) {
+        return oldClocks | 0;
     }
     if (oldClocks > -1) {
 		if (newClocks > -1) {
-            return Math.min(oldClocks, newClocks);
+            return Math.min(oldClocks | 0, newClocks | 0) | 0;
 		}
-		return oldClocks;
+		return oldClocks | 0;
 	}
-	return newClocks;
+	return newClocks | 0;
 }
