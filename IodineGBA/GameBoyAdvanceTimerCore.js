@@ -167,7 +167,13 @@ GameBoyAdvanceTimer.prototype.writeTM0CNT_L1 = function (data) {
 }
 GameBoyAdvanceTimer.prototype.writeTM0CNT_H = function (data) {
 	this.timer0Control = data;
-	this.timer0Enabled = (data > 0x7F);
+	if (!this.timer0Enabled && data > 0x7F) {
+        this.timer0Counter = this.timer0Reload;
+        this.timer0Enabled = true;
+    }
+    else {
+        this.timer0Enabled = false;
+    }
 	this.timer0IRQ = ((data & 0x40) == 0x40);
 	this.timer0Prescalar = this.prescalarLookup[data & 0x03];
 }
@@ -190,7 +196,13 @@ GameBoyAdvanceTimer.prototype.writeTM1CNT_L1 = function (data) {
 }
 GameBoyAdvanceTimer.prototype.writeTM1CNT_H = function (data) {
 	this.timer1Control = data;
-	this.timer1Enabled = (data > 0x7F);
+	if (!this.timer1Enabled && data > 0x7F) {
+        this.timer1Counter = this.timer1Reload;
+        this.timer1Enabled = true;
+    }
+    else {
+        this.timer1Enabled = false;
+    }
 	this.timer1IRQ = ((data & 0x40) == 0x40);
     this.timer1CountUp = ((data & 0x4) == 0x4);
 	this.timer1Prescalar = this.prescalarLookup[data & 0x03];
@@ -214,7 +226,13 @@ GameBoyAdvanceTimer.prototype.writeTM2CNT_L1 = function (data) {
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_H = function (data) {
 	this.timer2Control = data;
-	this.timer2Enabled = (data > 0x7F);
+	if (!this.timer2Enabled && data > 0x7F) {
+        this.timer2Counter = this.timer2Reload;
+        this.timer2Enabled = true;
+    }
+    else {
+        this.timer2Enabled = false;
+    }
 	this.timer2IRQ = ((data & 0x40) == 0x40);
     this.timer2CountUp = ((data & 0x4) == 0x4);
 	this.timer2Prescalar = this.prescalarLookup[data & 0x03];
@@ -238,7 +256,13 @@ GameBoyAdvanceTimer.prototype.writeTM3CNT_L1 = function (data) {
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_H = function (data) {
 	this.timer3Control = data;
-	this.timer3Enabled = (data > 0x7F);
+    if (!this.timer3Enabled && data > 0x7F) {
+        this.timer3Counter = this.timer3Reload;
+        this.timer3Enabled = true;
+    }
+    else {
+        this.timer3Enabled = false;
+    }
 	this.timer3IRQ = ((data & 0x40) == 0x40);
     this.timer3CountUp = ((data & 0x4) == 0x4);
 	this.timer3Prescalar = this.prescalarLookup[data & 0x03];
@@ -253,40 +277,44 @@ GameBoyAdvanceTimer.prototype.readTM3CNT_H = function () {
 	return 0x38 | this.timer3Control;
 }
 GameBoyAdvanceTimer.prototype.nextTimer0Overflow = function (numOverflows) {
-	if (this.timer0Enabled) {
-		return (((0x10000 - this.timer0Counter) * this.timer0Prescalar) - this.timer0Precounter) + (((0x10000 - this.timer0Reload) * this.timer0Prescalar) * --numOverflows);
+	numOverflows = ((numOverflows | 0) - 1) | 0;
+    if (this.timer0Enabled) {
+		return (((0x10000 - this.timer0Counter) * this.timer0Prescalar) - this.timer0Precounter) + (((0x10000 - this.timer0Reload) * this.timer0Prescalar) * numOverflows);
 	}
 	return -1;
 }
 GameBoyAdvanceTimer.prototype.nextTimer1Overflow = function (numOverflows) {
-	if (this.timer1Enabled) {
+    numOverflows = ((numOverflows | 0) - 1) | 0;
+    if (this.timer1Enabled) {
 		if (this.timer1CountUp) {
-			return this.nextTimer0Overflow(0x10000 - this.timer1Counter + --numOverflows * (0x10000 - this.timer1Reload));
+			return this.nextTimer0Overflow(0x10000 - this.timer1Counter + (numOverflows * (0x10000 - this.timer1Reload)));
 		}
 		else {
-			return (((0x10000 - this.timer1Counter) * this.timer1Prescalar) - this.timer1Precounter) + (((0x10000 - this.timer1Reload) * this.timer1Prescalar) * --numOverflows);
+			return (((0x10000 - this.timer1Counter) * this.timer1Prescalar) - this.timer1Precounter) + (((0x10000 - this.timer1Reload) * this.timer1Prescalar) * numOverflows);
 		}
 	}
 	return -1;
 }
 GameBoyAdvanceTimer.prototype.nextTimer2Overflow = function (numOverflows) {
-	if (this.timer2Enabled) {
+	numOverflows = ((numOverflows | 0) - 1) | 0;
+    if (this.timer2Enabled) {
 		if (this.timer2CountUp) {
-			return this.nextTimer1Overflow(0x10000 - this.timer2Counter + --numOverflows * (0x10000 - this.timer2Reload));
+			return this.nextTimer1Overflow(0x10000 - this.timer2Counter + (numOverflows * (0x10000 - this.timer2Reload)));
 		}
 		else {
-			return (((0x10000 - this.timer2Counter) * this.timer2Prescalar) - this.timer2Precounter) + (((0x10000 - this.timer2Reload) * this.timer2Prescalar) * --numOverflows);
+			return (((0x10000 - this.timer2Counter) * this.timer2Prescalar) - this.timer2Precounter) + (((0x10000 - this.timer2Reload) * this.timer2Prescalar) * numOverflows);
 		}
 	}
 	return -1;
 }
 GameBoyAdvanceTimer.prototype.nextTimer3Overflow = function (numOverflows) {
-	if (this.timer3Enabled) {
+	numOverflows = ((numOverflows | 0) - 1) | 0;
+    if (this.timer3Enabled) {
 		if (this.timer3CountUp) {
-			return this.nextTimer2Overflow(0x10000 - this.timer3Counter + --numOverflows * (0x10000 - this.timer3Reload));
+			return this.nextTimer2Overflow(0x10000 - this.timer3Counter + (numOverflows * (0x10000 - this.timer3Reload)));
 		}
 		else {
-			return (((0x10000 - this.timer3Counter) * this.timer3Prescalar) - this.timer3Precounter) + (((0x10000 - this.timer3Reload) * this.timer3Prescalar) * --numOverflows);
+			return (((0x10000 - this.timer3Counter) * this.timer3Prescalar) - this.timer3Precounter) + (((0x10000 - this.timer3Reload) * this.timer3Prescalar) * numOverflows);
 		}
 	}
 	return -1;
