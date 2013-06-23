@@ -2753,7 +2753,7 @@ GameBoyAdvanceIO.prototype.readVRAM = function (parentObj, address, busReqNumber
 		return parentObj.gfx.readVRAM(address & 0xFFFF) | 0;
 	}
 }
-GameBoyAdvanceIO.prototype.readVRAM = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readVRAM8 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.VRAMAccess8();
 	if ((address & 0x10000) != 0) {
