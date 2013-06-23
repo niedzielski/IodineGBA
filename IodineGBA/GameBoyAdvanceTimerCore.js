@@ -167,9 +167,11 @@ GameBoyAdvanceTimer.prototype.writeTM0CNT_L1 = function (data) {
 }
 GameBoyAdvanceTimer.prototype.writeTM0CNT_H = function (data) {
 	this.timer0Control = data;
-	if (!this.timer0Enabled && data > 0x7F) {
-        this.timer0Counter = this.timer0Reload;
-        this.timer0Enabled = true;
+	if (data > 0x7F) {
+        if (!this.timer0Enabled) {
+            this.timer0Counter = this.timer0Reload | 0;
+            this.timer0Enabled = true;
+        }
     }
     else {
         this.timer0Enabled = false;
@@ -196,9 +198,11 @@ GameBoyAdvanceTimer.prototype.writeTM1CNT_L1 = function (data) {
 }
 GameBoyAdvanceTimer.prototype.writeTM1CNT_H = function (data) {
 	this.timer1Control = data;
-	if (!this.timer1Enabled && data > 0x7F) {
-        this.timer1Counter = this.timer1Reload;
-        this.timer1Enabled = true;
+	if (data > 0x7F) {
+        if (!this.timer1Enabled) {
+            this.timer1Counter = this.timer1Reload | 0;
+            this.timer1Enabled = true;
+        }
     }
     else {
         this.timer1Enabled = false;
@@ -226,9 +230,11 @@ GameBoyAdvanceTimer.prototype.writeTM2CNT_L1 = function (data) {
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_H = function (data) {
 	this.timer2Control = data;
-	if (!this.timer2Enabled && data > 0x7F) {
-        this.timer2Counter = this.timer2Reload;
-        this.timer2Enabled = true;
+	if (data > 0x7F) {
+        if (!this.timer2Enabled) {
+            this.timer2Counter = this.timer2Reload | 0;
+            this.timer2Enabled = true;
+        }
     }
     else {
         this.timer2Enabled = false;
@@ -256,9 +262,11 @@ GameBoyAdvanceTimer.prototype.writeTM3CNT_L1 = function (data) {
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_H = function (data) {
 	this.timer3Control = data;
-    if (!this.timer3Enabled && data > 0x7F) {
-        this.timer3Counter = this.timer3Reload;
-        this.timer3Enabled = true;
+    if (data > 0x7F) {
+        if (!this.timer3Enabled) {
+            this.timer3Counter = this.timer3Reload | 0;
+            this.timer3Enabled = true;
+        }
     }
     else {
         this.timer3Enabled = false;
