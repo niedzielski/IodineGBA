@@ -241,17 +241,14 @@ GameBoyAdvanceTimer.prototype.readTM1CNT_H = function () {
 	return 0x38 | this.timer1Control;
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_L0 = function (data) {
-	this.IOCore.sound.audioJIT();
     this.timer2Reload &= 0xFF00;
 	this.timer2Reload |= data;
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_L1 = function (data) {
-	this.IOCore.sound.audioJIT();
     this.timer2Reload &= 0xFF;
 	this.timer2Reload |= data << 8;
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_H = function (data) {
-	this.IOCore.sound.audioJIT();
     this.timer2Control = data;
 	if (data > 0x7F) {
         if (!this.timer2Enabled) {
@@ -276,17 +273,14 @@ GameBoyAdvanceTimer.prototype.readTM2CNT_H = function () {
 	return 0x38 | this.timer2Control;
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_L0 = function (data) {
-	this.IOCore.sound.audioJIT();
     this.timer3Reload &= 0xFF00;
 	this.timer3Reload |= data;
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_L1 = function (data) {
-	this.IOCore.sound.audioJIT();
     this.timer3Reload &= 0xFF;
 	this.timer3Reload |= data << 8;
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_H = function (data) {
-	this.IOCore.sound.audioJIT();
     this.timer3Control = data;
     if (data > 0x7F) {
         if (!this.timer3Enabled) {
