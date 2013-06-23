@@ -52,7 +52,7 @@ ARMInstructionSet.prototype.executeARM = function (instruction) {
 }
 ARMInstructionSet.prototype.incrementProgramCounter = function () {
 	//Increment The Program Counter:
-	this.registers[15] = (this.registers[15] + 4) | 0;
+	this.registers[15] = ((this.registers[15] | 0) + 4) | 0;
 }
 ARMInstructionSet.prototype.conditionCodeTest = function () {
 	switch (this.execute >>> 28) {

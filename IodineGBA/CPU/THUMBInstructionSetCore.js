@@ -74,7 +74,7 @@ THUMBInstructionSet.prototype.executeTHUMB = function () {
 }
 THUMBInstructionSet.prototype.incrementProgramCounter = function () {
 	//Increment The Program Counter:
-	this.registers[15] = (this.registers[15] + 2) | 0;
+	this.registers[15] = ((this.registers[15] | 0) + 2) | 0;
 }
 THUMBInstructionSet.prototype.LSLimm = function (parentObj) {
 	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
