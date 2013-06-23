@@ -61,11 +61,10 @@ GameBoyAdvanceTimer.prototype.initializeTimers = function (data) {
 }
 GameBoyAdvanceTimer.prototype.addClocks = function (clocks) {
 	clocks = clocks | 0;
-    var predictedClocks = 0;
     var audioClocks = clocks | 0;
     while (audioClocks > 0) {
         var overflowClocks = this.nextAudioTimerOverflow(audioClocks | 0) | 0;
-        predictedClocks = Math.min(audioClocks | 0, overflowClocks | 0) | 0;
+        var predictedClocks = Math.min(audioClocks | 0, overflowClocks | 0) | 0;
         audioClocks = ((audioClocks | 0) - (predictedClocks | 0)) | 0;
         //See if timer channel 0 is enabled:
         if (this.timer0Enabled) {
