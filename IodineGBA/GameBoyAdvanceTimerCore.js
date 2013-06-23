@@ -61,46 +61,43 @@ GameBoyAdvanceTimer.prototype.initializeTimers = function (data) {
 }
 GameBoyAdvanceTimer.prototype.addClocks = function (clocks) {
 	clocks = clocks | 0;
-    var audioClocks = 0;
-    var audioEvent = false;
-    while (clocks > 0) {
-        clocks = (clocks - 1) | 0;
-        audioClocks = (audioClocks + 1) | 0;
+    var predictedClocks = 0;
+    var audioClocks = clocks | 0;
+    while (audioClocks > 0) {
+        var overflowClocks = this.nextAudioTimerOverflow(audioClocks | 0) | 0;
+        predictedClocks = Math.min(audioClocks | 0, overflowClocks | 0) | 0;
+        audioClocks = ((audioClocks | 0) - (predictedClocks | 0)) | 0;
         //See if timer channel 0 is enabled:
         if (this.timer0Enabled) {
-            ++this.timer0Precounter;
-            if (this.timer0Precounter >= this.timer0Prescalar) {
+            this.timer0Precounter += predictedClocks;
+            while (this.timer0Precounter >= this.timer0Prescalar) {
                 this.timer0Precounter -= this.timer0Prescalar;
                 if (++this.timer0Counter > 0xFFFF) {
                     this.timer0Counter = this.timer0Reload;
-                    audioEvent = this.timer0ExternalTriggerCheck();
-                    audioEvent = this.timer1ClockUpTickCheck(audioEvent);
+                    this.timer0ExternalTriggerCheck();
+                    this.timer1ClockUpTickCheck();
                 }
             }
         }
         //See if timer channel 1 is enabled:
         if (this.timer1Enabled && !this.timer1CountUp) {
-            ++this.timer1Precounter;
-            if (this.timer1Precounter >= this.timer1Prescalar) {
+            this.timer1Precounter += predictedClocks;
+            while (this.timer1Precounter >= this.timer1Prescalar) {
                 this.timer1Precounter -= this.timer1Prescalar;
                 if (++this.timer1Counter > 0xFFFF) {
                     this.timer1Counter = this.timer1Reload;
-                    audioEvent = this.timer1ExternalTriggerCheck();
+                    this.timer1ExternalTriggerCheck();
                     this.timer2ClockUpTickCheck();
                 }
             }
         }
         //Clock audio system up to latest timer:
-        if (audioEvent) {
-            this.IOCore.sound.addClocks(audioClocks | 0);
+        this.IOCore.sound.addClocks(predictedClocks | 0);
+        //Only jit if overflow was seen:
+        if ((overflowClocks | 0) == (predictedClocks | 0)) {
             this.IOCore.sound.audioJIT();
-            audioClocks = 0;
-            audioEvent = false;
         }
     }
-    //Spill remaining clocks to audio:
-    this.IOCore.sound.addClocks(audioClocks | 0);
-    this.IOCore.sound.audioJIT();
 	//See if timer channel 2 is enabled:
 	if (this.timer2Enabled && !this.timer2CountUp) {
 		this.timer2Precounter += clocks;
@@ -125,16 +122,14 @@ GameBoyAdvanceTimer.prototype.addClocks = function (clocks) {
 		}
 	}
 }
-GameBoyAdvanceTimer.prototype.timer1ClockUpTickCheck = function (audioEvent) {
+GameBoyAdvanceTimer.prototype.timer1ClockUpTickCheck = function () {
     if (this.timer1Enabled && this.timer1CountUp) {
 		if (++this.timer1Counter > 0xFFFF) {
-			audioEvent = true;
             this.timer1Counter = this.timer1Reload;
 			this.timer1ExternalTriggerCheck();
 			this.timer2ClockUpTickCheck();
 		}
 	}
-    return audioEvent;
 }
 GameBoyAdvanceTimer.prototype.timer2ClockUpTickCheck = function () {
 	if (this.timer2Enabled && this.timer2CountUp) {
@@ -358,6 +353,18 @@ GameBoyAdvanceTimer.prototype.nextTimer3Overflow = function (numOverflows) {
 		}
 	}
 	return -1;
+}
+GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function (clocks) {
+	clocks = clocks | 0;
+    var timer0 = this.nextTimer0Overflow(1) | 0;
+    if (timer0 == -1) {
+        timer0 = ((clocks | 0) + 1) | 0;
+    }
+    var timer1 = this.nextTimer1Overflow(1) | 0;
+    if (timer1 == -1) {
+        timer1 = ((clocks | 0) + 1) | 0;
+    }
+    return Math.min(timer0 | 0, timer1 | 0) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer0IRQEventTime = function () {
 	return (this.timer0Enabled && this.timer0IRQ) ? this.nextTimer0Overflow(1) : -1;
