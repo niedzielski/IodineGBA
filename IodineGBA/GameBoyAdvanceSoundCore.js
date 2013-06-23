@@ -842,12 +842,7 @@ GameBoyAdvanceSound.prototype.AGBDirectSoundTimer1ClockTick = function () {
 }
 GameBoyAdvanceSound.prototype.nextFIFOAEventTime = function () {
 	if (!this.FIFOABuffer.requestingDMA()) {
-        if (this.AGBDirectSoundATimer == 0) {
-            return this.IOCore.timer.nextTimer0Overflow(this.FIFOABuffer.count - 0x10);
-        }
-        else {
-            return this.IOCore.timer.nextTimer1Overflow(this.FIFOABuffer.count - 0x10);
-        }
+		return this.IOCore.timer.nextTimer0Overflow(this.FIFOABuffer.count - 0x10);
 	}
 	else {
 		return 0;
@@ -855,12 +850,7 @@ GameBoyAdvanceSound.prototype.nextFIFOAEventTime = function () {
 }
 GameBoyAdvanceSound.prototype.nextFIFOBEventTime = function () {
 	if (!this.FIFOBBuffer.requestingDMA()) {
-		if (this.AGBDirectSoundBTimer == 0) {
-            return this.IOCore.timer.nextTimer0Overflow(this.FIFOBBuffer.count - 0x10);
-        }
-        else {
-            return this.IOCore.timer.nextTimer1Overflow(this.FIFOBBuffer.count - 0x10);
-        }
+		return this.IOCore.timer.nextTimer1Overflow(this.FIFOBBuffer.count - 0x10);
 	}
 	else {
 		return 0;

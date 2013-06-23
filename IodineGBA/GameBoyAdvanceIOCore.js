@@ -2635,7 +2635,6 @@ GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
 	this.cyclesToIterate -= clocks | 0;
 	//Clock all components:
 	this.gfx.addClocks(clocks | 0);
-	this.sound.addClocks(clocks | 0);
 	this.timer.addClocks(clocks | 0);
     this.serial.addClocks(clocks | 0);
 }
