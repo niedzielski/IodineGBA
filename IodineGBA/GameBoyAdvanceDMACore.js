@@ -365,36 +365,44 @@ GameBoyAdvanceDMA.prototype.nextEventTime = function () {
 		}
 		clocks = (clocks > -1) ? ((workbench > -1) ? Math.min(clocks, workbench) : clocks) : workbench;
 	}
-	return clocks;
+	return clocks | 0;
 }
-GameBoyAdvanceDMA.prototype.nextIRQEventTime = function () {
+GameBoyAdvanceDMA.prototype.nextIRQEventTime = function (dmaChannel) {
 	var clocks = -1;
-	var workbench = -1;
-	for (var dmaChannel = 0; dmaChannel < 4; ++dmaChannel) {
-		if (this.controlShadow[dmaChannel][0]) {
-			switch (this.enabled[dmaChannel] & 0x3F) {
-				//V_BLANK
-				case 0x2:
-					workbench = this.IOCore.gfx.nextVBlankEventTime();
-					break;
-				//H_BLANK:
-				case 0x4:
-					workbench = this.IOCore.gfx.nextHBlankDMAEventTime();
-					break;
-				//FIFO_A:
-				case 0x8:
-					workbench = this.IOCore.sound.nextFIFOAEventTime();
-					break;
-				//FIFO_B:
-				case 0x10:
-					workbench = this.IOCore.sound.nextFIFOBEventTime();
-					break;
-				//DISPLAY_SYNC:
-				case 0x20:
-					workbench = this.IOCore.gfx.nextDisplaySyncEventTime();
-			}
-			clocks = (clocks > -1) ? ((workbench > -1) ? Math.min(clocks, workbench) : clocks) : workbench;
+	if (this.controlShadow[dmaChannel][0]) {
+		switch (this.enabled[dmaChannel] & 0x3F) {
+			//V_BLANK
+			case 0x2:
+				clocks = this.IOCore.gfx.nextVBlankEventTime();
+				break;
+			//H_BLANK:
+			case 0x4:
+				clocks = this.IOCore.gfx.nextHBlankDMAEventTime();
+				break;
+			//FIFO_A:
+			case 0x8:
+				clocks = this.IOCore.sound.nextFIFOAEventTime();
+				break;
+			//FIFO_B:
+			case 0x10:
+				clocks = this.IOCore.sound.nextFIFOBEventTime();
+				break;
+			//DISPLAY_SYNC:
+			case 0x20:
+				clocks = this.IOCore.gfx.nextDisplaySyncEventTime();
 		}
 	}
-	return clocks;
+	return clocks | 0;
+}
+GameBoyAdvanceDMA.prototype.nextDMA0IRQEventTime = function () {
+	return this.nextIRQEventTime(0);
+}
+GameBoyAdvanceDMA.prototype.nextDMA1IRQEventTime = function () {
+	return this.nextIRQEventTime(1);
+}
+GameBoyAdvanceDMA.prototype.nextDMA2IRQEventTime = function () {
+	return this.nextIRQEventTime(2);
+}
+GameBoyAdvanceDMA.prototype.nextDMA3IRQEventTime = function () {
+	return this.nextIRQEventTime(3);
 }
