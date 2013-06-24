@@ -2336,7 +2336,7 @@ GameBoyAdvanceIO.prototype.writeOAM = function (parentObj, address, data, busReq
 GameBoyAdvanceIO.prototype.writeOAM8 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.wait.OAMAccess2();
+    parentObj.wait.OAMAccess8();
 	parentObj.gfx.writeOAM(address & 0x3FF, data | 0);
 }
 GameBoyAdvanceIO.prototype.writeOAM16 = function (parentObj, address, data) {
