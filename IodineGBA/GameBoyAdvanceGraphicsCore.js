@@ -70,8 +70,14 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
     this.writeVRAM16 = (this.VRAM16) ? this.writeVRAM16Optimized : this.writeVRAM16Slow;
     this.VRAM32 = getInt32View(this.VRAM);
     this.readVRAM32 = (this.VRAM32) ? this.readVRAM32Optimized : this.readVRAM32Slow;
-    this.writeVRAM32 = (this.VRAM16) ? this.writeVRAM32Optimized : this.writeVRAM32Slow;
+    this.writeVRAM32 = (this.VRAM32) ? this.writeVRAM32Optimized : this.writeVRAM32Slow;
     this.OAMRAM = getUint8Array(0x400);
+    this.OAMRAM16 = getUint16View(this.VRAM);
+    this.readOAM16 = (this.OAMRAM16) ? this.readOAM16Optimized : this.readOAM16Slow;
+    this.writeOAM16 = (this.OAMRAM16) ? this.writeOAM16Optimized : this.writeOAM16Slow;
+    this.OAMRAM32 = getInt32View(this.VRAM);
+    this.readOAM32 = (this.OAMRAM32) ? this.readOAM32Optimized : this.readOAM32Slow;
+    this.writeOAM32 = (this.OAMRAM32) ? this.writeOAM32Optimized : this.writeOAM32Slow;
 	this.lineBuffer = getInt32Array(240);
 	this.frameBuffer = this.emulatorCore.frameBuffer;
 	this.LCDTicks = 0;
@@ -1048,20 +1054,16 @@ GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM = function (address, data) {
 	this.midScanLineJIT();
-	this.VRAM[address] = data | 0;
+	this.VRAM[address | 0] = data | 0;
+}
+GameBoyAdvanceGraphics.prototype.writeVRAM16Slow = function (address, data) {
+	this.midScanLineJIT();
+	this.VRAM[address] = data & 0xFF;
+    this.VRAM[address | 1] = data >> 8;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM16Optimized = function (address, data) {
 	this.midScanLineJIT();
 	this.VRAM16[address >> 1] = data | 0;
-}
-GameBoyAdvanceGraphics.prototype.writeVRAM16Slow = function (address, data) {
-	this.midScanLineJIT();
-	this.VRAM[address | 0] = data & 0xFF;
-    this.VRAM[address | 1] = data >> 8;
-}
-GameBoyAdvanceGraphics.prototype.writeVRAM32Optimized = function (address, data) {
-	this.midScanLineJIT();
-	this.VRAM32[address >> 2] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM32Slow = function (address, data) {
 	this.midScanLineJIT();
@@ -1069,6 +1071,10 @@ GameBoyAdvanceGraphics.prototype.writeVRAM32Slow = function (address, data) {
     this.VRAM[address | 1] = (data >> 8) & 0xFF;
     this.VRAM[address | 2] = (data >> 16) & 0xFF;
     this.VRAM[address | 3] = (data >> 24) & 0xFF;
+}
+GameBoyAdvanceGraphics.prototype.writeVRAM32Optimized = function (address, data) {
+	this.midScanLineJIT();
+	this.VRAM32[address >> 2] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.readVRAM = function (address) {
 	return this.VRAM[address | 0] | 0;
@@ -1132,10 +1138,22 @@ GameBoyAdvanceGraphics.prototype.writeOAM = function (address, data) {
 			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] |= data << 8;
 			this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] << 16) / 0x1000000;
 	}
-	this.OAMRAM[address] = data;
+	this.OAMRAM[address & 0x3FF] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.readOAM = function (address) {
-	return this.OAMRAM[address];
+    return this.OAMRAM[address & 0x3FF] | 0;
+}
+GameBoyAdvanceGraphics.prototype.readOAM16Slow = function (address) {
+    return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8);
+}
+GameBoyAdvanceGraphics.prototype.readOAM16Optimized = function (address) {
+	return this.OAMRAM16[(address >> 1) & 0x1FF] | 0;
+}
+GameBoyAdvanceGraphics.prototype.readOAM32Slow = function (address) {
+    return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8) | (this.OAMRAM[address | 2] << 16)  | (this.OAMRAM[address | 3] << 24);
+}
+GameBoyAdvanceGraphics.prototype.readOAM32Optimized = function (address) {
+	return this.OAMRAM32[(address >> 2) & 0xFF] | 0;
 }
 GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
 	this.midScanLineJIT();

@@ -2797,12 +2797,12 @@ GameBoyAdvanceIO.prototype.readOAM8 = function (parentObj, address) {
 GameBoyAdvanceIO.prototype.readOAM16 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.OAMAccess16();
-	return parentObj.gfx.readOAM(address & 0x3FF) | (parentObj.gfx.readOAM((address + 1) & 0x3FF) << 8);
+	return parentObj.gfx.readOAM16(address & 0x3FF) | 0;
 }
 GameBoyAdvanceIO.prototype.readOAM32 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.OAMAccess32();
-	return parentObj.gfx.readOAM(address & 0x3FF) | (parentObj.gfx.readOAM((address + 1) & 0x3FF) << 8) | (parentObj.gfx.readOAM((address + 2) & 0x3FF) << 16) | (parentObj.gfx.readOAM((address + 3) & 0x3FF) << 24);
+	return parentObj.gfx.readOAM32(address & 0x3FF) | 0;
 }
 GameBoyAdvanceIO.prototype.readPalette = function (parentObj, address, busReqNumber) {
 	address = address | 0;
