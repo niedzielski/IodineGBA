@@ -113,21 +113,25 @@ GameBoyAdvanceAffineBGRenderer.prototype.writeBGX_L0 = function (data) {
 	data = data | 0;
     this.BGReferenceX = (this.BGReferenceX & 0xFFFFF00) | data;
 	this.actualBGReferenceX = +((this.BGReferenceX << 4) / 0x1000);
+    this.resetReferenceCounters();
 }
 GameBoyAdvanceAffineBGRenderer.prototype.writeBGX_L1 = function (data) {
 	data = data | 0;
     this.BGReferenceX = (data << 8) | (this.BGReferenceX & 0xFFF00FF);
 	this.actualBGReferenceX = +((this.BGReferenceX << 4) / 0x1000);
+    this.resetReferenceCounters();
 }
 GameBoyAdvanceAffineBGRenderer.prototype.writeBGX_H0 = function (data) {
 	data = data | 0;
     this.BGReferenceX = (data << 16) | (this.BGReferenceX & 0xF00FFFF);
 	this.actualBGReferenceX = +((this.BGReferenceX << 4) / 0x1000);
+    this.resetReferenceCounters();
 }
 GameBoyAdvanceAffineBGRenderer.prototype.writeBGX_H1 = function (data) {
 	data = data | 0;
     this.BGReferenceX = ((data & 0xF) << 24) | (this.BGReferenceX & 0xFFFFFF);
 	this.actualBGReferenceX = +((this.BGReferenceX << 4) / 0x1000);
+    this.resetReferenceCounters();
 }
 GameBoyAdvanceAffineBGRenderer.prototype.writeBGY_L0 = function (data) {
 	data = data | 0;
