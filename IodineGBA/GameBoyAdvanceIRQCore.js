@@ -31,12 +31,12 @@ GameBoyAdvanceIRQ.prototype.IRQMatch = function () {
 }
 GameBoyAdvanceIRQ.prototype.checkForIRQFire = function () {
 	//Tell the CPU core when the emulated hardware is triggering an IRQ:
-	this.IOCore.cpu.triggerIRQ(this.IRQMatch() && this.IME);
+	this.IOCore.cpu.triggerIRQ((this.interruptsEnabled & this.interruptsRequested) != 0 && this.IME);
 }
 GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
-    irqLineToSet = irqLineToSet | 0;
+	irqLineToSet = irqLineToSet | 0;
     this.interruptsRequested |= irqLineToSet | 0;
-    this.checkForIRQFire();
+	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.writeIME = function (data) {
 	data = data | 0;
@@ -67,6 +67,7 @@ GameBoyAdvanceIRQ.prototype.readIE1 = function () {
 GameBoyAdvanceIRQ.prototype.writeIF0 = function (data) {
 	data = data | 0;
     this.interruptsRequested &= ~data;
+	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF0 = function () {
 	return this.interruptsRequested & 0xFF;
@@ -74,6 +75,7 @@ GameBoyAdvanceIRQ.prototype.readIF0 = function () {
 GameBoyAdvanceIRQ.prototype.writeIF1 = function (data) {
 	data = data | 0;
     this.interruptsRequested &= ~(data << 8);
+	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF1 = function () {
 	return this.interruptsRequested >> 8;
@@ -89,8 +91,8 @@ GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
 	clocks = this.findClosestEvent(clocks | 0, this.IOCore.serial.nextIRQEventTime() | 0, 0x80) | 0;
 	clocks = this.findClosestEvent(clocks | 0, this.IOCore.dma.nextDMA0IRQEventTime() | 0, 0x100) | 0;
     clocks = this.findClosestEvent(clocks | 0, this.IOCore.dma.nextDMA1IRQEventTime() | 0, 0x200) | 0;
-    clocks = this.findClosestEvent(clocks | 0, this.IOCore.dma.nextDMA2IRQEventTime() | 0, 0x400) | 0;
-    clocks = this.findClosestEvent(clocks | 0, this.IOCore.dma.nextDMA3IRQEventTime() | 0, 0x800) | 0;
+    clocks = this.findClosestEvent(clocks | 0, this.IOCore.dma.nextDMA2IRQEventTime() | 0, 0xF00) | 0;
+    clocks = this.findClosestEvent(clocks | 0, this.IOCore.dma.nextDMA3IRQEventTime() | 0, 0xF00) | 0;
 	//JoyPad input state should never update while we're in halt:
 	//clocks = this.findClosestEvent(clocks | 0, this.IOCore.joypad.nextIRQEventTime() | 0, 0x1000) | 0;
 	clocks = this.findClosestEvent(clocks | 0, this.IOCore.cartridge.nextIRQEventTime() | 0, 0x2000) | 0;
