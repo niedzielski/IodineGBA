@@ -231,6 +231,10 @@ GameBoyAdvanceGraphics.prototype.nextHBlankDMAEventTime = function () {
     return ((((((228 - (this.currentScanLine | 0)) * 1232) | 0) + 1006) | 0) - (this.LCDTicks | 0)) | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextVCounterEventTime = function () {
+    if (this.VCounter > 227) {
+        //Never will match:
+        return -1;
+    }
 	return (((((1 + (((227 + (this.VCounter | 0) - (this.currentScanLine | 0)) | 0) % 228)) | 0) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextVCounterIRQEventTime = function () {
