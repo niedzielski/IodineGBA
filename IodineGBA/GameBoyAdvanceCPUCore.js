@@ -113,7 +113,7 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 			//IRQ mode exit handling:
 			case 0x130:
 				this.ARM.execute = 0xE8BD500F;
-				this.ARM.LDMIAW(this.ARM, this.ARM.guardMultiRegisterWrite);
+				this.ARM.LDMIAW(this.ARM, this.ARM.guardRegisterWriteLDM);
 				this.ARM.execute = 0xE25EF004;
 				this.ARM.SUBS(this.ARM, this.ARM.imm);
 				break;

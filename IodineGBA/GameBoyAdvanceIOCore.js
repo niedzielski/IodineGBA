@@ -181,7 +181,7 @@ GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
                       this.readROM1,
                       this.readROM2,
                       this.readSRAM,
-                      this.readBIOS
+                      (this.BIOS) ? this.readBIOS : this.readUnused
     ];
     var bus8slow = this.compileMemoryDispatch(writeCalls8slow, readCalls8slow);
     this.memoryWriter = bus8slow[0];
@@ -211,7 +211,7 @@ GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
                       this.readROM18,
                       this.readROM28,
                       this.readSRAM8,
-                      this.readBIOS8
+                      (this.BIOS) ? this.readBIOS8 : this.readUnused8
                       ];
     var bus8 = this.compileMemoryDispatch(writeCalls8, readCalls8);
     this.memoryWriter8 = bus8[0];
@@ -241,7 +241,7 @@ GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
                        this.readROM116,
                        this.readROM216,
                        this.readSRAM16,
-                       this.readBIOS16
+                       (this.BIOS) ? this.readBIOS16 : this.readUnused16
     ];
     var bus16 = this.compileMemoryDispatch(writeCalls16, readCalls16);
     this.memoryWriter16 = bus16[0];
@@ -271,7 +271,7 @@ GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
                        this.readROM132,
                        this.readROM232,
                        this.readSRAM32,
-                       this.readBIOS32
+                       (this.BIOS) ? this.readBIOS32 : this.readUnused32
     ];
     var bus32 = this.compileMemoryDispatch(writeCalls32, readCalls32);
     this.memoryWriter32 = bus32[0];
