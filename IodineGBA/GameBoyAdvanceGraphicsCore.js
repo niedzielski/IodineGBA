@@ -76,7 +76,11 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
     this.readOAM16 = (this.OAMRAM16) ? this.readOAM16Optimized : this.readOAM16Slow;
     this.OAMRAM32 = getInt32View(this.OAMRAM);
     this.readOAM32 = (this.OAMRAM32) ? this.readOAM32Optimized : this.readOAM32Slow;
-	this.lineBuffer = getInt32Array(240);
+    this.paletteRAM16 = getUint16View(this.paletteRAM);
+    this.readPalette16 = (this.paletteRAM16) ? this.readPalette16Optimized : this.readPalette16Slow;
+    this.paletteRAM32 = getInt32View(this.paletteRAM);
+    this.readPalette32 = (this.paletteRAM32) ? this.readPalette32Optimized : this.readPalette32Slow;
+    this.lineBuffer = getInt32Array(240);
 	this.frameBuffer = this.emulatorCore.frameBuffer;
 	this.LCDTicks = 0;
 	this.totalLinesPassed = 0;
@@ -1145,13 +1149,15 @@ GameBoyAdvanceGraphics.prototype.readOAM16Slow = function (address) {
     return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8);
 }
 GameBoyAdvanceGraphics.prototype.readOAM16Optimized = function (address) {
-	return this.OAMRAM16[(address >> 1) & 0x1FF] | 0;
+	address = address | 0;
+    return this.OAMRAM16[(address >> 1) & 0x1FF] | 0;
 }
 GameBoyAdvanceGraphics.prototype.readOAM32Slow = function (address) {
     return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8) | (this.OAMRAM[address | 2] << 16)  | (this.OAMRAM[address | 3] << 24);
 }
 GameBoyAdvanceGraphics.prototype.readOAM32Optimized = function (address) {
-	return this.OAMRAM32[(address >> 2) & 0xFF] | 0;
+	address = address | 0;
+    return this.OAMRAM32[(address >> 2) & 0xFF] | 0;
 }
 GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
 	this.midScanLineJIT();
@@ -1181,5 +1187,19 @@ GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
 	}
 }
 GameBoyAdvanceGraphics.prototype.readPalette = function (address) {
-	return this.paletteRAM[address];
+	return this.paletteRAM[address & 0x3FF] | 0;
+}
+GameBoyAdvanceGraphics.prototype.readPalette16Slow = function (address) {
+    return this.paletteRAM[address] | (this.paletteRAM[address | 1] << 8);
+}
+GameBoyAdvanceGraphics.prototype.readPalette16Optimized = function (address) {
+	address = address | 0;
+    return this.paletteRAM16[(address >> 1) & 0x1FF] | 0;
+}
+GameBoyAdvanceGraphics.prototype.readPalette32Slow = function (address) {
+    return this.paletteRAM[address] | (this.paletteRAM[address | 1] << 8) | (this.paletteRAM[address | 2] << 16)  | (this.paletteRAM[address | 3] << 24);
+}
+GameBoyAdvanceGraphics.prototype.readPalette32Optimized = function (address) {
+	address = address | 0;
+    return this.paletteRAM32[(address >> 2) & 0xFF] | 0;
 }

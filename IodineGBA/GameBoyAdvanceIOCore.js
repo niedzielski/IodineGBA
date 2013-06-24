@@ -2813,17 +2813,17 @@ GameBoyAdvanceIO.prototype.readPalette = function (parentObj, address, busReqNum
 GameBoyAdvanceIO.prototype.readPalette8 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.VRAMAccess8();
-	return parentObj.gfx.readPalette(address & 0x3FF) | 0;
+	return parentObj.gfx.readPalette(address & 0x3FF);
 }
 GameBoyAdvanceIO.prototype.readPalette16 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.VRAMAccess16();
-	return parentObj.gfx.readPalette(address & 0x3FF) | (parentObj.gfx.readPalette((address + 1) & 0x3FF) << 8);
+	return parentObj.gfx.readPalette16(address & 0x3FF);
 }
 GameBoyAdvanceIO.prototype.readPalette32 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.VRAMAccess32();
-	return parentObj.gfx.readPalette(address & 0x3FF) | (parentObj.gfx.readPalette((address + 1) & 0x3FF) << 8) | (parentObj.gfx.readPalette((address + 2) & 0x3FF) << 16) | (parentObj.gfx.readPalette((address + 3) & 0x3FF) << 24);
+	return parentObj.gfx.readPalette32(address & 0x3FF);
 }
 GameBoyAdvanceIO.prototype.readROM0 = function (parentObj, address, busReqNumber) {
 	address = address | 0;
