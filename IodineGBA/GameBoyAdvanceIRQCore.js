@@ -31,12 +31,14 @@ GameBoyAdvanceIRQ.prototype.IRQMatch = function () {
 }
 GameBoyAdvanceIRQ.prototype.checkForIRQFire = function () {
 	//Tell the CPU core when the emulated hardware is triggering an IRQ:
-	this.IOCore.cpu.triggerIRQ((this.interruptsEnabled & this.interruptsRequested) != 0 && this.IME);
+	this.IOCore.cpu.triggerIRQ(this.IRQMatch() && this.IME);
 }
 GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
-	irqLineToSet = irqLineToSet | 0;
-    this.interruptsRequested |= irqLineToSet | 0;
-	this.checkForIRQFire();
+    irqLineToSet = irqLineToSet | 0;
+    if (this.IME && (this.interruptsEnabled & irqLineToSet) != 0) {
+        this.interruptsRequested |= irqLineToSet | 0;
+        this.checkForIRQFire();
+    }
 }
 GameBoyAdvanceIRQ.prototype.writeIME = function (data) {
 	data = data | 0;
@@ -67,7 +69,6 @@ GameBoyAdvanceIRQ.prototype.readIE1 = function () {
 GameBoyAdvanceIRQ.prototype.writeIF0 = function (data) {
 	data = data | 0;
     this.interruptsRequested &= ~data;
-	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF0 = function () {
 	return this.interruptsRequested & 0xFF;
@@ -75,7 +76,6 @@ GameBoyAdvanceIRQ.prototype.readIF0 = function () {
 GameBoyAdvanceIRQ.prototype.writeIF1 = function (data) {
 	data = data | 0;
     this.interruptsRequested &= ~(data << 8);
-	this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF1 = function () {
 	return this.interruptsRequested >> 8;
