@@ -336,8 +336,8 @@ ARMInstructionSet.prototype.BX = function (parentObj) {
 	}
 	else {
 		//Enter THUMB mode:
-		parentObj.CPUCore.branch(address & -2);
 		parentObj.CPUCore.enterTHUMB();
+        parentObj.CPUCore.branch(address & -2);
 	}
 }
 ARMInstructionSet.prototype.B = function (parentObj) {

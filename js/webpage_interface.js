@@ -64,24 +64,20 @@ function registerGUIEvents() {
 		if (typeof this.files != "undefined") {
 			if (this.files.length >= 1) {
 				//Gecko 1.9.2+ (Standard Method)
-                var binaryHandle = new FileReader();
                 try {
+                    var binaryHandle = new FileReader();
                     binaryHandle.onloadend = function () {
                         attachROM(this.result);
                     }
                     binaryHandle.readAsArrayBuffer(this.files[this.files.length - 1]);
                 }
                 catch (error) {
-                    binaryHandle.onload = function () {
-                        var result = [];
-                        for (var index = 0; index < this.result.length; index++) {
-                            result[index] = this.result.charCodeAt(index);
-                        }
-                        if (this.readyState == 2) {
-                            attachROM(result);
-                        }
+                    var result = this.files[this.files.length - 1].getAsBinary();
+                    var resultConverted = [];
+                    for (var index = 0; index < result.length; ++index) {
+                        resultConverted[index] = result.charCodeAt(index) & 0xFF;
                     }
-                    binaryHandle.readAsBinaryString(this.files[this.files.length - 1]);
+                    attachROM(resultConverted);
                 }
 			}
 		}
@@ -90,24 +86,20 @@ function registerGUIEvents() {
 		if (typeof this.files != "undefined") {
 			if (this.files.length >= 1) {
 				//Gecko 1.9.2+ (Standard Method)
-				var binaryHandle = new FileReader();
 				try {
+                    var binaryHandle = new FileReader();
                     binaryHandle.onloadend = function () {
                         attachBIOS(this.result);
                     }
                     binaryHandle.readAsArrayBuffer(this.files[this.files.length - 1]);
 				}
 				catch (error) {
-                    binaryHandle.onload = function () {
-                        var result = [];
-                        for (var index = 0; index < this.result.length; index++) {
-                            result[index] = this.result.charCodeAt(index);
-                        }
-                        if (this.readyState == 2) {
-                            attachBIOS(result);
-                        }
+                    var result = this.files[this.files.length - 1].getAsBinary();
+                    var resultConverted = [];
+                    for (var index = 0; index < result.length; ++index) {
+                        resultConverted[index] = result.charCodeAt(index) & 0xFF;
                     }
-                    binaryHandle.readAsBinaryString(this.files[this.files.length - 1]);
+                    attachBIOS(resultConverted);
 				}
 			}
 		}
