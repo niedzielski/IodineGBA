@@ -35,10 +35,8 @@ GameBoyAdvanceIRQ.prototype.checkForIRQFire = function () {
 }
 GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
     irqLineToSet = irqLineToSet | 0;
-    if ((this.interruptsEnabled & irqLineToSet) != 0) {
-        this.interruptsRequested |= irqLineToSet | 0;
-        this.checkForIRQFire();
-    }
+    this.interruptsRequested |= irqLineToSet | 0;
+    this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.writeIME = function (data) {
 	data = data | 0;
