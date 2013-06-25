@@ -90,5 +90,5 @@ DynarecBranchListenerCore.prototype.cacheAppend = function (cache) {
     this.caches["c_" + (cache.start >>> 0)] = cache;
 }
 DynarecBranchListenerCore.prototype.findCache = function (address) {
-    this.caches["c_" + (address >>> 0)];
+    return this.caches["c_" + (address >>> 0)];
 }

@@ -76,6 +76,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
         while (start < this.end) {
             //Build up a record of bytecode to pass to the worker to compile:
             this.record.push(this.read(start));
+            start += 0x4;
         }
         try {
             var parentObj = this;
