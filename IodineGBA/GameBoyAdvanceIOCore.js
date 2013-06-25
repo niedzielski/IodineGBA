@@ -97,10 +97,7 @@ GameBoyAdvanceIO.prototype.handleDMA = function () {
 GameBoyAdvanceIO.prototype.handleHalt = function () {
 	if (!this.irq.IRQMatch()) {
 		//Clock up to next IRQ match or DMA:
-		var clocks = this.irq.nextEventTime() | 0;
-		var dmaClocks = this.dma.nextEventTime() | 0;
-		clocks = ((clocks > -1) ? ((dmaClocks > -1) ? Math.min(clocks | 0, dmaClocks | 0) : (clocks | 0)) : (dmaClocks | 0)) | 0;
-		this.updateCore(((clocks == -1 || clocks > this.cyclesToIterate) ? (this.cyclesToIterate | 0) : (clocks | 0)) | 0);
+		this.updateCore(this.cyclesUntilNextEvent());
 	}
 	else {
 		//Exit HALT promptly:
@@ -117,4 +114,13 @@ GameBoyAdvanceIO.prototype.handleDynarec = function () {
 	if (this.emulatorCore.dynarecEnabled) {
 		this.cpu.dynarec.enter();
 	}
+    this.systemStatus = ((this.systemStatus | 0) - 0x5) | 0;
+}
+GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
+    //Find the clocks to the next event:
+    var clocks = this.irq.nextEventTime() | 0;
+    var dmaClocks = this.dma.nextEventTime() | 0;
+    clocks = ((clocks > -1) ? ((dmaClocks > -1) ? Math.min(clocks | 0, dmaClocks | 0) : (clocks | 0)) : (dmaClocks | 0)) | 0;
+    clocks = ((clocks == -1 || clocks > this.cyclesToIterate) ? (this.cyclesToIterate | 0) : (clocks | 0)) | 0;
+    return clocks | 0;
 }

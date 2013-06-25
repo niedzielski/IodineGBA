@@ -15,12 +15,21 @@
  * GNU General Public License for more details.
  *
  */
-self.onmessage = function (info) {
-    var record = info[0];
-    var InTHUMB = info[1];
-    var CPUMode = info[2];
-    var isROM = info[3];
-    var compiler = new DynarecCompilerWorkerCore(record, InTHUMB, CPUMode, isROM);
+
+self.onmessage = function (command) {
+    var info = command.data;
+    var startPC = info[0];
+    var record = info[1];
+    var InTHUMB = info[2];
+    var CPUMode = info[3];
+    var isROM = info[4];
+    try {
+        var compiler = new DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM);
+    }
+    catch (error) {
+        //Compiler had an internal error, tell the manager about it:
+        bailout();
+    }
 }
 function bailout() {
     postMessage([1]);
@@ -28,12 +37,64 @@ function bailout() {
 function done(functionString) {
     postMessage([0, functionString]);
 }
-function DynarecCompilerWorkerCore(record, InTHUMB, CPUMode) {
+function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM) {
     this.instructionsToJoin = [];
+    this.pc = startPC | 0;
     this.record = record;
     this.InTHUMB = InTHUMB;
     this.CPUMode = CPUMode;
+    this.isROM = isROM;
+    this.totalClocks = 0;
+    this.compile();
+    this.finish();
+}
+DynarecCompilerWorkerCore.prototype.compile = function () {
+    var length = this.record.length;
+    for (var index = 0; index < length; ++index) {
+        this.instructionsToJoin.push(this.parseInstruction(this.record[index]));
+        this.incrementPC();
+    }
+}
+DynarecCompilerWorkerCore.prototype.parseInstruction = function (instructionValue) {
+    var instuctionCode = this.decodeInstruction(instructionValue);
+    this.incrementPC();
+    return this.addRAMGuards(instructionValue, instuctionCode);
+}
+DynarecCompilerWorkerCore.prototype.incrementPC = function () {
+    if (this.InTHUMB) {
+        this.pc = (this.pc + 2) | 0;
+    }
+    else {
+        this.pc = (this.pc + 4) | 0;
+    }
+}
+DynarecCompilerWorkerCore.prototype.bailoutEarly = function () {
+    var bailoutText = "cpu.registers[15] = " + this.pc + ";";
+    bailoutText += this.addStateMachineUpdate();
+    return bailoutText;
+}
+DynarecCompilerWorkerCore.prototype.addRAMGuards = function (instructionValue, instructionCode) {
+    if (this.isROM) {
+        return instructionCode;
+    }
+    var guardText = "var instruction = " +  this.addMemoryRead(pc) + ";";
+    guardText += "if (instruction != " + instructionValue + ") {";
+    guardText += this.bailoutEarly();
+    guardText += "return;";
+    guardText += "}";
+    guardText += instructionCode;
+}
+DynarecCompilerWorkerCore.prototype.addClockChecks = function () {
+    return "if (cpu.IOCore.cyclesUntilNextEvent() < " + this.totalClocks + ") { return; }";
+}
+DynarecCompilerWorkerCore.prototype.addStateMachineUpdate = function () {
+    return "cpu.IOCore.updateCore(" + this.totalClocks + ");";
 }
 DynarecCompilerWorkerCore.prototype.finish = function () {
-    done(this.instructionsToJoin.join(";"));
+    var code = "function (cpu) {";
+    code += this.addClockChecks();
+    code += this.instructionsToJoin.join(";");
+    code += this.addStateMachineUpdate();
+    code += "}";
+    done(code);
 }

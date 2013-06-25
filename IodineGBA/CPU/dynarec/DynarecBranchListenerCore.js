@@ -25,7 +25,7 @@ DynarecBranchListenerCore.prototype.initialize = function () {
     this.lastCPUMode = 0x10;
     this.caches = {};
     this.currentCache = null;
-    this.compiling = false;
+    this.compiling = 0;
     this.backEdge = false;
 }
 DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instructionmode, cpumode) {
