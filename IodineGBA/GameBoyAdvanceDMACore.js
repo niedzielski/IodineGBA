@@ -248,12 +248,12 @@ GameBoyAdvanceDMA.prototype.handleDMACopy = function (dmaChannel) {
 	//Transfer Data:
 	if (control[2]) {
 		//32-bit Transfer:
-		this.IOCore.memoryWrite32(destination >>> 0, this.IOCore.memoryRead32(source >>> 0) | 0);
+		this.IOCore.memory.memoryWrite32(destination >>> 0, this.IOCore.memory.memoryRead32(source >>> 0) | 0);
 		this.decrementWordCount(control, dmaChannel | 0, source | 0, destination | 0, 4);
 	}
 	else {
 		//16-bit Transfer:
-		this.IOCore.memoryWrite16(destination >>> 0, this.IOCore.memoryRead16(source >>> 0) | 0);
+		this.IOCore.memory.memoryWrite16(destination >>> 0, this.IOCore.memory.memoryRead16(source >>> 0) | 0);
 		this.decrementWordCount(control, dmaChannel | 0, source | 0, destination | 0, 2);
 	}
 }

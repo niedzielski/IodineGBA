@@ -766,7 +766,7 @@ ARMInstructionSet.prototype.STMIA = function (parentObj, operand2OP) {
 		for (var rListPosition = 0; rListPosition < 0x10; rListPosition = (rListPosition + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
 				currentAddress = (currentAddress + 4) | 0;
 			}
 		}
@@ -785,7 +785,7 @@ ARMInstructionSet.prototype.STMIAW = function (parentObj, operand2OP) {
 		for (var rListPosition = 0; rListPosition < 0x10; rListPosition = (rListPosition + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
 				currentAddress = (currentAddress + 4) | 0;
 			}
 		}
@@ -806,7 +806,7 @@ ARMInstructionSet.prototype.STMDA = function (parentObj, operand2OP) {
 		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
 				currentAddress = (currentAddress - 4) | 0;
 			}
 		}
@@ -825,7 +825,7 @@ ARMInstructionSet.prototype.STMDAW = function (parentObj, operand2OP) {
 		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
 				currentAddress = (currentAddress - 4) | 0;
 			}
 		}
@@ -847,7 +847,7 @@ ARMInstructionSet.prototype.STMIB = function (parentObj, operand2OP) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				currentAddress = (currentAddress + 4) | 0;
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -866,7 +866,7 @@ ARMInstructionSet.prototype.STMIBW = function (parentObj, operand2OP) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				currentAddress = (currentAddress + 4) | 0;
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
 			}
 		}
 		//Store the updated base address back into register:
@@ -887,7 +887,7 @@ ARMInstructionSet.prototype.STMDB = function (parentObj, operand2OP) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				currentAddress = (currentAddress - 4) | 0;
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -906,7 +906,7 @@ ARMInstructionSet.prototype.STMDBW = function (parentObj, operand2OP) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				currentAddress = (currentAddress - 4) | 0;
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition >>> 0) | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition >>> 0) | 0);
 			}
 		}
 		//Store the updated base address back into register:
@@ -926,7 +926,7 @@ ARMInstructionSet.prototype.LDMIA = function (parentObj, operand2OP) {
 		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0);
+				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0);
 				currentAddress = (currentAddress + 4) | 0;
 			}
 		}
@@ -945,7 +945,7 @@ ARMInstructionSet.prototype.LDMIAW = function (parentObj, operand2OP) {
 		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0);
+				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0);
 				currentAddress = (currentAddress + 4) | 0;
 			}
 		}
@@ -966,7 +966,7 @@ ARMInstructionSet.prototype.LDMDA = function (parentObj, operand2OP) {
 		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0);
+				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0);
 				currentAddress = (currentAddress - 4) | 0;
 			}
 		}
@@ -985,7 +985,7 @@ ARMInstructionSet.prototype.LDMDAW = function (parentObj, operand2OP) {
 		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0);
+				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0);
 				currentAddress = (currentAddress - 4) | 0;
 			}
 		}
@@ -1007,7 +1007,7 @@ ARMInstructionSet.prototype.LDMIB = function (parentObj, operand2OP) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				currentAddress = (currentAddress + 4) | 0;
-				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0);
+				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0);
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -1026,7 +1026,7 @@ ARMInstructionSet.prototype.LDMIBW = function (parentObj, operand2OP) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				currentAddress = (currentAddress + 4) | 0;
-				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0);
+				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0);
 			}
 		}
 		//Store the updated base address back into register:
@@ -1047,7 +1047,7 @@ ARMInstructionSet.prototype.LDMDB = function (parentObj, operand2OP) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				currentAddress = (currentAddress - 4) | 0;
-				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0);
+				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0);
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -1066,7 +1066,7 @@ ARMInstructionSet.prototype.LDMDBW = function (parentObj, operand2OP) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				currentAddress = (currentAddress - 4) | 0;
-				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0);
+				operand2OP(parentObj, rListPosition | 0, parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0);
 			}
 		}
 		//Store the updated base address back into register:

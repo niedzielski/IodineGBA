@@ -565,7 +565,7 @@ THUMBInstructionSet.prototype.PUSH = function (parentObj) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push register onto the stack:
 				parentObj.registers[13] = (parentObj.registers[13] - 4) | 0;
-				parentObj.IOCore.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[rListPosition | 0] | 0);
+				parentObj.IOCore.memory.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[rListPosition | 0] | 0);
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -577,13 +577,13 @@ THUMBInstructionSet.prototype.PUSHlr = function (parentObj) {
 	parentObj.wait.NonSequentialBroadcast();
 	//Push link register onto the stack:
 	parentObj.registers[13] = (parentObj.registers[13] - 4) | 0;
-	parentObj.IOCore.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[14] | 0);
+	parentObj.IOCore.memory.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[14] | 0);
 	//Push register(s) onto the stack:
 	for (var rListPosition = 7; (rListPosition | 0) > -1; rListPosition = (rListPosition - 1) | 0) {
 		if ((parentObj.execute & (1 << rListPosition)) != 0) {
 			//Push register onto the stack:
 			parentObj.registers[13] = (parentObj.registers[13] - 4) | 0;
-			parentObj.IOCore.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[rListPosition | 0] | 0);
+			parentObj.IOCore.memory.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[rListPosition | 0] | 0);
 		}
 	}
 	//Updating the address bus back to PC fetch:
@@ -598,7 +598,7 @@ THUMBInstructionSet.prototype.POP = function (parentObj) {
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = (rListPosition + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//POP stack into a register:
-				parentObj.registers[rListPosition | 0] = parentObj.IOCore.memoryRead32(parentObj.registers[13] >>> 0) | 0;
+				parentObj.registers[rListPosition | 0] = parentObj.IOCore.memory.memoryRead32(parentObj.registers[13] >>> 0) | 0;
 				parentObj.registers[13] = (parentObj.registers[13] + 4) | 0;
 			}
 		}
@@ -613,12 +613,12 @@ THUMBInstructionSet.prototype.POPpc = function (parentObj) {
 	for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = (rListPosition + 1) | 0) {
 		if ((parentObj.execute & (1 << rListPosition)) != 0) {
 			//POP stack into a register:
-			parentObj.registers[rListPosition | 0] = parentObj.IOCore.memoryRead32(parentObj.registers[13] >>> 0) | 0;
+			parentObj.registers[rListPosition | 0] = parentObj.IOCore.memory.memoryRead32(parentObj.registers[13] >>> 0) | 0;
 			parentObj.registers[13] = (parentObj.registers[13] + 4) | 0;
 		}
 	}
 	//POP stack into the program counter (r15):
-	parentObj.writePC(parentObj.IOCore.memoryRead32(parentObj.registers[13] >>> 0) | 0);
+	parentObj.writePC(parentObj.IOCore.memory.memoryRead32(parentObj.registers[13] >>> 0) | 0);
 	parentObj.registers[13] = (parentObj.registers[13] + 4) | 0;
 	//Updating the address bus back to PC fetch:
 	parentObj.wait.NonSequentialBroadcast();
@@ -634,7 +634,7 @@ THUMBInstructionSet.prototype.STMIA = function (parentObj) {
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = (rListPosition + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				parentObj.IOCore.memoryWrite32(currentAddress >>> 0, parentObj.registers[rListPosition | 0] | 0);
+				parentObj.IOCore.memory.memoryWrite32(currentAddress >>> 0, parentObj.registers[rListPosition | 0] | 0);
 				currentAddress = (currentAddress + 4) | 0;
 			}
 		}
@@ -655,7 +655,7 @@ THUMBInstructionSet.prototype.LDMIA = function (parentObj) {
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = (rListPosition + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				parentObj.registers[rListPosition | 0] = parentObj.IOCore.memoryRead32(currentAddress >>> 0) | 0;
+				parentObj.registers[rListPosition | 0] = parentObj.IOCore.memory.memoryRead32(currentAddress >>> 0) | 0;
 				currentAddress = (currentAddress + 4) | 0;
 			}
 		}
