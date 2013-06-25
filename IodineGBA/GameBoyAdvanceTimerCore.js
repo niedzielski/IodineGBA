@@ -152,8 +152,9 @@ GameBoyAdvanceTimer.prototype.clockTimer3 = function (clocks) {
 }
 GameBoyAdvanceTimer.prototype.timer1ClockUpTickCheck = function () {
     if (this.timer1UseChainedClocks) {
-		if (++this.timer1Counter > 0xFFFF) {
-            this.timer1Counter = this.timer1Reload;
+		this.timer1Counter = ((this.timer1Counter | 0) + 1) | 0;
+        if ((this.timer1Counter | 0) > 0xFFFF) {
+            this.timer1Counter = this.timer1Reload | 0;
 			this.timer1ExternalTriggerCheck();
 			this.timer2ClockUpTickCheck();
 		}
@@ -161,17 +162,18 @@ GameBoyAdvanceTimer.prototype.timer1ClockUpTickCheck = function () {
 }
 GameBoyAdvanceTimer.prototype.timer2ClockUpTickCheck = function () {
 	if (this.timer2UseChainedClocks) {
-		if (++this.timer2Counter > 0xFFFF) {
-			this.timer2Counter = this.timer2Reload;
+		this.timer2Counter = ((this.timer2Counter | 0) + 1) | 0;
+        if ((this.timer2Counter | 0) > 0xFFFF) {
+			this.timer2Counter = this.timer2Reload | 0;
 			this.timer2ExternalTriggerCheck();
 			this.timer3ClockUpTickCheck();
 		}
 	}
 }
 GameBoyAdvanceTimer.prototype.timer3ClockUpTickCheck = function () {
-	if (this.timer3UseChainedClocksp) {
-		if (++this.timer3Counter > 0xFFFF) {
-			this.timer3Counter = this.timer3Reload;
+	this.timer3Counter = ((this.timer3Counter | 0) + 1) | 0;
+    if ((this.timer3Counter | 0) > 0xFFFF) {
+			this.timer3Counter = this.timer3Reload | 0;
 			this.timer3ExternalTriggerCheck();
 		}
 	}
@@ -181,14 +183,12 @@ GameBoyAdvanceTimer.prototype.timer0ExternalTriggerCheck = function () {
 		this.IOCore.irq.requestIRQ(0x08);
 	}
 	this.IOCore.sound.AGBDirectSoundTimer0ClockTick();
-    return true;
 }
 GameBoyAdvanceTimer.prototype.timer1ExternalTriggerCheck = function () {
 	if (this.timer1IRQ) {
 		this.IOCore.irq.requestIRQ(0x10);
 	}
 	this.IOCore.sound.AGBDirectSoundTimer1ClockTick();
-    return true;
 }
 GameBoyAdvanceTimer.prototype.timer2ExternalTriggerCheck = function () {
 	if (this.timer2IRQ) {
