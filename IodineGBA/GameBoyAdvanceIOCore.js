@@ -2607,7 +2607,7 @@ GameBoyAdvanceIO.prototype.readBIOS16Optimized = function (parentObj, address) {
 		}
 	}
 	else {
-		return parentObj.readUnused16(parentObj, address) | 0;
+		return parentObj.readUnused16(parentObj, address | 0) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.readBIOS32Slow = function (parentObj, address) {
@@ -2647,7 +2647,7 @@ GameBoyAdvanceIO.prototype.readBIOS32Optimized = function (parentObj, address) {
 		}
 	}
 	else {
-		return parentObj.readUnused16(parentObj, address) | 0;
+		return parentObj.readUnused16(parentObj, address | 0) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.readExternalWRAM = function (parentObj, address, busReqNumber) {
