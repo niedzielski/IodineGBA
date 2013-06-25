@@ -21,27 +21,34 @@ function DynarecBranchListenerCore(CPUCore) {
 }
 DynarecBranchListenerCore.prototype.initialize = function () {
     this.lastBranch = 0;
+    this.lastTHUMB = false;
+    this.lastCPUMode = 0x10;
     this.caches = {};
     this.currentCache = null;
     this.compiling = false;
+    this.backEdge = false;
 }
-DynarecBranchListenerCore.prototype.enter = function (oldPC, newPC, instructionmode, cpumode) {
+DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instructionmode, cpumode) {
     this.analyzePast(oldPC >>> 0, instructionmode, cpumode);
     this.handleNext(newPC >>> 0, instructionmode, cpumode);
 }
 DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmode, cpumode) {
-    if (this.isAddressSafe(this.lastBranch)) {
+    if (this.backEdge && this.isAddressSafe(this.lastBranch)) {
         var cache = this.findCache(this.lastBranch);
         if (!cache) {
-            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch, endPC, instructionmode, cpumode);
+            endPC = this.adjustPC(endPC, instructionmode);
+            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch, endPC, this.lastTHUMB, this.lastCPUMode);
             this.cacheAppend(cache);
         }
         cache.tickHotness();
     }
+    this.backEdge = true;
 }
 DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmode, cpumode) {
     this.lastBranch = newPC;
-    if (this.routineCacheable(newPC, instructionmode, cpumode)) {
+    this.lastTHUMB = instructionmode;
+    this.lastCPUMode = cpumode;
+    if (this.isAddressSafe(newPC)) {
         var cache = this.findCache(newPC);
         if (cache) {
             if (cache.ready()) {
@@ -49,6 +56,9 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
                 this.currentCache = cache;
             }
         }
+    }
+    else {
+        this.backEdge = false;
     }
 }
 DynarecBranchListenerCore.prototype.enter = function () {
@@ -66,12 +76,15 @@ DynarecBranchListenerCore.prototype.isAddressSafe = function (address) {
             else if (address >= 0x8000000) {
                 return true;
             }
-            else if (address < 0x40000 && this.CPUCore.IOCore.BIOSFound) {
+            else if (this.CPUCore.IOCore.BIOSFound && address >= 0x20 && address < 0x40000) {
                 return true;
             }
         }
     }
     return false;
+}
+DynarecBranchListenerCore.prototype.adjustPC = function (pc, thumb) {
+    return ((pc | 0) - ((thumb) ? 0x4 : 0x8)) | 0;
 }
 DynarecBranchListenerCore.prototype.cacheAppend = function (cache) {
     this.caches["c_" + (cache.start >>> 0)] = cache;
