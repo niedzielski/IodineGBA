@@ -15,15 +15,12 @@
  * GNU General Public License for more details.
  *
  */
-var record = null;
-var InTHUMB = false;
-var CPUMode = 0x10;
-var compiler = null;
 self.onmessage = function (info) {
-    record = info[0];
-    InTHUMB = info[1];
-    CPUMode = info[2];
-    compiler = new DynarecCompilerWorkerCore(record, InTHUMB, CPUMode);
+    var record = info[0];
+    var InTHUMB = info[1];
+    var CPUMode = info[2];
+    var isROM = info[3];
+    var compiler = new DynarecCompilerWorkerCore(record, InTHUMB, CPUMode, isROM);
 }
 function bailout() {
     postMessage([1]);
@@ -32,5 +29,11 @@ function done(functionString) {
     postMessage([0, functionString]);
 }
 function DynarecCompilerWorkerCore(record, InTHUMB, CPUMode) {
-    
+    this.instructionsToJoin = [];
+    this.record = record;
+    this.InTHUMB = InTHUMB;
+    this.CPUMode = CPUMode;
+}
+DynarecCompilerWorkerCore.prototype.finish = function () {
+    done(this.instructionsToJoin.join(";"));
 }

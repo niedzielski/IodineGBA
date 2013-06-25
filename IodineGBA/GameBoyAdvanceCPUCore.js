@@ -29,7 +29,7 @@ GameBoyAdvanceCPU.prototype.initialize = function () {
 	this.ARM = new ARMInstructionSet(this);
 	this.THUMB = new THUMBInstructionSet(this);
     this.swi = new GameBoyAdvanceSWI(this);
-    //this.dynarec = new DynarecBranchListenerCore(this);
+    this.dynarec = new DynarecBranchListenerCore(this);
 	this.instructionHandle = this.ARM;
 }
 GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
@@ -97,10 +97,10 @@ GameBoyAdvanceCPU.prototype.executeIteration = function () {
 GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	branchTo = branchTo | 0;
     if (branchTo > 0x3FFF || this.IOCore.BIOSFound) {
-		/*Tell the JIT information on the state before branch:
+		//Tell the JIT information on the state before branch:
          if (this.emulatorCore.dynarecEnabled) {
             this.dynarec.listen(this.registers[15] | 0, branchTo | 0, this.InTHUMB, this.MODEBits | 0);
-        }*/
+        }
         //Branch to new address:
 		this.registers[15] = branchTo | 0;
 		//Mark pipeline as invalid:

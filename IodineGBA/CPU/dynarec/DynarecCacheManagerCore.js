@@ -26,7 +26,6 @@ function DynarecCacheManagerCore(cpu, start, end, InTHUMB, CPUMode) {
     this.record = [];
     this.cache = null;
     this.worker = null;
-    this.compiling = false;
 }
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 10;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT = 10;
@@ -38,6 +37,10 @@ DynarecCacheManagerCore.prototype.execute = function () {
     this.cache(this);
 }
 DynarecCacheManagerCore.prototype.tickHotness = function () {
+    if (this.start >= this.end) {
+        //Don't let sub-routines too small through:
+        return;
+    }
     if (!this.cache) {
         if (this.badCount <= this.MAGIC_BAD_COUNT) {
             ++this.hotCount;
@@ -50,6 +53,20 @@ DynarecCacheManagerCore.prototype.tickHotness = function () {
 DynarecCacheManagerCore.prototype.bailout = function () {
     this.cache = null;
     ++this.badCount;
+}
+DynarecCacheManagerCore.prototype.read = function (address) {
+    if (address >= 0x8000000 && address < 0xE000000) {
+        return this.CPUCore.IOCore.cartridge.readROM32(address & 0x1FFFFFF);
+    }
+    else if (address >= 0x3000000 && address < 0x4000000) {
+        return this.CPUCore.IOCore.memory.externalRAM[address & 0x3FFFF] | (this.CPUCore.IOCore.memory.externalRAM[(address & 0x3FFFF) | 1] << 8) | (this.CPUCore.IOCore.memory.externalRAM[(address & 0x3FFFF) | 2] << 16)  | (this.CPUCore.IOCore.memory.externalRAM[(address & 0x3FFFF) | 3] << 24);
+    }
+    else if (address >= 0x2000000 && address < 0x3000000) {
+        return this.CPUCore.IOCore.memory.internalRAM[address & 0x7FFF] | (this.CPUCore.IOCore.memory.internalRAM[(address & 0x7FFF) | 1] << 8) | (this.CPUCore.IOCore.memory.internalRAM[(address & 0x7FFF) | 2] << 16)  | (this.CPUCore.IOCore.memory.internalRAM[(address & 0x7FFF) | 3] << 24);
+    }
+    else if (address >= 0x20 && address < 0x4000) {
+        return this.CPUCore.IOCore.memory.BIOS[address] | (this.CPUCore.IOCore.memory.BIOS[address | 1] << 8) | (this.CPUCore.IOCore.memory.BIOS[address | 2] << 16)  | (this.CPUCore.IOCore.memory.BIOS[address | 3] << 24);
+    }
 }
 DynarecCacheManagerCore.prototype.compile = function () {
     //Make sure there isn't another worker compiling:
@@ -69,7 +86,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
                         //Got the code block back:
                     case 0:
                         parentObj.cache = new Function(message[1]);
-                        parentObj.compiling = false;
+                        parentObj.CPUCore.dynarec.compiling = false;
                         break;
                         //Compiler returned an error:
                     case 1:
@@ -81,7 +98,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
             //Put a lock on the compiler:
             this.CPUCore.dynarec.compiling = true;
             //Pass the record memory and state:
-            this.worker.postMessage([this.record, this.InTHUMB, this.CPUMode]);
+            this.worker.postMessage([this.record, this.InTHUMB, this.CPUMode, (start >= 0x8000000 || start < 0x4000)]);
         }
         catch (error) {
             //Browser doesn't support webworkers, so disable dynarec:

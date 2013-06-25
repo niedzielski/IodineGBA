@@ -17,7 +17,7 @@
  */
 function GameBoyAdvanceEmulator() {
 	this.SKIPBoot = true;					//Skip the BIOS boot screen.
-    //this.dynarecEnabled = true;             //Use the dynarec engine?
+    this.dynarecEnabled = false;             //Use the dynarec engine?
 	this.emulatorSpeed = 1;					//Speed multiplier of the emulator.
 	this.timerIntervalRate = 16;			//How often the emulator core is called into (in milliseconds).
 	this.graphicsFound = false;				//Do we have graphics output sink found yet?
@@ -340,4 +340,7 @@ GameBoyAdvanceEmulator.prototype.toggleSkipBootROM = function (skipBoot) {
     if (this.romFound && this.paused) {
         this.initializeCore();
     }
+}
+GameBoyAdvanceEmulator.prototype.toggleDynarec = function (dynarecEnabled) {
+	this.dynarecEnabled = !!dynarecEnabled;
 }
