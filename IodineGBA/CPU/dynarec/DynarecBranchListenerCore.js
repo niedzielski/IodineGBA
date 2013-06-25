@@ -76,7 +76,7 @@ DynarecBranchListenerCore.prototype.isAddressSafe = function (address) {
             else if (address >= 0x8000000) {
                 return true;
             }
-            else if (this.CPUCore.IOCore.BIOSFound && address >= 0x20 && address < 0x40000) {
+            else if (this.CPUCore.IOCore.BIOSFound && address >= 0x20 && address < 0x4000) {
                 return true;
             }
         }

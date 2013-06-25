@@ -19,13 +19,15 @@ function GameBoyAdvanceIO(emulatorCore) {
 	//Reference to the emulator core:
 	this.emulatorCore = emulatorCore;
 	//Load the BIOS:
+    this.BIOS = getUint8Array(0x4000);
+    this.BIOS16 = getUint16View(this.BIOS);
+	this.BIOS32 = getInt32View(this.BIOS);
 	this.loadBIOS();
 	//State Machine Tracking:
 	this.systemStatus = 0;
 	this.cyclesToIterate = 0;
 	this.cyclesIteratedPreviously = 0;
-	this.lastBIOSREAD = [0, 0, 0, 0];		//BIOS read bus last.
-	//Initialize the various handler objects:
+    //Initialize the various handler objects:
 	this.dma = new GameBoyAdvanceDMA(this);
 	this.gfx = new GameBoyAdvanceGraphics(this);
 	this.sound = new GameBoyAdvanceSound(this);
@@ -43,6 +45,9 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.internalRAM = getUint8Array(0x8000);
     this.internalRAM16 = getUint16View(this.internalRAM);
 	this.internalRAM32 = getInt32View(this.internalRAM);
+    this.lastBIOSREAD = getUint8Array(0x4);		//BIOS read bus last.
+	this.lastBIOSREAD16 = getUint16View(this.lastBIOSREAD);
+    this.lastBIOSREAD32 = getInt32View(this.lastBIOSREAD);
     //After all sub-objects initialized, initialize dispatches:
 	this.compileMemoryDispatches();
     this.compileIOWriteDispatch();
@@ -241,7 +246,7 @@ GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
                        this.readROM116,
                        this.readROM216,
                        this.readSRAM16,
-                       (this.BIOSFound) ? this.readBIOS16 : this.readUnused16
+                       (this.BIOSFound) ? ((this.BIOS16) ? this.readBIOS16Optimized : this.readBIOS16Slow) : this.readUnused16
     ];
     var bus16 = this.compileMemoryDispatch(writeCalls16, readCalls16);
     this.memoryWriter16 = bus16[0];
@@ -271,7 +276,7 @@ GameBoyAdvanceIO.prototype.compileMemoryDispatches = function () {
                        this.readROM132,
                        this.readROM232,
                        this.readSRAM32,
-                       (this.BIOSFound) ? this.readBIOS32 : this.readUnused32
+                       (this.BIOSFound) ? ((this.BIOS32) ? this.readBIOS32Optimized : this.readBIOS32Slow) : this.readUnused32
     ];
     var bus32 = this.compileMemoryDispatch(writeCalls32, readCalls32);
     this.memoryWriter32 = bus32[0];
@@ -2567,7 +2572,7 @@ GameBoyAdvanceIO.prototype.readBIOS8 = function (parentObj, address) {
 		return parentObj.readUnused(parentObj, address | 0) | 0;
 	}
 }
-GameBoyAdvanceIO.prototype.readBIOS16 = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readBIOS16Slow = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
 	if (address < 0x4000) {
@@ -2586,7 +2591,26 @@ GameBoyAdvanceIO.prototype.readBIOS16 = function (parentObj, address) {
 		return parentObj.readUnused16(parentObj, address) | 0;
 	}
 }
-GameBoyAdvanceIO.prototype.readBIOS32 = function (parentObj, address) {
+GameBoyAdvanceIO.prototype.readBIOS16Optimized = function (parentObj, address) {
+	address = address | 0;
+    parentObj.wait.FASTAccess2();
+	if (address < 0x4000) {
+        address >>= 1;
+		if (parentObj.cpu.registers[15] < 0x4000) {
+			//If reading from BIOS while executing it:
+            parentObj.lastBIOSREAD16[address & 0x1] = (parentObj.cpu.registers[15] >> ((address & 0x1) << 16)) & 0xFFFF;
+            return parentObj.BIOS16[address & 0x1FFF] | 0;
+		}
+		else {
+			//Not allowed to read from BIOS while executing outside of it:
+			return parentObj.lastBIOSREAD16[address & 0x1] | 0;
+		}
+	}
+	else {
+		return parentObj.readUnused16(parentObj, address) | 0;
+	}
+}
+GameBoyAdvanceIO.prototype.readBIOS32Slow = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
 	if (address < 0x4000) {
@@ -2605,6 +2629,25 @@ GameBoyAdvanceIO.prototype.readBIOS32 = function (parentObj, address) {
 	}
 	else {
 		return parentObj.readUnused32(parentObj, address) | 0;
+	}
+}
+GameBoyAdvanceIO.prototype.readBIOS32Optimized = function (parentObj, address) {
+	address = address | 0;
+    parentObj.wait.FASTAccess2();
+	if (address < 0x4000) {
+        address >>= 2;
+		if (parentObj.cpu.registers[15] < 0x4000) {
+			//If reading from BIOS while executing it:
+            parentObj.lastBIOSREAD32[0] = parentObj.cpu.registers[15] | 0;
+            return parentObj.BIOS32[address & 0xFFF] | 0;
+		}
+		else {
+			//Not allowed to read from BIOS while executing outside of it:
+			return parentObj.lastBIOSREAD32[0] | 0;
+		}
+	}
+	else {
+		return parentObj.readUnused16(parentObj, address) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.readExternalWRAM = function (parentObj, address, busReqNumber) {
@@ -3030,7 +3073,9 @@ GameBoyAdvanceIO.prototype.loadBIOS = function () {
 	//Ensure BIOS is of correct length:
 	if (this.emulatorCore.BIOS.length == 0x4000) {
 		this.BIOSFound = true;
-		this.BIOS = this.emulatorCore.BIOS;
+        for (var index = 0; index < 0x4000; ++index) {
+            this.BIOS[index] = this.emulatorCore.BIOS[index];
+        }
 	}
 	else {
 		this.BIOSFound = false;
