@@ -17,6 +17,7 @@
  */
 function GameBoyAdvanceCPU(IOCore) {
 	this.IOCore = IOCore;
+    this.memory = this.IOCore.memory;
     this.emulatorCore = this.IOCore.emulatorCore;
 	this.wait = this.IOCore.wait;
 	this.mul64ResultHigh = 0;	//Scratch MUL64.
@@ -650,7 +651,7 @@ GameBoyAdvanceCPU.prototype.write32 = function (address, data) {
     data = data | 0;
     //Updating the address bus away from PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
-	this.IOCore.memory.memoryWriteFast32((address & -4) >>> 0, data | 0);
+	this.memory.memoryWriteFast32((address & -4) >>> 0, data | 0);
 	//Updating the address bus back to PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
 }
@@ -659,7 +660,7 @@ GameBoyAdvanceCPU.prototype.write16 = function (address, data) {
     data = data | 0;
     //Updating the address bus away from PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
-	this.IOCore.memory.memoryWriteFast16((address & -2) >>> 0, data | 0);
+	this.memory.memoryWriteFast16((address & -2) >>> 0, data | 0);
 	//Updating the address bus back to PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
 }
@@ -668,7 +669,7 @@ GameBoyAdvanceCPU.prototype.write8 = function (address, data) {
     data = data | 0;
     //Updating the address bus away from PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
-	this.IOCore.memory.memoryWrite8(address >>> 0, data | 0);
+	this.memory.memoryWrite8(address >>> 0, data | 0);
 	//Updating the address bus back to PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
 }
@@ -676,7 +677,7 @@ GameBoyAdvanceCPU.prototype.read32 = function (address) {
 	address = address | 0;
     //Updating the address bus away from PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
-	var data = this.IOCore.memory.memoryReadFast32((address & -4) >>> 0) | 0;
+	var data = this.memory.memoryReadFast32((address & -4) >>> 0) | 0;
     var real_output = ((address & 0x3) == 0) ? data : ((data << ((4 - (address & 0x3)) << 3)) | (data >>> ((address & 0x3) << 3)));
 	//Updating the address bus back to PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
@@ -686,7 +687,7 @@ GameBoyAdvanceCPU.prototype.read16 = function (address) {
 	address = address | 0;
     //Updating the address bus away from PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
-	var data = this.IOCore.memory.memoryReadFast16((address & -2) >>> 0) | 0;
+	var data = this.memory.memoryReadFast16((address & -2) >>> 0) | 0;
 	//Updating the address bus back to PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
 	return data | 0;
@@ -695,7 +696,7 @@ GameBoyAdvanceCPU.prototype.read8 = function (address) {
 	address = address | 0;
     //Updating the address bus away from PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
-	var data = this.IOCore.memory.memoryRead8(address >>> 0) | 0;
+	var data = this.memory.memoryRead8(address >>> 0) | 0;
 	//Updating the address bus back to PC fetch:
 	this.IOCore.wait.NonSequentialBroadcast();
 	return data | 0;

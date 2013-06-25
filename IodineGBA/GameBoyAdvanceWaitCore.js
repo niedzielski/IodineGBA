@@ -17,6 +17,7 @@
  */
 function GameBoyAdvanceWait(IOCore) {
 	this.IOCore = IOCore;
+    this.memory = this.IOCore.memory;
 	this.initialize();
 }
 GameBoyAdvanceWait.prototype.GAMEPAKWaitStateTable = [
@@ -168,7 +169,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
         this.nonSequential = false;
         return this.IOCore.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 	}
-	return this.IOCore.memory.memoryReadFast16(address >>> 0) | 0;
+	return this.memory.memoryReadFast16(address >>> 0) | 0;
 }
 GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
 	address = address | 0;
@@ -209,7 +210,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
         this.nonSequential = false;
         return this.IOCore.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 	}
-	return this.IOCore.memory.memoryReadFast32(address >>> 0) | 0;
+	return this.memory.memoryReadFast32(address >>> 0) | 0;
 }
 GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
 	this.nonSequential = true;
