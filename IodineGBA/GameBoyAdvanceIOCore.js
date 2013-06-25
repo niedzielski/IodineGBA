@@ -64,7 +64,7 @@ GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
 	clocks = clocks | 0;
     //This is used during normal/dma modes of operation:
 	//Decrement the clocks per iteration counter:
-	this.cyclesToIterate -= clocks | 0;
+	this.cyclesToIterate = ((this.cyclesToIterate | 0) - (clocks | 0)) | 0;
 	//Clock all components:
 	this.gfx.addClocks(clocks | 0);
 	this.timer.addClocks(clocks | 0);
