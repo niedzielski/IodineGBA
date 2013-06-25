@@ -26,10 +26,11 @@ function DynarecCacheManagerCore(cpu, start, end, InTHUMB, CPUMode) {
     this.record = [];
     this.cache = null;
     this.worker = null;
+    this.compiling = false;
 }
-DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 10;
+DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 100;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT = 10;
-DynarecCacheManagerCore.prototype.MAX_WORKERS = 10;
+DynarecCacheManagerCore.prototype.MAX_WORKERS = 5;
 DynarecCacheManagerCore.prototype.ready = function () {
     return !!this.cache;
 }
@@ -43,7 +44,7 @@ DynarecCacheManagerCore.prototype.tickHotness = function () {
         return;
     }
     if (!this.cache) {
-        if (this.badCount <= this.MAGIC_BAD_COUNT) {
+        if (this.badCount < this.MAGIC_BAD_COUNT) {
             ++this.hotCount;
             if (this.hotCount >= this.MAGIC_HOT_COUNT) {
                 this.compile();
@@ -93,7 +94,7 @@ DynarecCacheManagerCore.prototype.read32 = function (address) {
 }
 DynarecCacheManagerCore.prototype.compile = function () {
     //Make sure there isn't another worker compiling:
-    if (this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
+    if (!this.compiling && this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
         this.record = [];
         var start = this.start;
         while (start < this.end) {
@@ -119,9 +120,11 @@ DynarecCacheManagerCore.prototype.compile = function () {
                 //Destroy the worker:
                 parentObj.worker = null;
                 --parentObj.CPUCore.dynarec.compiling;
+                parentObj.compiling = false;
             }
             //Put a lock on the compiler:
             ++this.CPUCore.dynarec.compiling;
+            this.compiling = true;
             //Pass the record memory and state:
             this.worker.postMessage([this.start, this.record, this.InTHUMB, this.CPUMode, (start >= 0x8000000 || start < 0x4000)]);
         }

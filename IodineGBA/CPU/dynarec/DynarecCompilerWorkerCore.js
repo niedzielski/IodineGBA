@@ -71,6 +71,7 @@ DynarecCompilerWorkerCore.prototype.incrementPC = function () {
 DynarecCompilerWorkerCore.prototype.bailoutEarly = function () {
     var bailoutText = "cpu.registers[15] = " + this.pc + ";";
     bailoutText += this.addStateMachineUpdate();
+    bailoutText += "return;";
     return bailoutText;
 }
 DynarecCompilerWorkerCore.prototype.addRAMGuards = function (instructionValue, instructionCode) {
@@ -80,7 +81,6 @@ DynarecCompilerWorkerCore.prototype.addRAMGuards = function (instructionValue, i
     var guardText = "var instruction = " +  this.addMemoryRead(pc) + ";";
     guardText += "if (instruction != " + instructionValue + ") {";
     guardText += this.bailoutEarly();
-    guardText += "return;";
     guardText += "}";
     guardText += instructionCode;
 }
