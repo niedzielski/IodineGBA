@@ -171,8 +171,9 @@ GameBoyAdvanceTimer.prototype.timer2ClockUpTickCheck = function () {
 	}
 }
 GameBoyAdvanceTimer.prototype.timer3ClockUpTickCheck = function () {
-	this.timer3Counter = ((this.timer3Counter | 0) + 1) | 0;
-    if ((this.timer3Counter | 0) > 0xFFFF) {
+    if (this.timer3UseChainedClocks) {
+        this.timer3Counter = ((this.timer3Counter | 0) + 1) | 0;
+        if ((this.timer3Counter | 0) > 0xFFFF) {
 			this.timer3Counter = this.timer3Reload | 0;
 			this.timer3ExternalTriggerCheck();
 		}
