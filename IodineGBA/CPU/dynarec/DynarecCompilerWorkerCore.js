@@ -45,6 +45,8 @@ function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM) {
     this.CPUMode = CPUMode;
     this.isROM = isROM;
     this.totalClocks = 0;
+    this.thumbAssembler = new DynarecTHUMBAssemblerCore(this);
+    this.armAssembler = new DynarecARMAssemblerCore(this);
     this.compile();
     this.finish();
 }
@@ -97,4 +99,14 @@ DynarecCompilerWorkerCore.prototype.finish = function () {
     code += this.addStateMachineUpdate();
     code += "}";
     done(code);
+}
+DynarecCompilerWorkerCore.prototype.decodeInstruction = function () {
+    var genString = "";
+    if (this.InTHUMB) {
+        genString = this.thumbAssembler.generate(instructionValue);
+    }
+    else {
+        genString = this.armAssembler.generate(instructionValue);
+    }
+    return genString;
 }
