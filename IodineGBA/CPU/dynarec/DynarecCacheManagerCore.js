@@ -111,7 +111,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
                 switch (code) {
                         //Got the code block back:
                     case 0:
-                        parentObj.cache = new Function(message[1]);
+                        parentObj.cache = new Function("cpu", message[1]);
                         break;
                         //Compiler returned an error:
                     case 1:

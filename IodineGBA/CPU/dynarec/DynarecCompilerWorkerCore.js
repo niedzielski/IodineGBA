@@ -136,11 +136,9 @@ DynarecCompilerWorkerCore.prototype.addStateMachineUpdate = function () {
     return "cpu.IOCore.updateCore(" + this.compiler.clocks + ");";
 }
 DynarecCompilerWorkerCore.prototype.finish = function () {
-    var code = "function (cpu) {";
     code += this.addClockChecks();
     code += this.instructionsToJoin.join(";");
     code += this.addStateMachineUpdate();
-    code += "}";
     done(code);
 }
 DynarecCompilerWorkerCore.prototype.decodeInstruction = function () {
