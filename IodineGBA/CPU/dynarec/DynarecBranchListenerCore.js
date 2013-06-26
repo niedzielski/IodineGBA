@@ -33,10 +33,14 @@ DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instruction
     this.handleNext(newPC >>> 0, instructionmode, cpumode);
 }
 DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmode, cpumode) {
-    if (this.backEdge && this.isAddressSafe(this.lastBranch)) {
+    if (!this.lastTHUMB) {
+        this.backEdge = false;
+        return;
+    }
+    if (this.backEdge && instructionmode == this.lastTHUMB && cpumode == this.lastCPUMode) {
         var cache = this.findCache(this.lastBranch);
         if (!cache) {
-            endPC = this.adjustPC(endPC, instructionmode);
+            endPC = this.adjustPC(endPC);
             cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch, endPC, this.lastTHUMB, this.lastCPUMode);
             this.cacheAppend(cache);
         }
@@ -83,8 +87,8 @@ DynarecBranchListenerCore.prototype.isAddressSafe = function (address) {
     }
     return false;
 }
-DynarecBranchListenerCore.prototype.adjustPC = function (pc, thumb) {
-    return ((pc | 0) - ((thumb) ? 0x4 : 0x8)) | 0;
+DynarecBranchListenerCore.prototype.adjustPC = function (pc) {
+    return ((pc | 0) - ((this.lastTHUMB) ? 0x6 : 0xC)) | 0;
 }
 DynarecBranchListenerCore.prototype.cacheAppend = function (cache) {
     this.caches["c_" + (cache.start >>> 0)] = cache;

@@ -29,7 +29,7 @@ function DynarecCacheManagerCore(cpu, start, end, InTHUMB, CPUMode) {
     this.compiling = false;
 }
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 100;
-DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT = 10;
+DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT = 1;
 DynarecCacheManagerCore.prototype.MAX_WORKERS = 5;
 DynarecCacheManagerCore.prototype.ready = function () {
     return !!this.cache;
@@ -97,10 +97,10 @@ DynarecCacheManagerCore.prototype.compile = function () {
     if (!this.compiling && this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
         this.record = [];
         var start = this.start;
-        while (start < this.end) {
+        while (start <= this.end) {
             //Build up a record of bytecode to pass to the worker to compile:
             this.record.push(this.read(start));
-            start += 0x4;
+            start += (this.InTHUMB) ? 0x2 : 0x4;
         }
         try {
             var parentObj = this;
@@ -126,7 +126,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
             ++this.CPUCore.dynarec.compiling;
             this.compiling = true;
             //Pass the record memory and state:
-            this.worker.postMessage([this.start, this.record, this.InTHUMB, this.CPUMode, (start >= 0x8000000 || start < 0x4000)]);
+            this.worker.postMessage([this.start, this.record, this.InTHUMB, this.CPUMode, (this.start >= 0x8000000 || this.end < 0x4000)]);
         }
         catch (error) {
             //Browser doesn't support webworkers, so disable dynarec:
