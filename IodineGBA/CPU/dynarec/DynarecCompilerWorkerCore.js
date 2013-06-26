@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  */
-
+importScripts("DynarecARMAssemblerCore.js", "DynarecTHUMBAssemblerCore.js");
 self.onmessage = function (command) {
     var info = command.data;
     var startPC = info[0];
@@ -36,6 +36,7 @@ function bailout() {
 }
 function done(functionString) {
     postMessage([0, functionString]);
+    self.close();
 }
 function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM) {
     this.instructionsToJoin = [];

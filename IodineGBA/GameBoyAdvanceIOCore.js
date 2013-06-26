@@ -50,13 +50,13 @@ GameBoyAdvanceIO.prototype.iterate = function () {
 GameBoyAdvanceIO.prototype.runIterator = function () {
 	//Clock through interpreter:
 	while ((this.cyclesToIterate | 0) > 0) {
-		if ((this.systemStatus | 0) > 0) {
-			//Handle HALT/STOP/DMA here:
-			this.handleCPUStallEvents();
-		}
-		else {
+		if ((this.systemStatus | 0) == 0) {
 			//Execute next instruction:
 			this.cpu.executeIteration();
+		}
+		else {
+			//Handle HALT/STOP/DMA here:
+			this.handleCPUStallEvents();
 		}
 	}
 }
@@ -97,7 +97,7 @@ GameBoyAdvanceIO.prototype.handleDMA = function () {
 GameBoyAdvanceIO.prototype.handleHalt = function () {
 	if (!this.irq.IRQMatch()) {
 		//Clock up to next IRQ match or DMA:
-		this.updateCore(this.cyclesUntilNextEvent());
+		this.updateCore(this.cyclesUntilNextEvent() | 0);
 	}
 	else {
 		//Exit HALT promptly:
