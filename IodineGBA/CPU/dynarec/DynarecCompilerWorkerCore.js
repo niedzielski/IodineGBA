@@ -65,6 +65,8 @@ DynarecCompilerWorkerCore.prototype.compile = function () {
         this.decode = this.record[this.currentRecordOffset + 1];
         this.appendCompiledInstruction(this.compiler.generate(this.execute));
     }
+    this.execute = this.record[this.currentRecordOffset];
+    this.decode = this.record[this.currentRecordOffset + 1];
 }
 DynarecCompilerWorkerCore.prototype.appendCompiledInstruction = function (instruction) {
     if (this.forceSyncGuard) {
