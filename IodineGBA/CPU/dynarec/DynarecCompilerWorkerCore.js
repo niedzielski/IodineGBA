@@ -42,6 +42,7 @@ function done(functionString) {
 }
 function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM, pipelineInvalid, waitstates) {
     this.instructionsToJoin = [];
+    this.startPC = startPC;
     this.record = record;
     this.InTHUMB = InTHUMB;
     this.CPUMode = CPUMode;
@@ -100,8 +101,8 @@ DynarecCompilerWorkerCore.prototype.read32 = function (address) {
 DynarecCompilerWorkerCore.prototype.addStateMachineUpdate = function () {
     var code = "/*State Machine Synchronize*/\n";
     code += "cpu.registers[15] = " + this.compiler.getPipelinePC() + ";\n";
-    code += "cpu.fetch = " + this.record[this.currentRecordOffset + 2] + ";\n";
-    code += "cpu.decode = " + this.record[this.currentRecordOffset + 1] + ";\n";
+    code += "cpu.instructionHandle.fetch = " + this.record[this.currentRecordOffset + 2] + ";\n";
+    code += "cpu.instructionHandle.decode = " + this.record[this.currentRecordOffset + 1] + ";\n";
     code += "cpu.pipelineInvalid = 0;\n";
     code += "cpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
     return code;
