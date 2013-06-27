@@ -48,6 +48,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
 	this.CARTWaitState1First = this.GAMEPAKWaitStateTable[(data >> 5) & 0x3];
 	this.CARTWaitState1Second = (data > 0x7F) ? 0x2 : 0x5;
 	this.WAITCNT0 = data;
+    //this.IOCore.cpu.dynarec.invalidateCaches();
 }
 GameBoyAdvanceWait.prototype.readWAITCNT0 = function () {
 	return this.WAITCNT0;
@@ -60,6 +61,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
 		this.ROMPrebuffer = 0;
 	}
 	this.WAITCNT1 = data;
+    //this.IOCore.cpu.dynarec.invalidateCaches();
 }
 GameBoyAdvanceWait.prototype.readWAITCNT1 = function () {
 	return this.WAITCNT1 | 0x20;

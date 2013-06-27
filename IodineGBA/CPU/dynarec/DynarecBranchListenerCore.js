@@ -24,24 +24,25 @@ DynarecBranchListenerCore.prototype.initialize = function () {
     this.lastTHUMB = false;
     this.lastCPUMode = 0x10;
     this.caches = {};
+    this.readyCaches = {};
     this.currentCache = null;
     this.compiling = 0;
     this.backEdge = false;
 }
 DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instructionmode, cpumode) {
-    this.analyzePast(oldPC >>> 0, instructionmode, cpumode);
-    this.handleNext(newPC >>> 0, instructionmode, cpumode);
+    if ((this.CPUCore.emulatorCore.dynarecTHUMB && instructionmode) || (this.CPUCore.emulatorCore.dynarecARM && !instructionmode)) {
+        this.analyzePast(oldPC >>> 0, instructionmode, cpumode);
+        this.handleNext(newPC >>> 0, instructionmode, cpumode);
+    }
+    else {
+        this.backEdge = false;
+    }
 }
 DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmode, cpumode) {
-    if (!this.lastTHUMB) {
-        this.backEdge = false;
-        return;
-    }
     if (this.backEdge && instructionmode == this.lastTHUMB && cpumode == this.lastCPUMode) {
         var cache = this.findCache(this.lastBranch);
         if (!cache) {
-            endPC = this.adjustPC(endPC);
-            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch, endPC, this.lastTHUMB, this.lastCPUMode);
+            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, (endPC - ((this.lastTHUMB) ? 0x6 : 0xC)) >>> 0, this.lastTHUMB, this.lastCPUMode);
             this.cacheAppend(cache);
         }
         cache.tickHotness();
@@ -53,12 +54,10 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
     this.lastTHUMB = instructionmode;
     this.lastCPUMode = cpumode;
     if (this.isAddressSafe(newPC)) {
-        var cache = this.findCache(newPC);
+        var cache = this.findCacheReady(newPC);
         if (cache) {
-            if (cache.ready()) {
-                this.CPUCore.IOCore.systemStatus = 5;
-                this.currentCache = cache;
-            }
+            this.CPUCore.IOCore.systemStatus = 5;
+            this.currentCache = cache;
         }
     }
     else {
@@ -67,7 +66,7 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
 }
 DynarecBranchListenerCore.prototype.enter = function () {
     //Execute our compiled code:
-    this.currentCache.execute();
+    this.currentCache(this.CPUCore);
     //Return to normal state machine loop operations:
     this.CPUCore.emulatorCore.systemStatus -= 5;
 }
@@ -87,12 +86,18 @@ DynarecBranchListenerCore.prototype.isAddressSafe = function (address) {
     }
     return false;
 }
-DynarecBranchListenerCore.prototype.adjustPC = function (pc) {
-    return ((pc | 0) - ((this.lastTHUMB) ? 0x6 : 0xC)) | 0;
-}
 DynarecBranchListenerCore.prototype.cacheAppend = function (cache) {
     this.caches["c_" + (cache.start >>> 0)] = cache;
 }
+DynarecBranchListenerCore.prototype.cacheAppendReady = function (address, cache) {
+    this.readyCaches["c_" + (address >>> 0)] = cache;
+}
 DynarecBranchListenerCore.prototype.findCache = function (address) {
     return this.caches["c_" + (address >>> 0)];
+}
+DynarecBranchListenerCore.prototype.findCacheReady = function (address) {
+    return this.readyCaches["c_" + (address >>> 0)];
+}
+DynarecBranchListenerCore.prototype.invalidateCaches = function () {
+    this.readyCaches = {};
 }

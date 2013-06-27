@@ -23,27 +23,19 @@ function DynarecCacheManagerCore(cpu, start, end, InTHUMB, CPUMode) {
     this.CPUMode = CPUMode;
     this.badCount = 0;
     this.hotCount = 0;
-    this.record = [];
-    this.cache = null;
     this.worker = null;
     this.compiling = false;
+    this.compiled = false;
 }
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 100;
-DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT = 1;
+DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT = 2;
 DynarecCacheManagerCore.prototype.MAX_WORKERS = 5;
-DynarecCacheManagerCore.prototype.ready = function () {
-    return !!this.cache;
-}
-DynarecCacheManagerCore.prototype.execute = function () {
-    //Execute stub:
-    this.cache(this.CPUCore);
-}
 DynarecCacheManagerCore.prototype.tickHotness = function () {
     if (this.start >= this.end) {
         //Don't let sub-routines too small through:
         return;
     }
-    if (!this.cache) {
+    if (!this.compiled) {
         if (this.badCount < this.MAGIC_BAD_COUNT) {
             ++this.hotCount;
             if (this.hotCount >= this.MAGIC_HOT_COUNT) {
@@ -53,7 +45,7 @@ DynarecCacheManagerCore.prototype.tickHotness = function () {
     }
 }
 DynarecCacheManagerCore.prototype.bailout = function () {
-    this.cache = null;
+    this.compiled = false;
     ++this.badCount;
 }
 DynarecCacheManagerCore.prototype.read = function (address) {
@@ -97,7 +89,8 @@ DynarecCacheManagerCore.prototype.compile = function () {
     if (!this.compiling && this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
         this.record = [];
         var start = this.start;
-        while (start <= this.end) {
+        var end = this.end + ((this.InTHUMB) ? 0x4 : 0x8);
+        while (start <= end) {
             //Build up a record of bytecode to pass to the worker to compile:
             this.record.push(this.read(start));
             start += (this.InTHUMB) ? 0x2 : 0x4;
@@ -111,7 +104,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
                 switch (code) {
                         //Got the code block back:
                     case 0:
-                        parentObj.cache = new Function("cpu", message[1]);
+                        parentObj.CPUCore.dynarec.cacheAppendReady(parentObj.start, new Function("cpu", message[1]));
                         break;
                         //Compiler returned an error:
                     case 1:
@@ -121,12 +114,22 @@ DynarecCacheManagerCore.prototype.compile = function () {
                 parentObj.worker = null;
                 --parentObj.CPUCore.dynarec.compiling;
                 parentObj.compiling = false;
+                parentObj.compiled = true;
             }
             //Put a lock on the compiler:
             ++this.CPUCore.dynarec.compiling;
             this.compiling = true;
             //Pass the record memory and state:
-            this.worker.postMessage([this.start, this.record, this.InTHUMB, this.CPUMode, (this.start >= 0x8000000 || this.end < 0x4000)]);
+            this.worker.postMessage([this.start, this.record, this.InTHUMB, this.CPUMode, (this.start >= 0x8000000 || this.end < 0x4000), [
+                                                                                                                                            this.CPUCore.IOCore.wait.WRAMWaitState,
+                                                                                                                                            this.CPUCore.IOCore.wait.SRAMWaitState,
+                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState0First,
+                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState0Second,
+                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState1First,
+                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState1Second,
+                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState2First,
+                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState2Second
+                                    ]]);
         }
         catch (error) {
             //Browser doesn't support webworkers, so disable dynarec:
