@@ -40,7 +40,7 @@ function done(functionString) {
     postMessage([0, functionString]);
     self.close();
 }
-function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM, pipelineInvalid, waitstates) {
+function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM, waitstates) {
     this.instructionsToJoin = [];
     this.startPC = startPC;
     this.record = record;
@@ -101,8 +101,14 @@ DynarecCompilerWorkerCore.prototype.read32 = function (address) {
 DynarecCompilerWorkerCore.prototype.addStateMachineUpdate = function () {
     var code = "/*State Machine Synchronize*/\n";
     code += "cpu.registers[15] = " + this.compiler.getPipelinePC() + ";\n";
-    code += "cpu.instructionHandle.fetch = " + this.record[this.currentRecordOffset + 2] + ";\n";
-    code += "cpu.instructionHandle.decode = " + this.record[this.currentRecordOffset + 1] + ";\n";
+    //if (this.isROM) {
+        code += "cpu.instructionHandle.execute = " + this.record[this.currentRecordOffset] + ";\n";
+        code += "cpu.instructionHandle.decode = " + this.record[this.currentRecordOffset + 1] + ";\n";
+    /*}
+    else {
+        code += "cpu.instructionHandle.execute = " +  this.addMemoryRead(this.compiler.getRealPC()) + ";\n";
+        code += "cpu.instructionHandle.decode = " +  this.addMemoryRead(this.compiler.getDecodeOffset()) + ";\n";
+    }*/
     code += "cpu.pipelineInvalid = 0;\n";
     code += "cpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
     return code;
