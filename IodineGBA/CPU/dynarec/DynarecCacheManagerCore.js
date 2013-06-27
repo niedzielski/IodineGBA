@@ -89,7 +89,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
     if (!this.compiling && this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
         this.record = [];
         var start = this.start;
-        var end = this.end + ((this.InTHUMB) ? 0x4 : 0x8);
+        var end = this.end + ((this.InTHUMB) ? 0x2 : 0x4);
         while (start <= end) {
             //Build up a record of bytecode to pass to the worker to compile:
             this.record.push(this.read(start));

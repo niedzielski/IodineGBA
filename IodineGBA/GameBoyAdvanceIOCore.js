@@ -86,6 +86,8 @@ GameBoyAdvanceIO.prototype.handleCPUStallEvents = function () {
             break;
         case 5: //LLE Dynarec JIT
             this.handleDynarec();
+        default://Abort JIT or leave it normally
+            this.systemStatus = ((this.systemStatus | 0) - 0x5) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.handleDMA = function () {
@@ -111,10 +113,7 @@ GameBoyAdvanceIO.prototype.handleStop = function () {
 	//Exits when user presses joypad or from an external irq outside of GBA internal.
 }
 GameBoyAdvanceIO.prototype.handleDynarec = function () {
-	if (this.emulatorCore.dynarecEnabled) {
-		this.cpu.dynarec.enter();
-	}
-    this.systemStatus = ((this.systemStatus | 0) - 0x5) | 0;
+    this.cpu.dynarec.enter();
 }
 GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
     //Find the clocks to the next event:

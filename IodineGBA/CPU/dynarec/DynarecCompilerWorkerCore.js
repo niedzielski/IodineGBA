@@ -47,8 +47,9 @@ function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM, wai
     this.InTHUMB = InTHUMB;
     this.CPUMode = CPUMode;
     this.isROM = isROM;
+    this.forceSyncGuard = false;
     if (this.InTHUMB) {
-        this.compiler = new DynarecTHUMBAssemblerCore(this, startPC, pipelineInvalid, waitstates);
+        this.compiler = new DynarecTHUMBAssemblerCore(this, startPC, waitstates);
     }
     else {
         bailout();
@@ -58,24 +59,37 @@ function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM, wai
     this.finish();
 }
 DynarecCompilerWorkerCore.prototype.compile = function () {
-    var length = Math.max(this.record.length - 2, 0);
+    var length = Math.max(this.record.length - 1, 0);
     for (this.currentRecordOffset = 0; this.currentRecordOffset < length; ++this.currentRecordOffset) {
-        this.instructionsToJoin.push(this.compiler.generate(this.record[this.currentRecordOffset]));
+        this.execute = this.record[this.currentRecordOffset];
+        this.decode = this.record[this.currentRecordOffset + 1];
+        this.appendCompiledInstruction(this.compiler.generate(this.execute));
     }
-    --this.currentRecordOffset;
+}
+DynarecCompilerWorkerCore.prototype.appendCompiledInstruction = function (instruction) {
+    if (this.forceSyncGuard) {
+        //guard reads and writes due to their unknown timing:
+        this.spillTiming();
+        this.instructionsToJoin.push(instruction);
+        this.spillTiming();
+        this.forceSyncGuard = false;
+    }
+    else {
+        this.instructionsToJoin.push(instruction);
+    }
 }
 DynarecCompilerWorkerCore.prototype.read16 = function (address) {
     if (address >= 0x8000000 && address < 0xE000000) {
-        return "this.CPUCore.IOCore.cartridge.readROM16(" + (address & 0x1FFFFFF) + ");\n";
+        return "this.CPUCore.IOCore.cartridge.readROM16(" + (address & 0x1FFFFFF) + ") | 0";
     }
     else if (address >= 0x3000000 && address < 0x4000000) {
-        return "this.CPUCore.IOCore.memory.externalRAM[" + (address & 0x3FFFF) + "] | (this.CPUCore.IOCore.memory.externalRAM[" + ((address & 0x3FFFF) | 1) + "] << 8);\n";
+        return "this.CPUCore.IOCore.memory.externalRAM[" + (address & 0x3FFFF) + "] | (this.CPUCore.IOCore.memory.externalRAM[" + ((address & 0x3FFFF) | 1) + "] << 8)";
     }
     else if (address >= 0x2000000 && address < 0x3000000) {
-        return "this.CPUCore.IOCore.memory.internalRAM[" + (address & 0x7FFF) + "] | (this.CPUCore.IOCore.memory.internalRAM[" + ((address & 0x7FFF) | 1) + "] << 8);\n";
+        return "this.CPUCore.IOCore.memory.internalRAM[" + (address & 0x7FFF) + "] | (this.CPUCore.IOCore.memory.internalRAM[" + ((address & 0x7FFF) | 1) + "] << 8)";
     }
     else if (address >= 0x20 && address < 0x4000) {
-        return "this.CPUCore.IOCore.memory.BIOS[" + address + "] | (this.CPUCore.IOCore.memory.BIOS[" + (address | 1) + "] << 8);\n";
+        return "this.CPUCore.IOCore.memory.BIOS[" + address + "] | (this.CPUCore.IOCore.memory.BIOS[" + (address | 1) + "] << 8)";
     }
     else {
         bailout();
@@ -83,41 +97,48 @@ DynarecCompilerWorkerCore.prototype.read16 = function (address) {
 }
 DynarecCompilerWorkerCore.prototype.read32 = function (address) {
     if (address >= 0x8000000 && address < 0xE000000) {
-        return "this.CPUCore.IOCore.cartridge.readROM32(" + (address & 0x1FFFFFF) + ");\n";
+        return "this.CPUCore.IOCore.cartridge.readROM32(" + (address & 0x1FFFFFF) + ") | 0";
     }
     else if (address >= 0x3000000 && address < 0x4000000) {
-        return "this.CPUCore.IOCore.memory.externalRAM[0x" + (address & 0x3FFFF).toString(16) + "] | (this.CPUCore.IOCore.memory.externalRAM[0x" + ((address & 0x3FFFF) | 1).toString(16) + "] << 8) | (this.CPUCore.IOCore.memory.externalRAM[0x" + ((address & 0x3FFFF) | 2).toString(16) + "] << 16)  | (this.CPUCore.IOCore.memory.externalRAM[0x" + ((address & 0x3FFFF) | 3).toString(16) + "] << 24);\n";
+        return "this.CPUCore.IOCore.memory.externalRAM[" + (address & 0x3FFFF) + "] | (this.CPUCore.IOCore.memory.externalRAM[" + ((address & 0x3FFFF) | 1) + "] << 8) | (this.CPUCore.IOCore.memory.externalRAM[" + ((address & 0x3FFFF) | 2) + "] << 16)  | (this.CPUCore.IOCore.memory.externalRAM[" + ((address & 0x3FFFF) | 3) + "] << 24)";
     }
     else if (address >= 0x2000000 && address < 0x3000000) {
-        return "this.CPUCore.IOCore.memory.internalRAM[0x" + (address & 0x7FFF).toString(16) + "] | (this.CPUCore.IOCore.memory.internalRAM[0x" + ((address & 0x7FFF).toString(16) | 1) + "] << 8) | (this.CPUCore.IOCore.memory.internalRAM[0x" + ((address & 0x7FFF) | 2) + "] << 16)  | (this.CPUCore.IOCore.memory.internalRAM[0x" + ((address & 0x7FFF) | 3).toString(16) + "] << 24);\n";
+        return "this.CPUCore.IOCore.memory.internalRAM[" + (address & 0x7FFF) + "] | (this.CPUCore.IOCore.memory.internalRAM[" + ((address & 0x7FFF) | 1) + "] << 8) | (this.CPUCore.IOCore.memory.internalRAM[" + ((address & 0x7FFF) | 2) + "] << 16)  | (this.CPUCore.IOCore.memory.internalRAM[" + ((address & 0x7FFF) | 3) + "] << 24)";
     }
     else if (address >= 0x20 && address < 0x4000) {
-        return "this.CPUCore.IOCore.memory.BIOS[0x" + (address).toString(16) + "] | (this.CPUCore.IOCore.memory.BIOS[0x" + (address | 1).toString(16) + "] << 8) | (this.CPUCore.IOCore.memory.BIOS[0x" + (address | 2).toString(16) + "] << 16)  | (this.CPUCore.IOCore.memory.BIOS[0x" + (address | 3).toString(16) + "] << 24);\n";
+        return "this.CPUCore.IOCore.memory.BIOS[" + address + "] | (this.CPUCore.IOCore.memory.BIOS[" + (address | 1) + "] << 8) | (this.CPUCore.IOCore.memory.BIOS[" + (address | 2) + "] << 16)  | (this.CPUCore.IOCore.memory.BIOS[" + (address | 3) + "] << 24)";
     }
     else {
         bailout();
     }
 }
 DynarecCompilerWorkerCore.prototype.addStateMachineUpdate = function () {
-    var code = "/*State Machine Synchronize*/\n";
-    code += "cpu.registers[15] = " + this.compiler.getPipelinePC() + ";\n";
-    //if (this.isROM) {
-        code += "cpu.instructionHandle.execute = " + this.record[this.currentRecordOffset] + ";\n";
-        code += "cpu.instructionHandle.decode = " + this.record[this.currentRecordOffset + 1] + ";\n";
-    /*}
+    var code = "\t/*State Machine Synchronize*/\n";
+    code += "\tcpu.registers[15] = " + this.compiler.getPipelinePC() + " | 0;\n";
+    if (this.isROM) {
+        code += "\tcpu.instructionHandle.execute = " + this.execute + ";\n";
+        code += "\tcpu.instructionHandle.decode = " + this.decode + " | 0;\n";
+    }
     else {
-        code += "cpu.instructionHandle.execute = " +  this.addMemoryRead(this.compiler.getRealPC()) + ";\n";
-        code += "cpu.instructionHandle.decode = " +  this.addMemoryRead(this.compiler.getDecodeOffset()) + ";\n";
-    }*/
-    code += "cpu.pipelineInvalid = 0;\n";
-    code += "cpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
+        code += "\tcpu.instructionHandle.execute = instruction | 0;\n";
+        code += "\tcpu.instructionHandle.decode = " +  this.addMemoryRead(this.compiler.getDecodeOffset()) + " | 0;\n";
+    }
+    code += "\tcpu.pipelineInvalid = 0;\n";
+    code += "\tcpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
     return code;
 }
 DynarecCompilerWorkerCore.prototype.bailoutEarly = function () {
-    var bailoutText = "/*Bailout spew code*/\n";
+    var bailoutText = "\t/*Bailout spew code*/\n";
     bailoutText += this.addStateMachineUpdate();
-    bailoutText += "return;\n";
+    bailoutText += "\treturn;\n";
     return bailoutText;
+}
+DynarecCompilerWorkerCore.prototype.spillTiming = function () {
+    var code = this.addClockChecks();
+    code += this.instructionsToJoin.join("");
+    code += this.addStateMachineUpdate();
+    this.instructionsToJoin = [code];
+    this.compiler.clocks = 0;
 }
 DynarecCompilerWorkerCore.prototype.addMemoryRead = function (pc) {
     if (this.InTHUMB) {
@@ -132,7 +153,7 @@ DynarecCompilerWorkerCore.prototype.addRAMGuards = function (instructionValue, i
         return instructionCode;
     }
     var guardText = "/*RAM guard check*/\n";
-    guarDText += "var instruction = " +  this.addMemoryRead(this.compiler.getRealPC()) + ";\n";
+    guardText += "var instruction = " +  this.addMemoryRead(this.compiler.getRealPC()) + ";\n";
     guardText += "if (instruction != " + instructionValue + ") {\n";
     guardText += this.bailoutEarly();
     guardText += "}\n";
@@ -144,7 +165,7 @@ DynarecCompilerWorkerCore.prototype.addClockChecks = function () {
 }
 DynarecCompilerWorkerCore.prototype.finish = function () {
     var code = this.addClockChecks();
-    code += this.instructionsToJoin.join("\n");
+    code += this.instructionsToJoin.join("");
     code += this.addStateMachineUpdate();
     done(code);
 }
