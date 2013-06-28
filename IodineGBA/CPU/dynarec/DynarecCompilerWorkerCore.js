@@ -129,6 +129,12 @@ DynarecCompilerWorkerCore.prototype.addStateMachineUpdate = function () {
     code += "\tcpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
     return code;
 }
+DynarecCompilerWorkerCore.prototype.addBranchUpdate = function () {
+    var code = "\t/*Branch Synchronize*/\n";
+    code += "\tcpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
+    code += "\treturn true;\n";
+    return code;
+}
 DynarecCompilerWorkerCore.prototype.bailoutEarly = function () {
     var bailoutText = "\t/*Bailout spew code*/\n";
     bailoutText += this.addStateMachineUpdate();
@@ -138,7 +144,7 @@ DynarecCompilerWorkerCore.prototype.bailoutEarly = function () {
 DynarecCompilerWorkerCore.prototype.spillTiming = function () {
     var code = this.addClockChecks();
     code += this.instructionsToJoin.join("");
-    code += this.addStateMachineUpdate();
+    code += this.addBranchUpdate();
     this.instructionsToJoin = [code];
     this.compiler.clocks = 0;
 }

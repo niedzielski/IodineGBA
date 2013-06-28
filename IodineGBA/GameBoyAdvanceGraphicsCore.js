@@ -611,9 +611,9 @@ GameBoyAdvanceGraphics.prototype.writeBG0CNT1 = function (data) {
     this.bg0Renderer.screenBaseBlockPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readBG0CNT1 = function () {
-	return (this.BG0ScreenBaseBlock |
-	(this.BG0DisplayOverflow ? 0x20 : 0) |
-	(this.BG0ScreenSize << 6));
+	return (this.BGScreenBaseBlock[0] |
+	(this.BGDisplayOverflow[0] ? 0x20 : 0) |
+	(this.BGScreenSize[0] << 6));
 }
 GameBoyAdvanceGraphics.prototype.writeBG1CNT0 = function (data) {
 	this.midScanLineJIT();
