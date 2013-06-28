@@ -140,3 +140,27 @@ GameBoyAdvanceColorEffectsRenderer.prototype.brightnessDecreaseFast = function (
 	r1 = Math.imul(r1 | 0, decreaseMultiplier | 0) >> 4;
 	return (b1 << 10) | (g1 << 5) | r1;
 }
+GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDCNT0 = function (data) {
+    //Select target 1 and color effects mode:
+    this.effectsTarget1 = (data & 0x3F) << 16;
+    this.colorEffectsType = data >> 6;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.readBLDCNT0 = function (data) {
+    return (this.colorEffectsType << 6) | (this.effectsTarget1 >> 16);
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDCNT1 = function (data) {
+    //Select target 2:
+    this.effectsTarget2 = (data & 0x3F) << 16;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.readBLDCNT1 = function (data) {
+    return this.effectsTarget2 >> 16;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDALPHA0 = function (data) {
+    this.alphaBlendAmountTarget1 = Math.min(data & 0x1F, 0x10) | 0;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDALPHA1 = function (data) {
+    this.alphaBlendAmountTarget2 = Math.min(data & 0x1F, 0x10) | 0;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDY = function (data) {
+    this.brightnessEffectAmount = Math.min(data & 0x1F, 0x10) | 0;
+}

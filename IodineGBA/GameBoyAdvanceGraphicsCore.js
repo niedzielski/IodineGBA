@@ -1026,33 +1026,30 @@ GameBoyAdvanceGraphics.prototype.writeMOSAIC1 = function (data) {
 	this.mosaicRenderer.OBJMosaicVSize = data >> 4;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT0 = function (data) {
-	//Select target 1 and color effects mode:
 	this.midScanLineJIT();
-	this.colorEffectsRenderer.effectsTarget1 = (data & 0x3F) << 16;
-	this.colorEffectsRenderer.colorEffectsType = data >> 6;
+	this.colorEffectsRenderer.writeBLDCNT0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT0 = function () {
-	return (this.colorEffectsRenderer.effectsTarget1 >> 16) | (this.colorEffectsRenderer.colorEffectsType << 6);
+	return this.colorEffectsRenderer.readBLDCNT0();
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT1 = function (data) {
-	//Select target 2:
 	this.midScanLineJIT();
-	this.colorEffectsRenderer.effectsTarget2 = (data & 0x3F) << 16;
+	this.colorEffectsRenderer.writeBLDCNT1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT1 = function () {
-	return this.colorEffectsRenderer.effectsTarget2 >> 16;
+	return this.colorEffectsRenderer.readBLDCNT1();
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA0 = function (data) {
 	this.midScanLineJIT();
-	this.colorEffectsRenderer.alphaBlendAmountTarget1 = Math.min(data & 0x1F, 0x10) | 0;
+	this.colorEffectsRenderer.writeBLDALPHA0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA1 = function (data) {
 	this.midScanLineJIT();
-	this.colorEffectsRenderer.alphaBlendAmountTarget2 = Math.min(data & 0x1F, 0x10) | 0;
+	this.colorEffectsRenderer.writeBLDALPHA1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
 	this.midScanLineJIT();
-	this.colorEffectsRenderer.brightnessEffectAmount = Math.min(data & 0x1F, 0x10) | 0;
+    this.colorEffectsRenderer.writeBLDY(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM = function (address, data) {
 	this.midScanLineJIT();
