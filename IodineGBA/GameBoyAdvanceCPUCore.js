@@ -179,10 +179,10 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
 		//Disable IRQ:
 		this.IRQDisabled = true;
 		if (this.IOCore.BIOSFound) {
-            //IRQ exception vector:
-			this.branch(0x18);
             //Exception always enter ARM mode:
             this.enterARM();
+            //IRQ exception vector:
+			this.branch(0x18);
 		}
 		else {
 			//Exception always enter ARM mode:
@@ -205,10 +205,10 @@ GameBoyAdvanceCPU.prototype.SWI = function () {
 		this.registers[14] = this.getLR() | 0;
 		//Disable IRQ:
 		this.IRQDisabled = true;
-        //SWI exception vector:
-		this.branch(0x8);
         //Exception always enter ARM mode:
 		this.enterARM();
+        //SWI exception vector:
+		this.branch(0x8);
 	}
 	else {
 		//HLE the SWI command:
@@ -224,10 +224,10 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
 		this.registers[14] = this.getLR() | 0;
 		//Disable IRQ:
 		this.IRQDisabled = true;
-        //Undefined exception vector:
-		this.branch(0x4);
         //Exception always enter ARM mode:
 		this.enterARM();
+        //Undefined exception vector:
+		this.branch(0x4);
 	}
 }
 GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {

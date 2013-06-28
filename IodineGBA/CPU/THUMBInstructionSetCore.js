@@ -449,8 +449,8 @@ THUMBInstructionSet.prototype.BX_L = function (parentObj) {
 	var address = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
 	if ((address & 0x1) == 0) {
 		//Enter ARM mode:
-        parentObj.CPUCore.branch(address & -0x4);
         parentObj.CPUCore.enterARM();
+        parentObj.CPUCore.branch(address & -0x4);
 	}
 	else {
 		//Stay in THUMB mode:
@@ -462,8 +462,8 @@ THUMBInstructionSet.prototype.BX_H = function (parentObj) {
 	var address = parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)] | 0;
 	if ((address & 0x1) == 0) {
 		//Enter ARM mode:
-		parentObj.CPUCore.branch(address & -0x4);
-        parentObj.CPUCore.enterARM();
+		parentObj.CPUCore.enterARM();
+        parentObj.CPUCore.branch(address & -0x4);
 	}
 	else {
 		//Stay in THUMB mode:

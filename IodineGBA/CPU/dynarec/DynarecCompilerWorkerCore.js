@@ -132,7 +132,7 @@ DynarecCompilerWorkerCore.prototype.addStateMachineUpdate = function () {
 DynarecCompilerWorkerCore.prototype.bailoutEarly = function () {
     var bailoutText = "\t/*Bailout spew code*/\n";
     bailoutText += this.addStateMachineUpdate();
-    bailoutText += "\treturn;\n";
+    bailoutText += "\treturn false;\n";
     return bailoutText;
 }
 DynarecCompilerWorkerCore.prototype.spillTiming = function () {
@@ -163,7 +163,7 @@ DynarecCompilerWorkerCore.prototype.addRAMGuards = function (instructionValue, i
     return guardText;
 }
 DynarecCompilerWorkerCore.prototype.addClockChecks = function () {
-    return "if (cpu.IOCore.cyclesUntilNextEvent() < " + this.compiler.clocks + ") {\n\treturn;\n}\n";
+    return "if (!cpu.triggeredIRQ && cpu.IOCore.cyclesUntilNextEvent() < " + this.compiler.clocks + ") {\n\treturn false;\n}\n";
 }
 DynarecCompilerWorkerCore.prototype.finish = function () {
     var code = this.addClockChecks();

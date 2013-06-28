@@ -63,10 +63,10 @@ DynarecTHUMBAssemblerCore.prototype.get3BitImmediate = function (execute, shift)
     return ((execute >> shift) & 0x7);
 }
 DynarecTHUMBAssemblerCore.prototype.snip = function () {
-    if (this.pc == this.dynarec.startPC) {
+    //if (this.pc == this.dynarec.startPC) {
         //Force blacklist bail if bailing on the first generated instruction:
         bailout();
-    }
+    //}
     return this.dynarec.bailoutEarly(this.pc);
 }
 DynarecTHUMBAssemblerCore.prototype.LSLimm = function (parentObj, execute) {

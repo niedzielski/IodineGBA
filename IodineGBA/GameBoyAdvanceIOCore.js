@@ -20,6 +20,7 @@ function GameBoyAdvanceIO(emulatorCore) {
 	this.emulatorCore = emulatorCore;
 	//State Machine Tracking:
 	this.systemStatus = 0;
+    this.executeDynarec = false;
 	this.cyclesToIterate = 0;
 	this.cyclesIteratedPreviously = 0;
     this.BIOSFound = false;
@@ -52,7 +53,14 @@ GameBoyAdvanceIO.prototype.runIterator = function () {
 	while ((this.cyclesToIterate | 0) > 0) {
 		if ((this.systemStatus | 0) == 0) {
 			//Execute next instruction:
-			this.cpu.executeIteration();
+            if (this.executeDynarec) {
+                //LLE Dynarec JIT
+                this.handleDynarec();
+            }
+            else {
+                //Interpreter:
+                this.cpu.executeIteration();
+            }
 		}
 		else {
 			//Handle HALT/STOP/DMA here:
@@ -83,11 +91,6 @@ GameBoyAdvanceIO.prototype.handleCPUStallEvents = function () {
 			break;
 		case 4: //Handle Stop State
 			this.handleStop();
-            break;
-        case 5: //LLE Dynarec JIT
-            this.handleDynarec();
-        default://Abort JIT or leave it normally
-            this.systemStatus = ((this.systemStatus | 0) - 0x5) | 0;
 	}
 }
 GameBoyAdvanceIO.prototype.handleDMA = function () {
