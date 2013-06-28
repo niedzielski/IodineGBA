@@ -1044,15 +1044,15 @@ GameBoyAdvanceGraphics.prototype.readBLDCNT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA0 = function (data) {
 	this.midScanLineJIT();
-	this.colorEffectsRenderer.alphaBlendAmountTarget1 = Math.min((data & 0x1F) / 0x10, 1);
+	this.colorEffectsRenderer.alphaBlendAmountTarget1 = Math.min(data & 0x1F, 0x10) | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA1 = function (data) {
 	this.midScanLineJIT();
-	this.colorEffectsRenderer.alphaBlendAmountTarget2 = Math.min((data & 0x1F) / 0x10, 1);
+	this.colorEffectsRenderer.alphaBlendAmountTarget2 = Math.min(data & 0x1F, 0x10) | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
 	this.midScanLineJIT();
-	this.colorEffectsRenderer.brightnessEffectAmount = Math.min((data & 0x1F) / 0x10, 1);
+	this.colorEffectsRenderer.brightnessEffectAmount = Math.min(data & 0x1F, 0x10) | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM = function (address, data) {
 	this.midScanLineJIT();
