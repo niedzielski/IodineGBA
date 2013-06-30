@@ -39,7 +39,7 @@ GameBoyAdvanceWindowRenderer.prototype.renderNormalScanLine = function (line, li
 	var layerStack = this.gfx.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
 	var stackDepth = layerStack.length;
 	var stackIndex = 0;
-	if (this.WINYCoordTop <= line && line <= this.WINYCoordBottom) {
+	if (this.WINYCoordTop <= line && line < this.WINYCoordBottom) {
 		//Loop through each pixel on the line:
 		for (var pixelPosition = this.WINXCoordLeft, currentPixel = 0, workingPixel = 0, lowerPixel = 0, endPosition = Math.min(this.WINXCoordRight, 240); pixelPosition < endPosition; ++pixelPosition) {
 			//Start with backdrop color:
@@ -91,7 +91,7 @@ GameBoyAdvanceWindowRenderer.prototype.renderScanLineWithEffects = function (lin
 	var layerStack = this.gfx.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
 	var stackDepth = layerStack.length;
 	var stackIndex = 0;
-	if (this.WINYCoordTop <= line && line <= this.WINYCoordBottom) {
+	if (this.WINYCoordTop <= line && line < this.WINYCoordBottom) {
 		//Loop through each pixel on the line:
 		for (var pixelPosition = this.WINXCoordLeft, currentPixel = 0, workingPixel = 0, lowerPixel = 0, endPosition = Math.min(this.WINXCoordRight, 240); pixelPosition < endPosition; ++pixelPosition) {
 			//Start with backdrop color:

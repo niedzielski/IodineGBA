@@ -20,6 +20,7 @@ function DynarecTHUMBAssemblerCore(dynarec, pc, waitstates) {
     this.clocks = 0;
     this.pc = pc;
     this.pipelineInvalid = 0x4;
+    this.nonSequential = true;
     this.WRAMWaitState = waitstates[0];
 	this.SRAMWaitState = waitstates[1];
 	this.CARTWaitState0First = waitstates[2];
@@ -31,9 +32,16 @@ function DynarecTHUMBAssemblerCore(dynarec, pc, waitstates) {
     this.compileInstructionMap();
 }
 DynarecTHUMBAssemblerCore.prototype.addInstructionReadClocks = function () {
-    this.clocks += 1;
+    if (this.nonSequential) {
+        this.clocks += 2;
+    }
+    else {
+        this.clocks += 1;
+    }
+    this.pipelineInvalid >>= 1;
 }
 DynarecTHUMBAssemblerCore.prototype.generate = function (execute) {
+    this.addInstructionReadClocks();
     var codeBlock = this.instructionMap[execute >> 6](this, execute);
     codeBlock = this.dynarec.addRAMGuards(execute, codeBlock);
     codeBlock += this.incrementPC();
@@ -70,7 +78,6 @@ DynarecTHUMBAssemblerCore.prototype.snip = function () {
     return this.dynarec.bailoutEarly(this.pc);
 }
 DynarecTHUMBAssemblerCore.prototype.LSLimm = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var offset = " + parentObj.get5BitImmediate(execute, 6) + ";\n" +
 	"if (offset > 0) {\n" +
@@ -82,7 +89,6 @@ DynarecTHUMBAssemblerCore.prototype.LSLimm = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = source | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.LSRimm = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var offset = " + parentObj.get5BitImmediate(execute, 6) + ";\n" +
 	"if (offset > 0) {\n" +
@@ -98,7 +104,6 @@ DynarecTHUMBAssemblerCore.prototype.LSRimm = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = source | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ASRimm = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var offset = " + parentObj.get5BitImmediate(execute, 6) + ";\n" +
 	"if (offset > 0) {\n" +
@@ -114,44 +119,37 @@ DynarecTHUMBAssemblerCore.prototype.ASRimm = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = source | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADDreg = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + parentObj.get3BitImmediate(execute, 6) + "] | 0;\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.SUBreg = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + parentObj.get3BitImmediate(execute, 6) + "] | 0;\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADDimm3 = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var operand2 = " + parentObj.get3BitImmediate(execute, 6) + ";\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.SUBimm3 = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var operand2 = " + parentObj.get3BitImmediate(execute, 6) + ";\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MOVimm8 = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var result = " + (execute & 0xFF) + ";\n" +
 	"cpu.CPSRNegative = false;\n" +
 	"cpu.CPSRZero = (result == 0);\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] = result | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.CMPimm8 = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] | 0;\n" +
 	"var operand2 = " + (execute & 0xFF) + ";\n" +
 	"cpu.setCMPFlags(operand1 | 0, operand2 | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADDimm8 = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] | 0;\n" +
 	"var operand2 = " + (execute & 0xFF) + ";\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] = cpu.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
@@ -163,7 +161,6 @@ DynarecTHUMBAssemblerCore.prototype.SUBimm8 = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] = cpu.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.AND = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var result = source & destination;\n" +
@@ -172,7 +169,6 @@ DynarecTHUMBAssemblerCore.prototype.AND = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = result | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.EOR = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var result = source ^ destination;\n" +
@@ -181,7 +177,6 @@ DynarecTHUMBAssemblerCore.prototype.EOR = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = result | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.LSL = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] & 0xFF;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
     "if (source > 0) {\n" +
@@ -203,7 +198,6 @@ DynarecTHUMBAssemblerCore.prototype.LSL = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = destination | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.LSR = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] & 0xFF;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"if (source > 0) {\n" +
@@ -225,7 +219,6 @@ DynarecTHUMBAssemblerCore.prototype.LSR = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = destination | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ASR = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] & 0xFF;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"if (source > 0) {\n" +
@@ -243,19 +236,16 @@ DynarecTHUMBAssemblerCore.prototype.ASR = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = destination | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADC = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.setADCFlags(operand1 | 0, operand2 | 0) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.SBC = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.setSBCFlags(operand1 | 0, operand2 | 0) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ROR = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] & 0xFF;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"if (source > 0) {\n" +
@@ -273,7 +263,6 @@ DynarecTHUMBAssemblerCore.prototype.ROR = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = destination | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.TST = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var result = source & destination;\n" +
@@ -281,7 +270,6 @@ DynarecTHUMBAssemblerCore.prototype.TST = function (parentObj, execute) {
 	"cpu.CPSRZero = (result == 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.NEG = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"cpu.CPSROverflow = ((source ^ (-source)) == 0);\n" +
 	"source = (-source) | 0;\n" +
@@ -290,19 +278,16 @@ DynarecTHUMBAssemblerCore.prototype.NEG = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = source | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.CMP = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"cpu.setCMPFlags(operand1 | 0, operand2 | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.CMN = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"cpu.setCMNFlags(operand1 | 0, operand2 | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ORR = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var result = source | destination;\n" +
@@ -312,7 +297,6 @@ DynarecTHUMBAssemblerCore.prototype.ORR = function (parentObj, execute) {
 }
 DynarecTHUMBAssemblerCore.prototype.MUL = function (parentObj, execute) {
 	return this.snip();
-    parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var result = cpu.performMUL32(source | 0, destination | 0, 0);\n" +
@@ -322,7 +306,6 @@ DynarecTHUMBAssemblerCore.prototype.MUL = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = result | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.BIC = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var result = (~source) & destination;\n" +
@@ -331,20 +314,17 @@ DynarecTHUMBAssemblerCore.prototype.BIC = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = result | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MVN = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = ~cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"cpu.CPSRNegative = (source < 0);\n" +
 	"cpu.CPSRZero = (source == 0);\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = source | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADDH_LL = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = (source + destination) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADDH_LH = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     var code = parentObj.synchronizePC();
     return code + "var source = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
@@ -352,7 +332,6 @@ DynarecTHUMBAssemblerCore.prototype.ADDH_LH = function (parentObj, execute) {
 }
 DynarecTHUMBAssemblerCore.prototype.ADDH_HL = function (parentObj, execute) {
 	return this.snip();
-    parentObj.addInstructionReadClocks();
     var code = parentObj.synchronizePC();
     return code + "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] | 0;\n" +
@@ -360,54 +339,45 @@ DynarecTHUMBAssemblerCore.prototype.ADDH_HL = function (parentObj, execute) {
 }
 DynarecTHUMBAssemblerCore.prototype.ADDH_HH = function (parentObj, execute) {
 	return this.snip();
-    parentObj.addInstructionReadClocks();
     var code = parentObj.synchronizePC();
     return code + "var source = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n" +
 	"var destination = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] | 0;\n" +
 	"cpu.THUMB.guardHighRegisterWrite((source + destination) | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.CMPH_LL = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"cpu.setCMPFlags(operand1 | 0, operand2 | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.CMPH_LH = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     var code = parentObj.synchronizePC();
     return code + "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n" +
 	"cpu.setCMPFlags(operand1 | 0, operand2 | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.CMPH_HL = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     var code = parentObj.synchronizePC();
     return code + "var operand1 = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"cpu.setCMPFlags(operand1 | 0, operand2 | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.CMPH_HH = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     var code = parentObj.synchronizePC();
     return code + "var operand1 = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] | 0;\n" +
 	"var operand2 = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n" +
     "cpu.setCMPFlags(operand1 | 0, operand2 | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_LL = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_LH = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     var code = parentObj.synchronizePC();
     return code + "cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_HL = function (parentObj, execute) {
-    parentObj.addInstructionReadClocks();
     return "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_HH = function (parentObj, execute) {
-    parentObj.addInstructionReadClocks();
     var code = parentObj.synchronizePC();
     return code + "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n";
 }
@@ -469,15 +439,12 @@ DynarecTHUMBAssemblerCore.prototype.LDRSP = function (parentObj, execute) {
 	return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.ADDPC = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] = (" + (parentObj.getPipelinePC() & -3) + " + " + ((execute & 0xFF) << 2) + ") | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADDSP = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] = (" + ((execute & 0xFF) << 2) + " + (cpu.registers[13] | 0)) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADDSPimm7 = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     if ((execute & 0x80) != 0) {
 		return "cpu.registers[13] = ((cpu.registers[13] | 0) - " + ((execute & 0x7F) << 2) + ") | 0;\n";
 	}
@@ -489,7 +456,6 @@ DynarecTHUMBAssemblerCore.prototype.PUSH = function (parentObj, execute) {
 	if ((execute & 0xFF) > 0) {
 		return parentObj.snip();
 	}
-    parentObj.addInstructionReadClocks();
     return "";
 }
 DynarecTHUMBAssemblerCore.prototype.PUSHlr = function (parentObj, execute) {
@@ -499,7 +465,6 @@ DynarecTHUMBAssemblerCore.prototype.POP = function (parentObj, execute) {
 	if ((execute & 0xFF) > 0) {
 		return parentObj.snip();
 	}
-    parentObj.addInstructionReadClocks();
     return "";
 }
 DynarecTHUMBAssemblerCore.prototype.POPpc = function (parentObj, execute) {
@@ -509,14 +474,12 @@ DynarecTHUMBAssemblerCore.prototype.STMIA = function (parentObj, execute) {
 	if ((execute & 0xFF) > 0) {
 		return parentObj.snip();
 	}
-    parentObj.addInstructionReadClocks();
     return "";
 }
 DynarecTHUMBAssemblerCore.prototype.LDMIA = function (parentObj, execute) {
 	if ((execute & 0xFF) > 0) {
 		return parentObj.snip();
 	}
-    parentObj.addInstructionReadClocks();
     return "";
 }
 DynarecTHUMBAssemblerCore.prototype.BEQ = function (parentObj, execute) {
@@ -562,21 +525,27 @@ DynarecTHUMBAssemblerCore.prototype.BLE = function (parentObj, execute) {
 	return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.SWI = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return "cpu.SWI();\n";
 }
 DynarecTHUMBAssemblerCore.prototype.B = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return "cpu.branch(" + (parentObj.getPipelinePC() + ((execute << 21) >> 20)) + " | 0);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.BLsetup = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return "cpu.registers[14] = " + (parentObj.getPipelinePC() + (((execute & 0x7FF) << 21) >> 9)) + " | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.BLoff = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return "cpu.registers[14] = (cpu.registers[14] + " + ((execute & 0x7FF) << 1) + ") | 0;\n" +
+	"var oldPC = " + parentObj.getPipelinePC() + " | 0;\n" +
+	"cpu.branch(cpu.registers[14] & -0x2);\n" +
+	"cpu.registers[14] = (oldPC - 0x2) | 0x1;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.UNDEFINED = function (parentObj, execute) {
-    //Undefined Exception:
-	return "cpu.UNDEFINED();\n" +
-    this.dynarec.addBranchUpdate();
+	parentObj.dynarec.forceSyncGuard = true;
+    return "cpu.UNDEFINED();\n";
 }
 DynarecTHUMBAssemblerCore.prototype.compileInstructionMap = function () {
 	this.instructionMap = [];
