@@ -491,7 +491,8 @@ GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
     }
 }
 GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGMode = data & 0x07;
 	this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) >> 4);
 	this.HBlankIntervalFree = ((data & 0x20) == 0x20);
@@ -530,7 +531,8 @@ GameBoyAdvanceGraphics.prototype.readDISPCNT0 = function () {
 	(this.forcedBlank ? 0x80 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeDISPCNT1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.displayBG0 = ((data & 0x01) == 0x01);
 	this.displayBG1 = ((data & 0x02) == 0x02);
 	this.displayBG2 = ((data & 0x04) == 0x04);
@@ -551,14 +553,16 @@ GameBoyAdvanceGraphics.prototype.readDISPCNT1 = function () {
 	(this.displayObjectWindowFlag ? 0x80 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeGreenSwap = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.greenSwap = ((data & 0x01) == 0x01);
 }
 GameBoyAdvanceGraphics.prototype.readGreenSwap = function () {
 	return (this.greenSwap ? 0x1 : 0);
 }
 GameBoyAdvanceGraphics.prototype.writeDISPSTAT0 = function (data) {
-	//VBlank flag read only.
+	data = data | 0;
+    //VBlank flag read only.
 	//HBlank flag read only.
 	//V-Counter flag read only.
 	//Only LCD IRQ generation enablers can be set here:
@@ -575,18 +579,20 @@ GameBoyAdvanceGraphics.prototype.readDISPSTAT0 = function () {
 	(this.IRQVCounter ? 0x20 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeDISPSTAT1 = function (data) {
-	//V-Counter match value:
-	this.VCounter = data;
+	data = data | 0;
+    //V-Counter match value:
+	this.VCounter = data | 0;
 	this.checkVCounter();
 }
 GameBoyAdvanceGraphics.prototype.readDISPSTAT1 = function () {
-	return this.VCounter;
+	return this.VCounter | 0;
 }
 GameBoyAdvanceGraphics.prototype.readVCOUNT = function () {
-	return this.currentScanLine;
+	return this.currentScanLine | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeBG0CNT0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGPriority[0] = data & 0x3;
 	this.BGCharacterBaseBlock[0] = (data & 0xC) >> 2;
 	//Bits 5-6 always 0.
@@ -603,7 +609,8 @@ GameBoyAdvanceGraphics.prototype.readBG0CNT0 = function () {
 	(this.BGPalette256[0] ? 0x80 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeBG0CNT1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGScreenBaseBlock[0] = data & 0x1F;
 	this.BGDisplayOverflow[0] = ((data & 0x20) == 0x20);	//Note: Only applies to BG2/3 supposedly.
 	this.BGScreenSize[0] = (data & 0xC0) >> 6;
@@ -616,7 +623,8 @@ GameBoyAdvanceGraphics.prototype.readBG0CNT1 = function () {
 	(this.BGScreenSize[0] << 6));
 }
 GameBoyAdvanceGraphics.prototype.writeBG1CNT0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGPriority[1] = data & 0x3;
 	this.BGCharacterBaseBlock[1] = (data & 0xC) >> 2;
 	//Bits 5-6 always 0.
@@ -633,7 +641,8 @@ GameBoyAdvanceGraphics.prototype.readBG1CNT0 = function () {
 	(this.BGPalette256[1] ? 0x80 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeBG1CNT1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGScreenBaseBlock[1] = data & 0x1F;
 	this.BGDisplayOverflow[1] = ((data & 0x20) == 0x20);	//Note: Only applies to BG2/3 supposedly.
 	this.BGScreenSize[1] = (data & 0xC0) >> 6;
@@ -646,7 +655,8 @@ GameBoyAdvanceGraphics.prototype.readBG1CNT1 = function () {
 	(this.BGScreenSize[1] << 6));
 }
 GameBoyAdvanceGraphics.prototype.writeBG2CNT0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGPriority[2] = data & 0x3;
 	this.BGCharacterBaseBlock[2] = (data & 0xC) >> 2;
 	//Bits 5-6 always 0.
@@ -665,7 +675,8 @@ GameBoyAdvanceGraphics.prototype.readBG2CNT0 = function () {
 	(this.BGPalette256[2] ? 0x80 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeBG2CNT1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGScreenBaseBlock[2] = data & 0x1F;
 	this.BGDisplayOverflow[2] = ((data & 0x20) == 0x20);
 	this.BGScreenSize[2] = (data & 0xC0) >> 6;
@@ -681,7 +692,8 @@ GameBoyAdvanceGraphics.prototype.readBG2CNT1 = function () {
 	(this.BGScreenSize[2] << 6));
 }
 GameBoyAdvanceGraphics.prototype.writeBG3CNT0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGPriority[3] = data & 0x3;
 	this.BGCharacterBaseBlock[3] = (data & 0xC) >> 2;
 	//Bits 5-6 always 0.
@@ -700,7 +712,8 @@ GameBoyAdvanceGraphics.prototype.readBG3CNT0 = function () {
 	(this.BGPalette256[3] ? 0x80 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeBG3CNT1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.BGScreenBaseBlock[3] = data & 0x1F;
 	this.BGDisplayOverflow[3] = ((data & 0x20) == 0x20);
 	this.BGScreenSize[3] = (data & 0xC0) >> 6;
@@ -716,271 +729,308 @@ GameBoyAdvanceGraphics.prototype.readBG3CNT1 = function () {
 	(this.BGScreenSize[3] << 6));
 }
 GameBoyAdvanceGraphics.prototype.writeBG0HOFS0 = function (data) {
-	this.midScanLineJIT();
-	this.bg0Renderer.writeBGHOFS0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg0Renderer.writeBGHOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG0HOFS1 = function (data) {
-	this.midScanLineJIT();
-	this.bg0Renderer.writeBGHOFS1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg0Renderer.writeBGHOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG0VOFS0 = function (data) {
-	this.midScanLineJIT();
-	this.bg0Renderer.writeBGVOFS0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg0Renderer.writeBGVOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG0VOFS1 = function (data) {
-	this.midScanLineJIT();
-	this.bg0Renderer.writeBGVOFS1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg0Renderer.writeBGVOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG1HOFS0 = function (data) {
-	this.midScanLineJIT();
-	this.bg1Renderer.writeBGHOFS0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg1Renderer.writeBGHOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG1HOFS1 = function (data) {
-	this.midScanLineJIT();
-	this.bg1Renderer.writeBGHOFS1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg1Renderer.writeBGHOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG1VOFS0 = function (data) {
-	this.midScanLineJIT();
-	this.bg1Renderer.writeBGVOFS0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg1Renderer.writeBGVOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG1VOFS1 = function (data) {
-	this.midScanLineJIT();
-	this.bg1Renderer.writeBGVOFS1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg1Renderer.writeBGVOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2HOFS0 = function (data) {
-	this.midScanLineJIT();
-	this.bg2TextRenderer.writeBGHOFS0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg2TextRenderer.writeBGHOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2HOFS1 = function (data) {
-	this.midScanLineJIT();
-	this.bg2TextRenderer.writeBGHOFS1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg2TextRenderer.writeBGHOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2VOFS0 = function (data) {
-	this.midScanLineJIT();
-	this.bg2TextRenderer.writeBGVOFS0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg2TextRenderer.writeBGVOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2VOFS1 = function (data) {
-	this.midScanLineJIT();
-    this.bg2TextRenderer.writeBGVOFS1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+    this.bg2TextRenderer.writeBGVOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3HOFS0 = function (data) {
-	this.midScanLineJIT();
-	this.bg3TextRenderer.writeBGHOFS0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg3TextRenderer.writeBGHOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3HOFS1 = function (data) {
-	this.midScanLineJIT();
-	this.bg3TextRenderer.writeBGHOFS1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg3TextRenderer.writeBGHOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3VOFS0 = function (data) {
-	this.midScanLineJIT();
-	this.bg3TextRenderer.writeBGVOFS0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg3TextRenderer.writeBGVOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3VOFS1 = function (data) {
-	this.midScanLineJIT();
-	this.bg3TextRenderer.writeBGVOFS1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bg3TextRenderer.writeBGVOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PA0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGPA0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGPA0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PA1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGPA1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGPA1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PB0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGPB0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGPB0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PB1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGPB1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGPB1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PC0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGPC0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGPC0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PC1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGPC1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGPC1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PD0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGPD0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGPD0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PD1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGPD1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGPD1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PA0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGPA0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGPA0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PA1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGPA1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGPA1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PB0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGPB0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGPB0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PB1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGPB1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGPB1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PC0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGPC0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGPC0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PC1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGPC1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGPC1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PD0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGPD0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGPD0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PD1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGPD1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGPD1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_L0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGX_L0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGX_L0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_L1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGX_L1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGX_L1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_H0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGX_H0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGX_H0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_H1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGX_H1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGX_H1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2Y_L0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGY_L0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGY_L0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2Y_L1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGY_L1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGY_L1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2Y_H0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGY_H0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGY_H0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2Y_H1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[0].writeBGY_H1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[0].writeBGY_H1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3X_L0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGX_L0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGX_L0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3X_L1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGX_L1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGX_L1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3X_H0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGX_H0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGX_H0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3X_H1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGX_H1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGX_H1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3Y_L0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGY_L0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGY_L0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3Y_L1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGY_L1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGY_L1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3Y_H0 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGY_H0(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGY_H0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3Y_H1 = function (data) {
-	this.midScanLineJIT();
-	this.bgAffineRenderer[1].writeBGY_H1(data);
+	data = data | 0;
+    this.midScanLineJIT();
+	this.bgAffineRenderer[1].writeBGY_H1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0H0 = function (data) {
-	this.midScanLineJIT();
-	this.window0Renderer.WINXCoordRight = data;		//Window x-coord goes up to this minus 1.
+	data = data | 0;
+    this.midScanLineJIT();
+	this.window0Renderer.writeWINH0(data | 0);		//Window x-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0H1 = function (data) {
-	this.midScanLineJIT();
-	this.window0Renderer.WINXCoordLeft = data;
+	data = data | 0;
+    this.midScanLineJIT();
+	this.window0Renderer.writeWINH1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1H0 = function (data) {
-	this.midScanLineJIT();
-	this.window1Renderer.WINXCoordRight = data;		//Window x-coord goes up to this minus 1.
+	data = data | 0;
+    this.midScanLineJIT();
+	this.window1Renderer.writeWINH0(data | 0);		//Window x-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1H1 = function (data) {
-	this.midScanLineJIT();
-	this.window1Renderer.WINXCoordLeft = data;
+	data = data | 0;
+    this.midScanLineJIT();
+	this.window1Renderer.writeWINH1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0V0 = function (data) {
-	this.midScanLineJIT();
-	this.window0Renderer.WINYCoordBottom = data;		//Window y-coord goes up to this minus 1.
+	data = data | 0;
+    this.midScanLineJIT();
+	this.window0Renderer.writeWINV0(data | 0);		//Window y-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0V1 = function (data) {
-	this.midScanLineJIT();
-	this.window0Renderer.WINYCoordTop = data;
+	data = data | 0;
+    this.midScanLineJIT();
+	this.window0Renderer.writeWINV1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1V0 = function (data) {
-	this.midScanLineJIT();
-	this.window1Renderer.WINYCoordBottom = data;		//Window y-coord goes up to this minus 1.
+	data = data | 0;
+    this.midScanLineJIT();
+	this.window1Renderer.writeWINV0(data | 0);		//Window y-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1V1 = function (data) {
-	this.midScanLineJIT();
-	this.window1Renderer.WINYCoordTop = data;
+	data = data | 0;
+    this.midScanLineJIT();
+	this.window1Renderer.writeWINV1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWININ0 = function (data) {
-	//Window 0:
+	data = data | 0;
+    //Window 0:
 	this.midScanLineJIT();
-	this.window0Renderer.WINBG0 = ((data & 0x01) == 0x01);
-	this.window0Renderer.WINBG1 = ((data & 0x02) == 0x02);
-	this.window0Renderer.WINBG2 = ((data & 0x04) == 0x04);
-	this.window0Renderer.WINBG3 = ((data & 0x08) == 0x08);
-	this.window0Renderer.WINOBJ = ((data & 0x10) == 0x10);
-	this.window0Renderer.WINEffects = ((data & 0x20) == 0x20);
-	this.window0Renderer.preprocess();
+	this.window0Renderer.writeWININ(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readWININ0 = function () {
 	//Window 0:
-	return ((this.window0Renderer.WINBG0 ? 0x1 : 0) |
-	(this.window0Renderer.WINBG1 ? 0x2 : 0) |
-	(this.window0Renderer.WINBG2 ? 0x4 : 0) |
-	(this.window0Renderer.WINBG3 ? 0x8 : 0) |
-	(this.window0Renderer.WINOBJ ? 0x10 : 0) |
-	(this.window0Renderer.WINEffects ? 0x20 : 0));
+	return this.window0Renderer.readWININ() | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeWININ1 = function (data) {
-	//Window 1:
+	data = data | 0;
+    //Window 1:
 	this.midScanLineJIT();
-	this.window1Renderer.WINBG0 = ((data & 0x01) == 0x01);
-	this.window1Renderer.WINBG1 = ((data & 0x02) == 0x02);
-	this.window1Renderer.WINBG2 = ((data & 0x04) == 0x04);
-	this.window1Renderer.WINBG3 = ((data & 0x08) == 0x08);
-	this.window1Renderer.WINOBJ = ((data & 0x10) == 0x10);
-	this.window1Renderer.WINEffects = ((data & 0x20) == 0x20);
-	this.window1Renderer.preprocess();
+	this.window1Renderer.writeWININ(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readWININ1 = function () {
 	//Window 1:
-	return ((this.window1Renderer.WINBG0 ? 0x1 : 0) |
-	(this.window1Renderer.WINBG1 ? 0x2 : 0) |
-	(this.window1Renderer.WINBG2 ? 0x4 : 0) |
-	(this.window1Renderer.WINBG3 ? 0x8 : 0) |
-	(this.window1Renderer.WINOBJ ? 0x10 : 0) |
-	(this.window1Renderer.WINEffects ? 0x20 : 0));
+	return this.window1Renderer.readWININ() | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeWINOUT0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.WINBG0Outside = ((data & 0x01) == 0x01);
 	this.WINBG1Outside = ((data & 0x02) == 0x02);
 	this.WINBG2Outside = ((data & 0x04) == 0x04);
@@ -998,7 +1048,8 @@ GameBoyAdvanceGraphics.prototype.readWINOUT0 = function () {
 	(this.WINEffectsOutside ? 0x20 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeWINOUT1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.WINOBJBG0Outside = ((data & 0x01) == 0x01);
 	this.WINOBJBG1Outside = ((data & 0x02) == 0x02);
 	this.WINOBJBG2Outside = ((data & 0x04) == 0x04);
@@ -1016,39 +1067,46 @@ GameBoyAdvanceGraphics.prototype.readWINOUT1 = function () {
 	(this.WINOBJEffectsOutside ? 0x20 : 0));
 }
 GameBoyAdvanceGraphics.prototype.writeMOSAIC0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.mosaicRenderer.BGMosaicHSize = data & 0xF;
 	this.mosaicRenderer.BGMosaicVSize = data >> 4;
 }
 GameBoyAdvanceGraphics.prototype.writeMOSAIC1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.mosaicRenderer.OBJMosaicHSize = data & 0xF;
 	this.mosaicRenderer.OBJMosaicVSize = data >> 4;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.colorEffectsRenderer.writeBLDCNT0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT0 = function () {
 	return this.colorEffectsRenderer.readBLDCNT0();
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.colorEffectsRenderer.writeBLDCNT1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT1 = function () {
 	return this.colorEffectsRenderer.readBLDCNT1();
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA0 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.colorEffectsRenderer.writeBLDALPHA0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA1 = function (data) {
-	this.midScanLineJIT();
+	data = data | 0;
+    this.midScanLineJIT();
 	this.colorEffectsRenderer.writeBLDALPHA1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
-	this.midScanLineJIT();
+    data = data | 0;
+    this.midScanLineJIT();
     this.colorEffectsRenderer.writeBLDY(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM = function (address, data) {
@@ -1065,7 +1123,8 @@ GameBoyAdvanceGraphics.prototype.writeVRAM16Optimized = function (address, data)
 	this.VRAM16[address >> 1] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM32Slow = function (address, data) {
-	this.midScanLineJIT();
+	
+    this.midScanLineJIT();
 	this.VRAM[address | 0] = data & 0xFF;
     this.VRAM[address | 1] = (data >> 8) & 0xFF;
     this.VRAM[address | 2] = (data >> 16) & 0xFF;
@@ -1091,7 +1150,9 @@ GameBoyAdvanceGraphics.prototype.readVRAM32Optimized = function (address) {
 	return this.VRAM32[address >> 2] | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeOAM = function (address, data) {
-	this.midScanLineJIT();
+	address = address | 0;
+    data = data | 0;
+    this.midScanLineJIT();
 	var OAMTable = this.OAMTable[address >> 3];
 	switch (address & 0x7) {
 		//Attrib 0:
