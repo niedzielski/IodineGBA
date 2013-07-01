@@ -17,7 +17,6 @@
  */
 function GameBoyAdvanceWindowRenderer(gfx) {
 	this.gfx = gfx;
-    this.backdrop = this.gfx.backdrop | 0;
     this.WINXCoordRight = 0;
 	this.WINXCoordLeft = 0;
     this.WINYCoordBottom = 0;
@@ -44,10 +43,10 @@ GameBoyAdvanceWindowRenderer.prototype.renderNormalScanLine = function (line, li
 		//Loop through each pixel on the line:
 		for (var pixelPosition = this.WINXCoordLeft | 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0, endPosition = Math.min(this.WINXCoordRight | 0, 240) | 0; (pixelPosition | 0) < (endPosition | 0); pixelPosition = ((pixelPosition | 0) + 1) | 0) {
 			//Start with backdrop color:
-			lowerPixel = currentPixel = this.backdrop | 0;
+			lowerPixel = currentPixel = this.gfx.backdrop | 0;
 			//Loop through all layers each pixel to resolve priority:
 			for (stackIndex = 0; (stackIndex | 0) < (stackDepth | 0); stackIndex = ((stackIndex | 0) + 1) | 0) {
-				workingPixel = layerStack[stackIndex | 0][pixelPosition | 0];
+				workingPixel = layerStack[stackIndex | 0][pixelPosition | 0] | 0;
 				if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
 					/*
 						If higher priority than last pixel and not transparent.
@@ -96,7 +95,7 @@ GameBoyAdvanceWindowRenderer.prototype.renderScanLineWithEffects = function (lin
 		//Loop through each pixel on the line:
 		for (var pixelPosition = this.WINXCoordLeft | 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0, endPosition = Math.min(this.WINXCoordRight | 0, 240) | 0; (pixelPosition | 0) < (endPosition | 0); pixelPosition = ((pixelPosition | 0) + 1) | 0) {
 			//Start with backdrop color:
-			lowerPixel = currentPixel = this.backdrop | 0;
+			lowerPixel = currentPixel = this.gfx.backdrop | 0;
 			//Loop through all layers each pixel to resolve priority:
 			for (stackIndex = 0; (stackIndex | 0) < (stackDepth | 0); stackIndex = ((stackIndex | 0) + 1) | 0) {
 				workingPixel = layerStack[stackIndex | 0][pixelPosition | 0] | 0;
