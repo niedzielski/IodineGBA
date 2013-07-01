@@ -71,11 +71,6 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
     this.VRAM32 = getInt32View(this.VRAM);
     this.readVRAM32 = (this.VRAM32) ? this.readVRAM32Optimized : this.readVRAM32Slow;
     this.writeVRAM32 = (this.VRAM32) ? this.writeVRAM32Optimized : this.writeVRAM32Slow;
-    this.OAMRAM = getUint8Array(0x400);
-    this.OAMRAM16 = getUint16View(this.OAMRAM);
-    this.readOAM16 = (this.OAMRAM16) ? this.readOAM16Optimized : this.readOAM16Slow;
-    this.OAMRAM32 = getInt32View(this.OAMRAM);
-    this.readOAM32 = (this.OAMRAM32) ? this.readOAM32Optimized : this.readOAM32Slow;
     this.paletteRAM16 = getUint16View(this.paletteRAM);
     this.readPalette16 = (this.paletteRAM16) ? this.readPalette16Optimized : this.readPalette16Slow;
     this.paletteRAM32 = getInt32View(this.paletteRAM);
@@ -90,9 +85,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
     this.backdrop = this.transparency;
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
-	this.initializeMatrixStorage();
 	this.initializePaletteStorage();
-	this.initializeOAMTable();
 	this.bg0Renderer = new GameBoyAdvanceBGTEXTRenderer(this, 0);
 	this.bg1Renderer = new GameBoyAdvanceBGTEXTRenderer(this, 1);
 	this.bg2TextRenderer = new GameBoyAdvanceBGTEXTRenderer(this, 2);
@@ -140,12 +133,6 @@ GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
 		this.palette16[index][0] = this.transparency;
         this.paletteOBJ16[index] = getInt32Array(0x10);
         this.paletteOBJ16[index][0] = this.transparency;
-	}
-}
-GameBoyAdvanceGraphics.prototype.initializeOAMTable = function () {
-	this.OAMTable = [];
-	for (var spriteNumber = 0; spriteNumber < 128; spriteNumber = (spriteNumber + 1) | 0) {
-		this.OAMTable[spriteNumber | 0] = new GameBoyAdvanceOAMAttributeTable();
 	}
 }
 GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {
@@ -1153,69 +1140,16 @@ GameBoyAdvanceGraphics.prototype.writeOAM = function (address, data) {
 	address = address | 0;
     data = data | 0;
     this.midScanLineJIT();
-	var OAMTable = this.OAMTable[address >> 3];
-	switch (address & 0x7) {
-		//Attrib 0:
-		case 0:
-			OAMTable.ycoord = data;
-			break;
-		case 1:
-			OAMTable.matrix2D = ((data & 0x1) == 0x1);
-			OAMTable.doubleSizeOrDisabled = ((data & 0x2) == 0x2);
-			OAMTable.mode = (data >> 2) & 0x3;
-			OAMTable.mosaic = ((data & 0x10) == 0x10);
-			OAMTable.monolithicPalette = ((data & 0x20) == 0x20);
-			OAMTable.shape = data >> 6;
-			break;
-		//Attrib 1:
-		case 2:
-			OAMTable.xcoord = (OAMTable.xcoord & 0x100) | data;
-			break;
-		case 3:
-			OAMTable.xcoord = ((data & 0x1) << 8) | (OAMTable.xcoord & 0xFF);
-			OAMTable.matrixParameters = (data >> 1) & 0x1F;
-			OAMTable.horizontalFlip = ((data & 0x10) == 0x10);
-			OAMTable.verticalFlip = ((data & 0x20) == 0x20);
-			OAMTable.size = data >> 6;
-			break;
-		//Attrib 2:
-		case 4:
-			OAMTable.tileNumber = (OAMTable.tileNumber & 0x300) | data;
-			break;
-		case 5:
-			OAMTable.tileNumber = ((data & 0x3) << 8) | (OAMTable.tileNumber & 0xFF);
-			OAMTable.priority = (data >> 2) & 0x3;
-			OAMTable.paletteNumber = data >> 4;
-			break;
-		//Scaling/Rotation Parameter:
-		case 6:
-			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] &= 0xFF00;
-			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] |= data;
-			this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] << 16) / 0x1000000;
-			break;
-		default:
-			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] &= 0x00FF;
-			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] |= data << 8;
-			this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] << 16) / 0x1000000;
-	}
-	this.OAMRAM[address & 0x3FF] = data | 0;
+	this.objRenderer.writeOAM(address | 0, data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readOAM = function (address) {
-    return this.OAMRAM[address & 0x3FF] | 0;
+    return this.objRenderer.readOAM(address | 0) | 0;
 }
-GameBoyAdvanceGraphics.prototype.readOAM16Slow = function (address) {
-    return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8);
+GameBoyAdvanceGraphics.prototype.readOAM16 = function (address) {
+    return this.objRenderer.readOAM16(address | 0) | 0;
 }
-GameBoyAdvanceGraphics.prototype.readOAM16Optimized = function (address) {
-	address = address | 0;
-    return this.OAMRAM16[(address >> 1) & 0x1FF] | 0;
-}
-GameBoyAdvanceGraphics.prototype.readOAM32Slow = function (address) {
-    return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8) | (this.OAMRAM[address | 2] << 16)  | (this.OAMRAM[address | 3] << 24);
-}
-GameBoyAdvanceGraphics.prototype.readOAM32Optimized = function (address) {
-	address = address | 0;
-    return this.OAMRAM32[(address >> 2) & 0xFF] | 0;
+GameBoyAdvanceGraphics.prototype.readOAM32 = function (address) {
+    return this.objRenderer.readOAM32(address | 0) | 0;
 }
 GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
 	this.midScanLineJIT();

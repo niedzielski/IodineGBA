@@ -17,6 +17,7 @@
  */
 function GameBoyAdvanceOBJRenderer(gfx) {
 	this.gfx = gfx;
+    this.transparency = this.gfx.transparency;
 	this.initialize();
 }
 GameBoyAdvanceOBJRenderer.prototype.lookupXSize = [
@@ -36,10 +37,31 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
 	16, 32, 32, 64
 ];
 GameBoyAdvanceOBJRenderer.prototype.initialize = function (line) {
-	this.scratchBuffer = getInt32Array(240);
+	this.OAMRAM = getUint8Array(0x400);
+    this.OAMRAM16 = getUint16View(this.OAMRAM);
+    this.readOAM16 = (this.OAMRAM16) ? this.readOAM16Optimized : this.readOAM16Slow;
+    this.OAMRAM32 = getInt32View(this.OAMRAM);
+    this.readOAM32 = (this.OAMRAM32) ? this.readOAM32Optimized : this.readOAM32Slow;
+    this.scratchBuffer = getInt32Array(240);
 	this.scratchWindowBuffer = getInt32Array(240);
 	this.scratchOBJBuffer = getInt32Array(128);
 	this.targetBuffer = null;
+    this.initializeMatrixStorage();
+    this.initializeOAMTable();
+}
+GameBoyAdvanceOBJRenderer.prototype.initializeMatrixStorage = function () {
+	this.OBJMatrixParametersRaw = [];
+	this.OBJMatrixParameters = [];
+	for (var index = 0; index < 0x20;) {
+		this.OBJMatrixParametersRaw[index] = getUint16Array(0x4);
+		this.OBJMatrixParameters[index++] = getInt32Array(0x4);
+	}
+}
+GameBoyAdvanceOBJRenderer.prototype.initializeOAMTable = function () {
+	this.OAMTable = [];
+	for (var spriteNumber = 0; spriteNumber < 128; spriteNumber = (spriteNumber + 1) | 0) {
+		this.OAMTable[spriteNumber | 0] = new GameBoyAdvanceOAMAttributeTable();
+	}
 }
 GameBoyAdvanceOBJRenderer.prototype.renderScanLine = function (line) {
 	this.targetBuffer = this.scratchBuffer;
@@ -54,12 +76,12 @@ GameBoyAdvanceOBJRenderer.prototype.renderWindowScanLine = function (line) {
 GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line, isOBJWindow) {
 	this.clearScratch();
 	for (var objNumber = 0; objNumber < 0x80; ++objNumber) {
-		this.renderSprite(line, this.gfx.OAMTable[objNumber], isOBJWindow);
+		this.renderSprite(line, this.OAMTable[objNumber], isOBJWindow);
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
 	for (var position = 0; position < 240; ++position) {
-		this.targetBuffer[position] = this.gfx.transparency;
+		this.targetBuffer[position] = this.transparency;
 	}
 }
 GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJWindow) {
@@ -105,30 +127,32 @@ GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize
     xSize = xSize | 0;
     ySize = ySize | 0;
     yOffset = yOffset | 0;
-    var xDiff = -((xSize | 0) >> 1);
+    var xDiff = (-((xSize | 0) >> 1)) | 0;
     var yDiff = ((yOffset | 0) - (ySize >> 1)) | 0;
     var xSizeOriginal = ((xSize | 0) >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
+    var xSizeFixed = xSizeOriginal << 8;
     var ySizeOriginal = ((ySize | 0) >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
-    var params = this.gfx.OBJMatrixParameters[sprite.matrixParameters | 0];
-    var dx = +params[0];
-    var dmx = +params[1];
-    var dy = +params[2];
-    var dmy = +params[3];
-	var pa = +(+dx * (xDiff | 0));
-	var pb = +(+dmx * (yDiff | 0));
-	var pc = +(+dy * (xDiff | 0));
-	var pd = +(+dmy * (yDiff | 0));
-	var x = +((+pa) + (+pb) + ((xSizeOriginal | 0) >> 1));
-	var y = +((+pc) + (+pd) + ((ySizeOriginal | 0) >> 1));
-	var tileNumber = sprite.tileNumber;
-	for (var position = 0; (position | 0) < (xSize | 0); position = (position + 1) | 0, x = (+x) + (+dx), y = (+y) + (+dy)) {
-		if ((+x) >= 0 && (+y) >= 0 && (+x) < (xSizeOriginal | 0) && (+y) < (ySizeOriginal | 0)) {
+    var ySizeFixed = ySizeOriginal << 8;
+    var params = this.OBJMatrixParameters[sprite.matrixParameters | 0];
+    var dx = params[0] | 0;
+    var dmx = params[1] | 0;
+    var dy = params[2] | 0;
+    var dmy = params[3] | 0;
+	var pa = ((dx | 0) * (xDiff | 0)) | 0;
+	var pb = ((dmx | 0) * (yDiff | 0)) | 0;
+	var pc = ((dy | 0) * (xDiff | 0)) | 0;
+	var pd = ((dmy | 0) * (yDiff | 0)) | 0;
+	var x = ((pa | 0) + (pb | 0) + ((xSizeFixed | 0) >> 1)) | 0;
+	var y = ((pc | 0) + (pd | 0) + ((ySizeFixed | 0) >> 1)) | 0;
+	var tileNumber = sprite.tileNumber | 0;
+	for (var position = 0; (position | 0) < (xSize | 0); position = (position + 1) | 0, x = ((x | 0) + (dx | 0)) | 0, y = ((y | 0) + (dy | 0)) | 0) {
+		if ((x | 0) >= 0 && (y | 0) >= 0 && (x | 0) < (xSizeFixed | 0) && (y | 0) < (ySizeFixed | 0)) {
 			//Coordinates in range, fetch pixel:
-			this.scratchOBJBuffer[position | 0] = this.fetchMatrixPixel(sprite, tileNumber | 0, x | 0, y | 0, xSizeOriginal | 0) | 0;
+			this.scratchOBJBuffer[position | 0] = this.fetchMatrixPixel(sprite, tileNumber | 0, x >> 8, y >> 8, xSizeOriginal | 0) | 0;
 		}
 		else {
 			//Coordinates outside of range, transparency defaulted:
-			this.scratchOBJBuffer[position | 0] = this.gfx.transparency | 0;
+			this.scratchOBJBuffer[position | 0] = this.transparency | 0;
 		}
 	}
 }
@@ -145,12 +169,12 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNum
 	}
 	else {
 		//16 Colors / 16 palettes:
-		address = ((address | 0) + ((this.tileRelativeAddressOffset(x,y) >> 1) | 0));
+		address = ((address | 0) + ((this.tileRelativeAddressOffset(x | 0, y | 0) >> 1) | 0));
 		if ((x & 0x1) == 0) {
-			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address | 0] & 0xF] | 0;
+			return this.gfx.paletteOBJ16[sprite.paletteNumber | 0][this.gfx.VRAM[address | 0] & 0xF] | 0;
 		}
 		else {
-			return this.gfx.paletteOBJ16[sprite.paletteNumber][this.gfx.VRAM[address | 0] >> 4] | 0;
+			return this.gfx.paletteOBJ16[sprite.paletteNumber | 0][this.gfx.VRAM[address | 0] >> 4] | 0;
 		}
 	}
 }
@@ -281,4 +305,71 @@ GameBoyAdvanceOBJRenderer.prototype.isDrawable = function (sprite, doWindowOBJ) 
 		}
 	}
 	return false;
+}
+GameBoyAdvanceOBJRenderer.prototype.writeOAM = function (address, data) {
+	address = address | 0;
+    data = data | 0;
+	var OAMTable = this.OAMTable[address >> 3];
+	switch (address & 0x7) {
+            //Attrib 0:
+		case 0:
+			OAMTable.ycoord = data;
+			break;
+		case 1:
+			OAMTable.matrix2D = ((data & 0x1) == 0x1);
+			OAMTable.doubleSizeOrDisabled = ((data & 0x2) == 0x2);
+			OAMTable.mode = (data >> 2) & 0x3;
+			OAMTable.mosaic = ((data & 0x10) == 0x10);
+			OAMTable.monolithicPalette = ((data & 0x20) == 0x20);
+			OAMTable.shape = data >> 6;
+			break;
+            //Attrib 1:
+		case 2:
+			OAMTable.xcoord = (OAMTable.xcoord & 0x100) | data;
+			break;
+		case 3:
+			OAMTable.xcoord = ((data & 0x1) << 8) | (OAMTable.xcoord & 0xFF);
+			OAMTable.matrixParameters = (data >> 1) & 0x1F;
+			OAMTable.horizontalFlip = ((data & 0x10) == 0x10);
+			OAMTable.verticalFlip = ((data & 0x20) == 0x20);
+			OAMTable.size = data >> 6;
+			break;
+            //Attrib 2:
+		case 4:
+			OAMTable.tileNumber = (OAMTable.tileNumber & 0x300) | data;
+			break;
+		case 5:
+			OAMTable.tileNumber = ((data & 0x3) << 8) | (OAMTable.tileNumber & 0xFF);
+			OAMTable.priority = (data >> 2) & 0x3;
+			OAMTable.paletteNumber = data >> 4;
+			break;
+            //Scaling/Rotation Parameter:
+		case 6:
+			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] &= 0xFF00;
+			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] |= data;
+			this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] << 16) >> 16;
+			break;
+		default:
+			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] &= 0x00FF;
+			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] |= data << 8;
+			this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] << 16) >> 16;
+	}
+	this.OAMRAM[address & 0x3FF] = data | 0;
+}
+GameBoyAdvanceOBJRenderer.prototype.readOAM = function (address) {
+    return this.OAMRAM[address & 0x3FF] | 0;
+}
+GameBoyAdvanceOBJRenderer.prototype.readOAM16Slow = function (address) {
+    return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8);
+}
+GameBoyAdvanceOBJRenderer.prototype.readOAM16Optimized = function (address) {
+	address = address | 0;
+    return this.OAMRAM16[(address >> 1) & 0x1FF] | 0;
+}
+GameBoyAdvanceOBJRenderer.prototype.readOAM32Slow = function (address) {
+    return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8) | (this.OAMRAM[address | 2] << 16)  | (this.OAMRAM[address | 3] << 24);
+}
+GameBoyAdvanceOBJRenderer.prototype.readOAM32Optimized = function (address) {
+	address = address | 0;
+    return this.OAMRAM32[(address >> 2) & 0xFF] | 0;
 }
