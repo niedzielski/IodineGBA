@@ -56,7 +56,7 @@ function DynarecCompilerWorkerCore(startPC, record, InTHUMB, CPUMode, isROM, wai
         this.compiler = null;
     }
     this.compile();
-    this.finish();
+    this.finish(false);
 }
 DynarecCompilerWorkerCore.prototype.compile = function () {
     var length = Math.max(this.record.length - 1, 0);
@@ -69,15 +69,10 @@ DynarecCompilerWorkerCore.prototype.compile = function () {
     this.decode = this.record[this.currentRecordOffset + 1];
 }
 DynarecCompilerWorkerCore.prototype.appendCompiledInstruction = function (instruction) {
+    this.instructionsToJoin.push(instruction);
     if (this.forceSyncGuard) {
         //guard reads and writes due to their unknown timing:
-        this.spillTiming();
-        this.instructionsToJoin.push(instruction);
-        this.spillTiming();
-        this.forceSyncGuard = false;
-    }
-    else {
-        this.instructionsToJoin.push(instruction);
+        this.finish(true);
     }
 }
 DynarecCompilerWorkerCore.prototype.read16 = function (address) {
@@ -114,40 +109,6 @@ DynarecCompilerWorkerCore.prototype.read32 = function (address) {
         bailout();
     }
 }
-DynarecCompilerWorkerCore.prototype.addStateMachineUpdate = function () {
-    var code = "\t/*State Machine Synchronize*/\n";
-    code += "\tcpu.registers[15] = " + this.compiler.getPipelinePC() + " | 0;\n";
-    if (this.isROM) {
-        code += "\tcpu.instructionHandle.execute = " + this.execute + ";\n";
-        code += "\tcpu.instructionHandle.decode = " + this.decode + " | 0;\n";
-    }
-    else {
-        code += "\tcpu.instructionHandle.execute = instruction | 0;\n";
-        code += "\tcpu.instructionHandle.decode = " +  this.addMemoryRead(this.compiler.getDecodeOffset()) + " | 0;\n";
-    }
-    code += "\tcpu.pipelineInvalid = 0;\n";
-    code += "\tcpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
-    return code;
-}
-DynarecCompilerWorkerCore.prototype.addBranchUpdate = function () {
-    var code = "\t/*Branch Synchronize*/\n";
-    code += "\tcpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
-    code += "\treturn true;\n";
-    return code;
-}
-DynarecCompilerWorkerCore.prototype.bailoutEarly = function () {
-    var bailoutText = "\t/*Bailout spew code*/\n";
-    bailoutText += this.addStateMachineUpdate();
-    bailoutText += "\treturn false;\n";
-    return bailoutText;
-}
-DynarecCompilerWorkerCore.prototype.spillTiming = function () {
-    var code = this.addClockChecks();
-    code += this.instructionsToJoin.join("");
-    code += this.addBranchUpdate();
-    this.instructionsToJoin = [code];
-    this.compiler.clocks = 0;
-}
 DynarecCompilerWorkerCore.prototype.addMemoryRead = function (pc) {
     if (this.InTHUMB) {
         return this.read16(pc);
@@ -161,19 +122,35 @@ DynarecCompilerWorkerCore.prototype.addRAMGuards = function (instructionValue, i
         return instructionCode;
     }
     var guardText = "/*RAM guard check*/\n";
-    guardText += "var instruction = " +  this.addMemoryRead(this.compiler.getRealPC()) + ";\n";
-    guardText += "if (instruction != " + instructionValue + ") {\n";
-    guardText += this.bailoutEarly();
+    guardText += "cpu.instructionHandle.fetch = " +  this.addMemoryRead(this.compiler.getPipelinePC()) + ";\n";
+    guardText += "if (cpu.instructionHandle.execute != " + instructionValue + ") {\n";
+    guardText += "\tcpu.pipelineInvalid = 0;\n";
+    guardText += "\tcpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
+    guardText += "\treturn false;\n";
     guardText += "}\n";
     guardText += instructionCode;
+    guardText += "cpu.instructionHandle.execute = cpu.instructionHandle.decode | 0;\n";
+    guardText += "cpu.instructionHandle.decode = cpu.instructionHandle.fetch | 0;\n";
     return guardText;
 }
 DynarecCompilerWorkerCore.prototype.addClockChecks = function () {
-    return "if (!cpu.triggeredIRQ && cpu.IOCore.cyclesUntilNextEvent() < " + this.compiler.clocks + ") {\n\treturn false;\n}\n";
+    return "if (cpu.triggeredIRQ || cpu.IOCore.cyclesUntilNextEvent() < " + this.compiler.clocks + ") {\n\treturn false;\n}\n";
 }
-DynarecCompilerWorkerCore.prototype.finish = function () {
+DynarecCompilerWorkerCore.prototype.finish = function (didBranch) {
     var code = this.addClockChecks();
     code += this.instructionsToJoin.join("");
-    code += this.addStateMachineUpdate();
+    code += "\tcpu.pipelineInvalid = 0;\n";
+    code += "\tcpu.IOCore.updateCore(" + this.compiler.clocks + ");\n";
+    if (didBranch) {
+        code += "\treturn true;\n";
+    }
+    else {
+        code += "\tcpu.registers[15] = " + this.compiler.getPipelinePC() + " | 0;\n";
+        if (this.isROM) {
+            code += "\tcpu.instructionHandle.execute = " + this.execute + " | 0;\n";
+            code += "\tcpu.instructionHandle.decode = " + this.decode + " | 0;\n";
+        }
+        code += "\treturn false;\n";
+    }
     done(code);
 }

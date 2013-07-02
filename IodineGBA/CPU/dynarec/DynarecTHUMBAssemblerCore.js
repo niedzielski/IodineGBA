@@ -70,12 +70,14 @@ DynarecTHUMBAssemblerCore.prototype.get5BitImmediate = function (execute, shift)
 DynarecTHUMBAssemblerCore.prototype.get3BitImmediate = function (execute, shift) {
     return ((execute >> shift) & 0x7);
 }
-DynarecTHUMBAssemblerCore.prototype.snip = function () {
-    if (this.pc == this.dynarec.startPC) {
-        //Force blacklist bail if bailing on the first generated instruction:
-        bailout();
+DynarecTHUMBAssemblerCore.prototype.checkForPCTargeting = function (register) {
+    if (register == 15) {
+        this.dynarec.forceSyncGuard = true;
+        return true;
     }
-    return this.dynarec.bailoutEarly(this.pc);
+    else {
+        return false;
+    }
 }
 DynarecTHUMBAssemblerCore.prototype.LSLimm = function (parentObj, execute) {
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
@@ -155,7 +157,6 @@ DynarecTHUMBAssemblerCore.prototype.ADDimm8 = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] = cpu.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.SUBimm8 = function (parentObj, execute) {
-	parentObj.addInstructionReadClocks();
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] | 0;\n" +
 	"var operand2 = " + (execute & 0xFF) + ";\n" +
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 8) + "] = cpu.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
@@ -296,10 +297,9 @@ DynarecTHUMBAssemblerCore.prototype.ORR = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = result | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MUL = function (parentObj, execute) {
-	return this.snip();
     return "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
 	"var destination = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
-	"var result = cpu.performMUL32(source | 0, destination | 0, 0);\n" +
+	"var result = cpu.calculateMUL32(source | 0, destination | 0);\n" +
 	"cpu.CPSRCarry = false;\n" +
 	"cpu.CPSRNegative = (result < 0);\n" +
 	"cpu.CPSRZero = (result == 0);\n" +
@@ -331,18 +331,30 @@ DynarecTHUMBAssemblerCore.prototype.ADDH_LH = function (parentObj, execute) {
 	"cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = (source + destination) | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.ADDH_HL = function (parentObj, execute) {
-	return this.snip();
+    var targetPC = parentObj.checkForPCTargeting(0x8 | parentObj.get3BitImmediate(execute, 0));
     var code = parentObj.synchronizePC();
-    return code + "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
-	"var destination = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] | 0;\n" +
-	"cpu.THUMB.guardHighRegisterWrite((source + destination) | 0);\n";
+    code += "var source = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
+	"var destination = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] | 0;\n";
+    if (!targetPC) {
+        code += "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = (source + destination) | 0;\n";
+    }
+    else {
+        code += "cpu.branch(data & -2);\n";
+    }
+    return code;
 }
 DynarecTHUMBAssemblerCore.prototype.ADDH_HH = function (parentObj, execute) {
-	return this.snip();
+	var targetPC = parentObj.checkForPCTargeting(0x8 | parentObj.get3BitImmediate(execute, 0));
     var code = parentObj.synchronizePC();
     return code + "var source = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n" +
-	"var destination = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] | 0;\n" +
-	"cpu.THUMB.guardHighRegisterWrite((source + destination) | 0);\n";
+	"var destination = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] | 0;\n";
+    if (!targetPC) {
+        code += "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = (source + destination) | 0;\n";
+    }
+    else {
+        code += "cpu.branch(data & -2);\n";
+    }
+    return code;
 }
 DynarecTHUMBAssemblerCore.prototype.CMPH_LL = function (parentObj, execute) {
     return "var operand1 = cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] | 0;\n" +
@@ -375,17 +387,21 @@ DynarecTHUMBAssemblerCore.prototype.MOVH_LH = function (parentObj, execute) {
     return code + "cpu.registers[" + parentObj.get3BitImmediate(execute, 0) + "] = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_HL = function (parentObj, execute) {
+    var targetPC = parentObj.checkForPCTargeting(0x8 | parentObj.get3BitImmediate(execute, 0));
     return "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_HH = function (parentObj, execute) {
+    parentObj.checkForPCTargeting(0x8 | parentObj.get3BitImmediate(execute, 0));
     var code = parentObj.synchronizePC();
     return code + "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.BX_L = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BX_H = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.LDRPC = function (parentObj, execute) {
 	return parentObj.snip();
@@ -483,46 +499,60 @@ DynarecTHUMBAssemblerCore.prototype.LDMIA = function (parentObj, execute) {
     return "";
 }
 DynarecTHUMBAssemblerCore.prototype.BEQ = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BNE = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BCS = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BCC = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BMI = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BPL = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BVS = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BVC = function (parentObj, execute) {
+    parentObj.dynarec.forceSyncGuard = true;
 	return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BHI = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BLS = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BGE = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BLT = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BGT = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.BLE = function (parentObj, execute) {
-	return parentObj.snip();
+	parentObj.dynarec.forceSyncGuard = true;
+    return parentObj.snip();
 }
 DynarecTHUMBAssemblerCore.prototype.SWI = function (parentObj, execute) {
 	parentObj.dynarec.forceSyncGuard = true;

@@ -492,6 +492,20 @@ GameBoyAdvanceCPU.prototype.setVFlagForSUB = function (operand1, operand2, resul
     result = result | 0;
     this.CPSROverflow = ((operand1 ^ operand2) < 0 && (operand1 ^ result) < 0);
 }
+GameBoyAdvanceCPU.prototype.calculateMUL32 = function (rs, rd) {
+    rs = rs | 0;
+    rd = rd | 0;
+    /*
+     We have to split up the 32 bit multiplication,
+     as JavaScript does multiplication on the FPU
+     as double floats, which drops the low bits
+     rather than the high bits.
+     */
+	var lowMul = (rs & 0xFFFF) * rd;
+	var highMul = (rs >> 16) * rd;
+	//Cut off bits above bit 31 and return with proper sign:
+	return ((highMul << 16) + lowMul) | 0;
+}
 GameBoyAdvanceCPU.prototype.performMUL32 = function (rs, rd, MLAClocks) {
 	rs = rs | 0;
     rd = rd | 0;
@@ -509,16 +523,7 @@ GameBoyAdvanceCPU.prototype.performMUL32 = function (rs, rd, MLAClocks) {
 	else {
 		this.IOCore.wait.CPUInternalCyclePrefetch(this.instructionHandle.fetch | 0, (4 + (MLAClocks | 0)) | 0);
 	}
-	/*
-		We have to split up the 32 bit multiplication,
-		as JavaScript does multiplication on the FPU
-		as double floats, which drops the low bits
-		rather than the high bits.
-	*/
-	var lowMul = (rs & 0xFFFF) * rd;
-	var highMul = (rs >> 16) * rd;
-	//Cut off bits above bit 31 and return with proper sign:
-	return ((highMul << 16) + lowMul) | 0;
+	return this.calculateMUL32(rs | 0, rd | 0) | 0;
 }
 GameBoyAdvanceCPU.prototype.performMUL64 = function (rs, rd) {
 	rs = rs | 0;
@@ -539,7 +544,7 @@ GameBoyAdvanceCPU.prototype.performMUL64 = function (rs, rd) {
 	//Solve for the high word (Do FPU double divide to bring down high word into the low word):
 	this.mul64ResultHigh = ((rs * rd) / 0x100000000) | 0;
 	/*
-		We have to split up the 32 bit multiplication,
+		We have to split up the 64 bit multiplication,
 		as JavaScript does multiplication on the FPU
 		as double floats, which drops the low bits
 		rather than the high bits.
@@ -570,7 +575,7 @@ GameBoyAdvanceCPU.prototype.performMLA64 = function (rs, rd, mlaHigh, mlaLow) {
 	//Solve for the high word (Do FPU double divide to bring down high word into the low word):
 	this.mul64ResultHigh = ((((rs * rd) + (mlaLow >>> 0)) / 0x100000000) + (mlaHigh >>> 0)) | 0;
 	/*
-		We have to split up the 32 bit multiplication,
+		We have to split up the 64 bit multiplication,
 		as JavaScript does multiplication on the FPU
 		as double floats, which drops the low bits
 		rather than the high bits.
@@ -602,7 +607,7 @@ GameBoyAdvanceCPU.prototype.performUMUL64 = function (rs, rd) {
 	//Solve for the high word (Do FPU double divide to bring down high word into the low word):
 	this.mul64ResultHigh = ((rs * rd) / 0x100000000) | 0;
 	/*
-		We have to split up the 32 bit multiplication,
+		We have to split up the 64 bit multiplication,
 		as JavaScript does multiplication on the FPU
 		as double floats, which drops the low bits
 		rather than the high bits.
@@ -636,7 +641,7 @@ GameBoyAdvanceCPU.prototype.performUMLA64 = function (rs, rd, mlaHigh, mlaLow) {
 	//Solve for the high word (Do FPU double divide to bring down high word into the low word):
 	this.mul64ResultHigh = ((((rs * rd) + mlaLow) / 0x100000000) + mlaHigh) | 0;
 	/*
-		We have to split up the 32 bit multiplication,
+		We have to split up the 64 bit multiplication,
 		as JavaScript does multiplication on the FPU
 		as double floats, which drops the low bits
 		rather than the high bits.
