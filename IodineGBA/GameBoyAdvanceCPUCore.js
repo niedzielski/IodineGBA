@@ -171,31 +171,29 @@ GameBoyAdvanceCPU.prototype.THUMBBitModify = function (isThumb) {
 	}
 }
 GameBoyAdvanceCPU.prototype.IRQ = function () {
-	if (!this.IRQDisabled) {
-		//Mode bits are set to IRQ:
-		this.switchMode(0x12);
-		//Save link register:
-		this.registers[14] = this.getIRQLR() | 0;
-		//Disable IRQ:
-		this.IRQDisabled = true;
-		if (this.IOCore.BIOSFound) {
-            //Exception always enter ARM mode:
-            this.enterARM();
-            //IRQ exception vector:
-			this.branch(0x18);
-		}
-		else {
-			//Exception always enter ARM mode:
-			this.enterARM();
-			this.ARM.execute = 0xE92D500F;
-			this.ARM.STMDBW(this, this.ARM.guardMultiRegisterRead);
-			this.registers[0] = 0x4000000;
-			//Save link register:
-			this.registers[14] = 0x130;
-			//Skip BIOS ROM processing:
-			this.branch(this.read32(0x3FFFFFC) & -0x4);
-		}
-	}
+    //Mode bits are set to IRQ:
+    this.switchMode(0x12);
+    //Save link register:
+    this.registers[14] = this.getIRQLR() | 0;
+    //Disable IRQ:
+    this.IRQDisabled = true;
+    if (this.IOCore.BIOSFound) {
+        //Exception always enter ARM mode:
+        this.enterARM();
+        //IRQ exception vector:
+        this.branch(0x18);
+    }
+    else {
+        //Exception always enter ARM mode:
+        this.enterARM();
+        this.ARM.execute = 0xE92D500F;
+        this.ARM.STMDBW(this, this.ARM.guardMultiRegisterRead);
+        this.registers[0] = 0x4000000;
+        //Save link register:
+        this.registers[14] = 0x130;
+        //Skip BIOS ROM processing:
+        this.branch(this.read32(0x3FFFFFC) & -0x4);
+    }
 }
 GameBoyAdvanceCPU.prototype.SWI = function () {
 	if (this.IOCore.BIOSFound) {

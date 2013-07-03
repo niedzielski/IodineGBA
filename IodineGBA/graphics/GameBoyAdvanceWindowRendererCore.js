@@ -27,115 +27,22 @@ function GameBoyAdvanceWindowRenderer(gfx) {
 	this.WINBG3 = false;
 	this.WINOBJ = false;
 	this.WINEffects = false;
+    this.compositor = new GameBoyAdvanceCompositor(this.gfx);
 	this.preprocess();
 }
-GameBoyAdvanceWindowRenderer.prototype.renderNormalScanLine = function (line, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
+GameBoyAdvanceWindowRenderer.prototype.renderScanLine = function (line, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
 	//Arrange our layer stack so we can remove disabled and order for correct edge case priority:
 	OBJBuffer = (this.WINOBJ) ? OBJBuffer : null;
 	BG0Buffer = (this.WINBG0) ? BG0Buffer : null;
 	BG1Buffer = (this.WINBG1) ? BG1Buffer : null;
 	BG2Buffer = (this.WINBG2) ? BG2Buffer : null;
 	BG3Buffer = (this.WINBG3) ? BG3Buffer : null;
-	var layerStack = this.gfx.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	var stackDepth = layerStack.length | 0;
-	var stackIndex = 0;
 	if ((this.WINYCoordTop | 0) <= (line | 0) && (line | 0) < (this.WINYCoordBottom | 0)) {
-		//Loop through each pixel on the line:
-		for (var pixelPosition = this.WINXCoordLeft | 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0, endPosition = Math.min(this.WINXCoordRight | 0, 240) | 0; (pixelPosition | 0) < (endPosition | 0); pixelPosition = ((pixelPosition | 0) + 1) | 0) {
-			//Start with backdrop color:
-			lowerPixel = currentPixel = this.gfx.backdrop | 0;
-			//Loop through all layers each pixel to resolve priority:
-			for (stackIndex = 0; (stackIndex | 0) < (stackDepth | 0); stackIndex = ((stackIndex | 0) + 1) | 0) {
-				workingPixel = layerStack[stackIndex | 0][pixelPosition | 0] | 0;
-				if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
-					/*
-						If higher priority than last pixel and not transparent.
-						Also clear any plane layer bits other than backplane for
-						transparency.
-						
-						Keep a copy of the previous pixel (backdrop or non-transparent) for the color effects:
-					*/
-					lowerPixel = currentPixel | 0;
-					currentPixel = workingPixel | 0;
-				}
-                else if ((workingPixel & 0x3800000) <= (lowerPixel & 0x1800000)) {
-					/*
-                     If higher priority than last pixel and not transparent.
-                     Also clear any plane layer bits other than backplane for
-                     transparency.
-                     
-                     Keep a copy of the previous pixel (backdrop or non-transparent) for the color effects:
-                     */
-					lowerPixel = workingPixel | 0;
-				}
-			}
-			if ((currentPixel & 0x400000) == 0) {
-				//Normal Pixel:
-				lineBuffer[pixelPosition | 0] = currentPixel | 0;
-			}
-			else {
-				//OAM Pixel Processing:
-				//Pass the highest two pixels to be arbitrated in the color effects processing:
-				lineBuffer[pixelPosition | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
-			}
-		}
-	}
-}
-GameBoyAdvanceWindowRenderer.prototype.renderScanLineWithEffects = function (line, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
-	//Arrange our layer stack so we can remove disabled and order for correct edge case priority:
-	OBJBuffer = (this.WINOBJ) ? OBJBuffer : null;
-	BG0Buffer = (this.WINBG0) ? BG0Buffer : null;
-	BG1Buffer = (this.WINBG1) ? BG1Buffer : null;
-	BG2Buffer = (this.WINBG2) ? BG2Buffer : null;
-	BG3Buffer = (this.WINBG3) ? BG3Buffer : null;
-	var layerStack = this.gfx.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	var stackDepth = layerStack.length | 0;
-	var stackIndex = 0;
-	if ((this.WINYCoordTop | 0) <= (line | 0) && (line | 0) < (this.WINYCoordBottom | 0)) {
-		//Loop through each pixel on the line:
-		for (var pixelPosition = this.WINXCoordLeft | 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0, endPosition = Math.min(this.WINXCoordRight | 0, 240) | 0; (pixelPosition | 0) < (endPosition | 0); pixelPosition = ((pixelPosition | 0) + 1) | 0) {
-			//Start with backdrop color:
-			lowerPixel = currentPixel = this.gfx.backdrop | 0;
-			//Loop through all layers each pixel to resolve priority:
-			for (stackIndex = 0; (stackIndex | 0) < (stackDepth | 0); stackIndex = ((stackIndex | 0) + 1) | 0) {
-				workingPixel = layerStack[stackIndex | 0][pixelPosition | 0] | 0;
-				if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
-					/*
-						If higher priority than last pixel and not transparent.
-						Also clear any plane layer bits other than backplane for
-						transparency.
-						
-						Keep a copy of the previous pixel (backdrop or non-transparent) for the color effects:
-					*/
-					lowerPixel = currentPixel | 0;
-					currentPixel = workingPixel | 0;
-				}
-                else if ((workingPixel & 0x3800000) <= (lowerPixel & 0x1800000)) {
-					/*
-                     If higher priority than last pixel and not transparent.
-                     Also clear any plane layer bits other than backplane for
-                     transparency.
-                     
-                     Keep a copy of the previous pixel (backdrop or non-transparent) for the color effects:
-                     */
-					lowerPixel = workingPixel | 0;
-				}
-			}
-			if ((currentPixel & 0x400000) == 0) {
-				//Normal Pixel:
-				//Pass the highest two pixels to be arbitrated in the color effects processing:
-				lineBuffer[pixelPosition | 0] = this.gfx.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
-			}
-			else {
-				//OAM Pixel Processing:
-				//Pass the highest two pixels to be arbitrated in the color effects processing:
-				lineBuffer[pixelPosition | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
-			}
-		}
+		this.compositor.renderScanLine(this.WINXCoordLeft | 0, Math.min(this.WINXCoordRight | 0, 240) | 0, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
 	}
 }
 GameBoyAdvanceWindowRenderer.prototype.preprocess = function () {
-	this.renderScanLine = (this.WINEffects) ? this.renderScanLineWithEffects : this.renderNormalScanLine;
+	this.compositor.preprocess(this.WINEffects);
 }
 GameBoyAdvanceWindowRenderer.prototype.writeWINH0 = function (data) {
 	this.WINXCoordRight = data | 0;		//Window x-coord goes up to this minus 1.

@@ -61,6 +61,9 @@ DynarecTHUMBAssemblerCore.prototype.getDecodeOffset = function () {
 DynarecTHUMBAssemblerCore.prototype.getPipelinePC = function () {
     return (this.pc + 4) | 0;
 }
+DynarecTHUMBAssemblerCore.prototype.snip = function () {
+    bailout();
+}
 DynarecTHUMBAssemblerCore.prototype.synchronizePC = function () {
     return "cpu.registers[15] = " + this.getPipelinePC() + ";\n";
 }
@@ -339,7 +342,7 @@ DynarecTHUMBAssemblerCore.prototype.ADDH_HL = function (parentObj, execute) {
         code += "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = (source + destination) | 0;\n";
     }
     else {
-        code += "cpu.branch(data & -2);\n";
+        code += "cpu.branch((source + destination) & -2);\n";
     }
     return code;
 }
@@ -352,7 +355,7 @@ DynarecTHUMBAssemblerCore.prototype.ADDH_HH = function (parentObj, execute) {
         code += "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = (source + destination) | 0;\n";
     }
     else {
-        code += "cpu.branch(data & -2);\n";
+        code += "cpu.branch((source + destination) & -2);\n";
     }
     return code;
 }
@@ -388,20 +391,47 @@ DynarecTHUMBAssemblerCore.prototype.MOVH_LH = function (parentObj, execute) {
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_HL = function (parentObj, execute) {
     var targetPC = parentObj.checkForPCTargeting(0x8 | parentObj.get3BitImmediate(execute, 0));
-    return "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n";
+    if (!targetPC) {
+        return "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n";
+    }
+    else {
+        return code + "cpu.branch(cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] & -2);\n";
+    }
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_HH = function (parentObj, execute) {
-    parentObj.checkForPCTargeting(0x8 | parentObj.get3BitImmediate(execute, 0));
+    var targetPC = parentObj.checkForPCTargeting(0x8 | parentObj.get3BitImmediate(execute, 0));
     var code = parentObj.synchronizePC();
-    return code + "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n";
+    if (!targetPC) {
+        return code + "cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 0)) + "] = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n";
+    }
+    else {
+        return code + "cpu.branch(cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] & -2);\n";
+    }
 }
 DynarecTHUMBAssemblerCore.prototype.BX_L = function (parentObj, execute) {
 	parentObj.dynarec.forceSyncGuard = true;
-    return parentObj.snip();
+    var code = "var address = cpu.registers[" + parentObj.get3BitImmediate(execute, 3) + "] | 0;\n" +
+	"if ((address & 0x1) == 0) {\n" +
+    "    cpu.enterARM();\n" +
+    "    cpu.branch(address & -0x4);\n" +
+	"}\n" +
+	"else {\n" +
+	"	cpu.branch(address & -0x2);\n" +
+	"}\n";
+    return code;
 }
 DynarecTHUMBAssemblerCore.prototype.BX_H = function (parentObj, execute) {
 	parentObj.dynarec.forceSyncGuard = true;
-    return parentObj.snip();
+    var code = parentObj.synchronizePC();
+    code += "var address = cpu.registers[" + (0x8 | parentObj.get3BitImmediate(execute, 3)) + "] | 0;\n" +
+	"if ((address & 0x1) == 0) {\n" +
+    "    cpu.enterARM();\n" +
+    "    cpu.branch(address & -0x4);\n" +
+	"}\n" +
+	"else {\n" +
+	"	cpu.branch(address & -0x2);\n" +
+	"}\n";
+    return code;
 }
 DynarecTHUMBAssemblerCore.prototype.LDRPC = function (parentObj, execute) {
 	return parentObj.snip();

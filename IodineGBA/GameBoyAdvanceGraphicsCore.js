@@ -86,6 +86,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 	this.initializePaletteStorage();
+    this.compositor = new GameBoyAdvanceCompositor(this);
 	this.bg0Renderer = new GameBoyAdvanceBGTEXTRenderer(this, 0);
 	this.bg1Renderer = new GameBoyAdvanceBGTEXTRenderer(this, 1);
 	this.bg2TextRenderer = new GameBoyAdvanceBGTEXTRenderer(this, 2);
@@ -109,6 +110,7 @@ GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 	this.mode3Renderer = new GameBoyAdvanceMode3Renderer(this);
 	this.mode4Renderer = new GameBoyAdvanceMode4Renderer(this);
 	this.mode5Renderer = new GameBoyAdvanceMode5Renderer(this);
+
 	this.renderer = this.mode0Renderer;
 	this.compositorPreprocess();
 }
@@ -316,14 +318,10 @@ GameBoyAdvanceGraphics.prototype.OAMLockedCycles = function () {
 	}
 	return 0;
 }
-GameBoyAdvanceGraphics.prototype.midScanLineJIT = function () {
-	//No mid-scanline JIT for now, instead just do per-scanline:
-	this.graphicsJIT();
+GameBoyAdvanceGraphics.prototype.compositorPreprocess = function () {
+	this.compositor.preprocess(this.WINEffectsOutside);
 }
-GameBoyAdvanceGraphics.prototype.compositorPreprocess = function () { 
-	this.compositeLayers = (this.WINEffectsOutside) ? this.compositeLayersWithEffects : this.compositeLayersNormal;
-}
-GameBoyAdvanceGraphics.prototype.compositeLayersNormal = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
+GameBoyAdvanceGraphics.prototype.compositeLayers = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
 	//Arrange our layer stack so we can remove disabled and order for correct edge case priority:
 	if (this.displayObjectWindowFlag || this.displayWindow1Flag || this.displayWindow0Flag) {
 		//Window registers can further disable background layers if one or more window layers enabled:
@@ -333,98 +331,7 @@ GameBoyAdvanceGraphics.prototype.compositeLayersNormal = function (OBJBuffer, BG
 		BG2Buffer = (this.WINBG2Outside) ? BG2Buffer : null;
 		BG3Buffer = (this.WINBG3Outside) ? BG3Buffer : null;
 	}
-	var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	var stackDepth = layerStack.length | 0;
-	var stackIndex = 0;
-	//Loop through each pixel on the line:
-	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; pixelPosition = (pixelPosition + 1) | 0) {
-		//Start with backdrop color:
-		lowerPixel = currentPixel = this.backdrop | 0;
-		//Loop through all layers each pixel to resolve priority:
-		for (stackIndex = 0; stackIndex < stackDepth; stackIndex = (stackIndex + 1) | 0) {
-			workingPixel = layerStack[stackIndex | 0][pixelPosition | 0] | 0;
-			if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
-				/*
-					If higher priority than last pixel and not transparent.
-					Also clear any plane layer bits other than backplane for
-					transparency.
-				*/
-				lowerPixel = currentPixel | 0;
-				currentPixel = workingPixel | 0;
-			}
-            else if ((workingPixel & 0x3800000) <= (lowerPixel & 0x1800000)) {
-				/*
-                 If higher priority than last pixel and not transparent.
-                 Also clear any plane layer bits other than backplane for
-                 transparency.
-                 */
-				lowerPixel = workingPixel | 0;
-			}
-		}
-		if ((currentPixel & 0x400000) == 0) {
-			//Normal Pixel:
-			this.lineBuffer[pixelPosition | 0] = currentPixel | 0;
-		}
-		else {
-			//OAM Pixel Processing:
-			//Pass the highest two pixels to be arbitrated in the color effects processing:
-			this.lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
-		}
-	}
-}
-GameBoyAdvanceGraphics.prototype.compositeLayersWithEffects = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
-	//Arrange our layer stack so we can remove disabled and order for correct edge case priority:
-	if (this.displayObjectWindowFlag || this.displayWindow1Flag || this.displayWindow0Flag) {
-		//Window registers can further disable background layers if one or more window layers enabled:
-		OBJBuffer = (this.WINOBJOutside) ? OBJBuffer : null;
-		BG0Buffer = (this.WINBG0Outside) ? BG0Buffer : null;
-		BG1Buffer = (this.WINBG1Outside) ? BG1Buffer : null;
-		BG2Buffer = (this.WINBG2Outside) ? BG2Buffer : null;
-		BG3Buffer = (this.WINBG3Outside) ? BG3Buffer : null;
-	}
-	var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	var stackDepth = layerStack.length | 0;
-	var stackIndex = 0;
-	//Loop through each pixel on the line:
-	for (var pixelPosition = 0, currentPixel = 0, workingPixel = 0, lowerPixel = 0; pixelPosition < 240; pixelPosition = (pixelPosition + 1) | 0) {
-		//Start with backdrop color:
-		lowerPixel = currentPixel = this.backdrop | 0;
-		//Loop through all layers each pixel to resolve priority:
-		for (stackIndex = 0; stackIndex < stackDepth; stackIndex = (stackIndex + 1) | 0) {
-			workingPixel = layerStack[stackIndex | 0][pixelPosition | 0] | 0;
-			if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
-				/*
-					If higher priority than last pixel and not transparent.
-					Also clear any plane layer bits other than backplane for
-					transparency.
-					
-					Keep a copy of the previous pixel (backdrop or non-transparent) for the color effects:
-				*/
-				lowerPixel = currentPixel | 0;
-				currentPixel = workingPixel | 0;
-			}
-            else if ((workingPixel & 0x3800000) <= (lowerPixel & 0x1800000)) {
-                /*
-                 If higher priority than last secondary pixel and not transparent.
-                 Also clear any plane layer bits other than backplane for
-                 transparency.
-                 
-                 Keep a copy of the previous pixel (backdrop or non-transparent) for the color effects:
-                 */
-                lowerPixel = workingPixel | 0;
-            }
-		}
-		if ((currentPixel & 0x400000) == 0) {
-			//Normal Pixel:
-			//Pass the highest two pixels to be arbitrated in the color effects processing:
-			this.lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
-		}
-		else {
-			//OAM Pixel Processing:
-			//Pass the highest two pixels to be arbitrated in the color effects processing:
-			this.lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
-		}
-	}
+	this.compositor.renderScanLine(0, 240, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
 }
 GameBoyAdvanceGraphics.prototype.cleanLayerStack = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
 	//Clear out disabled layers from our stack:
@@ -479,7 +386,7 @@ GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
 }
 GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGMode = data & 0x07;
 	this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) >> 4);
 	this.HBlankIntervalFree = ((data & 0x20) == 0x20);
@@ -519,7 +426,7 @@ GameBoyAdvanceGraphics.prototype.readDISPCNT0 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeDISPCNT1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.displayBG0 = ((data & 0x01) == 0x01);
 	this.displayBG1 = ((data & 0x02) == 0x02);
 	this.displayBG2 = ((data & 0x04) == 0x04);
@@ -541,7 +448,7 @@ GameBoyAdvanceGraphics.prototype.readDISPCNT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeGreenSwap = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.greenSwap = ((data & 0x01) == 0x01);
 }
 GameBoyAdvanceGraphics.prototype.readGreenSwap = function () {
@@ -579,7 +486,7 @@ GameBoyAdvanceGraphics.prototype.readVCOUNT = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG0CNT0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGPriority[0] = data & 0x3;
 	this.BGCharacterBaseBlock[0] = (data & 0xC) >> 2;
 	//Bits 5-6 always 0.
@@ -597,7 +504,7 @@ GameBoyAdvanceGraphics.prototype.readBG0CNT0 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG0CNT1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGScreenBaseBlock[0] = data & 0x1F;
 	this.BGDisplayOverflow[0] = ((data & 0x20) == 0x20);	//Note: Only applies to BG2/3 supposedly.
 	this.BGScreenSize[0] = (data & 0xC0) >> 6;
@@ -611,7 +518,7 @@ GameBoyAdvanceGraphics.prototype.readBG0CNT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG1CNT0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGPriority[1] = data & 0x3;
 	this.BGCharacterBaseBlock[1] = (data & 0xC) >> 2;
 	//Bits 5-6 always 0.
@@ -629,7 +536,7 @@ GameBoyAdvanceGraphics.prototype.readBG1CNT0 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG1CNT1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGScreenBaseBlock[1] = data & 0x1F;
 	this.BGDisplayOverflow[1] = ((data & 0x20) == 0x20);	//Note: Only applies to BG2/3 supposedly.
 	this.BGScreenSize[1] = (data & 0xC0) >> 6;
@@ -643,7 +550,7 @@ GameBoyAdvanceGraphics.prototype.readBG1CNT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG2CNT0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGPriority[2] = data & 0x3;
 	this.BGCharacterBaseBlock[2] = (data & 0xC) >> 2;
 	//Bits 5-6 always 0.
@@ -663,7 +570,7 @@ GameBoyAdvanceGraphics.prototype.readBG2CNT0 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG2CNT1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGScreenBaseBlock[2] = data & 0x1F;
 	this.BGDisplayOverflow[2] = ((data & 0x20) == 0x20);
 	this.BGScreenSize[2] = (data & 0xC0) >> 6;
@@ -680,7 +587,7 @@ GameBoyAdvanceGraphics.prototype.readBG2CNT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG3CNT0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGPriority[3] = data & 0x3;
 	this.BGCharacterBaseBlock[3] = (data & 0xC) >> 2;
 	//Bits 5-6 always 0.
@@ -700,7 +607,7 @@ GameBoyAdvanceGraphics.prototype.readBG3CNT0 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG3CNT1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.BGScreenBaseBlock[3] = data & 0x1F;
 	this.BGDisplayOverflow[3] = ((data & 0x20) == 0x20);
 	this.BGScreenSize[3] = (data & 0xC0) >> 6;
@@ -717,288 +624,288 @@ GameBoyAdvanceGraphics.prototype.readBG3CNT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBG0HOFS0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg0Renderer.writeBGHOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG0HOFS1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg0Renderer.writeBGHOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG0VOFS0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg0Renderer.writeBGVOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG0VOFS1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg0Renderer.writeBGVOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG1HOFS0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg1Renderer.writeBGHOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG1HOFS1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg1Renderer.writeBGHOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG1VOFS0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg1Renderer.writeBGVOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG1VOFS1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg1Renderer.writeBGVOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2HOFS0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg2TextRenderer.writeBGHOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2HOFS1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg2TextRenderer.writeBGHOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2VOFS0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg2TextRenderer.writeBGVOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2VOFS1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
     this.bg2TextRenderer.writeBGVOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3HOFS0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg3TextRenderer.writeBGHOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3HOFS1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg3TextRenderer.writeBGHOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3VOFS0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg3TextRenderer.writeBGVOFS0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3VOFS1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bg3TextRenderer.writeBGVOFS1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PA0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGPA0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PA1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGPA1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PB0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGPB0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PB1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGPB1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PC0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGPC0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PC1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGPC1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PD0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGPD0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2PD1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGPD1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PA0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGPA0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PA1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGPA1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PB0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGPB0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PB1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGPB1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PC0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGPC0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PC1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGPC1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PD0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGPD0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3PD1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGPD1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_L0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGX_L0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_L1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGX_L1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_H0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGX_H0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2X_H1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGX_H1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2Y_L0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGY_L0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2Y_L1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGY_L1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2Y_H0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGY_H0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG2Y_H1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[0].writeBGY_H1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3X_L0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGX_L0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3X_L1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGX_L1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3X_H0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGX_H0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3X_H1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGX_H1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3Y_L0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGY_L0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3Y_L1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGY_L1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3Y_H0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGY_H0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBG3Y_H1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.bgAffineRenderer[1].writeBGY_H1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0H0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.window0Renderer.writeWINH0(data | 0);		//Window x-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0H1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.window0Renderer.writeWINH1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1H0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.window1Renderer.writeWINH0(data | 0);		//Window x-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1H1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.window1Renderer.writeWINH1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0V0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.window0Renderer.writeWINV0(data | 0);		//Window y-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN0V1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.window0Renderer.writeWINV1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1V0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.window1Renderer.writeWINV0(data | 0);		//Window y-coord goes up to this minus 1.
 }
 GameBoyAdvanceGraphics.prototype.writeWIN1V1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.window1Renderer.writeWINV1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeWININ0 = function (data) {
 	data = data | 0;
     //Window 0:
-	this.midScanLineJIT();
+	this.graphicsJIT();
 	this.window0Renderer.writeWININ(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readWININ0 = function () {
@@ -1008,7 +915,7 @@ GameBoyAdvanceGraphics.prototype.readWININ0 = function () {
 GameBoyAdvanceGraphics.prototype.writeWININ1 = function (data) {
 	data = data | 0;
     //Window 1:
-	this.midScanLineJIT();
+	this.graphicsJIT();
 	this.window1Renderer.writeWININ(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readWININ1 = function () {
@@ -1017,7 +924,7 @@ GameBoyAdvanceGraphics.prototype.readWININ1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeWINOUT0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.WINBG0Outside = ((data & 0x01) == 0x01);
 	this.WINBG1Outside = ((data & 0x02) == 0x02);
 	this.WINBG2Outside = ((data & 0x04) == 0x04);
@@ -1036,7 +943,7 @@ GameBoyAdvanceGraphics.prototype.readWINOUT0 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeWINOUT1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.WINOBJBG0Outside = ((data & 0x01) == 0x01);
 	this.WINOBJBG1Outside = ((data & 0x02) == 0x02);
 	this.WINOBJBG2Outside = ((data & 0x04) == 0x04);
@@ -1055,19 +962,19 @@ GameBoyAdvanceGraphics.prototype.readWINOUT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeMOSAIC0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.mosaicRenderer.BGMosaicHSize = data & 0xF;
 	this.mosaicRenderer.BGMosaicVSize = data >> 4;
 }
 GameBoyAdvanceGraphics.prototype.writeMOSAIC1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.mosaicRenderer.OBJMosaicHSize = data & 0xF;
 	this.mosaicRenderer.OBJMosaicVSize = data >> 4;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.colorEffectsRenderer.writeBLDCNT0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT0 = function () {
@@ -1075,7 +982,7 @@ GameBoyAdvanceGraphics.prototype.readBLDCNT0 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.colorEffectsRenderer.writeBLDCNT1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT1 = function () {
@@ -1083,42 +990,42 @@ GameBoyAdvanceGraphics.prototype.readBLDCNT1 = function () {
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA0 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.colorEffectsRenderer.writeBLDALPHA0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA1 = function (data) {
 	data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.colorEffectsRenderer.writeBLDALPHA1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
     data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
     this.colorEffectsRenderer.writeBLDY(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM = function (address, data) {
-	this.midScanLineJIT();
+	this.graphicsJIT();
 	this.VRAM[address | 0] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM16Slow = function (address, data) {
-	this.midScanLineJIT();
+	this.graphicsJIT();
 	this.VRAM[address] = data & 0xFF;
     this.VRAM[address | 1] = data >> 8;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM16Optimized = function (address, data) {
-	this.midScanLineJIT();
+	this.graphicsJIT();
 	this.VRAM16[address >> 1] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM32Slow = function (address, data) {
 	
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.VRAM[address | 0] = data & 0xFF;
     this.VRAM[address | 1] = (data >> 8) & 0xFF;
     this.VRAM[address | 2] = (data >> 16) & 0xFF;
     this.VRAM[address | 3] = (data >> 24) & 0xFF;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM32Optimized = function (address, data) {
-	this.midScanLineJIT();
+	this.graphicsJIT();
 	this.VRAM32[address >> 2] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.readVRAM = function (address) {
@@ -1139,7 +1046,7 @@ GameBoyAdvanceGraphics.prototype.readVRAM32Optimized = function (address) {
 GameBoyAdvanceGraphics.prototype.writeOAM = function (address, data) {
 	address = address | 0;
     data = data | 0;
-    this.midScanLineJIT();
+    this.graphicsJIT();
 	this.objRenderer.writeOAM(address | 0, data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readOAM = function (address) {
@@ -1152,7 +1059,7 @@ GameBoyAdvanceGraphics.prototype.readOAM32 = function (address) {
     return this.objRenderer.readOAM32(address | 0) | 0;
 }
 GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
-	this.midScanLineJIT();
+	this.graphicsJIT();
 	this.paletteRAM[address] = data;
 	var palette = ((this.paletteRAM[address | 1] << 8) | this.paletteRAM[address & 0x3FE]) & 0x7FFF;
 	address >>= 1;
