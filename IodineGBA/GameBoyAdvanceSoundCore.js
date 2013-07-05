@@ -108,6 +108,8 @@ GameBoyAdvanceSound.prototype.initializeAudioStartState = function () {
     this.nr62 = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0xFF;
 	this.nr63 = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0x2;
     this.soundMasterEnabled = (!this.IOCore.BIOSFound || this.emulatorCore.SKIPBoot);
+    this.PWMWidth = 0;
+    this.PWMWidthShadow = 0x200;
     this.mixerSoundBIAS = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0x200;
 	this.channel1currentSampleLeft = 0;
 	this.channel1currentSampleLeftSecondary = 0;
@@ -338,7 +340,7 @@ GameBoyAdvanceSound.prototype.generateAudioOptimized = function (numSamples) {
 				clockUpTo = ((clockUpTo | 0) - (multiplier | 0)) | 0;
 				this.audioIndex = ((this.audioIndex | 0) + (multiplier | 0)) | 0;
                 this.downsampleInputLeft = ((this.downsampleInputLeft | 0) + Math.imul(this.mixerOutputCacheLeft | 0, multiplier | 0)) | 0;
-                this.downsampleInputRight = ((this.downsampleInputRight | 0) + ((this.mixerOutputCacheRight | 0) * (multiplier | 0))) | 0;
+                this.downsampleInputRight = ((this.downsampleInputRight | 0) + Math.imul(this.mixerOutputCacheRight | 0, multiplier | 0)) | 0;
 				if ((this.audioIndex | 0) == (this.audioResamplerFirstPassFactor | 0)) {
 					this.audioIndex = 0;
 					this.emulatorCore.outputAudio(this.downsampleInputLeft | 0, this.downsampleInputRight | 0);
@@ -1340,6 +1342,7 @@ GameBoyAdvanceSound.prototype.writeSOUNDBIAS1 = function (data) {
 	this.audioJIT();
 	this.mixerSoundBIAS &= 0xFF;
 	this.mixerSoundBIAS |= (data & 0x3) << 8;
+    this.PWMWidthShadow = 0x200 >> ((data & 0xC0) >> 6);
 	//Should we implement the PWM modulation (It only lower audio quality on a real device)?
 	this.nr63 = data;
 }
