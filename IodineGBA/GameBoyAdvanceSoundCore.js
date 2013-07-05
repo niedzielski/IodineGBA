@@ -267,6 +267,8 @@ GameBoyAdvanceSound.prototype.audioDisabled = function () {
     this.PWMWidth = 0x200;
     this.PWMWidthOld = 0x200;
     this.PWMWidthShadow = 0x200;
+    this.PWMBitDepthMask = 0x3FE;
+    this.PWMBitDepthMaskShadow = 0x3FE;
 	this.channel1OutputLevelCache();
 	this.channel2OutputLevelCache();
 	this.channel3UpdateCache();
@@ -413,6 +415,8 @@ GameBoyAdvanceSound.prototype.computeNextPWMInterval = function () {
             this.computeAudioChannels();
         }
     }
+    //Copy the new bit-depth mask for the next counter interval:
+    this.PWMBitDepthMask = this.PWMBitDepthMaskShadow | 0;
     //Compute next sample for the PWM output:
     this.channel1OutputLevelCache();
     this.channel2OutputLevelCache();
@@ -876,10 +880,10 @@ GameBoyAdvanceSound.prototype.CGBFolder = function () {
 GameBoyAdvanceSound.prototype.mixerOutputLevelCache = function () {
 	this.mixerOutputCacheLeft = Math.min(Math.max(((this.AGBDirectSoundALeftCanPlay) ? this.AGBDirectSoundAFolded : 0) +
 	((this.AGBDirectSoundBLeftCanPlay) ? this.AGBDirectSoundBFolded : 0) +
-	this.CGBMixerOutputCacheLeftFolded + this.mixerSoundBIAS, 0), 0x3FF) | 0;
+	this.CGBMixerOutputCacheLeftFolded + this.mixerSoundBIAS, 0), 0x3FF) & this.PWMBitDepthMask;
 	this.mixerOutputCacheRight = Math.min(Math.max(((this.AGBDirectSoundARightCanPlay) ? this.AGBDirectSoundAFolded : 0) +
 	((this.AGBDirectSoundBRightCanPlay) ? this.AGBDirectSoundBFolded : 0) +
-	this.CGBMixerOutputCacheRightFolded + this.mixerSoundBIAS, 0), 0x3FF) | 0;
+	this.CGBMixerOutputCacheRightFolded + this.mixerSoundBIAS, 0), 0x3FF) & this.PWMBitDepthMask;
 }
 GameBoyAdvanceSound.prototype.readSOUND1CNT_L = function () {
 	//NR10:
@@ -1323,6 +1327,7 @@ GameBoyAdvanceSound.prototype.writeSOUNDBIAS1 = function (data) {
 	this.mixerSoundBIAS &= 0xFF;
 	this.mixerSoundBIAS |= (data & 0x3) << 8;
     this.PWMWidthShadow = 0x200 >> ((data & 0xC0) >> 6);
+    this.PWMBitDepthMask = (this.PWMWidthShadow - 1) << (1 + ((data & 0xC0) >> 6));
 	//Should we implement the PWM modulation (It only lower audio quality on a real device)?
 	this.nr63 = data;
 }
