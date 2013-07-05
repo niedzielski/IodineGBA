@@ -37,20 +37,19 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
     line = line | 0;
     if (this.gfx.BGMosaic[this.BGLayer | 0]) {
 		//Correct line number for mosaic:
-		line -= this.gfx.mosaicRenderer.getMosaicYOffset(line | 0) | 0;
-        line = (line | 0) | 0;
+		line = ((line | 0) - (this.gfx.mosaicRenderer.getMosaicYOffset(line | 0) | 0)) | 0;
 	}
 	var yTileOffset = ((line | 0) + (this.BGYCoord | 0)) & 0x7;
 	var pixelPipelinePosition = this.BGXCoord & 0x7;
     var yTileStart = ((line | 0) + (this.BGYCoord | 0)) >> 3;
     var xTileStart = this.BGXCoord >> 3;
-	for (var position = 0; (position | 0) < 240;) {
-		var chrData = this.fetchTile(yTileStart | 0, xTileStart | 0) | 0;
-        xTileStart = (xTileStart + 1) | 0;
+	for (var position = 0, chrData = 0; (position | 0) < 240;) {
+		chrData = this.fetchTile(yTileStart | 0, xTileStart | 0) | 0;
+        xTileStart = ((xTileStart | 0) + 1) | 0;
 		while ((pixelPipelinePosition | 0) < 0x8) {
-			this.scratchBuffer[position | 0] = (this.priorityFlag | 0) | (this.fetchVRAM(chrData | 0, pixelPipelinePosition | 0, yTileOffset | 0) | 0);
-            pixelPipelinePosition = (pixelPipelinePosition + 1) | 0;
-            position = (position + 1) | 0;
+			this.scratchBuffer[position | 0] = this.priorityFlag | this.fetchVRAM(chrData | 0, pixelPipelinePosition | 0, yTileOffset | 0);
+            pixelPipelinePosition = ((pixelPipelinePosition | 0) + 1) | 0;
+            position = ((position | 0) + 1) | 0;
 		}
 		pixelPipelinePosition &= 0x7;
 	}
@@ -61,18 +60,16 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
 	return this.scratchBuffer;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileNormal = function (yTileStart, xTileStart) {
-    yTileStart = yTileStart | 0;
-    xTileStart = xTileStart | 0;
     //Find the tile code to locate the tile block:
 	var address = this.computeScreenMapAddress8(this.computeTileNumber(yTileStart | 0, xTileStart | 0) | 0) | 0;
-	return (this.VRAM[address | 1] << 8) | this.VRAM[address | 0];
+	return (this.VRAM[address | 1] << 8) | this.VRAM[address];
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileOptimized = function (yTileStart, xTileStart) {
     yTileStart = yTileStart | 0;
     xTileStart = xTileStart | 0;
     //Find the tile code to locate the tile block:
 	var address = this.computeScreenMapAddress16(this.computeTileNumber(yTileStart | 0, xTileStart | 0) | 0) | 0;
-	return this.VRAM16[address | 0] | 0;
+	return this.VRAM16[address & 0x7FFF] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.computeTileNumber = function (yTile, xTile) {
 	//Return the true tile number:
