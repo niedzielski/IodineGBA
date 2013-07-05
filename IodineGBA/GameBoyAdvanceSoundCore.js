@@ -108,8 +108,6 @@ GameBoyAdvanceSound.prototype.initializeAudioStartState = function () {
     this.nr62 = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0xFF;
 	this.nr63 = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0x2;
     this.soundMasterEnabled = (!this.IOCore.BIOSFound || this.emulatorCore.SKIPBoot);
-    this.PWMWidth = 0;
-    this.PWMWidthShadow = 0x200;
     this.mixerSoundBIAS = (this.IOCore.BIOSFound && !this.emulatorCore.SKIPBoot) ? 0 : 0x200;
 	this.channel1currentSampleLeft = 0;
 	this.channel1currentSampleLeftSecondary = 0;
@@ -266,6 +264,9 @@ GameBoyAdvanceSound.prototype.audioDisabled = function () {
 	this.channel2DutyTracker = 0;
 	this.channel3Counter = 0;
 	this.channel4Counter = 0;
+    this.PWMWidth = 0x200;
+    this.PWMWidthOld = 0x200;
+    this.PWMWidthShadow = 0x200;
 	this.channel1OutputLevelCache();
 	this.channel2OutputLevelCache();
 	this.channel3OutputLevelCache();
@@ -285,16 +286,15 @@ GameBoyAdvanceSound.prototype.generateAudioSlow = function (numSamples) {
     var multiplier = 0;
 	if (this.soundMasterEnabled && this.IOCore.systemStatus < 4) {
 		for (var clockUpTo = 0; (numSamples | 0) > 0;) {
-			clockUpTo = Math.min(this.audioClocksUntilNextEventCounter | 0, this.sequencerClocks | 0, numSamples | 0) | 0;
-			this.audioClocksUntilNextEventCounter = ((this.audioClocksUntilNextEventCounter | 0) - (clockUpTo | 0));
-			this.sequencerClocks = ((this.sequencerClocks | 0) - (clockUpTo | 0)) | 0;
+			clockUpTo = Math.min(this.PWMWidth | 0, numSamples | 0) | 0;
+			this.PWMWidth = ((this.PWMWidth | 0) - (clockUpTo | 0)) | 0;
 			numSamples = ((numSamples | 0) - (clockUpTo | 0)) | 0;
 			while ((clockUpTo | 0) > 0) {
 				multiplier = Math.min(clockUpTo | 0, ((this.audioResamplerFirstPassFactor | 0) - (this.audioIndex | 0)) | 0) | 0;
 				clockUpTo = ((clockUpTo | 0) - (multiplier | 0)) | 0;
 				this.audioIndex = ((this.audioIndex | 0) + (multiplier | 0)) | 0;
-                this.downsampleInputLeft = ((this.downsampleInputLeft | 0) + ((this.mixerOutputCacheLeft | 0) * (multiplier | 0))) | 0;
-                this.downsampleInputRight = ((this.downsampleInputRight | 0) + ((this.mixerOutputCacheRight | 0) * (multiplier | 0))) | 0;
+                this.downsampleInputLeft = ((this.downsampleInputLeft | 0) + (((this.mixerOutputCacheLeft | 0) * (multiplier | 0)) | 0)) | 0;
+                this.downsampleInputRight = ((this.downsampleInputRight | 0) + (((this.mixerOutputCacheRight | 0) * (multiplier | 0)) | 0)) | 0;
 				if ((this.audioIndex | 0) == (this.audioResamplerFirstPassFactor | 0)) {
 					this.audioIndex = 0;
 					this.emulatorCore.outputAudio(this.downsampleInputLeft | 0, this.downsampleInputRight | 0);
@@ -302,12 +302,10 @@ GameBoyAdvanceSound.prototype.generateAudioSlow = function (numSamples) {
                     this.downsampleInputRight = 0;
 				}
 			}
-			if ((this.sequencerClocks | 0) == 0) {
-				this.audioComputeSequencer();
-				this.sequencerClocks = 0x8000;
-			}
-			if ((this.audioClocksUntilNextEventCounter | 0) == 0) {
-				this.computeAudioChannels();
+			if ((this.PWMWidth | 0) == 0) {
+				this.computeNextPWMInterval();
+                this.PWMWidthOld = this.PWMWidthShadow | 0;
+				this.PWMWidth = this.PWMWidthShadow | 0;
 			}
 		}
 	}
@@ -331,9 +329,8 @@ GameBoyAdvanceSound.prototype.generateAudioOptimized = function (numSamples) {
     var multiplier = 0;
 	if (this.soundMasterEnabled && this.IOCore.systemStatus < 4) {
 		for (var clockUpTo = 0; (numSamples | 0) > 0;) {
-			clockUpTo = Math.min(this.audioClocksUntilNextEventCounter | 0, this.sequencerClocks | 0, numSamples | 0) | 0;
-			this.audioClocksUntilNextEventCounter = ((this.audioClocksUntilNextEventCounter | 0) - (clockUpTo | 0));
-			this.sequencerClocks = ((this.sequencerClocks | 0) - (clockUpTo | 0)) | 0;
+			clockUpTo = Math.min(this.PWMWidth | 0, numSamples | 0) | 0;
+			this.PWMWidth = ((this.PWMWidth | 0) - (clockUpTo | 0)) | 0;
 			numSamples = ((numSamples | 0) - (clockUpTo | 0)) | 0;
 			while ((clockUpTo | 0) > 0) {
 				multiplier = Math.min(clockUpTo | 0, ((this.audioResamplerFirstPassFactor | 0) - (this.audioIndex | 0)) | 0) | 0;
@@ -348,12 +345,10 @@ GameBoyAdvanceSound.prototype.generateAudioOptimized = function (numSamples) {
                     this.downsampleInputRight = 0;
 				}
 			}
-			if ((this.sequencerClocks | 0) == 0) {
-				this.audioComputeSequencer();
-				this.sequencerClocks = 0x8000;
-			}
-			if ((this.audioClocksUntilNextEventCounter | 0) == 0) {
-				this.computeAudioChannels();
+			if ((this.PWMWidth | 0) == 0) {
+				this.computeNextPWMInterval();
+				this.PWMWidthOld = this.PWMWidthShadow | 0;
+                this.PWMWidth = this.PWMWidthShadow | 0;
 			}
 		}
 	}
@@ -374,18 +369,16 @@ GameBoyAdvanceSound.prototype.generateAudioOptimized = function (numSamples) {
 }
 //Generate audio, but don't actually output it (Used for when sound is disabled by user/browser):
 GameBoyAdvanceSound.prototype.generateAudioFake = function (numSamples) {
-	if (!this.soundMasterEnabled && this.IOCore.systemStatus < 4) {
-		for (var clockUpTo = 0; numSamples > 0;) {
-			clockUpTo = Math.min(this.audioClocksUntilNextEventCounter, this.sequencerClocks, numSamples);
-			this.audioClocksUntilNextEventCounter -= clockUpTo;
-			this.sequencerClocks -= clockUpTo;
-			numSamples -= clockUpTo;
-			if (this.sequencerClocks == 0) {
-				this.audioComputeSequencer();
-				this.sequencerClocks = 0x8000;
-			}
-			if (this.audioClocksUntilNextEventCounter == 0) {
-				this.computeAudioChannels();
+	numSamples = numSamples | 0;
+    if (this.soundMasterEnabled && this.IOCore.systemStatus < 4) {
+		for (var clockUpTo = 0; (numSamples | 0) > 0;) {
+			clockUpTo = Math.min(this.PWMWidth | 0, numSamples | 0) | 0;
+			this.PWMWidth = ((this.PWMWidth | 0) - (clockUpTo | 0)) | 0;
+			numSamples = ((numSamples | 0) - (clockUpTo | 0)) | 0;
+			if ((this.PWMWidth | 0) == 0) {
+				this.computeNextPWMInterval();
+				this.PWMWidthOld = this.PWMWidthShadow | 0;
+                this.PWMWidth = this.PWMWidthShadow | 0;
 			}
 		}
 	}
@@ -404,6 +397,24 @@ GameBoyAdvanceSound.prototype.audioJIT = function () {
 	//Audio Sample Generation Timing:
     this.generateAudio(this.audioTicks | 0);
 	this.audioTicks = 0;
+}
+GameBoyAdvanceSound.prototype.computeNextPWMInterval = function () {
+    //Clock down the PSG system:
+    for (var numSamples = this.PWMWidthOld | 0, clockUpTo = 0; numSamples > 0; numSamples = ((numSamples | 0) - 1) | 0) {
+        clockUpTo = Math.min(this.audioClocksUntilNextEventCounter | 0, this.sequencerClocks | 0, numSamples | 0) | 0;
+        this.audioClocksUntilNextEventCounter = ((this.audioClocksUntilNextEventCounter | 0) - (clockUpTo | 0)) | 0;
+        this.sequencerClocks = ((this.sequencerClocks | 0) - (clockUpTo | 0)) | 0;
+        numSamples = ((numSamples | 0) - (clockUpTo | 0)) | 0;
+        if ((this.sequencerClocks | 0) == 0) {
+            this.audioComputeSequencer();
+            this.sequencerClocks = 0x8000;
+        }
+        if ((this.audioClocksUntilNextEventCounter | 0) == 0) {
+            this.computeAudioChannels();
+        }
+    }
+    //Compute next sample for the PWM output:
+    this.mixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.audioComputeSequencer = function () {
 	switch (this.sequencePosition++) {
@@ -870,16 +881,13 @@ GameBoyAdvanceSound.prototype.AGBDirectSoundBTimerIncrement = function () {
 }
 GameBoyAdvanceSound.prototype.AGBFIFOAFolder = function () {
 	this.AGBDirectSoundAFolded = this.AGBDirectSoundA >> this.AGBDirectSoundAShifter;
-	this.mixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.AGBFIFOBFolder = function () {
 	this.AGBDirectSoundBFolded = this.AGBDirectSoundB >> this.AGBDirectSoundBShifter;
-	this.mixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.CGBFolder = function () {
 	this.CGBMixerOutputCacheLeftFolded = (this.CGBMixerOutputCacheLeft << this.CGBOutputRatio) >> 1;
 	this.CGBMixerOutputCacheRightFolded = (this.CGBMixerOutputCacheRight << this.CGBOutputRatio) >> 1;
-	this.mixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.mixerOutputLevelCache = function () {
 	this.mixerOutputCacheLeft = Math.min(Math.max(((this.AGBDirectSoundALeftCanPlay) ? this.AGBDirectSoundAFolded : 0) +
@@ -1248,7 +1256,6 @@ GameBoyAdvanceSound.prototype.writeSOUNDCNT_L0 = function (data) {
 		this.nr50 = data;
 		this.VinLeftChannelMasterVolume = ((data >> 4) & 0x07) + 1;
 		this.VinRightChannelMasterVolume = (data & 0x07) + 1;
-		this.mixerOutputLevelCache();
 	}
 }
 GameBoyAdvanceSound.prototype.readSOUNDCNT_L0 = function () {
