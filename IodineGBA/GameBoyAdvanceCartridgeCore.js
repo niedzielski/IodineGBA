@@ -30,9 +30,9 @@ GameBoyAdvanceCartridge.prototype.initialize = function () {
 	this.lookupCartridgeType();
 }
 GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
-    var length = old_array.length;
-    var newArray = getUint8Array(0x2000000);
-    for (var index = 0; index < length; ++index) {
+    this.ROMLength = (old_array.length >> 2) << 2;
+    var newArray = getUint8Array(this.ROMLength);
+    for (var index = 0; index < this.ROMLength; ++index) {
         newArray[index] = old_array[index];
     }
     return newArray;
@@ -42,7 +42,10 @@ GameBoyAdvanceCartridge.prototype.preprocessROMAccess = function () {
     this.readROM32 = (this.ROM32) ? this.readROM32Optimized : this.readROM32Slow;
 }
 GameBoyAdvanceCartridge.prototype.readROM = function (address) {
-	return this.ROM[address & 0x1FFFFFF] | 0;
+	if ((address | 0) >= (this.ROMLength | 0)) {
+        return 0;
+    }
+    return this.ROM[address & 0x1FFFFFF] | 0;
     /*if (!this.saveRTC) {
 		return this.ROM[address & 0x1FFFFFF] | 0;
 	}
@@ -67,15 +70,27 @@ GameBoyAdvanceCartridge.prototype.readROM = function (address) {
 	}*/
 }
 GameBoyAdvanceCartridge.prototype.readROM16Slow = function (address) {
+    if ((address | 0) >= (this.ROMLength | 0)) {
+        return 0;
+    }
     return this.ROM[address] | (this.ROM[address | 1] << 8);
 }
 GameBoyAdvanceCartridge.prototype.readROM16Optimized = function (address) {
+    if ((address | 0) >= (this.ROMLength | 0)) {
+        return 0;
+    }
     return this.ROM16[(address >> 1) & 0xFFFFFF] | 0;
 }
 GameBoyAdvanceCartridge.prototype.readROM32Slow = function (address) {
+    if ((address | 0) >= (this.ROMLength | 0)) {
+        return 0;
+    }
     return this.ROM[address] | (this.ROM[address | 1] << 8) | (this.ROM[address | 2] << 16)  | (this.ROM[address | 3] << 24);
 }
 GameBoyAdvanceCartridge.prototype.readROM32Optimized = function (address) {
+    if ((address | 0) >= (this.ROMLength | 0)) {
+        return 0;
+    }
     return this.ROM32[(address >> 2) & 0x7FFFFF] | 0;
 }
 GameBoyAdvanceCartridge.prototype.writeROM = function (address, data) {
