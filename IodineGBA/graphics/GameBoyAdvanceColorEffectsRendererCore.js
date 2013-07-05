@@ -48,7 +48,7 @@ GameBoyAdvanceColorEffectsRenderer.prototype.process = function (lowerPixel, top
     if (((topPixel | 0) & (this.effectsTarget1 | 0)) != 0) {
 		switch (this.colorEffectsType | 0) {
 			case 1:
-				if (((lowerPixel | 0) & (this.effectsTarget2 | 0)) != 0) {
+				if (((lowerPixel | 0) & (this.effectsTarget2 | 0)) != 0 && (topPixel | 0) != (lowerPixel | 0)) {
 					return this.alphaBlend(topPixel | 0, lowerPixel | 0) | 0;
 				}
 				break;
