@@ -436,10 +436,9 @@ GameBoyAdvanceCPU.prototype.setSUBFlags = function (operand1, operand2) {
     //Update flags for a subtraction operation:
     operand1 >>>= 0;
     operand2 >>>= 0;
-    var unsignedResult = operand1 - operand2;
-    var result = unsignedResult | 0;
+    var result = ((operand1 | 0) - (operand2 | 0)) | 0;
     this.setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
-	this.CPSRCarry = (unsignedResult >= 0);
+	this.CPSRCarry = (operand1 >= operand2);
 	this.CPSRNegative = (result < 0);
 	this.CPSRZero = (result == 0);
     return result | 0;
@@ -460,10 +459,9 @@ GameBoyAdvanceCPU.prototype.setCMPFlags = function (operand1, operand2) {
     //Update flags for a subtraction operation:
     operand1 >>>= 0;
     operand2 >>>= 0;
-    var unsignedResult = operand1 - operand2;
-    var result = unsignedResult | 0;
+    var result = ((operand1 | 0) - (operand2 | 0)) | 0;
     this.setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
-	this.CPSRCarry = (unsignedResult >= 0);
+	this.CPSRCarry = (operand1 >= operand2);
 	this.CPSRNegative = (result < 0);
 	this.CPSRZero = (result == 0);
 }
