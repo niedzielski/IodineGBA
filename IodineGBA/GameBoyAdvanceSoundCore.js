@@ -418,6 +418,7 @@ GameBoyAdvanceSound.prototype.computeNextPWMInterval = function () {
     this.channel2OutputLevelCache();
     this.channel3UpdateCache();
     this.channel4UpdateCache();
+    this.CGBMixerOutputLevelCache();
     this.mixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.audioComputeSequencer = function () {
@@ -683,7 +684,6 @@ GameBoyAdvanceSound.prototype.channel1OutputLevelTrimaryCache = function () {
 		this.channel1currentSampleLeftTrimary = 0;
 		this.channel1currentSampleRightTrimary = 0;
 	}
-	this.CGBMixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.channel2EnableCheck = function () {
 	this.channel2Enabled = ((this.channel2consecutive || this.channel2totalLength > 0) && this.channel2canPlay);
@@ -717,7 +717,6 @@ GameBoyAdvanceSound.prototype.channel2OutputLevelTrimaryCache = function () {
 		this.channel2currentSampleLeftTrimary = 0;
 		this.channel2currentSampleRightTrimary = 0;
 	}
-	this.CGBMixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.channel3EnableCheck = function () {
 	this.channel3Enabled = (/*this.channel3canPlay && */(this.channel3consecutive || this.channel3totalLength > 0));
@@ -736,7 +735,6 @@ GameBoyAdvanceSound.prototype.channel3OutputLevelSecondaryCache = function () {
 		this.channel3currentSampleLeftSecondary = 0;
 		this.channel3currentSampleRightSecondary = 0;
 	}
-	this.CGBMixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.channel4EnableCheck = function () {
 	this.channel4Enabled = ((this.channel4consecutive || this.channel4totalLength > 0) && this.channel4canPlay);
@@ -759,7 +757,6 @@ GameBoyAdvanceSound.prototype.channel4OutputLevelSecondaryCache = function () {
 		this.channel4currentSampleLeftSecondary = 0;
 		this.channel4currentSampleRightSecondary = 0;
 	}
-	this.CGBMixerOutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.CGBMixerOutputLevelCache = function () {
 	this.CGBMixerOutputCacheLeft = (this.channel1currentSampleLeftTrimary + this.channel2currentSampleLeftTrimary + this.channel3currentSampleLeftSecondary + this.channel4currentSampleLeftSecondary) * this.VinLeftChannelMasterVolume;
