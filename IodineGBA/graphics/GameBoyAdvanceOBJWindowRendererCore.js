@@ -84,7 +84,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderScanLineWithEffects = function (
 		BG2Buffer = (this.gfx.WINOBJBG2Outside) ? BG2Buffer: null;
 		BG3Buffer = (this.gfx.WINOBJBG3Outside) ? BG3Buffer: null;
 	}
-	var layerStack = this.gfx.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+	var layerStack = this.gfx.compositor.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
 	var stackDepth = layerStack.length | 0;
 	var stackIndex = 0;
 	var OBJWindowBuffer = this.gfx.objRenderer.renderWindowScanLine(line | 0);
