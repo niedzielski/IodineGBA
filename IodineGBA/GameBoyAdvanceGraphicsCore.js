@@ -333,26 +333,6 @@ GameBoyAdvanceGraphics.prototype.compositeLayers = function (OBJBuffer, BG0Buffe
 	}
 	this.compositor.renderScanLine(0, 240, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
 }
-GameBoyAdvanceGraphics.prototype.cleanLayerStack = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
-	//Clear out disabled layers from our stack:
-	var layerStack = [];
-	if (BG3Buffer) {
-		layerStack.push(BG3Buffer);
-	}
-	if (BG2Buffer) {
-		layerStack.push(BG2Buffer);
-	}
-	if (BG1Buffer) {
-		layerStack.push(BG1Buffer);
-	}
-	if (BG0Buffer) {
-		layerStack.push(BG0Buffer);
-	}
-	if (OBJBuffer) {
-		layerStack.push(OBJBuffer);
-	}
-	return layerStack;
-}
 GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
     line = line | 0;
     var offsetStart = (line * 240) | 0;
@@ -963,14 +943,12 @@ GameBoyAdvanceGraphics.prototype.readWINOUT1 = function () {
 GameBoyAdvanceGraphics.prototype.writeMOSAIC0 = function (data) {
 	data = data | 0;
     this.graphicsJIT();
-	this.mosaicRenderer.BGMosaicHSize = data & 0xF;
-	this.mosaicRenderer.BGMosaicVSize = data >> 4;
+	this.mosaicRenderer.writeMOSAIC0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeMOSAIC1 = function (data) {
 	data = data | 0;
     this.graphicsJIT();
-	this.mosaicRenderer.OBJMosaicHSize = data & 0xF;
-	this.mosaicRenderer.OBJMosaicVSize = data >> 4;
+	this.mosaicRenderer.writeMOSAIC1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT0 = function (data) {
 	data = data | 0;
