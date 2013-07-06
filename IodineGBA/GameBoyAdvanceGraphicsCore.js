@@ -112,14 +112,6 @@ GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 	this.renderer = this.mode0Renderer;
 	this.compositorPreprocess();
 }
-GameBoyAdvanceGraphics.prototype.initializeMatrixStorage = function () {
-	this.OBJMatrixParametersRaw = [];
-	this.OBJMatrixParameters = [];
-	for (var index = 0; index < 0x20;) {
-		this.OBJMatrixParametersRaw[index] = getUint16Array(0x4);
-		this.OBJMatrixParameters[index++] = getFloat32Array(0x4);
-	}
-}
 GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
 	//Both BG and OAM in unified storage:
 	this.palette256 = getInt32Array(0x100);
@@ -333,16 +325,16 @@ GameBoyAdvanceGraphics.prototype.compositeLayers = function (OBJBuffer, BG0Buffe
 }
 GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
     line = line | 0;
-    var offsetStart = (line * 240) | 0;
+    var offsetStart = ((line | 0) * 240) | 0;
 	var position = 0;
 	if (this.forcedBlank) {
-        for (; position < 240; offsetStart = (offsetStart + 1) | 0, position = (position + 1) | 0) {
+        for (; (position | 0) < 240; offsetStart = ((offsetStart | 0) + 1) | 0, position = ((position | 0) + 1) | 0) {
 			this.frameBuffer[offsetStart | 0] = 0x7FFF;
 		}
     }
     else {
         if (!this.greenSwap) {
-            for (; position < 240; offsetStart = (offsetStart + 1) | 0, position = (position + 1) | 0) {
+            for (; (position | 0) < 240; offsetStart = ((offsetStart | 0) + 1) | 0, position = ((position | 0) + 1) | 0) {
                 this.frameBuffer[offsetStart | 0] = this.lineBuffer[position | 0] | 0;
             }
         }
@@ -351,13 +343,13 @@ GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
             var pixel1 = 0;
             while (position < 240) {
                 pixel0 = this.lineBuffer[position | 0] | 0;
-                position = (position + 1) | 0;
+                position = ((position | 0) + 1) | 0;
                 pixel1 = this.lineBuffer[position | 0] | 0;
-                position = (position + 1) | 0;
+                position = ((position | 0) + 1) | 0;
                 this.frameBuffer[offsetStart | 0] = (pixel0 & 0x7C1F) | (pixel1 & 0x3E0);
-                offsetStart = (offsetStart + 1) | 0;
+                offsetStart = ((offsetStart | 0) + 1) | 0;
                 this.frameBuffer[offsetStart | 0] = (pixel1 & 0x7C1F) | (pixel0 & 0x3E0);
-                offsetStart = (offsetStart + 1) | 0;
+                offsetStart = ((offsetStart | 0) + 1) | 0;
             }
         }
     }
