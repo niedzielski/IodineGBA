@@ -107,9 +107,7 @@ GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 	this.mode0Renderer = new GameBoyAdvanceMode0Renderer(this);
 	this.mode1Renderer = new GameBoyAdvanceMode1Renderer(this);
 	this.mode2Renderer = new GameBoyAdvanceMode2Renderer(this);
-	this.mode3Renderer = new GameBoyAdvanceMode3Renderer(this);
-	this.mode4Renderer = new GameBoyAdvanceMode4Renderer(this);
-	this.mode5Renderer = new GameBoyAdvanceMode5Renderer(this);
+	this.modeFrameBufferRenderer = new GameBoyAdvanceModeFrameBufferRenderer(this);
 
 	this.renderer = this.mode0Renderer;
 	this.compositorPreprocess();
@@ -382,19 +380,9 @@ GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
 		case 2:
 			this.renderer = this.mode2Renderer;
 			break;
-		case 3:
-			this.renderer = this.mode3Renderer;
-			this.renderer.preprocess();
-			break;
-		case 4:
-			this.renderer = this.mode4Renderer;
-			this.renderer.preprocess();
-			break;
-		//case 5:
-		//Make the prohibited codes select mode 5?
 		default:
-			this.renderer = this.mode5Renderer;
-			this.renderer.preprocess();
+			this.renderer = this.modeFrameBufferRenderer;
+			this.renderer.preprocess(Math.min(this.BGMode, 5));
 	}
 }
 GameBoyAdvanceGraphics.prototype.readDISPCNT0 = function () {

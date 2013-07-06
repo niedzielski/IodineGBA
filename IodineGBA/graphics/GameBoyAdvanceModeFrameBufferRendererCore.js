@@ -15,10 +15,10 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceMode4Renderer(gfx) {
+function GameBoyAdvanceModeFrameBufferRenderer(gfx) {
 	this.gfx = gfx;
 }
-GameBoyAdvanceMode4Renderer.prototype.renderScanLine = function (line) {
+GameBoyAdvanceModeFrameBufferRenderer.prototype.renderScanLine = function (line) {
 	var BG2Buffer = (this.gfx.displayBG2) ? this.gfx.bg2FrameBufferRenderer.renderScanLine(line) : null;
 	var OBJBuffer = (this.gfx.displayOBJ) ? this.gfx.objRenderer.renderScanLine(line) : null;
 	this.gfx.compositeLayers(OBJBuffer, null, null, BG2Buffer, null);
@@ -33,7 +33,7 @@ GameBoyAdvanceMode4Renderer.prototype.renderScanLine = function (line) {
 	}
 	this.gfx.copyLineToFrameBuffer(line);
 }
-GameBoyAdvanceMode4Renderer.prototype.preprocess = function () {
+GameBoyAdvanceModeFrameBufferRenderer.prototype.preprocess = function (BGMode) {
 	//Set up pixel fetcher ahead of time:
-	this.gfx.bg2FrameBufferRenderer.selectMode(4);
+	this.gfx.bg2FrameBufferRenderer.selectMode(BGMode | 0);
 }
