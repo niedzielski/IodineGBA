@@ -82,7 +82,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.queuedScanLines = 0;
 	this.lastUnrenderedLine = 0;
 	this.transparency = 0x3800000;
-    this.backdrop = this.transparency;
+    this.backdrop = this.transparency | 0x200000;
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 	this.initializePaletteStorage();
@@ -140,9 +140,9 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
         if ((this.LCDTicks | 0) >= 1232) {
             /*We've now overflowed the LCD scan line state machine counter,
              which tells us we need to be on a new scan-line and refresh over.*/
-            this.inHBlank = false;                                          //Un-mark HBlank.
+            this.inHBlank = false;                                        //Un-mark HBlank.
             //De-clock for starting on new scan-line:
-            this.LCDTicks = ((this.LCDTicks | 0) - 1232) | 0;               //We start out at the beginning of the next line.
+            this.LCDTicks = ((this.LCDTicks | 0) - 1232) | 0;             //We start out at the beginning of the next line.
             //Increment scanline counter:
             this.currentScanLine = (this.currentScanLine + 1) | 0;        //Increment to the next scan line.
             //Handle switching in/out of vblank:
@@ -151,6 +151,8 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
                 switch (this.currentScanLine | 0) {
                     case 160:
                         this.updateVBlankStart();                           //Update state for start of vblank.
+                    case 161:
+                        this.checkDisplaySync();                            //Check for display sync.
                         break;
                     case 162:
                         this.IOCore.dma.gfxDisplaySyncKillRequest();		//Display Sync. DMA reset on start of line 162.
@@ -161,6 +163,9 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
                     case 228:
                         this.currentScanLine = 0;							//Reset scan-line to zero (First line of draw).
                 }
+            }
+            else {
+                 this.checkDisplaySync();                                   //Check for display sync.
             }
             this.checkDisplaySync();                                        //Check for display sync.
             this.checkVCounter();                                           //We're on a new scan line, so check the VCounter for match.
@@ -182,7 +187,7 @@ GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
 	}
 }
 GameBoyAdvanceGraphics.prototype.checkDisplaySync = function () {
-	if ((this.currentScanLine | 0) > 1 && (this.currentScanLine | 0) < 162) {
+	if ((this.currentScanLine | 0) > 1) {
 		this.IOCore.dma.gfxDisplaySyncRequest();					//Display Sync. DMA trigger.
 	}
 }
@@ -309,7 +314,7 @@ GameBoyAdvanceGraphics.prototype.OAMLockedCycles = function () {
 	return 0;
 }
 GameBoyAdvanceGraphics.prototype.compositorPreprocess = function () {
-	this.compositor.preprocess(this.WINEffectsOutside);
+	this.compositor.preprocess(this.WINEffectsOutside || (!this.displayObjectWindowFlag && !this.displayWindow1Flag && !this.displayWindow0Flag));
 }
 GameBoyAdvanceGraphics.prototype.compositeLayers = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
 	//Arrange our layer stack so we can remove disabled and order for correct edge case priority:
@@ -395,6 +400,7 @@ GameBoyAdvanceGraphics.prototype.writeDISPCNT1 = function (data) {
 	this.displayWindow0Flag = ((data & 0x20) == 0x20);
 	this.displayWindow1Flag = ((data & 0x40) == 0x40);
 	this.displayObjectWindowFlag = ((data & 0x80) == 0x80);
+    this.compositorPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.readDISPCNT1 = function () {
 	return ((this.displayBG0 ? 0x1 : 0) |

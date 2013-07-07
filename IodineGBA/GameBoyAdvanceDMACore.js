@@ -205,6 +205,7 @@ GameBoyAdvanceDMA.prototype.gfxDisplaySyncRequest = function () {
 }
 GameBoyAdvanceDMA.prototype.gfxDisplaySyncKillRequest = function () {
 	this.enabled[3] &= ~this.DMA_REQUEST_TYPE.DISPLAY_SYNC;
+	this.pending[3] &= ~this.DMA_REQUEST_TYPE.DISPLAY_SYNC;
 }
 GameBoyAdvanceDMA.prototype.requestDMA = function (DMAType) {
 	for (var dmaPriority = 0; dmaPriority < 4; ++dmaPriority) {
