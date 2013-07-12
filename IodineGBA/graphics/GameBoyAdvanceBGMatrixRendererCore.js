@@ -17,39 +17,39 @@
  */
 function GameBoyAdvanceBGMatrixRenderer(gfx, BGLayer) {
 	this.gfx = gfx;
-    this.BGLayer = BGLayer;
+    this.BGLayer = BGLayer | 0;
     this.VRAM = this.gfx.VRAM;
     this.palette = this.gfx.palette256;
-    this.transparency = this.gfx.transparency;
+    this.transparency = this.gfx.transparency | 0;
     this.bgAffineRenderer = this.gfx.bgAffineRenderer[BGLayer & 0x1];
+    this.fetchTile = (Math.imul) ? this.fetchTileOptimized : this.fetchTileSlow;
 	this.screenSizePreprocess();
     this.screenBaseBlockPreprocess();
     this.characterBaseBlockPreprocess();
     this.displayOverflowPreprocess();
 }
-GameBoyAdvanceBGMatrixRenderer.prototype.tileMapSize = [
-	0x80,
-	0x100,
-	0x200,
-	0x400
-];
 GameBoyAdvanceBGMatrixRenderer.prototype.renderScanLine = function (line) {
 	line = line | 0;
     return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
-GameBoyAdvanceBGMatrixRenderer.prototype.fetchTile = function (x, y, mapSize) {
+GameBoyAdvanceBGMatrixRenderer.prototype.fetchTileSlow = function (x, y, mapSize) {
+	//Compute address for tile VRAM to address:
+	var tileNumber = x + (y * mapSize);
+    return this.VRAM[((tileNumber | 0) + (this.BGScreenBaseBlock | 0)) & 0xFFFF];
+}
+GameBoyAdvanceBGMatrixRenderer.prototype.fetchTileOptimized = function (x, y, mapSize) {
 	//Compute address for tile VRAM to address:
     x = x | 0;
     y = y | 0;
     mapSize = mapSize | 0;
-	var tileNumber = x + (y * mapSize);
+	var tileNumber = ((x | 0) + Math.imul(y | 0, mapSize | 0)) | 0;
     return this.VRAM[((tileNumber | 0) + (this.BGScreenBaseBlock | 0)) & 0xFFFF] | 0;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.computeScreenAddress = function (x, y) {
 	//Compute address for character VRAM to address:
     x = x | 0;
     y = y | 0;
-    var address = this.fetchTile(x >> 3, y >> 3, this.mapSize >> 3) << 6;
+    var address = this.fetchTile(x >> 3, y >> 3, this.mapSize | 0) << 6;
 	address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
 	address = ((address | 0) + ((y & 0x7) << 3)) | 0;
 	address = ((address | 0) + (x & 0x7)) | 0;
@@ -79,8 +79,8 @@ GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixel = function (x, y) {
 	return this.palette[this.VRAM[address & 0xFFFF] | 0] | 0;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.screenSizePreprocess = function () {
-	this.mapSize = this.tileMapSize[this.gfx.BGScreenSize[this.BGLayer | 0] | 0] | 0;
-	this.mapSizeComparer = ((this.mapSize | 0) - 1) | 0;
+	this.mapSize = 0x10 << (this.gfx.BGScreenSize[this.BGLayer | 0] | 0);
+	this.mapSizeComparer = ((this.mapSize << 3) - 1) | 0;
 }
 GameBoyAdvanceBGMatrixRenderer.prototype.screenBaseBlockPreprocess = function () {
 	this.BGScreenBaseBlock = this.gfx.BGScreenBaseBlock[this.BGLayer | 0] << 11;
