@@ -1795,6 +1795,10 @@ ARMInstructionSet.prototype.prrprr = function (parentObj, operand, userMode) {
     var offset = parentObj.rri2(operand | 0) | 0;
 	return parentObj.updateBasePreIncrement(operand | 0, offset | 0) | 0;
 }
+ARMInstructionSet.prototype.ofm = ARMInstructionSet.prototype.prm =
+ARMInstructionSet.prototype.ofp = ARMInstructionSet.prototype.prp =
+ARMInstructionSet.prototype.unm = ARMInstructionSet.prototype.unp =
+ARMInstructionSet.prototype.ptm = ARMInstructionSet.prototype.ptp =
 ARMInstructionSet.prototype.NOP = function (parentObj, operand) {
 	//nothing...
 }
@@ -3054,7 +3058,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 			],
 			[
 				this.STRH,
-				this.pprm
+				this.prrm
 			],
 			[
 				this.UNDEFINED,
