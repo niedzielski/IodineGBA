@@ -16,7 +16,7 @@
  *
  */
 function GameBoyAdvanceEmulator() {
-	this.SKIPBoot = true;					//Skip the BIOS boot screen.
+	this.SKIPBoot = false;					//Skip the BIOS boot screen.
     this.dynarecEnabled = false;            //Use the dynarec engine?
     this.dynarecTHUMB = true;               //Enable THUMB compiling.
     this.dynarecARM = false;                //Enable ARM compiling.
