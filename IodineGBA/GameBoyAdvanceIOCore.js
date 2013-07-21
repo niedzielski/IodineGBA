@@ -116,6 +116,7 @@ GameBoyAdvanceIO.prototype.handleStop = function () {
 	//Exits when user presses joypad or from an external irq outside of GBA internal.
 }
 GameBoyAdvanceIO.prototype.handleDynarec = function () {
+    this.executeDynarec = false;
     this.cpu.dynarec.enter();
 }
 GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {

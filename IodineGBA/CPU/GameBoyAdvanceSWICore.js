@@ -193,39 +193,57 @@ GameBoyAdvanceSWI.prototype.RegisterRAMReset = function () {
 	var control = this.CPUCore.registers[0];
     if ((control & 0x1) == 0x1) {
         //Clear 256K on-board WRAM
-        for (var address = 0x200000; address < 0x2040000; address += 4) {
+        for (var address = 0x2000000; address < 0x2040000; address += 4) {
             this.IOCore.memory.memoryWrite32(address >>> 0, 0);
         }
     }
     if ((control & 0x2) == 0x2) {
         //Clear 32K in-chip WRAM
-        for (var address = 0x300000; address < 0x3008000; address += 4) {
+        for (var address = 0x3000000; address < 0x3008000; address += 4) {
             this.IOCore.memory.memoryWrite32(address >>> 0, 0);
         }
     }
     if ((control & 0x4) == 0x4) {
         //Clear Palette
-        
+        for (var address = 0x5000000; address < 0x5000400; address += 4) {
+            this.IOCore.memory.memoryWrite32(address >>> 0, 0);
+        }
     }
     if ((control & 0x8) == 0x8) {
         //Clear VRAM
-        
+        for (var address = 0x6000000; address < 0x6018000; address += 4) {
+            this.IOCore.memory.memoryWrite32(address >>> 0, 0);
+        }
     }
     if ((control & 0x10) == 0x10) {
         //Clear OAM
-        
+        for (var address = 0x7000000; address < 0x7000400; address += 4) {
+            this.IOCore.memory.memoryWrite32(address >>> 0, 0);
+        }
     }
     if ((control & 0x20) == 0x20) {
         //Reset SIO registers
-        
+        for (var address = 0x4000120; address < 0x4000130; address += 4) {
+            this.IOCore.memory.memoryWrite32(address >>> 0, 0);
+        }
     }
     if ((control & 0x40) == 0x40) {
         //Reset Sound registers
-        
+        for (var address = 0x4000060; address < 0x40000A8; address += 4) {
+            this.IOCore.memory.memoryWrite32(address >>> 0, 0);
+        }
     }
     if ((control & 0x80) == 0x80) {
         //Reset all other registers
-        
+        for (var address = 0x4000000; address < 0x4000060; address += 4) {
+            this.IOCore.memory.memoryWrite32(address >>> 0, 0);
+        }
+        for (var address = 0x4000100; address < 0x4000120; address += 4) {
+            this.IOCore.memory.memoryWrite32(address >>> 0, 0);
+        }
+        for (var address = 0x4000130; address < 0x4000300; address += 4) {
+            this.IOCore.memory.memoryWrite32(address >>> 0, 0);
+        }
     }
 }
 GameBoyAdvanceSWI.prototype.Halt = function () {

@@ -67,8 +67,9 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
 DynarecBranchListenerCore.prototype.enter = function () {
    if (this.CPUCore.emulatorCore.dynarecEnabled) {
        //Execute our compiled code:
-       this.CPUCore.IOCore.executeDynarec = this.currentCache(this.CPUCore);
+       return !!this.currentCache(this.CPUCore);
    }
+    return false;
 }
 DynarecBranchListenerCore.prototype.isAddressSafe = function (address) {
     if (address < 0xE000000) {
