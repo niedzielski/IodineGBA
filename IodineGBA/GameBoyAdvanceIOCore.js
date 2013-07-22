@@ -37,6 +37,7 @@ function GameBoyAdvanceIO(emulatorCore) {
 	this.wait = new GameBoyAdvanceWait(this);
 	this.cpu = new GameBoyAdvanceCPU(this);
     this.memory.loadReferences();
+    this.preprocessSystemStepper();
 }
 GameBoyAdvanceIO.prototype.iterate = function () {
 	//Find out how many clocks to iterate through this run:
@@ -51,21 +52,8 @@ GameBoyAdvanceIO.prototype.iterate = function () {
 GameBoyAdvanceIO.prototype.runIterator = function () {
 	//Clock through interpreter:
 	while ((this.cyclesToIterate | 0) > 0) {
-		if ((this.systemStatus | 0) == 0) {
-			//Execute next instruction:
-            if (this.executeDynarec) {
-                //LLE Dynarec JIT
-                this.handleDynarec();
-            }
-            else {
-                //Interpreter:
-                this.cpu.executeIteration();
-            }
-		}
-		else {
-			//Handle HALT/STOP/DMA here:
-			this.handleCPUStallEvents();
-		}
+		//Handle the current system state selected:
+        this.stepHandle();
 	}
 }
 GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
@@ -78,25 +66,42 @@ GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
 	this.timer.addClocks(clocks | 0);
     this.serial.addClocks(clocks | 0);
 }
-GameBoyAdvanceIO.prototype.handleCPUStallEvents = function () {
+GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
 	switch (this.systemStatus | 0) {
-		case 1:	//DMA Handle State
-			this.handleDMA();
-			break;
+		case 0: //CPU Handle State
+            this.stepHandle = this.handleCPU;
+            break;
+        case 1:	//DMA Handle State
+			this.stepHandle = this.handleDMA;
+            break;
 		case 2: //Handle Halt State
-			this.handleHalt();
-			break;
+			this.stepHandle = this.handleHalt;
+            break;
 		case 3: //DMA Inside Halt State
-			this.handleDMA();
-			break;
+			this.stepHandle = this.handleDMA;
+            break;
 		case 4: //Handle Stop State
-			this.handleStop();
+			this.stepHandle = this.handleStop;
+            break;
+        default:
+            throw(new Error("Invalid state selected."));
 	}
+}
+GameBoyAdvanceIO.prototype.handleCPU = function () {
+    //Execute next instruction:
+    if (!this.executeDynarec) {
+        //Interpreter:
+        this.cpu.executeIteration();
+    }
+    else {
+        //LLE Dynarec JIT
+        this.executeDynarec = !!this.cpu.dynarec.enter();
+    }
 }
 GameBoyAdvanceIO.prototype.handleDMA = function () {
 	if (this.dma.perform()) {
 		//If DMA is done, exit it:
-		this.systemStatus = ((this.systemStatus | 0) - 0x1) | 0;
+        this.deflagStepper(0x1);
 	}
 }
 GameBoyAdvanceIO.prototype.handleHalt = function () {
@@ -106,7 +111,7 @@ GameBoyAdvanceIO.prototype.handleHalt = function () {
 	}
 	else {
 		//Exit HALT promptly:
-		this.systemStatus = ((this.systemStatus | 0) - 0x2) | 0;
+        this.deflagStepper(0x2);
 	}
 }
 GameBoyAdvanceIO.prototype.handleStop = function () {
@@ -115,9 +120,6 @@ GameBoyAdvanceIO.prototype.handleStop = function () {
 	this.cyclesToIterate = 0;
 	//Exits when user presses joypad or from an external irq outside of GBA internal.
 }
-GameBoyAdvanceIO.prototype.handleDynarec = function () {
-    this.executeDynarec = !!this.cpu.dynarec.enter();
-}
 GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
     //Find the clocks to the next event:
     var clocks = this.irq.nextEventTime() | 0;
@@ -125,4 +127,16 @@ GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
     clocks = ((clocks > -1) ? ((dmaClocks > -1) ? Math.min(clocks | 0, dmaClocks | 0) : (clocks | 0)) : (dmaClocks | 0)) | 0;
     clocks = ((clocks == -1 || clocks > this.cyclesToIterate) ? (this.cyclesToIterate | 0) : (clocks | 0)) | 0;
     return clocks | 0;
+}
+GameBoyAdvanceIO.prototype.deflagStepper = function (statusFlag) {
+    //Deflag a system event to step through:
+    statusFlag = statusFlag | 0;
+    this.systemStatus = ((this.systemStatus | 0) & (~statusFlag)) | 0;
+    this.preprocessSystemStepper();
+}
+GameBoyAdvanceIO.prototype.flagStepper = function (statusFlag) {
+    //Flag a system event to step through:
+    statusFlag = statusFlag | 0;
+    this.systemStatus = ((this.systemStatus | 0) | (statusFlag | 0)) | 0;
+    this.preprocessSystemStepper();
 }

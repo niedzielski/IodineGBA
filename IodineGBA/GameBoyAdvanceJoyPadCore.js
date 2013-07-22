@@ -63,6 +63,7 @@ GameBoyAdvanceJoyPad.prototype.keyPress = function (keyPressed) {
 	if (this.keyIRQEnabled) {
 		this.checkForIRQ();
 	}
+    this.IOCore.deflagStepper(0x4);
 }
 GameBoyAdvanceJoyPad.prototype.keyRelease = function (keyReleased) {
 	switch (keyReleased.toUpperCase()) {

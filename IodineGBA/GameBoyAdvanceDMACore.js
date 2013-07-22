@@ -177,7 +177,7 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
 		//Flag immediate DMA transfers for processing now:
 		if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.IMMEDIATE) {
 			this.pending[dmaChannel] |= this.DMA_REQUEST_TYPE.IMMEDIATE;
-			this.IOCore.systemStatus |= 0x1;
+			this.IOCore.flagStepper(0x1);
 		}
 		//Copy all of the internal to shadow:
 		controlShadow[2] = control[2];
@@ -211,7 +211,7 @@ GameBoyAdvanceDMA.prototype.requestDMA = function (DMAType) {
 	for (var dmaPriority = 0; dmaPriority < 4; ++dmaPriority) {
 		if ((this.enabled[dmaPriority] & DMAType) != 0) {
 			this.pending[dmaPriority] |= DMAType;
-			this.IOCore.systemStatus |= 0x1;
+			this.IOCore.flagStepper(0x1);
 		}
 	}
 }
@@ -220,7 +220,7 @@ GameBoyAdvanceDMA.prototype.requestGamePakDMA = function () {
 		//Game Pak transfer causes DMA to trigger:
 		this.pending[3] |= this.DMA_REQUEST_TYPE.GAME_PAK;
 		this.enabled[3] |= this.DMA_REQUEST_TYPE.GAME_PAK;
-		this.IOCore.systemStatus |= 0x1;
+		this.IOCore.flagStepper(0x1);
 	}
 }
 GameBoyAdvanceDMA.prototype.perform = function () {

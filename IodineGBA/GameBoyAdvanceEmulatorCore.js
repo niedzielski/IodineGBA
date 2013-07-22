@@ -140,7 +140,7 @@ GameBoyAdvanceEmulator.prototype.resetMetrics = function () {
 }
 GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
 	this.clocksPerSecond = this.emulatorSpeed * 0x1000000;
-	this.CPUCyclesTotal = this.CPUCyclesPerIteration = (this.clocksPerSecond / 1000 * this.timerIntervalRate) | 0;
+	this.CPUCyclesTotal = this.CPUCyclesPerIteration = Math.min(this.clocksPerSecond / 1000 * this.timerIntervalRate, 0x7FFFFFFF) | 0;
 }
 GameBoyAdvanceEmulator.prototype.getSpeedPercentage = function () {
     var metricEnd = new Date();
@@ -308,13 +308,13 @@ GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInputLeft, do
 	}
 }
 GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
-	this.CPUCyclesTotal = this.CPUCyclesPerIteration;
+	this.CPUCyclesTotal = this.CPUCyclesPerIteration | 0;
     if (this.audioFound) {
 		var underrunAmount = this.audio.remainingBuffer();
 		if (typeof underrunAmount == "number") {
 			underrunAmount = this.audioBufferContainAmount - Math.max(underrunAmount, 0);
 			if (underrunAmount > 0) {
-				this.CPUCyclesTotal += (underrunAmount >> 1) * this.audioResamplerFirstPassFactor;
+				this.CPUCyclesTotal = Math.min((this.CPUCyclesTotal | 0) + (Math.min((underrunAmount >> 1) * this.audioResamplerFirstPassFactor, 0x7FFFFFFF) | 0), 0x7FFFFFFF) | 0;
 			}
 		}
 	}
