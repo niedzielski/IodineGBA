@@ -50,7 +50,7 @@ GameBoyAdvanceIO.prototype.iterate = function () {
 	this.cyclesIteratedPreviously = this.cyclesToIterate | 0;
 }
 GameBoyAdvanceIO.prototype.runIterator = function () {
-	//Clock through interpreter:
+	//Clock through the state machine:
 	while ((this.cyclesToIterate | 0) > 0) {
 		//Handle the current system state selected:
         this.stepHandle();
