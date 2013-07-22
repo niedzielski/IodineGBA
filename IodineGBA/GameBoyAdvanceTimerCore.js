@@ -18,7 +18,7 @@
 function GameBoyAdvanceTimer(IOCore) {
 	//Build references:
 	this.IOCore = IOCore;
-	this.initializeTimers();
+	this.initialize();
 }
 GameBoyAdvanceTimer.prototype.prescalarLookup = [
 	0x1,
@@ -26,7 +26,12 @@ GameBoyAdvanceTimer.prototype.prescalarLookup = [
 	0x100,
 	0x400
 ];
-GameBoyAdvanceTimer.prototype.initializeTimers = function (data) {
+GameBoyAdvanceTimer.prototype.initialize = function () {
+    this.nextTimer0Overflow = (!!Math.imul) ? this.nextTimer0OverflowFast : this.nextTimer0OverflowSlow;
+    this.nextTimer0OverflowAudio = (!!Math.imul) ? this.nextTimer0OverflowAudioFast : this.nextTimer0OverflowAudioSlow;
+    this.initializeTimers();
+}
+GameBoyAdvanceTimer.prototype.initializeTimers = function () {
 	this.timer0Counter = 0;
 	this.timer0Reload = 0;
 	this.timer0Control = 0;
@@ -349,10 +354,29 @@ GameBoyAdvanceTimer.prototype.preprocessTimer3 = function () {
 	this.timer3UseMainClocks = (this.timer3Enabled && !this.timer3CountUp);
     this.timer3UseChainedClocks = (this.timer3Enabled && this.timer3CountUp);
 }
-GameBoyAdvanceTimer.prototype.nextTimer0Overflow = function (numOverflows) {
+GameBoyAdvanceTimer.prototype.nextTimer0OverflowSlow = function (numOverflows) {
 	numOverflows = ((numOverflows | 0) - 1) | 0;
     if (this.timer0Enabled) {
-		return (((0x10000 - this.timer0Counter) * this.timer0Prescalar) - this.timer0Precounter) + (((0x10000 - this.timer0Reload) * this.timer0Prescalar) * numOverflows) | 0;
+		return (((0x10000 - this.timer0Counter) * this.timer0Prescalar) - this.timer0Precounter) + (((0x10000 - this.timer0Reload) * this.timer0Prescalar) * numOverflows);
+	}
+	return -1;
+}
+GameBoyAdvanceTimer.prototype.nextTimer0OverflowFast = function (numOverflows) {
+	numOverflows = ((numOverflows | 0) - 1) | 0;
+    if (this.timer0Enabled) {
+		return ((Math.imul((0x10000 - (this.timer0Counter | 0)), (this.timer0Prescalar | 0)) - (this.timer0Precounter | 0)) + Math.imul(Math.imul((0x10000 - (this.timer0Reload | 0)) | 0, (this.timer0Prescalar | 0)), (numOverflows | 0))) | 0;
+	}
+	return -1;
+}
+GameBoyAdvanceTimer.prototype.nextTimer0OverflowAudioSlow = function () {
+    if (this.timer0Enabled) {
+		return ((0x10000 - this.timer0Counter) * this.timer0Prescalar) - this.timer0Precounter;
+	}
+	return -1;
+}
+GameBoyAdvanceTimer.prototype.nextTimer0OverflowAudioFast = function () {
+    if (this.timer0Enabled) {
+		return (Math.imul((0x10000 - (this.timer0Counter | 0)) | 0, (this.timer0Prescalar | 0)) - (this.timer0Precounter | 0)) | 0;
 	}
 	return -1;
 }
@@ -360,10 +384,21 @@ GameBoyAdvanceTimer.prototype.nextTimer1Overflow = function (numOverflows) {
     numOverflows = ((numOverflows | 0) - 1) | 0;
     if (this.timer1Enabled) {
 		if (this.timer1CountUp) {
-			return this.nextTimer0Overflow(0x10000 - this.timer1Counter + (numOverflows * (0x10000 - this.timer1Reload))) | 0;
+			return this.nextTimer0Overflow((0x10000 - this.timer1Counter + (numOverflows * (0x10000 - this.timer1Reload))) | 0) | 0;
 		}
 		else {
-			return (((0x10000 - this.timer1Counter) * this.timer1Prescalar) - this.timer1Precounter) + (((0x10000 - this.timer1Reload) * this.timer1Prescalar) * numOverflows) | 0;
+			return ((((0x10000 - this.timer1Counter) * this.timer1Prescalar) - this.timer1Precounter) + (((0x10000 - this.timer1Reload) * this.timer1Prescalar) * numOverflows)) | 0;
+		}
+	}
+	return -1;
+}
+GameBoyAdvanceTimer.prototype.nextTimer1OverflowAudio = function () {
+    if (this.timer1Enabled) {
+		if (this.timer1CountUp) {
+			return this.nextTimer0Overflow((0x10000 - this.timer1Counter) | 0) | 0;
+		}
+		else {
+			return (((0x10000 - this.timer1Counter) * this.timer1Prescalar) - this.timer1Precounter) | 0;
 		}
 	}
 	return -1;
@@ -372,10 +407,10 @@ GameBoyAdvanceTimer.prototype.nextTimer2Overflow = function (numOverflows) {
 	numOverflows = ((numOverflows | 0) - 1) | 0;
     if (this.timer2Enabled) {
 		if (this.timer2CountUp) {
-			return this.nextTimer1Overflow(0x10000 - this.timer2Counter + (numOverflows * (0x10000 - this.timer2Reload))) | 0;
+			return this.nextTimer1Overflow((0x10000 - this.timer2Counter + (numOverflows * (0x10000 - this.timer2Reload))) | 0) | 0;
 		}
 		else {
-			return (((0x10000 - this.timer2Counter) * this.timer2Prescalar) - this.timer2Precounter) + (((0x10000 - this.timer2Reload) * this.timer2Prescalar) * numOverflows) | 0;
+			return ((((0x10000 - this.timer2Counter) * this.timer2Prescalar) - this.timer2Precounter) + (((0x10000 - this.timer2Reload) * this.timer2Prescalar) * numOverflows)) | 0;
 		}
 	}
 	return -1;
@@ -384,22 +419,22 @@ GameBoyAdvanceTimer.prototype.nextTimer3Overflow = function (numOverflows) {
 	numOverflows = ((numOverflows | 0) - 1) | 0;
     if (this.timer3Enabled) {
 		if (this.timer3CountUp) {
-			return this.nextTimer2Overflow(0x10000 - this.timer3Counter + (numOverflows * (0x10000 - this.timer3Reload))) | 0;
+			return this.nextTimer2Overflow((0x10000 - this.timer3Counter + (numOverflows * (0x10000 - this.timer3Reload))) | 0) | 0;
 		}
 		else {
-			return (((0x10000 - this.timer3Counter) * this.timer3Prescalar) - this.timer3Precounter) + (((0x10000 - this.timer3Reload) * this.timer3Prescalar) * numOverflows) | 0;
+			return ((((0x10000 - this.timer3Counter) * this.timer3Prescalar) - this.timer3Precounter) + (((0x10000 - this.timer3Reload) * this.timer3Prescalar) * numOverflows)) | 0;
 		}
 	}
 	return -1;
 }
 GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function (clocks) {
 	clocks = clocks | 0;
-    var timer0 = this.nextTimer0Overflow(1) | 0;
-    if (timer0 == -1) {
+    var timer0 = this.nextTimer0OverflowAudio() | 0;
+    if ((timer0 | 0) == -1) {
         timer0 = ((clocks | 0) + 1) | 0;
     }
-    var timer1 = this.nextTimer1Overflow(1) | 0;
-    if (timer1 == -1) {
+    var timer1 = this.nextTimer1OverflowAudio() | 0;
+    if ((timer1 | 0) == -1) {
         timer1 = ((clocks | 0) + 1) | 0;
     }
     return Math.min(timer0 | 0, timer1 | 0) | 0;
