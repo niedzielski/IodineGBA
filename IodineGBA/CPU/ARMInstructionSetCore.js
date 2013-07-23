@@ -45,7 +45,7 @@ ARMInstructionSet.prototype.executeARM = function (instruction) {
 	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
         //Check the condition code:
 		if (this.conditionCodeTest()) {
-			instruction[0](this, instruction[1]);
+			instruction();
 		}
 	}
 }
@@ -4574,9 +4574,16 @@ ARMInstructionSet.prototype.compileReducedInstructionMap = function () {
     for (var range1 = 0; range1 < 0x100; ++range1) {
         var instrDecoded = this.instructionMap[range1];
         for (var range2 = 0; range2 < 0x10; ++range2) {
-            this.instructionMapReduced.push(instrDecoded[range2]);
+            this.appendInstrucion(instrDecoded[range2][0], instrDecoded[range2][1]);
         }
     }
 	//Reduce memory usage by nulling the temporary multi array:
 	this.instructionMap = null;
+}
+ARMInstructionSet.prototype.appendInstrucion = function (decodedInstr, decodedOperand) {
+    var parentObj = this;
+    var decodeFunc = function () {
+        decodedInstr(parentObj, decodedOperand);
+    }
+    this.instructionMapReduced.push(decodeFunc);
 }
