@@ -45,7 +45,7 @@ ARMInstructionSet.prototype.executeARM = function () {
 	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
         //Check the condition code:
 		if (this.conditionCodeTest()) {
-			this.instructionMapReduced[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]();
+			this[0x1000 | (((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF))]();
 		}
 	}
 }
@@ -328,7 +328,7 @@ ARMInstructionSet.prototype.updateBasePreIncrement = function (operand, offset) 
 	this.guardRegisterWrite(baseRegisterNumber | 0, result | 0);
     return result | 0;
 }
-ARMInstructionSet.prototype.BX = function (parentObj) {
+ARMInstructionSet.prototype.BX = function (parentObj, operand2OP) {
 	//Branch & eXchange:
 	var address = parentObj.registers[parentObj.execute & 0xF] | 0;
 	if ((address & 0x1) == 0) {
@@ -341,11 +341,11 @@ ARMInstructionSet.prototype.BX = function (parentObj) {
         parentObj.CPUCore.branch(address & -2);
 	}
 }
-ARMInstructionSet.prototype.B = function (parentObj) {
+ARMInstructionSet.prototype.B = function (parentObj, operand2OP) {
 	//Branch:
 	parentObj.CPUCore.branch(((parentObj.readRegister(0xF) | 0) + ((parentObj.execute << 8) >> 6)) | 0);
 }
-ARMInstructionSet.prototype.BL = function (parentObj) {
+ARMInstructionSet.prototype.BL = function (parentObj, operand2OP) {
 	//Branch with Link:
     parentObj.writeRegister(0xE, parentObj.getLR() | 0);
 	parentObj.B(parentObj);
@@ -4570,20 +4570,20 @@ ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function () {
 }
 ARMInstructionSet.prototype.compileReducedInstructionMap = function () {
     //Flatten the multi-dimensional decode array:
-    this.instructionMapReduced = [];
+    var indice = 0;
     for (var range1 = 0; range1 < 0x100; ++range1) {
         var instrDecoded = this.instructionMap[range1];
         for (var range2 = 0; range2 < 0x10; ++range2) {
-            this.appendInstrucion(instrDecoded[range2][0], instrDecoded[range2][1]);
+            this.appendInstrucion(indice++, instrDecoded[range2][0], instrDecoded[range2][1]);
         }
     }
 	//Reduce memory usage by nulling the temporary multi array:
 	this.instructionMap = null;
 }
-ARMInstructionSet.prototype.appendInstrucion = function (decodedInstr, decodedOperand) {
-    var parentObj = this;
+ARMInstructionSet.prototype.appendInstrucion = function (indice, decodedInstr, decodedOperand) {
     var decodeFunc = function () {
-        decodedInstr(parentObj, decodedOperand);
+        decodedInstr(this, decodedOperand);
     }
-    this.instructionMapReduced.push(decodeFunc);
+    //Apparently JS Engines (Especially V8) throw the core into dictionary mode anyhow, so optimize towards that:
+    this[0x1000 | indice] = decodeFunc;
 }

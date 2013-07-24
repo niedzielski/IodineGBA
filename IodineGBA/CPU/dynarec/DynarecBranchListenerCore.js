@@ -39,7 +39,7 @@ DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instruction
     }
 }
 DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmode, cpumode) {
-    if (this.backEdge && instructionmode == this.lastTHUMB && cpumode == this.lastCPUMode) {
+    if (this.backEdge && cpumode == this.lastCPUMode) {
         var cache = this.findCache(this.lastBranch);
         if (!cache) {
             cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, (endPC - ((this.lastTHUMB) ? 0x6 : 0xC)) >>> 0, this.lastTHUMB, this.lastCPUMode);

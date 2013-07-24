@@ -344,5 +344,6 @@ GameBoyAdvanceEmulator.prototype.toggleSkipBootROM = function (skipBoot) {
     }
 }
 GameBoyAdvanceEmulator.prototype.toggleDynarec = function (dynarecEnabled) {
-	this.dynarecEnabled = !!dynarecEnabled;
+	//Keep disabled by force until we rewrite the jit:
+    //this.dynarecEnabled = !!dynarecEnabled;
 }

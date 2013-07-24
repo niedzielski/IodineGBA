@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  */
-importScripts(/*"DynarecARMAssemblerCore.js", */"DynarecTHUMBAssemblerCore.js");
+importScripts("DynarecARMAssemblerCore.js", "DynarecTHUMBAssemblerCore.js");
 self.onmessage = function (command) {
     var info = command.data;
     var startPC = info[0];
