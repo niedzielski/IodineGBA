@@ -193,7 +193,7 @@ GameBoyAdvanceCPU.prototype.HLEIRQ = function () {
     this.enterARM();
     this.ARM.execute = 0xE92D500F;
     //Get the base address:
-    var currentAddress = this.ARM.readRegister(0xD) | 0;
+    var currentAddress = this.registers[0xD] | 0;
     //Updating the address bus away from PC fetch:
     this.wait.NonSequentialBroadcast();
     //Push register(s) into memory:
@@ -201,11 +201,11 @@ GameBoyAdvanceCPU.prototype.HLEIRQ = function () {
             if ((0x500F & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 currentAddress = (currentAddress - 4) | 0;
-                this.memory.memoryWrite32(currentAddress >>> 0, this.ARM.readRegister(rListPosition >>> 0) | 0);
+                this.memory.memoryWrite32(currentAddress >>> 0, this.registers[rListPosition >>> 0] | 0);
             }
     }
     //Store the updated base address back into register:
-    this.ARM.guardRegisterWrite(0xD, currentAddress | 0);
+    this.registers[0xD] = currentAddress | 0;
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
     this.registers[0] = 0x4000000;
