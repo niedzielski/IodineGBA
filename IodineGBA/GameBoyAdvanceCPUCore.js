@@ -185,16 +185,34 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
         this.branch(0x18);
     }
     else {
-        //Exception always enter ARM mode:
-        this.enterARM();
-        this.ARM.execute = 0xE92D500F;
-        this.ARM.STMDBW(this, this.ARM.guardMultiRegisterRead);
-        this.registers[0] = 0x4000000;
-        //Save link register:
-        this.registers[14] = 0x130;
-        //Skip BIOS ROM processing:
-        this.branch(this.read32(0x3FFFFFC) & -0x4);
+        this.HLEIRQ();
     }
+}
+GameBoyAdvanceCPU.prototype.HLEIRQ = function () {
+    //Exception always enter ARM mode:
+    this.enterARM();
+    this.ARM.execute = 0xE92D500F;
+    //Get the base address:
+    var currentAddress = this.ARM.readRegister(0xD) | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    //Push register(s) into memory:
+    for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+            if ((0x500F & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = (currentAddress - 4) | 0;
+                this.memory.memoryWrite32(currentAddress >>> 0, this.ARM.readRegister(rListPosition >>> 0) | 0);
+            }
+    }
+    //Store the updated base address back into register:
+    this.ARM.guardRegisterWrite(0xD, currentAddress | 0);
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+    this.registers[0] = 0x4000000;
+    //Save link register:
+    this.registers[14] = 0x130;
+    //Skip BIOS ROM processing:
+    this.branch(this.read32(0x3FFFFFC) & -0x4);
 }
 GameBoyAdvanceCPU.prototype.SWI = function () {
 	if (this.IOCore.BIOSFound) {

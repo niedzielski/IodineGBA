@@ -45,7 +45,7 @@ ARMInstructionSet.prototype.executeARM = function () {
 	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
         //Check the condition code:
 		if (this.conditionCodeTest()) {
-			this[0x1000 | (((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF))]();
+			this.instructionMapReduced[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]();
 		}
 	}
 }
@@ -911,7 +911,7 @@ ARMInstructionSet.prototype.STMDBW = function (parentObj, operand2OP) {
 			}
 		}
 		//Store the updated base address back into register:
-		parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress);
+		parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
 		//Updating the address bus back to PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 	}
@@ -4571,19 +4571,19 @@ ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function () {
 ARMInstructionSet.prototype.compileReducedInstructionMap = function () {
     //Flatten the multi-dimensional decode array:
     var indice = 0;
+    this.instructionMapReduced = [];
     for (var range1 = 0; range1 < 0x100; ++range1) {
         var instrDecoded = this.instructionMap[range1];
         for (var range2 = 0; range2 < 0x10; ++range2) {
-            this.appendInstrucion(indice++, instrDecoded[range2][0], instrDecoded[range2][1]);
+            var instructionCombo = instrDecoded[range2];
+            this.instructionMapReduced.push(this.appendInstrucion(this, instructionCombo[0], instructionCombo[1]));
         }
     }
 	//Reduce memory usage by nulling the temporary multi array:
 	this.instructionMap = null;
 }
-ARMInstructionSet.prototype.appendInstrucion = function (indice, decodedInstr, decodedOperand) {
-    var decodeFunc = function () {
-        decodedInstr(this, decodedOperand);
+ARMInstructionSet.prototype.appendInstrucion = function (parentObj, decodedInstr, decodedOperand) {
+    return function () {
+        decodedInstr(parentObj, decodedOperand);
     }
-    //Apparently JS Engines (Especially V8) throw the core into dictionary mode anyhow, so optimize towards that:
-    this[0x1000 | indice] = decodeFunc;
 }
