@@ -191,7 +191,6 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
 GameBoyAdvanceCPU.prototype.HLEIRQ = function () {
     //Exception always enter ARM mode:
     this.enterARM();
-    this.ARM.execute = 0xE92D500F;
     //Get the base address:
     var currentAddress = this.registers[0xD] | 0;
     //Updating the address bus away from PC fetch:
