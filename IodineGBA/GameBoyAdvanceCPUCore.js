@@ -111,16 +111,14 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	}
 	else {
 		//We're branching into BIOS, handle specially:
-		switch (branchTo) {
-			//IRQ mode exit handling:
-			case 0x130:
-				this.ARM.execute = 0xE8BD500F;
-				this.ARM.LDMIAW(this.ARM, this.ARM.guardRegisterWriteLDM);
-				this.ARM.execute = 0xE25EF004;
-				this.ARM.SUBS(this.ARM, this.ARM.imm);
-				break;
-			default:
-				throw(new Error("Could not handle branch to: " + branchTo.toString(16)));
+		if (branchTo == 0x130) {
+            //IRQ mode exit handling:
+            //ROM IRQ handling returns back from its own subroutine back to BIOS at this address.
+            this.HLEIRQExit();
+        }
+        else {
+            //Illegal to branch directly into BIOS (Except for return from IRQ), only SWIs can:
+            throw(new Error("Could not handle branch to: " + branchTo.toString(16)));
 		}
 	}
 }
@@ -185,10 +183,11 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
         this.branch(0x18);
     }
     else {
-        this.HLEIRQ();
+        //HLE the IRQ entrance:
+        this.HLEIRQEnter();
     }
 }
-GameBoyAdvanceCPU.prototype.HLEIRQ = function () {
+GameBoyAdvanceCPU.prototype.HLEIRQEnter = function () {
     //Exception always enter ARM mode:
     this.enterARM();
     //Get the base address:
@@ -212,6 +211,31 @@ GameBoyAdvanceCPU.prototype.HLEIRQ = function () {
     this.registers[14] = 0x130;
     //Skip BIOS ROM processing:
     this.branch(this.read32(0x3FFFFFC) & -0x4);
+}
+GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
+    //Get the base address:
+    var currentAddress = this.registers[0xD] | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    //Load register(s) from memory:
+    for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
+        if ((0x500F & (1 << rListPosition)) != 0) {
+            //Load a register from memory:
+            this.registers[rListPosition & 0xF] = this.memory.memoryRead32(currentAddress >>> 0) | 0;
+            currentAddress = (currentAddress + 4) | 0;
+        }
+    }
+    //Store the updated base address back into register:
+    this.registers[0xD] = currentAddress | 0;
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+	//Return from an exception mode:
+	var data = this.setSUBFlags(this.registers[0xE] | 0, 4) | 0;
+    //Restore SPSR to CPSR:
+    this.SPSRtoCPSR();
+    data &= (!this.InTHUMB) ? -4 : -2;
+    //We performed a branch:
+    this.branch(data | 0);
 }
 GameBoyAdvanceCPU.prototype.SWI = function () {
 	if (this.IOCore.BIOSFound) {

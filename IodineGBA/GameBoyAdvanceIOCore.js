@@ -23,6 +23,8 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.executeDynarec = false;
 	this.cyclesToIterate = 0;
 	this.cyclesIteratedPreviously = 0;
+    this.accumulatedClocks = 0;
+    this.nextEventClocks = 0;
     this.BIOSFound = false;
     //Initialize the various handler objects:
 	this.memory = new GameBoyAdvanceMemory(this);
@@ -59,12 +61,21 @@ GameBoyAdvanceIO.prototype.runIterator = function () {
 GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
 	clocks = clocks | 0;
     //This is used during normal/dma modes of operation:
-	//Decrement the clocks per iteration counter:
-	this.cyclesToIterate = ((this.cyclesToIterate | 0) - (clocks | 0)) | 0;
-	//Clock all components:
-	this.gfx.addClocks(clocks | 0);
-	this.timer.addClocks(clocks | 0);
+    this.accumulatedClocks = ((this.accumulatedClocks | 0) + (clocks | 0)) | 0;
+    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
+        this.updateCoreSpill();
+    }
+}
+GameBoyAdvanceIO.prototype.updateCoreSpill = function () {
+    var clocks = this.accumulatedClocks | 0;
+    //Decrement the clocks per iteration counter:
+    this.cyclesToIterate = ((this.cyclesToIterate | 0) - (clocks | 0)) | 0;
+    //Clock all components:
+    this.gfx.addClocks(clocks | 0);
+    this.timer.addClocks(clocks | 0);
     this.serial.addClocks(clocks | 0);
+    this.accumulatedClocks = 0;
+    this.nextEventClocks = this.cyclesUntilNextEvent() | 0;
 }
 GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
 	switch (this.systemStatus | 0) {

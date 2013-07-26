@@ -2235,7 +2235,8 @@ GameBoyAdvanceMemory.prototype.writeIODispatch = function (parentObj, address, d
     parentObj.wait.FASTAccess(busReqNumber | 0);
 	if (address < 0x4000304) {
 		//IO Write:
-		parentObj.writeIO[address & 0x3FF](parentObj, data | 0);
+		parentObj.IOCore.updateCoreSpill();
+        parentObj.writeIO[address & 0x3FF](parentObj, data | 0);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
@@ -2248,7 +2249,8 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (parentObj, address, 
     parentObj.wait.FASTAccess2();
 	if (address < 0x4000304) {
 		//IO Write:
-		parentObj.writeIO[address & 0x3FF](parentObj, data | 0);
+		parentObj.IOCore.updateCoreSpill();
+        parentObj.writeIO[address & 0x3FF](parentObj, data | 0);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
@@ -2261,7 +2263,8 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (parentObj, address,
     parentObj.wait.FASTAccess2();
 	if (address < 0x4000304) {
 		//IO Write:
-		parentObj.writeIO[address & 0x3FF](parentObj, data & 0xFF);
+		parentObj.IOCore.updateCoreSpill();
+        parentObj.writeIO[address & 0x3FF](parentObj, data & 0xFF);
         parentObj.writeIO[(address + 1) & 0x3FF](parentObj, (data >> 8) & 0xFF);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
@@ -2275,7 +2278,8 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (parentObj, address,
     parentObj.wait.FASTAccess2();
 	if (address < 0x4000304) {
 		//IO Write:
-		parentObj.writeIO[address & 0x3FF](parentObj, data & 0xFF);
+		parentObj.IOCore.updateCoreSpill();
+        parentObj.writeIO[address & 0x3FF](parentObj, data & 0xFF);
         parentObj.writeIO[(address + 1) & 0x3FF](parentObj, (data >> 8) & 0xFF);
         parentObj.writeIO[(address + 2) & 0x3FF](parentObj, (data >> 16) & 0xFF);
         parentObj.writeIO[(address + 3) & 0x3FF](parentObj, (data >> 24) & 0xFF);
@@ -2723,8 +2727,9 @@ GameBoyAdvanceMemory.prototype.readIODispatch = function (parentObj, address, bu
 	address = address | 0;
     busReqNumber = busReqNumber | 0;
     if (address < 0x4000304) {
-		//IO Write:
-		parentObj.wait.FASTAccess(busReqNumber | 0);
+		//IO Read:
+		parentObj.IOCore.updateCoreSpill();
+        parentObj.wait.FASTAccess(busReqNumber | 0);
 		return parentObj.readIO[address & 0x3FF](parentObj) | 0;
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
@@ -2739,8 +2744,9 @@ GameBoyAdvanceMemory.prototype.readIODispatch = function (parentObj, address, bu
 GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
 	address = address | 0;
     if (address < 0x4000304) {
-		//IO Write:
-		parentObj.wait.FASTAccess2();
+		//IO Read:
+		parentObj.IOCore.updateCoreSpill();
+        parentObj.wait.FASTAccess2();
 		return parentObj.readIO[address & 0x3FF](parentObj) | 0;
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
@@ -2755,8 +2761,9 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) {
 	address = address | 0;
     if (address < 0x4000304) {
-		//IO Write:
-		parentObj.wait.FASTAccess2();
+		//IO Read:
+		parentObj.IOCore.updateCoreSpill();
+        parentObj.wait.FASTAccess2();
 		return parentObj.readIO[address & 0x3FF](parentObj) | (parentObj.readIO[(address + 1) & 0x3FF](parentObj) << 8);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
@@ -2771,8 +2778,9 @@ GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) 
 GameBoyAdvanceMemory.prototype.readIODispatch32 = function (parentObj, address) {
 	address = address | 0;
     if (address < 0x4000304) {
-		//IO Write:
-		parentObj.wait.FASTAccess2();
+		//IO Read:
+		parentObj.IOCore.updateCoreSpill();
+        parentObj.wait.FASTAccess2();
 		return parentObj.readIO[address & 0x3FF](parentObj) | (parentObj.readIO[(address + 1) & 0x3FF](parentObj) << 8) | (parentObj.readIO[(address + 2) & 0x3FF](parentObj) << 16) | (parentObj.readIO[(address + 3) & 0x3FF](parentObj) << 24);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
