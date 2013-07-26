@@ -264,7 +264,6 @@ GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
 }
 GameBoyAdvanceGraphics.prototype.graphicsJIT = function () {
 	this.totalLinesPassed = 0;			//Mark frame for ensuring a JIT pass for the next framebuffer output.
-	this.IOCore.updateCoreSpill();
     this.graphicsJITScanlineGroup();
 }
 GameBoyAdvanceGraphics.prototype.graphicsJITVBlank = function () {
