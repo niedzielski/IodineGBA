@@ -67,6 +67,10 @@ GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
     }
 }
 GameBoyAdvanceIO.prototype.updateCoreSpill = function () {
+    this.updateCoreClocking();
+    this.updateCoreEventTime();
+}
+GameBoyAdvanceIO.prototype.updateCoreClocking = function () {
     var clocks = this.accumulatedClocks | 0;
     //Decrement the clocks per iteration counter:
     this.cyclesToIterate = ((this.cyclesToIterate | 0) - (clocks | 0)) | 0;
@@ -75,6 +79,8 @@ GameBoyAdvanceIO.prototype.updateCoreSpill = function () {
     this.timer.addClocks(clocks | 0);
     this.serial.addClocks(clocks | 0);
     this.accumulatedClocks = 0;
+}
+GameBoyAdvanceIO.prototype.updateCoreEventTime = function () {
     this.nextEventClocks = this.cyclesUntilNextEvent() | 0;
 }
 GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
