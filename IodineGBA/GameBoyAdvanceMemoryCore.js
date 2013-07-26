@@ -2733,7 +2733,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch = function (parentObj, address, bu
     if (address < 0x4000304) {
 		//IO Read:
 		parentObj.wait.FASTAccess(busReqNumber | 0);
-        parentObj.IOCore.updateCoreClocking();
+        parentObj.IOCore.updateCoreSpill();
 		return parentObj.readIO[address & 0x3FF](parentObj) | 0;
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
@@ -2750,7 +2750,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
     if (address < 0x4000304) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
-        parentObj.IOCore.updateCoreClocking();
+        parentObj.IOCore.updateCoreSpill();
 		return parentObj.readIO[address & 0x3FF](parentObj) | 0;
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
@@ -2767,7 +2767,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) 
     if (address < 0x4000304) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
-        parentObj.IOCore.updateCoreClocking();
+        parentObj.IOCore.updateCoreSpill();
 		return parentObj.readIO[address & 0x3FF](parentObj) | (parentObj.readIO[(address + 1) & 0x3FF](parentObj) << 8);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
@@ -2784,7 +2784,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch32 = function (parentObj, address) 
     if (address < 0x4000304) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
-        parentObj.IOCore.updateCoreClocking();
+        parentObj.IOCore.updateCoreSpill();
 		return parentObj.readIO[address & 0x3FF](parentObj) | (parentObj.readIO[(address + 1) & 0x3FF](parentObj) << 8) | (parentObj.readIO[(address + 2) & 0x3FF](parentObj) << 16) | (parentObj.readIO[(address + 3) & 0x3FF](parentObj) << 24);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
