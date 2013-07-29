@@ -42,6 +42,7 @@ GameBoyAdvanceWait.prototype.initialize = function () {
 	this.WAITCNT1 = 0;
     this.getROMRead16 = this.getROMRead16Prefetch;
     this.getROMRead32 = this.getROMRead32Prefetch;
+    this.opcodeCache = new GameBoyAdvanceMemoryCache(this.memory);
 }
 GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
 	this.SRAMWaitState = this.GAMEPAKWaitStateTable[data & 0x3];
@@ -151,7 +152,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 		data = this.getROMRead16(address | 0) | 0;
 	}
     else {
-        data = this.memory.memoryReadFast16(address >>> 0) | 0;
+        data = this.opcodeCache.memoryReadFast16(address >>> 0) | 0;
     }
 	return data | 0;
 }
@@ -207,7 +208,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
 		data = this.getROMRead32(address | 0) | 0;
 	}
 	else {
-        data = this.memory.memoryReadFast32(address >>> 0) | 0;
+        data = this.opcodeCache.memoryReadFast32(address >>> 0) | 0;
     }
     return data | 0;
 }

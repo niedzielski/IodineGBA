@@ -67,10 +67,16 @@ GameBoyAdvanceMemory.prototype.memoryWrite16 = function (address, data) {
         this.memoryWriteFast16(address >>> 0, data | 0);
     }
     else {
-        this.wait.width = 16;
-        this.memoryWrite(address >>>= 0, data & 0xFF, 0);
-        this.memoryWrite((address + 1) >>> 0, (data >> 8) & 0xFF, 1);
+        this.memoryWrite16Unaligned(address >>> 0, data | 0);
     }
+}
+GameBoyAdvanceMemory.prototype.memoryWrite16Unaligned = function (address, data) {
+	address = address >>> 0;
+    data = data | 0;
+    //Half-Word Write:
+    this.wait.width = 16;
+    this.memoryWrite(address >>> 0, data & 0xFF, 0);
+    this.memoryWrite((address + 1) >>> 0, (data >> 8) & 0xFF, 1);
 }
 GameBoyAdvanceMemory.prototype.memoryWrite32 = function (address, data) {
 	address = address >>> 0;
@@ -81,12 +87,17 @@ GameBoyAdvanceMemory.prototype.memoryWrite32 = function (address, data) {
         this.memoryWriteFast32(address >>> 0, data | 0);
     }
     else {
-        this.wait.width = 32;
-        this.memoryWrite(address >>>= 0, data & 0xFF, 0);
-        this.memoryWrite((address + 1) >>> 0, (data >> 8) & 0xFF, 1);
-        this.memoryWrite((address + 2) >>> 0, (data >> 16) & 0xFF, 2);
-        this.memoryWrite((address + 3) >>> 0, data >>> 24, 3);
+        this.memoryWrite32Unaligned(address >>> 0, data | 0);
     }
+}
+GameBoyAdvanceMemory.prototype.memoryWrite32Unaligned = function (address, data) {
+	address = address >>> 0;
+    data = data | 0;
+    this.wait.width = 32;
+    this.memoryWrite(address >>> 0, data & 0xFF, 0);
+    this.memoryWrite((address + 1) >>> 0, (data >> 8) & 0xFF, 1);
+    this.memoryWrite((address + 2) >>> 0, (data >> 16) & 0xFF, 2);
+    this.memoryWrite((address + 3) >>> 0, data >>> 24, 3);
 }
 GameBoyAdvanceMemory.prototype.memoryWrite = function (address, data, busReqNumber) {
 	address = address >>> 0;
@@ -121,11 +132,16 @@ GameBoyAdvanceMemory.prototype.memoryRead16 = function (address) {
         return this.memoryReadFast16(address >>> 0) | 0;
     }
     else {
-        this.wait.width = 16;
-        var data16 = this.memoryRead(address >>>= 0, 0) | 0;
-        data16 |= this.memoryRead((address + 1) >>> 0, 1) << 8;
-        return data16 | 0;
+        return this.memoryRead16Unaligned(address >>> 0) | 0;
     }
+}
+GameBoyAdvanceMemory.prototype.memoryRead16Unaligned = function (address) {
+	address = address >>> 0;
+    //Half-Word Read:
+    this.wait.width = 16;
+    var data16 = this.memoryRead(address >>> 0, 0) | 0;
+    data16 |= this.memoryRead((address + 1) >>> 0, 1) << 8;
+    return data16 | 0;
 }
 GameBoyAdvanceMemory.prototype.memoryRead32 = function (address) {
 	address = address >>> 0;
@@ -135,13 +151,18 @@ GameBoyAdvanceMemory.prototype.memoryRead32 = function (address) {
         return this.memoryReadFast32(address >>> 0) | 0;
     }
     else {
-        this.wait.width = 32;
-        var data32 = this.memoryRead(address >>>= 0, 0) | 0;
-        data32 |= this.memoryRead((address + 1) >>> 0, 1) << 8;
-        data32 |= this.memoryRead((address + 2) >>> 0, 2) << 16;
-        data32 |= this.memoryRead((address + 3) >>> 0, 3) << 24;
-        return data32 | 0;
+        return this.memoryRead32Unaligned(address >>> 0) | 0;
     }
+}
+GameBoyAdvanceMemory.prototype.memoryRead32Unaligned = function (address) {
+	address = address >>> 0;
+    //Word Read:
+    this.wait.width = 32;
+    var data32 = this.memoryRead(address >>> 0, 0) | 0;
+    data32 |= this.memoryRead((address + 1) >>> 0, 1) << 8;
+    data32 |= this.memoryRead((address + 2) >>> 0, 2) << 16;
+    data32 |= this.memoryRead((address + 3) >>> 0, 3) << 24;
+    return data32 | 0;
 }
 GameBoyAdvanceMemory.prototype.memoryRead = function (address, busReqNumber) {
 	address = address >>> 0;
