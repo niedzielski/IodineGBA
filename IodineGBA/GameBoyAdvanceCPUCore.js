@@ -32,6 +32,7 @@ GameBoyAdvanceCPU.prototype.initialize = function () {
     this.dynarec = new DynarecBranchListenerCore(this);
 	this.instructionHandle = this.ARM;
     this.calculateMUL32 = (!!Math.imul) ? this.calculateMUL32Fast : this.calculateMUL32Slow;
+    this.randomMemoryCache = new GameBoyAdvanceMemoryCache(this.memory);
 }
 GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 	/*
@@ -200,7 +201,7 @@ GameBoyAdvanceCPU.prototype.HLEIRQEnter = function () {
             if ((0x500F & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 currentAddress = (currentAddress - 4) | 0;
-                this.memory.memoryWrite32(currentAddress >>> 0, this.registers[rListPosition >>> 0] | 0);
+                this.randomMemoryCache.memoryWrite32(currentAddress >>> 0, this.registers[rListPosition >>> 0] | 0);
             }
     }
     //Store the updated base address back into register:
@@ -222,7 +223,7 @@ GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
     for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
         if ((0x500F & (1 << rListPosition)) != 0) {
             //Load a register from memory:
-            this.registers[rListPosition & 0xF] = this.memory.memoryRead32(currentAddress >>> 0) | 0;
+            this.registers[rListPosition & 0xF] = this.randomMemoryCache.memoryRead32(currentAddress >>> 0) | 0;
             currentAddress = (currentAddress + 4) | 0;
         }
     }
