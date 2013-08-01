@@ -124,21 +124,16 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	}
 }
 GameBoyAdvanceCPU.prototype.checkPendingIRQ = function () {
-    if (this.triggeredIRQ) {
-        //Clear our Pending IRQ acknowledge:
-        this.triggeredIRQ = false;
+    if (this.triggeredIRQ && !this.IRQDisabled) {
         //Branch for IRQ now:
         this.IRQ();
     }
 }
 GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
-	this.triggeredIRQ = didFire && !this.IRQDisabled;
-}
-GameBoyAdvanceCPU.prototype.checkIRQStatus = function () {
-	this.IOCore.irq.checkForIRQFire();
+	this.triggeredIRQ = !!didFire;
 }
 GameBoyAdvanceCPU.prototype.getCurrentFetchValue = function () {
-	return this.instructionHandle.fetch;
+	return this.instructionHandle.fetch | 0;
 }
 GameBoyAdvanceCPU.prototype.enterARM = function () {
 	this.THUMBBitModify(false);
@@ -298,7 +293,6 @@ GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
 	this.CPSROverflow = spsr[2];
 	this.CPSRCarry = spsr[3];
 	this.IRQDisabled = spsr[4];
-    this.checkIRQStatus();
 	this.FIQDisabled = spsr[5];
 	this.THUMBBitModify(spsr[6]);
 	this.switchRegisterBank(spsr[7]);
