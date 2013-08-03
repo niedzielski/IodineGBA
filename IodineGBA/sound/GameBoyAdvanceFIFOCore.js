@@ -24,14 +24,14 @@ GameBoyAdvanceFIFO.prototype.initializeFIFO = function () {
 	this.position = 0;
 }
 GameBoyAdvanceFIFO.prototype.push = function (sample) {
-	this.buffer[(this.position + this.count) & 0x1F] = (sample << 24) >> 23;
+	this.buffer[(this.position + this.count) & 0x1F] = (sample << 24) >> 24;
 	this.count = Math.min(this.count + 1, 0x20);    //Should we cap at 0x20 or overflow back to 0 and reset queue?
 }
 GameBoyAdvanceFIFO.prototype.shift = function () {
 	var output = 0;
 	if (this.count > 0) {
 		--this.count;
-		output = this.buffer[this.position] << 2;
+		output = this.buffer[this.position] << 3;
 		this.position = (this.position + 1) & 0x1F;
 	}
 	return output | 0;
