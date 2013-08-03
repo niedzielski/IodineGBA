@@ -1480,6 +1480,7 @@ ARMInstructionSet.prototype.rcs = function (parentObj, operand) {
 	parentObj.CPUCore.CPSROverflow = ((newcpsr & 0x10000000) != 0);
     if ((operand & 0x10000) == 0x10000 && parentObj.CPUCore.MODEBits != 0x10) {
         parentObj.CPUCore.IRQDisabled = ((newcpsr & 0x80) != 0);
+        parentObj.CPUCore.assertIRQ();
         parentObj.CPUCore.FIQDisabled = ((newcpsr & 0x40) != 0);
         //parentObj.CPUCore.THUMBBitModify((newcpsr & 0x20) != 0);
         //ARMWrestler test rom triggers THUMB mode, but expects it to remain in ARM mode, so ignore.

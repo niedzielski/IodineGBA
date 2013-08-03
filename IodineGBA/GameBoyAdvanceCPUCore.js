@@ -74,6 +74,7 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 	this.SPSRABT = [false, false, false, false, true, true, false, 0x13];	//Abort
 	this.SPSRUND = [false, false, false, false, true, true, false, 0x13];	//Undefined
 	this.triggeredIRQ = false;		//Pending IRQ found.
+    this.processIRQ = false;        //Interrupt program flow for IRQ.
 	this.pipelineInvalid = 0x4;		//Mark pipeline as invalid.
     //Pre-initialize stack pointers if no BIOS loaded:
 	if (!this.IOCore.BIOSFound || this.IOCore.emulatorCore.SKIPBoot) {
@@ -124,13 +125,17 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	}
 }
 GameBoyAdvanceCPU.prototype.checkPendingIRQ = function () {
-    if (this.triggeredIRQ && !this.IRQDisabled) {
+    if (this.processIRQ) {
         //Branch for IRQ now:
         this.IRQ();
     }
 }
 GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
 	this.triggeredIRQ = !!didFire;
+    this.assertIRQ();
+}
+GameBoyAdvanceCPU.prototype.assertIRQ = function () {
+	this.processIRQ = !!this.triggeredIRQ && !this.IRQDisabled;
 }
 GameBoyAdvanceCPU.prototype.getCurrentFetchValue = function () {
 	return this.instructionHandle.fetch | 0;
@@ -173,6 +178,7 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
     this.registers[14] = this.getIRQLR() | 0;
     //Disable IRQ:
     this.IRQDisabled = true;
+    this.processIRQ = false;
     if (this.IOCore.BIOSFound) {
         //Exception always enter ARM mode:
         this.enterARM();
@@ -242,6 +248,7 @@ GameBoyAdvanceCPU.prototype.SWI = function () {
 		this.registers[14] = this.getLR() | 0;
 		//Disable IRQ:
 		this.IRQDisabled = true;
+        this.processIRQ = false;
         //Exception always enter ARM mode:
 		this.enterARM();
         //SWI exception vector:
@@ -261,6 +268,7 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
 		this.registers[14] = this.getLR() | 0;
 		//Disable IRQ:
 		this.IRQDisabled = true;
+        this.processIRQ = false;
         //Exception always enter ARM mode:
 		this.enterARM();
         //Undefined exception vector:
@@ -293,6 +301,7 @@ GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
 	this.CPSROverflow = spsr[2];
 	this.CPSRCarry = spsr[3];
 	this.IRQDisabled = spsr[4];
+    this.assertIRQ();
 	this.FIQDisabled = spsr[5];
 	this.THUMBBitModify(spsr[6]);
 	this.switchRegisterBank(spsr[7]);
