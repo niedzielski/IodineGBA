@@ -56,7 +56,7 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
     if (this.isAddressSafe(newPC)) {
         var cache = this.findCacheReady(newPC);
         if (cache) {
-            this.CPUCore.IOCore.executeDynarec = true;
+            this.CPUCore.IOCore.preprocessCPUHandler(true);
             this.currentCache = cache;
         }
     }

@@ -20,7 +20,6 @@ function GameBoyAdvanceIO(emulatorCore) {
 	this.emulatorCore = emulatorCore;
 	//State Machine Tracking:
 	this.systemStatus = 0;
-    this.executeDynarec = false;
 	this.cyclesToIterate = 0;
 	this.cyclesIteratedPreviously = 0;
     this.accumulatedClocks = 0;
@@ -39,7 +38,7 @@ function GameBoyAdvanceIO(emulatorCore) {
 	this.wait = new GameBoyAdvanceWait(this);
 	this.cpu = new GameBoyAdvanceCPU(this);
     this.memory.loadReferences();
-    this.preprocessSystemStepper();
+    this.preprocessCPUHandler(false);   //Start in interpreter.
 }
 GameBoyAdvanceIO.prototype.iterate = function () {
 	//Find out how many clocks to iterate through this run:
@@ -108,16 +107,21 @@ GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
             throw(new Error("Invalid state selected."));
 	}
 }
-GameBoyAdvanceIO.prototype.handleCPU = function () {
+GameBoyAdvanceIO.prototype.handleCPUInterpreter = function () {
     //Execute next instruction:
-    if (!this.executeDynarec) {
-        //Interpreter:
-        this.cpu.executeIteration();
+    //Interpreter:
+    this.cpu.executeIteration();
+}
+GameBoyAdvanceIO.prototype.handleCPUDynarec = function () {
+    //Execute next instruction:
+    //LLE Dynarec JIT:
+    if (!this.cpu.dynarec.enter()) {
+        this.preprocessCPUHandler(false);
     }
-    else {
-        //LLE Dynarec JIT
-        this.executeDynarec = !!this.cpu.dynarec.enter();
-    }
+}
+GameBoyAdvanceIO.prototype.preprocessCPUHandler = function (useDynarec) {
+    this.handleCPU = (!useDynarec) ? this.handleCPUInterpreter : this.handleCPUDynarec;
+    this.preprocessSystemStepper();
 }
 GameBoyAdvanceIO.prototype.handleDMA = function () {
 	if (this.dma.perform()) {
