@@ -933,6 +933,8 @@ THUMBInstructionSet.prototype.compileInstructionMap = function () {
 	this.generateLowMap(this.BLsetup);
 	//F8-FF
 	this.generateLowMap(this.BLoff);
+    //Force length to be ready only:
+    Object.defineProperty(this.instructionMap, "length", {writable: false});
 }
 THUMBInstructionSet.prototype.generateLowMap = function (instruction) {
 	for (var index = 0; index < 0x20; ++index) {

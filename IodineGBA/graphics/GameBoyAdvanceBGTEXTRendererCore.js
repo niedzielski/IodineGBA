@@ -61,7 +61,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileNormal = function (yTileStart, xTileStart) {
     //Find the tile code to locate the tile block:
-	var address = this.computeScreenMapAddress8(this.computeTileNumber(yTileStart | 0, xTileStart | 0) | 0) | 0;
+	var address = this.computeScreenMapAddress8(this.computeTileNumber(yTileStart, xTileStart));
 	return (this.VRAM[address | 1] << 8) | this.VRAM[address];
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileOptimized = function (yTileStart, xTileStart) {

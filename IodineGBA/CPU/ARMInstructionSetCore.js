@@ -4578,13 +4578,15 @@ ARMInstructionSet.prototype.compileReducedInstructionMap = function () {
         var instrDecoded = this.instructionMap[range1];
         for (var range2 = 0; range2 < 0x10; ++range2) {
             var instructionCombo = instrDecoded[range2];
-            this.instructionMapReduced.push(this.appendInstrucion(this, instructionCombo[0], instructionCombo[1]));
+            this.instructionMapReduced.push(this.appendInstruction(this, instructionCombo[0], instructionCombo[1]));
         }
     }
 	//Reduce memory usage by nulling the temporary multi array:
 	this.instructionMap = null;
+    //Force length to be ready only:
+    Object.defineProperty(this.instructionMapReduced, "length", {writable: false});
 }
-ARMInstructionSet.prototype.appendInstrucion = function (parentObj, decodedInstr, decodedOperand) {
+ARMInstructionSet.prototype.appendInstruction = function (parentObj, decodedInstr, decodedOperand) {
     return function () {
         decodedInstr(parentObj, decodedOperand);
     }

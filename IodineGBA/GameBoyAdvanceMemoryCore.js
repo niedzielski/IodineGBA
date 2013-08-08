@@ -537,6 +537,8 @@ GameBoyAdvanceMemory.prototype.compileMemoryDispatch = function (writeCalls, rea
                         readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
                         readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused
                         ];
+    Object.defineProperty(memoryWriter, "length", {writable: false});
+    Object.defineProperty(memoryReader, "length", {writable: false});
     return [memoryWriter, memoryReader];
 }
 GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
