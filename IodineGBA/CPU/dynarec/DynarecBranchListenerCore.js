@@ -42,7 +42,7 @@ DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmo
     if (this.backEdge && cpumode == this.lastCPUMode) {
         var cache = this.findCache(this.lastBranch);
         if (!cache) {
-            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, (endPC - ((this.lastTHUMB) ? 0x6 : 0xC)) >>> 0, this.lastTHUMB, this.lastCPUMode);
+            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, endPC >>> 0, this.lastTHUMB, this.lastCPUMode);
             this.cacheAppend(cache);
         }
         cache.tickHotness();
@@ -56,7 +56,7 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
     if (this.isAddressSafe(newPC)) {
         var cache = this.findCacheReady(newPC);
         if (cache) {
-            this.CPUCore.IOCore.preprocessCPUHandler(true);
+            this.CPUCore.IOCore.preprocessCPUHandler(1);
             this.currentCache = cache;
         }
     }
@@ -67,9 +67,8 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
 DynarecBranchListenerCore.prototype.enter = function () {
    if (this.CPUCore.emulatorCore.dynarecEnabled) {
        //Execute our compiled code:
-       return !!this.currentCache(this.CPUCore);
+       this.currentCache(this.CPUCore);
    }
-    return false;
 }
 DynarecBranchListenerCore.prototype.isAddressSafe = function (address) {
     if (address < 0xE000000) {

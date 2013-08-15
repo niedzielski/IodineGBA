@@ -15,12 +15,11 @@
  * GNU General Public License for more details.
  *
  */
-function DynarecCacheManagerCore(cpu, start, end, InTHUMB, CPUMode) {
+function DynarecCacheManagerCore(cpu, start, end, InTHUMB) {
 	this.CPUCore = cpu;
     this.start = start | 0;
     this.end = end | 0;
     this.InTHUMB = InTHUMB;
-    this.CPUMode = CPUMode;
     this.badCount = 0;
     this.hotCount = 0;
     this.worker = null;
@@ -28,17 +27,17 @@ function DynarecCacheManagerCore(cpu, start, end, InTHUMB, CPUMode) {
     this.compiled = false;
 }
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 100;
-DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT = 2;
-DynarecCacheManagerCore.prototype.MAX_WORKERS = 5;
+DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.01;
+DynarecCacheManagerCore.prototype.MAX_WORKERS = 1;
 DynarecCacheManagerCore.prototype.tickHotness = function () {
     if (this.start >= this.end) {
         //Don't let sub-routines too small through:
         return;
     }
+    ++this.hotCount;
     if (!this.compiled) {
-        if (this.badCount < this.MAGIC_BAD_COUNT) {
-            ++this.hotCount;
-            if (this.hotCount >= this.MAGIC_HOT_COUNT) {
+        if (this.hotCount >= this.MAGIC_HOT_COUNT) {
+            if ((this.badCount / this.hotCount) < this.MAGIC_BAD_COUNT_RATIO) {
                 this.compile();
             }
         }
@@ -89,7 +88,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
     if (!this.compiling && this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
         this.record = [];
         var start = this.start;
-        var end = this.end + ((this.InTHUMB) ? 0x4 : 0x8);
+        var end = this.end - ((this.InTHUMB) ? 0x4 : 0x8);
         while (start <= end) {
             //Build up a record of bytecode to pass to the worker to compile:
             this.record.push(this.read(start));
@@ -120,16 +119,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
             ++this.CPUCore.dynarec.compiling;
             this.compiling = true;
             //Pass the record memory and state:
-            this.worker.postMessage([this.start, this.record, this.InTHUMB, this.CPUMode, (this.start >= 0x8000000 || this.end < 0x4000), [
-                                                                                                                                            this.CPUCore.IOCore.wait.WRAMWaitState,
-                                                                                                                                            this.CPUCore.IOCore.wait.SRAMWaitState,
-                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState0First,
-                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState0Second,
-                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState1First,
-                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState1Second,
-                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState2First,
-                                                                                                                                            this.CPUCore.IOCore.wait.CARTWaitState2Second
-                                    ]]);
+            this.worker.postMessage([this.start, this.record, this.InTHUMB]);
         }
         catch (error) {
             //Browser doesn't support webworkers, so disable dynarec:
