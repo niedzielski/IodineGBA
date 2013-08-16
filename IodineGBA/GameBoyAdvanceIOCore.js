@@ -164,11 +164,13 @@ GameBoyAdvanceIO.prototype.deflagStepper = function (statusFlag) {
     //Deflag a system event to step through:
     statusFlag = statusFlag | 0;
     this.systemStatus = ((this.systemStatus | 0) & (~statusFlag)) | 0;
+    this.cpu.checkCPUExecutionStatus();
     this.preprocessSystemStepper();
 }
 GameBoyAdvanceIO.prototype.flagStepper = function (statusFlag) {
     //Flag a system event to step through:
     statusFlag = statusFlag | 0;
     this.systemStatus = ((this.systemStatus | 0) | (statusFlag | 0)) | 0;
+    this.cpu.checkCPUExecutionStatus();
     this.preprocessSystemStepper();
 }

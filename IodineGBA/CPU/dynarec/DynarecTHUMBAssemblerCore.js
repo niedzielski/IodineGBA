@@ -27,15 +27,41 @@ DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
     var batched = "\t//Stub Code For Address " + this.pc + ":\n" +
     "\tvar thumb = cpu.THUMB;\n";
     batched += this.generatePipelineSpew();
+    this.incrementInternalPC();
     batched += this.generatePipelineSpew();
+    this.incrementInternalPC();
     var length = this.records.length;
     for (var index = 0; index < length; index++) {
-        batched += this.generateBodySpew(this.records[index]);
+        batched += this.generateBodySpew(index >>> 0, this.records[index >>> 0] >>> 0);
+        this.incrementInternalPC();
     }
     this.stubCode = batched;
 }
 DynarecTHUMBAssemblerCore.prototype.getStubCode = function () {
     return this.stubCode;
+}
+DynarecTHUMBAssemblerCore.prototype.incrementInternalPC = function () {
+    this.pcRaw = this.nextInstructionPC() >>> 0;
+}
+DynarecTHUMBAssemblerCore.prototype.nextInstructionPC = function () {
+    return ((this.pcRaw >>> 0) + 2) >>> 0;
+}
+DynarecTHUMBAssemblerCore.prototype.currentInstructionPC = function () {
+    return ("0x" + (this.pcRaw >>> 0).toString(16));
+}
+DynarecTHUMBAssemblerCore.prototype.isInROM = function () {
+    //Get the address of the instruction:
+    var relativePC = ((this.pcRaw >>> 0) - 4) >>> 0;
+    //Check for instruction address being in ROM:
+    if ((relativePC >>> 0) > 0x8000000) {
+        if ((relativePC >>> 0) < 0xE000000) {
+            return true;
+        }
+    }
+    else if ((relativePC >>> 0) < 0x4000) {
+        return true;
+    }
+    return false;
 }
 DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function () {
     return this.insertRunnableCheck() +
@@ -44,15 +70,11 @@ DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function () {
     this.insertPipelineSuffix() +
 	this.incrementPC();
 }
-DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (instruction) {
+DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (index, instruction) {
     instruction = instruction | 0;
     return this.insertRunnableCheck() +
-    "\t//Verify the cached instruction should be called:\n" +
-    "\tif ((thumb.execute | 0) != 0x" + instruction.toString(16) + ") {\n" +
-        "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
-        "\t\treturn;\n" +
-    "\t}\n" +
-    this.insertFetchPrefix() +
+    this.insertMemoryInstabilityCheck(instruction) +
+    ((index == 0) ? this.insertFetchPrefix() : this.insertFetching()) +
     this.generateInstructionSpew(instruction | 0) +
     this.insertPipelineSuffix() +
 	this.checkPCStatus();
@@ -61,18 +83,37 @@ DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruct
     instruction = instruction | 0;
     return "\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
 }
+DynarecTHUMBAssemblerCore.prototype.insertMemoryInstabilityCheck = function (instruction) {
+    if (!!this.isInROM()) {
+        return "\t//Address of instruction located in ROM, skipping guard check!\n";
+    }
+    else {
+        return "\t//Verify the cached instruction should be called:\n" +
+        "\tif ((thumb.execute | 0) != 0x" + instruction.toString(16) + ") {\n" +
+            "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
+            "\t\treturn;\n" +
+        "\t}\n";
+    }
+}
 DynarecTHUMBAssemblerCore.prototype.insertRunnableCheck = function () {
     return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
-    "\tif (cpu.processIRQ || (cpu.IOCore.systemStatus | 0) != 0) {\n" +
+    "\tif (!!cpu.breakNormalExecution) {\n" +
     this.insertIRQCheck() +
     "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
-    "\t\treturn;\n" +
+        "\t\treturn;\n" +
 	"\t}\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertFetchPrefix = function () {
+    return this.insertPipelineTick() +
+    this.insertFetching();
+}
+DynarecTHUMBAssemblerCore.prototype.insertPipelineTick = function () {
     return "\t//Tick the CPU pipeline:\n" +
-	"\tcpu.pipelineInvalid >>= 1;\n" +
-    "\tthumb.fetch = cpu.wait.CPUGetOpcode16(cpu.registers[15] | 0) | 0;\n";
+	"\tcpu.pipelineInvalid >>= 1;\n";
+}
+DynarecTHUMBAssemblerCore.prototype.insertFetching = function () {
+    return "\t//Update the fetch stage:\n" +
+    "\tthumb.fetch = cpu.wait.CPUGetOpcode16(" + this.currentInstructionPC() + ") | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertPipelineSuffix = function () {
     return "\t//Push decode to execute and fetch to decode:\n" +
@@ -92,7 +133,7 @@ DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
 	"\t}\n";
 }
 DynarecTHUMBAssemblerCore.prototype.incrementPC = function () {
-    return "\tthumb.incrementProgramCounter();\n";
+    return "\tcpu.registers[15] = 0x" + this.nextInstructionPC().toString(16) + ";\n";
 }
 DynarecTHUMBAssemblerCore.prototype.compileInstructionMap = function () {
 	this.instructionMap = [];

@@ -84,6 +84,7 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 		this.registers[15] = 0x8000000;
         this.MODEBits = 0x1F;
 	}
+    this.breakNormalExecution = false;//No pending interruption.
 }
 GameBoyAdvanceCPU.prototype.executeIteration = function () {
 	//Check for pending IRQ:
@@ -136,6 +137,10 @@ GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
 }
 GameBoyAdvanceCPU.prototype.assertIRQ = function () {
 	this.processIRQ = !!this.triggeredIRQ && !this.IRQDisabled;
+    this.checkCPUExecutionStatus();
+}
+GameBoyAdvanceCPU.prototype.checkCPUExecutionStatus = function () {
+	this.breakNormalExecution = ((this.IOCore.systemStatus | 0) != 0 || this.processIRQ);
 }
 GameBoyAdvanceCPU.prototype.getCurrentFetchValue = function () {
 	return this.instructionHandle.fetch | 0;
@@ -179,6 +184,7 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
     //Disable IRQ:
     this.IRQDisabled = true;
     this.processIRQ = false;
+    this.checkCPUExecutionStatus();
     if (this.IOCore.BIOSFound) {
         //Exception always enter ARM mode:
         this.enterARM();
@@ -249,6 +255,7 @@ GameBoyAdvanceCPU.prototype.SWI = function () {
 		//Disable IRQ:
 		this.IRQDisabled = true;
         this.processIRQ = false;
+        this.checkCPUExecutionStatus();
         //Exception always enter ARM mode:
 		this.enterARM();
         //SWI exception vector:
@@ -269,6 +276,7 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
 		//Disable IRQ:
 		this.IRQDisabled = true;
         this.processIRQ = false;
+        this.checkCPUExecutionStatus();
         //Exception always enter ARM mode:
 		this.enterARM();
         //Undefined exception vector:
