@@ -18,30 +18,41 @@
 function DynarecCacheManagerCore(cpu, start, end, InTHUMB) {
 	this.CPUCore = cpu;
     this.start = start >>> 0;
+    end = ((end >>> 0) - ((!!InTHUMB) ? 0x4 : 0x8)) >>> 0;
     this.end = end >>> 0;
-    this.InTHUMB = InTHUMB;
+    this.InTHUMB = !!InTHUMB;
     this.badCount = 0;
     this.hotCount = 0;
     this.worker = null;
     this.compiling = false;
     this.compiled = false;
     this.read = (this.InTHUMB) ? this.read16 : this.read32;
+    this.sizeOfBlock = (this.end >>> 0) - (this.start >>> 0);
 }
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 1000;
-DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.01;
-DynarecCacheManagerCore.prototype.MAX_WORKERS = 2;
+DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.001;
+DynarecCacheManagerCore.prototype.MAX_WORKERS = 3;
+DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE = 100;
+DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE_HLIMIT = 200;
 DynarecCacheManagerCore.prototype.tickHotness = function () {
-    if (this.start >= this.end) {
+    if (this.sizeOfBlock >= this.MIN_BLOCK_SIZE) {
         //Don't let sub-routines too small through:
-        return;
-    }
-    ++this.hotCount;
-    if (!this.compiled) {
-        if (this.hotCount >= this.MAGIC_HOT_COUNT) {
-            if ((this.badCount / this.hotCount) < this.MAGIC_BAD_COUNT_RATIO) {
-                this.compile();
+        ++this.hotCount;
+        if (!this.compiled) {
+            if (this.hotCount >= this.MAGIC_HOT_COUNT) {
+                if ((this.badCount / this.hotCount) < this.MAGIC_BAD_COUNT_RATIO) {
+                    this.compile();
+                }
             }
         }
+    }
+    else if (this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
+        if (this.MIN_BLOCK_SIZE > 1) {
+            --this.MIN_BLOCK_SIZE;
+        }
+    }
+   else if (this.MIN_BLOCK_SIZE < this.MIN_BLOCK_SIZE_HLIMIT) {
+        ++this.MIN_BLOCK_SIZE;
     }
 }
 DynarecCacheManagerCore.prototype.bailout = function () {
@@ -86,8 +97,8 @@ DynarecCacheManagerCore.prototype.compile = function () {
     if (!this.compiling && this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
         this.record = [];
         var start = this.start >>> 0;
-        var end = ((this.end >>> 0) - ((this.InTHUMB) ? 0x4 : 0x8)) >>> 0;
-        while (start <= end) {
+        var end = this.end >>> 0;
+        while ((start >>> 0) <= (end >>> 0)) {
             //Build up a record of bytecode to pass to the worker to compile:
             this.record.push(this.read(start >>> 0) | 0);
             start = ((start >>> 0) + ((this.InTHUMB) ? 0x2 : 0x4)) >>> 0;
@@ -101,7 +112,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
                 switch (code | 0) {
                         //Got the code block back:
                     case 0:
-                        parentObj.CPUCore.dynarec.cacheAppendReady(parentObj.start >>> 0, new Function("cpu", message[1]));
+                        parentObj.CPUCore.dynarec.cacheAppendReady(parentObj.start >>> 0, !!parentObj.InTHUMB, new Function("cpu", message[1]));
                         break;
                         //Compiler returned an error:
                     case 1:
