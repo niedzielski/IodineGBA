@@ -23,11 +23,6 @@ function DynarecTHUMBAssemblerCore(pc, records) {
 }
 DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
     var batched = "\t//Stub Code For Address " + this.pc + ":\n" +
-    "\t//Ensure we're executing in THUMB mode and in cpu mode:\n" +
-    "\tif (cpu.InTHUMB == false || (cpu.IOCore.systemStatus | 0) != 0) {\n" +
-        "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
-        "\t\treturn;\n" +
-    "\t}\n" +
     "\tvar thumb = cpu.THUMB;\n";
     batched += this.generatePipelineSpew();
     batched += this.generatePipelineSpew();

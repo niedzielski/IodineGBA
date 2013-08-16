@@ -43,7 +43,7 @@ DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmo
     if (this.backEdge) {
         var cache = this.findCache(this.lastBranch >>> 0);
         if (!cache) {
-            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, endPC >>> 0, this.lastTHUMB);
+            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, endPC >>> 0, !!this.lastTHUMB);
             this.cacheAppend(cache);
         }
         cache.tickHotness();
@@ -103,6 +103,11 @@ DynarecBranchListenerCore.prototype.findCacheReady = function (address, InTHUMB)
     address = address >>> 0;
     InTHUMB = !!InTHUMB;
     return this.readyCaches[((InTHUMB) ? "thumb_" : "arm_") + (address >>> 0)];
+}
+DynarecBranchListenerCore.prototype.deleteReadyCaches = function (address) {
+    address = address >>> 0;
+    this.readyCaches["thumb_"+ (address >>> 0)] = null;
+    this.readyCaches["arm_"+ (address >>> 0)] = null;
 }
 DynarecBranchListenerCore.prototype.invalidateCaches = function () {
     this.readyCaches = {};

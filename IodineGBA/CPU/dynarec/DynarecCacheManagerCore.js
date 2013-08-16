@@ -31,6 +31,7 @@ function DynarecCacheManagerCore(cpu, start, end, InTHUMB) {
 }
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 1000;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.001;
+DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_CLEAR_RATIO = 0.1;
 DynarecCacheManagerCore.prototype.MAX_WORKERS = 3;
 DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE = 100;
 DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE_HLIMIT = 200;
@@ -56,11 +57,15 @@ DynarecCacheManagerCore.prototype.tickHotness = function () {
     }
 }
 DynarecCacheManagerCore.prototype.bailout = function () {
+    ++this.badCount;
     this.compiled = false;
-    this.tickBad();
+    this.CPUCore.dynarec.deleteReadyCaches(this.start >>> 0);
 }
 DynarecCacheManagerCore.prototype.tickBad = function () {
     ++this.badCount;
+    if ((this.badCount / this.hotCount) >= this.MAGIC_BAD_COUNT_CLEAR_RATIO) {
+        this.CPUCore.dynarec.deleteReadyCaches(this.start >>> 0);
+    }
 }
 DynarecCacheManagerCore.prototype.read16 = function (address) {
     address = address >>> 0;
