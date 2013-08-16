@@ -20,7 +20,8 @@ function GameBoyAdvanceEmulator() {
     this.dynarecEnabled = false;            //Use the dynarec engine?
     this.dynarecTHUMB = true;               //Enable THUMB compiling.
     this.dynarecARM = false;                //Enable ARM compiling.
-	this.emulatorSpeed = 1;					//Speed multiplier of the emulator.
+	this.useWorkers = true;                //Enable Web Workers for compiling.
+    this.emulatorSpeed = 1;					//Speed multiplier of the emulator.
 	this.timerIntervalRate = 16;			//How often the emulator core is called into (in milliseconds).
 	this.graphicsFound = false;				//Do we have graphics output sink found yet?
 	this.audioFound = false;				//Do we have audio output sink found yet?

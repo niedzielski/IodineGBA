@@ -22,18 +22,14 @@ self.onmessage = function (command) {
     var record = info[1];
     var InTHUMB = info[2];
     if (InTHUMB) {
-        var compiler = new DynarecTHUMBAssemblerCore(startPC | 0, record);
+        var compiler = new DynarecTHUMBAssemblerCore(startPC >>> 0, record);
     }
     else {
         bailout();
-        //var compiler = new DynarecARMAssemblerCore(startPC | 0, record);
+        //var compiler = new DynarecARMAssemblerCore(startPC >>> 0, record);
     }
-}
-function bailout() {
-    postMessage([1]);
-    self.close();
+    done(compiler.getStubCode());
 }
 function done(functionString) {
     postMessage([0, functionString]);
-    self.close();
 }

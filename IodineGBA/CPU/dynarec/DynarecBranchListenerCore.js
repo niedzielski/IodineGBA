@@ -19,16 +19,37 @@ function DynarecBranchListenerCore(CPUCore) {
 	this.CPUCore = CPUCore;
     this.initialize();
 }
+DynarecBranchListenerCore.prototype.MAX_WORKERS = 3;
 DynarecBranchListenerCore.prototype.initialize = function () {
     this.lastBranch = 0;
     this.lastTHUMB = false;
     this.caches = {};
     this.readyCaches = {};
     this.currentCache = null;
-    this.compiling = 0;
     this.backEdge = false;
+    this.workers = [];
+    this.generateWorkerCache();
 }
-DynarecBranchListenerCore.prototype.MIN_BLOCK_SIZE = 100;
+DynarecBranchListenerCore.prototype.generateWorkerCache = function () {
+    try {
+        for (var index = 0; index < this.MAX_WORKERS; index++) {
+            var newWorker = new Worker("IodineGBA/CPU/dynarec/DynarecCompilerWorkerCore.js");
+            this.workers.push(newWorker);
+        }
+    }
+    catch (error) {
+        this.CPUCore.emulatorCore.useWorkers = false;
+    }
+}
+DynarecBranchListenerCore.prototype.getFreeWorker = function () {
+    return this.workers.pop();
+}
+DynarecBranchListenerCore.prototype.returnFreeWorker = function (oldWorker) {
+    return this.workers.push(oldWorker);
+}
+DynarecBranchListenerCore.prototype.hasFreeWorker = function () {
+    return (this.workers.length > 0);
+}
 DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instructionmode) {
     if ((this.CPUCore.emulatorCore.dynarecTHUMB && instructionmode) || (this.CPUCore.emulatorCore.dynarecARM && !instructionmode)) {
         this.analyzePast(oldPC >>> 0, instructionmode);
@@ -44,7 +65,7 @@ DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmo
     if (this.backEdge) {
         var cache = this.findCache(this.lastBranch >>> 0);
         if (!cache) {
-            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, endPC >>> 0, !!this.lastTHUMB);
+            cache = new DynarecCacheManagerCore(this, this.lastBranch >>> 0, endPC >>> 0, !!this.lastTHUMB);
             this.cacheAppend(cache);
         }
         cache.tickHotness();

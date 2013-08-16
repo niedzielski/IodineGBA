@@ -16,7 +16,9 @@
  *
  */
 function DynarecTHUMBAssemblerCore(pc, records) {
-    this.pc = "0x" + pc.toString(16);
+    pc = pc >>> 0;
+    this.pcRaw = pc >>> 0;
+    this.pc = "0x" + this.pcRaw.toString(16);
     this.records = records;
     this.compileInstructionMap();
     this.generateSpew();
@@ -30,51 +32,72 @@ DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
     for (var index = 0; index < length; index++) {
         batched += this.generateBodySpew(this.records[index]);
     }
-    done(batched);
+    this.stubCode = batched;
+}
+DynarecTHUMBAssemblerCore.prototype.getStubCode = function () {
+    return this.stubCode;
 }
 DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function () {
-    return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
-    "\tif (cpu.processIRQ || (cpu.IOCore.systemStatus | 0) != 0) {\n" +
-        "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
-        "\t\treturn;\n" +
-	"\t}\n" +
-    "\t//Tick the CPU pipeline:\n" +
-	"\tcpu.pipelineInvalid >>= 1;\n" +
-    "\tthumb.fetch = cpu.wait.CPUGetOpcode16(cpu.registers[15] | 0) | 0;\n" +
+    return this.insertRunnableCheck() +
+    this.insertFetchPrefix() +
     "\t//Waiting for the pipeline bubble to clear...\n" +
-    "\tthumb.execute = thumb.decode | 0;\n" +
-    "\tthumb.decode = thumb.fetch | 0;\n" +
-	"\tthumb.incrementProgramCounter();\n";
+    this.insertPipelineSuffix() +
+	this.incrementPC();
 }
 DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (instruction) {
     instruction = instruction | 0;
-    return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
-    "\tif (cpu.processIRQ || (cpu.IOCore.systemStatus | 0) != 0) {\n" +
-        "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
-        "\t\treturn;\n" +
-	"\t}\n" +
+    return this.insertRunnableCheck() +
     "\t//Verify the cached instruction should be called:\n" +
     "\tif ((thumb.execute | 0) != 0x" + instruction.toString(16) + ") {\n" +
         "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
         "\t\treturn;\n" +
     "\t}\n" +
-    "\t//Tick the CPU pipeline:\n" +
-	"\tcpu.pipelineInvalid >>= 1;\n" +
-    "\tthumb.fetch = cpu.wait.CPUGetOpcode16(cpu.registers[15] | 0) | 0;\n" +
+    this.insertFetchPrefix() +
     this.generateInstructionSpew(instruction | 0) +
-    "\tthumb.execute = thumb.decode | 0;\n" +
-    "\tthumb.decode = thumb.fetch | 0;\n" +
-	"\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
-        "\t\tthumb.incrementProgramCounter();\n" +
-	"\t}\n" +
-    "\telse {\n" +
-        "\t\t//We branched, so exit normally:\n" +
-        "\t\treturn;\n" +
-	"\t}\n";
+    this.insertPipelineSuffix() +
+	this.checkPCStatus();
 }
 DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruction) {
     instruction = instruction | 0;
     return "\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
+}
+DynarecTHUMBAssemblerCore.prototype.insertRunnableCheck = function () {
+    return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
+    "\tif (cpu.processIRQ || (cpu.IOCore.systemStatus | 0) != 0) {\n" +
+    this.insertIRQCheck() +
+    "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
+    "\t\treturn;\n" +
+	"\t}\n";
+}
+DynarecTHUMBAssemblerCore.prototype.insertFetchPrefix = function () {
+    return "\t//Tick the CPU pipeline:\n" +
+	"\tcpu.pipelineInvalid >>= 1;\n" +
+    "\tthumb.fetch = cpu.wait.CPUGetOpcode16(cpu.registers[15] | 0) | 0;\n";
+}
+DynarecTHUMBAssemblerCore.prototype.insertPipelineSuffix = function () {
+    return "\t//Push decode to execute and fetch to decode:\n" +
+    "\tthumb.execute = thumb.decode | 0;\n" +
+    "\tthumb.decode = thumb.fetch | 0;\n";
+}
+DynarecTHUMBAssemblerCore.prototype.insertIRQCheck = function () {
+    return "\t\tcpu.checkPendingIRQ();\n";
+}
+DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
+    return "\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
+        "\t" + this.incrementPC() +
+	"\t}\n" +
+    "\telse {\n" +
+        "\t\t//We branched, so exit normally:\n" +
+        "\t\tvar cache = cpu.dynarec.readyCaches[\"thumb_" + this.pcRaw + "\"];\n" +
+        "\t\tif (cache) {\n" +
+            "\t\t\tcpu.IOCore.preprocessCPUHandler(1);\n" +
+            "\t\t\tcpu.dynarec.currentCache = cache;\n" +
+        "\t\t}\n" +
+        "\t\treturn;\n" +
+	"\t}\n";
+}
+DynarecTHUMBAssemblerCore.prototype.incrementPC = function () {
+    return "\tthumb.incrementProgramCounter();\n";
 }
 DynarecTHUMBAssemblerCore.prototype.compileInstructionMap = function () {
 	this.instructionMap = [];
