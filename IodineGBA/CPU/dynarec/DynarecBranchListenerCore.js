@@ -22,39 +22,37 @@ function DynarecBranchListenerCore(CPUCore) {
 DynarecBranchListenerCore.prototype.initialize = function () {
     this.lastBranch = 0;
     this.lastTHUMB = false;
-    this.lastCPUMode = 0x10;
     this.caches = {};
     this.readyCaches = {};
     this.currentCache = null;
     this.compiling = 0;
     this.backEdge = false;
 }
-DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instructionmode, cpumode) {
+DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instructionmode) {
     if ((this.CPUCore.emulatorCore.dynarecTHUMB && instructionmode) || (this.CPUCore.emulatorCore.dynarecARM && !instructionmode)) {
-        this.analyzePast(oldPC >>> 0, instructionmode, cpumode);
-        this.handleNext(newPC >>> 0, instructionmode, cpumode);
+        this.analyzePast(oldPC >>> 0, instructionmode);
+        this.handleNext(newPC >>> 0, instructionmode);
     }
     else {
         this.backEdge = false;
     }
 }
-DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmode, cpumode) {
-    if (this.backEdge && cpumode == this.lastCPUMode) {
-        var cache = this.findCache(this.lastBranch);
+DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmode) {
+    if (this.backEdge) {
+        var cache = this.findCache(this.lastBranch | 0);
         if (!cache) {
-            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, endPC >>> 0, this.lastTHUMB, this.lastCPUMode);
+            cache = new DynarecCacheManagerCore(this.CPUCore, this.lastBranch >>> 0, (endPC - ((!instructionmode) ? 0x8 : 0x4)) >>> 0, this.lastTHUMB);
             this.cacheAppend(cache);
         }
         cache.tickHotness();
     }
     this.backEdge = true;
 }
-DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmode, cpumode) {
-    this.lastBranch = newPC;
-    this.lastTHUMB = instructionmode;
-    this.lastCPUMode = cpumode;
-    if (this.isAddressSafe(newPC)) {
-        var cache = this.findCacheReady(newPC);
+DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmode) {
+    this.lastBranch = newPC | 0;
+    this.lastTHUMB = !!instructionmode;
+    if (this.isAddressSafe(newPC | 0)) {
+        var cache = this.findCacheReady(newPC | 0);
         if (cache) {
             this.CPUCore.IOCore.preprocessCPUHandler(1);
             this.currentCache = cache;

@@ -22,49 +22,62 @@ function DynarecTHUMBAssemblerCore(pc, records) {
     this.generateSpew();
 }
 DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
-    var batched = "\t//Stub Code For Address " + this.pc + "\n" +
+    var batched = "\t//Stub Code For Address " + this.pc + ":\n" +
+    "\t//Ensure we're executing in THUMB mode:\n" +
     "\tif (cpu.InTHUMB == false) {\n" +
+        "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
         "\t\treturn;\n" +
     "\t}\n" +
     "\tvar thumb = cpu.THUMB;\n";
+    batched += this.generatePipelineSpew();
+    batched += this.generatePipelineSpew();
     var length = this.records.length;
     for (var index = 0; index < length; index++) {
         batched += this.generateBodySpew(this.records[index]);
     }
     done(batched);
 }
-DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (instruction) {
+DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function (instruction) {
     return "\t//Ensure we do not run when an IRQ is flagged:\n" +
     "\tif (cpu.processIRQ) {\n" +
+        "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
         "\t\treturn;\n" +
 	"\t}\n" +
     "\t//Tick the CPU pipeline:\n" +
 	"\tcpu.pipelineInvalid >>= 1;\n" +
     "\tthumb.fetch = cpu.wait.CPUGetOpcode16(cpu.registers[15] | 0) | 0;\n" +
-    "\t//Only execute if the pipeline bubbles have been cleared:\n" +
-    "\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
-        this.generateInstructionSpew(instruction) +
-	"\t}\n" +
+    "\t//Waiting for the pipeline bubble to clear...\n" +
     "\tthumb.execute = thumb.decode | 0;\n" +
     "\tthumb.decode = thumb.fetch | 0;\n" +
-	"\tif ((cpu.pipelineInvalid | 0) < 0x4) {\n" +
+	"\tthumb.incrementProgramCounter();\n";
+}
+DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (instruction) {
+    return "\t//Ensure we do not run when an IRQ is flagged:\n" +
+    "\tif (cpu.processIRQ) {\n" +
+        "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
+        "\t\treturn;\n" +
+	"\t}\n" +
+    "\t//Verify the cached instruction should be called:\n" +
+    "\tif ((thumb.execute | 0) != 0x" + instruction.toString(16) + ") {\n" +
+        "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
+        "\t\treturn;\n" +
+    "\t}\n" +
+    "\t//Tick the CPU pipeline:\n" +
+	"\tcpu.pipelineInvalid >>= 1;\n" +
+    "\tthumb.fetch = cpu.wait.CPUGetOpcode16(cpu.registers[15] | 0) | 0;\n" +
+    this.generateInstructionSpew(instruction) +
+    "\tthumb.execute = thumb.decode | 0;\n" +
+    "\tthumb.decode = thumb.fetch | 0;\n" +
+	"\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
         "\t\tthumb.incrementProgramCounter();\n" +
 	"\t}\n" +
     "\telse {\n" +
-        "\t\t//We branched, so bail:\n" +
+        "\t\t//We branched, so exit normally:\n" +
         "\t\treturn;\n" +
 	"\t}\n";
 }
 DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruction) {
-    return "\t\t//Verify the cached instruction should be called:\n" +
-    "\t\tif ((thumb.execute | 0) == 0x" + instruction.toString(16) + ") {\n" +
-        "\t\t\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n" +
-    "\t\t}\n" +
-    "\t\telse {\n" +
-        "\t\t\t//Cached instruction was invalid, so bail:\n" +
-        "\t\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
-        "\t\t\treturn;\n" +
-    "\t\t}\n";
+    return "\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.compileInstructionMap = function () {
 	this.instructionMap = [];

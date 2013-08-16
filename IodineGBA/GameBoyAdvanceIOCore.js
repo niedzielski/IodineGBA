@@ -25,6 +25,7 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.accumulatedClocks = 0;
     this.nextEventClocks = 0;
     this.lastDynarecUsage = 1;
+    this.flaggedDynarec = 0;
     this.BIOSFound = false;
     //Initialize the various handler objects:
 	this.memory = new GameBoyAdvanceMemory(this);
@@ -116,11 +117,13 @@ GameBoyAdvanceIO.prototype.handleCPUInterpreter = function () {
 GameBoyAdvanceIO.prototype.handleCPUDynarec = function () {
     //Execute next instruction:
     //LLE Dynarec JIT:
+    this.flaggedDynarec = 0;
     this.cpu.dynarec.enter();
-    this.preprocessCPUHandler(0);
+    this.preprocessCPUHandler(this.flaggedDynarec | 0);
 }
 GameBoyAdvanceIO.prototype.preprocessCPUHandler = function (useDynarec) {
     useDynarec = useDynarec | 0;
+    this.flaggedDynarec = useDynarec | 0;
     if ((this.lastDynarecUsage | 0) != (useDynarec | 0)) {
         this.lastDynarecUsage = useDynarec | 0;
         this.handleCPU = ((useDynarec | 0) == 0) ? this.handleCPUInterpreter : this.handleCPUDynarec;

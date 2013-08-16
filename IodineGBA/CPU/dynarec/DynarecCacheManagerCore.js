@@ -17,18 +17,19 @@
  */
 function DynarecCacheManagerCore(cpu, start, end, InTHUMB) {
 	this.CPUCore = cpu;
-    this.start = start | 0;
-    this.end = end | 0;
+    this.start = start >>> 0;
+    this.end = end >>> 0;
     this.InTHUMB = InTHUMB;
     this.badCount = 0;
     this.hotCount = 0;
     this.worker = null;
     this.compiling = false;
     this.compiled = false;
+    this.read = (this.InTHUMB) ? this.read16 : this.read32;
 }
-DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 100;
+DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 1000;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.01;
-DynarecCacheManagerCore.prototype.MAX_WORKERS = 1;
+DynarecCacheManagerCore.prototype.MAX_WORKERS = 2;
 DynarecCacheManagerCore.prototype.tickHotness = function () {
     if (this.start >= this.end) {
         //Don't let sub-routines too small through:
@@ -45,17 +46,13 @@ DynarecCacheManagerCore.prototype.tickHotness = function () {
 }
 DynarecCacheManagerCore.prototype.bailout = function () {
     this.compiled = false;
+    this.tickBad();
+}
+DynarecCacheManagerCore.prototype.tickBad = function () {
     ++this.badCount;
 }
-DynarecCacheManagerCore.prototype.read = function (address) {
-    if (this.InTHUMB) {
-        return this.read16(address);
-    }
-    else {
-        return this.read32(address);
-    }
-}
 DynarecCacheManagerCore.prototype.read16 = function (address) {
+    address = address >>> 0;
     if (address >= 0x8000000 && address < 0xE000000) {
         return this.CPUCore.IOCore.cartridge.readROM16(address & 0x1FFFFFF);
     }
@@ -70,6 +67,7 @@ DynarecCacheManagerCore.prototype.read16 = function (address) {
     }
 }
 DynarecCacheManagerCore.prototype.read32 = function (address) {
+    address = address >>> 0;
     if (address >= 0x8000000 && address < 0xE000000) {
         return this.CPUCore.IOCore.cartridge.readROM32(address & 0x1FFFFFF);
     }
@@ -87,23 +85,23 @@ DynarecCacheManagerCore.prototype.compile = function () {
     //Make sure there isn't another worker compiling:
     if (!this.compiling && this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
         this.record = [];
-        var start = this.start;
-        var end = this.end - ((this.InTHUMB) ? 0x4 : 0x8);
+        var start = this.start >>> 0;
+        var end = ((this.end >>> 0) - ((this.InTHUMB) ? 0x4 : 0x8)) >>> 0;
         while (start <= end) {
             //Build up a record of bytecode to pass to the worker to compile:
-            this.record.push(this.read(start));
-            start += (this.InTHUMB) ? 0x2 : 0x4;
+            this.record.push(this.read(start >>> 0) | 0);
+            start = ((start >>> 0) + ((this.InTHUMB) ? 0x2 : 0x4)) >>> 0;
         }
         try {
             var parentObj = this;
             this.worker = new Worker("IodineGBA/CPU/dynarec/DynarecCompilerWorkerCore.js");
             this.worker.onmessage = function (command) {
                 var message = command.data;
-                var code = message[0];
-                switch (code) {
+                var code = message[0] | 0;
+                switch (code | 0) {
                         //Got the code block back:
                     case 0:
-                        parentObj.CPUCore.dynarec.cacheAppendReady(parentObj.start, new Function("cpu", message[1]));
+                        parentObj.CPUCore.dynarec.cacheAppendReady(parentObj.start >>> 0, new Function("cpu", message[1]));
                         break;
                         //Compiler returned an error:
                     case 1:
@@ -119,7 +117,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
             ++this.CPUCore.dynarec.compiling;
             this.compiling = true;
             //Pass the record memory and state:
-            this.worker.postMessage([this.start, this.record, this.InTHUMB]);
+            this.worker.postMessage([this.start | 0, this.record, !!this.InTHUMB]);
         }
         catch (error) {
             //Browser doesn't support webworkers, so disable dynarec:

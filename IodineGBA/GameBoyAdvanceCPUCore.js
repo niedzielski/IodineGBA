@@ -102,7 +102,7 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
     if (branchTo > 0x3FFF || this.IOCore.BIOSFound) {
 		//Tell the JIT information on the state before branch:
          if (this.emulatorCore.dynarecEnabled) {
-            this.dynarec.listen(this.registers[15] | 0, branchTo | 0, this.InTHUMB, this.MODEBits | 0);
+            this.dynarec.listen(this.registers[15] | 0, branchTo | 0, !!this.InTHUMB);
         }
         //Branch to new address:
 		this.registers[15] = branchTo | 0;
