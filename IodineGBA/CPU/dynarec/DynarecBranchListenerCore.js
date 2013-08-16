@@ -28,6 +28,7 @@ DynarecBranchListenerCore.prototype.initialize = function () {
     this.compiling = 0;
     this.backEdge = false;
 }
+DynarecBranchListenerCore.prototype.MIN_BLOCK_SIZE = 100;
 DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instructionmode) {
     if ((this.CPUCore.emulatorCore.dynarecTHUMB && instructionmode) || (this.CPUCore.emulatorCore.dynarecARM && !instructionmode)) {
         this.analyzePast(oldPC >>> 0, instructionmode);

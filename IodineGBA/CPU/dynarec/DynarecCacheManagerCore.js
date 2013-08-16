@@ -33,10 +33,10 @@ DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 1000;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.001;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_CLEAR_RATIO = 0.1;
 DynarecCacheManagerCore.prototype.MAX_WORKERS = 3;
-DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE = 100;
+DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE_LLIMIT = 10;
 DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE_HLIMIT = 200;
 DynarecCacheManagerCore.prototype.tickHotness = function () {
-    if (this.sizeOfBlock >= this.MIN_BLOCK_SIZE) {
+    if (this.sizeOfBlock >= this.CPUCore.dynarec.MIN_BLOCK_SIZE) {
         //Don't let sub-routines too small through:
         ++this.hotCount;
         if (!this.compiled) {
@@ -48,12 +48,12 @@ DynarecCacheManagerCore.prototype.tickHotness = function () {
         }
     }
     else if (this.CPUCore.dynarec.compiling < this.MAX_WORKERS) {
-        if (this.MIN_BLOCK_SIZE > 1) {
-            --this.MIN_BLOCK_SIZE;
+        if (this.CPUCore.dynarec.MIN_BLOCK_SIZE > this.MIN_BLOCK_SIZE_LLIMIT) {
+            --this.CPUCore.dynarec.MIN_BLOCK_SIZE;
         }
     }
-   else if (this.MIN_BLOCK_SIZE < this.MIN_BLOCK_SIZE_HLIMIT) {
-        ++this.MIN_BLOCK_SIZE;
+   else if (this.CPUCore.dynarec.MIN_BLOCK_SIZE < this.MIN_BLOCK_SIZE_HLIMIT) {
+        ++this.CPUCore.dynarec.MIN_BLOCK_SIZE;
     }
 }
 DynarecCacheManagerCore.prototype.bailout = function () {
