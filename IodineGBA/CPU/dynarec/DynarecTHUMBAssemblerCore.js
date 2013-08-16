@@ -23,8 +23,8 @@ function DynarecTHUMBAssemblerCore(pc, records) {
 }
 DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
     var batched = "\t//Stub Code For Address " + this.pc + ":\n" +
-    "\t//Ensure we're executing in THUMB mode:\n" +
-    "\tif (cpu.InTHUMB == false) {\n" +
+    "\t//Ensure we're executing in THUMB mode and in cpu mode:\n" +
+    "\tif (cpu.InTHUMB == false || (this.systemStatus | 0) != 0) {\n" +
         "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
         "\t\treturn;\n" +
     "\t}\n" +
@@ -37,9 +37,9 @@ DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
     }
     done(batched);
 }
-DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function (instruction) {
-    return "\t//Ensure we do not run when an IRQ is flagged:\n" +
-    "\tif (cpu.processIRQ) {\n" +
+DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function () {
+    return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
+    "\tif (cpu.processIRQ || (this.systemStatus | 0) != 0) {\n" +
         "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
         "\t\treturn;\n" +
 	"\t}\n" +
@@ -52,8 +52,9 @@ DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function (instruction
 	"\tthumb.incrementProgramCounter();\n";
 }
 DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (instruction) {
-    return "\t//Ensure we do not run when an IRQ is flagged:\n" +
-    "\tif (cpu.processIRQ) {\n" +
+    instruction = instruction | 0;
+    return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
+    "\tif (cpu.processIRQ || (this.systemStatus | 0) != 0) {\n" +
         "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
         "\t\treturn;\n" +
 	"\t}\n" +
@@ -65,7 +66,7 @@ DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (instruction) {
     "\t//Tick the CPU pipeline:\n" +
 	"\tcpu.pipelineInvalid >>= 1;\n" +
     "\tthumb.fetch = cpu.wait.CPUGetOpcode16(cpu.registers[15] | 0) | 0;\n" +
-    this.generateInstructionSpew(instruction) +
+    this.generateInstructionSpew(instruction | 0) +
     "\tthumb.execute = thumb.decode | 0;\n" +
     "\tthumb.decode = thumb.fetch | 0;\n" +
 	"\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
@@ -77,6 +78,7 @@ DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (instruction) {
 	"\t}\n";
 }
 DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruction) {
+    instruction = instruction | 0;
     return "\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.compileInstructionMap = function () {
