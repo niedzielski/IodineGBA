@@ -88,11 +88,6 @@ DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
 	"\t}\n" +
     "\telse {\n" +
         "\t\t//We branched, so exit normally:\n" +
-        "\t\tvar cache = cpu.dynarec.readyCaches[\"thumb_" + this.pcRaw + "\"];\n" +
-        "\t\tif (cache) {\n" +
-            "\t\t\tcpu.IOCore.preprocessCPUHandler(1);\n" +
-            "\t\t\tcpu.dynarec.currentCache = cache;\n" +
-        "\t\t}\n" +
         "\t\treturn;\n" +
 	"\t}\n";
 }
