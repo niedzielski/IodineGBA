@@ -24,7 +24,7 @@ function DynarecTHUMBAssemblerCore(pc, records) {
 DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
     var batched = "\t//Stub Code For Address " + this.pc + ":\n" +
     "\t//Ensure we're executing in THUMB mode and in cpu mode:\n" +
-    "\tif (cpu.InTHUMB == false || (this.systemStatus | 0) != 0) {\n" +
+    "\tif (cpu.InTHUMB == false || (cpu.IOCore.systemStatus | 0) != 0) {\n" +
         "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
         "\t\treturn;\n" +
     "\t}\n" +
@@ -39,7 +39,7 @@ DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
 }
 DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function () {
     return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
-    "\tif (cpu.processIRQ || (this.systemStatus | 0) != 0) {\n" +
+    "\tif (cpu.processIRQ || (cpu.IOCore.systemStatus | 0) != 0) {\n" +
         "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
         "\t\treturn;\n" +
 	"\t}\n" +
@@ -54,7 +54,7 @@ DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function () {
 DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (instruction) {
     instruction = instruction | 0;
     return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
-    "\tif (cpu.processIRQ || (this.systemStatus | 0) != 0) {\n" +
+    "\tif (cpu.processIRQ || (cpu.IOCore.systemStatus | 0) != 0) {\n" +
         "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
         "\t\treturn;\n" +
 	"\t}\n" +
