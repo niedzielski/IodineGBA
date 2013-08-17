@@ -133,12 +133,6 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 		}
 	}
 }
-GameBoyAdvanceCPU.prototype.checkPendingIRQ = function () {
-    if (this.processIRQ) {
-        //Branch for IRQ now:
-        this.IRQ();
-    }
-}
 GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
 	this.triggeredIRQ = !!didFire;
     this.assertIRQ();

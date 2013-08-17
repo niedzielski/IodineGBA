@@ -106,8 +106,7 @@ DynarecTHUMBAssemblerCore.prototype.insertMemoryInstabilityCheck = function (ins
 DynarecTHUMBAssemblerCore.prototype.insertRunnableCheck = function () {
     return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
     "\tif (!!cpu.breakNormalExecution) {\n" +
-    this.insertIRQCheck() +
-    "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
+        "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
         "\t\treturn;\n" +
 	"\t}\n";
 }
@@ -132,9 +131,6 @@ DynarecTHUMBAssemblerCore.prototype.insertPipelineSuffix = function (index) {
     return "\t//Push decode to execute and fetch to decode:\n" +
     "\tthumb.execute = " + ((this.isInROM(((this.pcRaw >>> 0) - 2) >>> 0)) ? this.records[index + 1] : "thumb.decode | 0") + ";\n" +
     "\tthumb.decode = " + ((this.isInROM(this.pcRaw >>> 0)) ? this.records[index + 2] : "thumb.fetch | 0") + ";\n";
-}
-DynarecTHUMBAssemblerCore.prototype.insertIRQCheck = function () {
-    return "\t\tcpu.checkPendingIRQ();\n";
 }
 DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
     return "\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
