@@ -17,8 +17,6 @@
  */
 function GameBoyAdvanceDMA(IOCore) {
 	this.IOCore = IOCore;
-	this.memory = this.IOCore.memory;
-	this.emulatorCore = IOCore.emulatorCore;
 	this.initialize();
 }
 GameBoyAdvanceDMA.prototype.DMA_ENABLE_TYPE = [
@@ -54,8 +52,7 @@ GameBoyAdvanceDMA.prototype.DMA_REQUEST_TYPE = {
 	H_BLANK:		0x4,
 	FIFO_A:			0x8,
 	FIFO_B:			0x10,
-	DISPLAY_SYNC:	0x20,
-	GAME_PAK:		0x40
+	DISPLAY_SYNC:	0x20
 }
 GameBoyAdvanceDMA.prototype.initialize = function () {
 	this.enabled = [0, 0, 0, 0];
@@ -82,7 +79,7 @@ GameBoyAdvanceDMA.prototype.initialize = function () {
 	this.gamePakDMA = false;
 	this.currentMatch = -1;
 	this.lastCurrentMatch = -1;
-	this.memoryAccessCache = new GameBoyAdvanceMemoryCache(this.memory);
+	this.memoryAccessCache = new GameBoyAdvanceMemoryCache(this.IOCore.memory);
 }
 GameBoyAdvanceDMA.prototype.writeDMASource = function (dmaChannel, byteNumber, data) {
 	this.source[dmaChannel] &= ~(0xFF << (byteNumber << 3));
@@ -214,14 +211,6 @@ GameBoyAdvanceDMA.prototype.requestDMA = function (DMAType) {
 			this.pending[dmaPriority] |= DMAType;
 			this.IOCore.flagStepper(0x1);
 		}
-	}
-}
-GameBoyAdvanceDMA.prototype.requestGamePakDMA = function () {
-	if (this.gamePakDMA) {
-		//Game Pak transfer causes DMA to trigger:
-		this.pending[3] |= this.DMA_REQUEST_TYPE.GAME_PAK;
-		this.enabled[3] |= this.DMA_REQUEST_TYPE.GAME_PAK;
-		this.IOCore.flagStepper(0x1);
 	}
 }
 GameBoyAdvanceDMA.prototype.perform = function () {
