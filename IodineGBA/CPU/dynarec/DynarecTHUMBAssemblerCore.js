@@ -26,11 +26,11 @@ function DynarecTHUMBAssemblerCore(pc, records) {
 DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
     var batched = "\t//Stub Code For Address " + this.pc + ":\n" +
     "\tvar thumb = cpu.THUMB;\n";
-    batched += this.generatePipelineSpew();
+    batched += this.generatePipelineSpew1();
     this.incrementInternalPC();
-    batched += this.generatePipelineSpew();
+    batched += this.generatePipelineSpew2();
     this.incrementInternalPC();
-    var length = this.records.length;
+    var length = this.records.length - 2;
     for (var index = 0; index < length; index++) {
         batched += this.generateBodySpew(index >>> 0, this.records[index >>> 0] >>> 0);
         this.incrementInternalPC();
@@ -49,9 +49,9 @@ DynarecTHUMBAssemblerCore.prototype.nextInstructionPC = function () {
 DynarecTHUMBAssemblerCore.prototype.currentInstructionPC = function () {
     return ("0x" + (this.pcRaw >>> 0).toString(16));
 }
-DynarecTHUMBAssemblerCore.prototype.isInROM = function () {
+DynarecTHUMBAssemblerCore.prototype.isInROM = function (relativePC) {
     //Get the address of the instruction:
-    var relativePC = ((this.pcRaw >>> 0) - 4) >>> 0;
+    var relativePC = relativePC >>> 0;
     //Check for instruction address being in ROM:
     if ((relativePC >>> 0) > 0x8000000) {
         if ((relativePC >>> 0) < 0xE000000) {
@@ -63,11 +63,19 @@ DynarecTHUMBAssemblerCore.prototype.isInROM = function () {
     }
     return false;
 }
-DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew = function () {
+DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew1 = function () {
     return this.insertRunnableCheck() +
     this.insertFetchPrefix() +
-    "\t//Waiting for the pipeline bubble to clear...\n" +
-    this.insertPipelineSuffix() +
+    "\t//Waiting for the pipeline bubble to clear... two stages left\n" +
+    "\t//Push fetch to decode:\n" +
+    "\tthumb.decode = thumb.fetch | 0;\n" +
+	this.incrementPC();
+}
+DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew2 = function () {
+    return this.insertRunnableCheck() +
+    this.insertFetchPrefix() +
+    "\t//Waiting for the pipeline bubble to clear... one stage left\n" +
+    this.insertPipelineStartSuffix() +
 	this.incrementPC();
 }
 DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (index, instruction) {
@@ -76,7 +84,7 @@ DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (index, instruct
     this.insertMemoryInstabilityCheck(instruction) +
     ((index == 0) ? this.insertFetchPrefix() : this.insertFetching()) +
     this.generateInstructionSpew(instruction | 0) +
-    this.insertPipelineSuffix() +
+    this.insertPipelineSuffix(index | 0) +
 	this.checkPCStatus();
 }
 DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruction) {
@@ -84,7 +92,7 @@ DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruct
     return "\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertMemoryInstabilityCheck = function (instruction) {
-    if (!!this.isInROM()) {
+    if (!!this.isInROM(((this.pcRaw >>> 0) - 4) >>> 0)) {
         return "\t//Address of instruction located in ROM, skipping guard check!\n";
     }
     else {
@@ -115,10 +123,15 @@ DynarecTHUMBAssemblerCore.prototype.insertFetching = function () {
     return "\t//Update the fetch stage:\n" +
     "\tthumb.fetch = cpu.wait.CPUGetOpcode16(" + this.currentInstructionPC() + ") | 0;\n";
 }
-DynarecTHUMBAssemblerCore.prototype.insertPipelineSuffix = function () {
+DynarecTHUMBAssemblerCore.prototype.insertPipelineStartSuffix = function () {
     return "\t//Push decode to execute and fetch to decode:\n" +
     "\tthumb.execute = thumb.decode | 0;\n" +
     "\tthumb.decode = thumb.fetch | 0;\n";
+}
+DynarecTHUMBAssemblerCore.prototype.insertPipelineSuffix = function (index) {
+    return "\t//Push decode to execute and fetch to decode:\n" +
+    "\tthumb.execute = " + ((this.isInROM(((this.pcRaw >>> 0) - 2) >>> 0)) ? this.records[index + 1] : "thumb.decode | 0") + ";\n" +
+    "\tthumb.decode = " + ((this.isInROM(this.pcRaw >>> 0)) ? this.records[index + 2] : "thumb.fetch | 0") + ";\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertIRQCheck = function () {
     return "\t\tcpu.checkPendingIRQ();\n";

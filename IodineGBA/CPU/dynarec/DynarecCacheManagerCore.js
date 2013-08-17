@@ -93,6 +93,7 @@ DynarecCacheManagerCore.prototype.getRecords = function () {
     this.record = [];
     var start = this.start >>> 0;
     var end = this.end >>> 0;
+    end = ((end >>> 0) + ((!!this.InTHUMB) ? 0x4 : 0x8)) >>> 0;
     while ((start >>> 0) <= (end >>> 0)) {
         //Build up a record of bytecode to pass to the worker to compile:
         this.record.push(this.read(start >>> 0) | 0);

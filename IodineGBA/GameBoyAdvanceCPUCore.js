@@ -84,11 +84,19 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
 		this.registers[15] = 0x8000000;
         this.MODEBits = 0x1F;
 	}
-    this.breakNormalExecution = false;//No pending interruption.
+    //No pending interruption for dynarec:
+    this.breakNormalExecution = false;
+    //No pending IRQs to check for yet:
+    this.executeIteration = this.executeIterationWithoutIRQ;
 }
-GameBoyAdvanceCPU.prototype.executeIteration = function () {
-	//Check for pending IRQ:
-	this.checkPendingIRQ();
+GameBoyAdvanceCPU.prototype.executeIterationWithIRQ = function () {
+	//Handle an IRQ:
+	this.IRQ();
+    //Execute the CPU stepping normally:
+    this.executeIteration = this.executeIterationWithoutIRQ;
+	this.executeIterationWithoutIRQ();
+}
+GameBoyAdvanceCPU.prototype.executeIterationWithoutIRQ = function () {
 	//Tick the pipeline and bubble out invalidity:
 	this.pipelineInvalid >>= 1;
 	//Tick the pipeline of the selected instruction set:
@@ -137,6 +145,9 @@ GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
 }
 GameBoyAdvanceCPU.prototype.assertIRQ = function () {
 	this.processIRQ = !!this.triggeredIRQ && !this.IRQDisabled;
+    if (this.processIRQ) {
+        this.executeIteration = this.executeIterationWithIRQ;
+    }
     this.checkCPUExecutionStatus();
 }
 GameBoyAdvanceCPU.prototype.checkCPUExecutionStatus = function () {
