@@ -167,7 +167,6 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
             else {
                  this.checkDisplaySync();                                   //Check for display sync.
             }
-            this.checkDisplaySync();                                        //Check for display sync.
             this.checkVCounter();                                           //We're on a new scan line, so check the VCounter for match.
             //Recursive clocking of the LCD state:
             this.clockLCDState();
