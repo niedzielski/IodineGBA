@@ -1581,7 +1581,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.gfx.readVCOUNT() | 0;
 	}
 	//4000007h - VCOUNT - Vertical Counter (Read only)
-	this.readIO[0x7] = this.readWriteOnly;
+	this.readIO[0x7] = this.readZero;
 	//4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
 	this.readIO[0x8] = function (parentObj) {
 		return parentObj.gfx.readBG0CNT0() | 0;
