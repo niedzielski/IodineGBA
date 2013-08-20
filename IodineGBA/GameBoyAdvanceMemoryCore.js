@@ -1567,7 +1567,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.gfx.readGreenSwap() | 0;
 	}
 	//4000003h - Undocumented - Green Swap (R/W)
-	this.readIO[0x3] = this.readWriteOnly;
+	this.readIO[0x3] = this.readZero;
 	//4000004h - DISPSTAT - General LCD Status (Read/Write)
 	this.readIO[0x4] = function (parentObj) {
 		return parentObj.gfx.readDISPSTAT0() | 0;
@@ -1660,7 +1660,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.sound.readSOUND1CNT_L() | 0;
 	}
 	//4000061h - NOT USED - ZERO
-	this.readIO[0x61] = this.readWriteOnly;
+	this.readIO[0x61] = this.readZero;
 	//4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
 	this.readIO[0x62] = function (parentObj) {
 		//NR11:
@@ -1672,7 +1672,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.sound.readSOUND1CNT_H1() | 0;
 	}
 	//4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
-	this.readIO[0x64] = this.readWriteOnly;
+	this.readIO[0x64] = this.readZero;
 	//4000065h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
 	this.readIO[0x65] = function (parentObj) {
 		//NR14:
@@ -1697,7 +1697,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 	//400006Bh - NOT USED - ZERO
 	this.readIO[0x6B] = this.readZero;
 	//400006Ch - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
-	this.readIO[0x6C] = this.readWriteOnly;
+	this.readIO[0x6C] = this.readZero;
 	//400006Dh - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
 	this.readIO[0x6D] = function (parentObj) {
 		//NR24:
@@ -1713,16 +1713,16 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.sound.readSOUND3CNT_L() | 0;
 	}
 	//4000071h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)
-	this.readIO[0x71] = this.readWriteOnly;
+	this.readIO[0x71] = this.readZero;
 	//4000072h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
-	this.readIO[0x72] = this.readWriteOnly;
+	this.readIO[0x72] = this.readZero;
 	//4000073h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
 	this.readIO[0x73] = function (parentObj) {
 		//NR32:
 		return parentObj.sound.readSOUND3CNT_H() | 0;
 	}
 	//4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
-	this.readIO[0x74] = this.readWriteOnly;
+	this.readIO[0x74] = this.readZero;
 	//4000075h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
 	this.readIO[0x75] = function (parentObj) {
 		//NR34:
@@ -1733,7 +1733,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 	//4000077h - NOT USED - ZERO
 	this.readIO[0x77] = this.readZero;
 	//4000078h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
-	this.readIO[0x78] = this.readWriteOnly;
+	this.readIO[0x78] = this.readZero;
 	//4000079h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
 	this.readIO[0x79] = function (parentObj) {
 		//NR42:
@@ -1780,7 +1780,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.sound.readSOUNDCNT_X() | 0;
 	}
 	//4000085h - NOT USED - ZERO
-	this.readIO[0x85] = this.readWriteOnly;
+	this.readIO[0x85] = this.readZero;
 	//4000086h - NOT USED - ZERO
 	this.readIO[0x86] = this.readZero;
 	//4000087h - NOT USED - ZERO
@@ -1924,7 +1924,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.timer.readTM0CNT_H() | 0;
 	}
 	//4000103h - TM0CNT_H - Timer 0 Control (R/W)
-	this.readIO[0x103] = this.readWriteOnly;
+	this.readIO[0x103] = this.readZero;
 	//4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
 	this.readIO[0x104] = function (parentObj) {
 		return parentObj.timer.readTM1CNT_L0() | 0;
@@ -1938,7 +1938,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.timer.readTM1CNT_H() | 0;
 	}
 	//4000107h - TM1CNT_H - Timer 1 Control (R/W)
-	this.readIO[0x107] = this.readWriteOnly;
+	this.readIO[0x107] = this.readZero;
 	//4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
 	this.readIO[0x108] = function (parentObj) {
 		return parentObj.timer.readTM2CNT_L0() | 0;
@@ -1952,7 +1952,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.timer.readTM2CNT_H() | 0;
 	}
 	//400010Bh - TM2CNT_H - Timer 2 Control (R/W)
-	this.readIO[0x10B] = this.readWriteOnly;
+	this.readIO[0x10B] = this.readZero;
 	//400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
 	this.readIO[0x10C] = function (parentObj) {
 		return parentObj.timer.readTM3CNT_L0() | 0;
@@ -1966,7 +1966,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.timer.readTM3CNT_H() | 0;
 	}
 	//400010Fh - TM3CNT_H - Timer 3 Control (R/W)
-	this.readIO[0x10F] = this.readWriteOnly;
+	this.readIO[0x10F] = this.readZero;
 	//4000110h through 400011Fh - NOT USED - GLITCHED
 	this.fillReadTableUnused(0x110, 0x11F);
 	//4000120h - Serial Data A (R/W)
@@ -2054,7 +2054,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.serial.readJOYCNT() | 0;
 	}
 	//4000141h - JOYCNT - JOY BUS Control Register (R/W)
-	this.readIO[0x141] = this.readWriteOnly;
+	this.readIO[0x141] = this.readZero;
 	//4000142h - NOT USED - ZERO
 	this.readIO[0x142] = this.readZero;
 	//4000143h - NOT USED - ZERO
@@ -2098,7 +2098,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.serial.readJOYBUS_STAT() | 0;
 	}
 	//4000159h - JoyBus Stat (R/W)
-	this.readIO[0x159] = this.readWriteOnly;
+	this.readIO[0x159] = this.readZero;
 	//400015Ah - NOT USED - ZERO
 	this.readIO[0x15A] = this.readZero;
 	//400015Bh - NOT USED - ZERO
@@ -2138,7 +2138,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.irq.readIME() | 0;
 	}
 	//4000209h - IME - Interrupt Master Enable Register (R/W)
-	this.readIO[0x209] = this.readWriteOnly;
+	this.readIO[0x209] = this.readZero;
 	//400020Ah - NOT USED - ZERO
 	this.readIO[0x20A] = this.readZero;
 	//400020Bh - NOT USED - ZERO
@@ -2150,7 +2150,7 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 		return parentObj.wait.readPOSTBOOT() | 0;
 	}
 	//4000301h - HALTCNT - BYTE - Undocumented - Low Power Mode Control (W)
-	this.readIO[0x301] = this.readWriteOnly;
+	this.readIO[0x301] = this.readZero;
 	//4000302h - NOT USED - ZERO
 	this.readIO[0x302] = this.readZero;
 	//4000303h - NOT USED - ZERO
@@ -3011,9 +3011,6 @@ GameBoyAdvanceMemory.prototype.readSRAM32 = function (parentObj, address) {
 }
 GameBoyAdvanceMemory.prototype.readZero = function (parentObj) {
 	return 0;
-}
-GameBoyAdvanceMemory.prototype.readWriteOnly = function (parentObj) {
-	return 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused = function (parentObj, address, busReqNumber) {
 	address = address | 0;
