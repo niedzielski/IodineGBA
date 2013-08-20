@@ -1807,107 +1807,107 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 	this.readIO[0x8F] = this.readUnused3;
 	//4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x90] = function (parentObj) {
-		return parentObj.sound.readWAVE(0);
+		return parentObj.sound.readWAVE(0) | 0;
 	}
 	//4000091h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x91] = function (parentObj) {
-		return parentObj.sound.readWAVE(1);
+		return parentObj.sound.readWAVE(1) | 0;
 	}
 	//4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x92] = function (parentObj) {
-		return parentObj.sound.readWAVE(2);
+		return parentObj.sound.readWAVE(2) | 0;
 	}
 	//4000093h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x93] = function (parentObj) {
-		return parentObj.sound.readWAVE(3);
+		return parentObj.sound.readWAVE(3) | 0;
 	}
 	//4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x94] = function (parentObj) {
-		return parentObj.sound.readWAVE(4);
+		return parentObj.sound.readWAVE(4) | 0;
 	}
 	//4000095h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x95] = function (parentObj) {
-		return parentObj.sound.readWAVE(5);
+		return parentObj.sound.readWAVE(5) | 0;
 	}
 	//4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x96] = function (parentObj) {
-		return parentObj.sound.readWAVE(6);
+		return parentObj.sound.readWAVE(6) | 0;
 	}
 	//4000097h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x97] = function (parentObj) {
-		return parentObj.sound.readWAVE(7);
+		return parentObj.sound.readWAVE(7) | 0;
 	}
 	//4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x98] = function (parentObj) {
-		return parentObj.sound.readWAVE(8);
+		return parentObj.sound.readWAVE(8) | 0;
 	}
 	//4000099h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x99] = function (parentObj) {
-		return parentObj.sound.readWAVE(9);
+		return parentObj.sound.readWAVE(9) | 0;
 	}
 	//400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x9A] = function (parentObj) {
-		return parentObj.sound.readWAVE(10);
+		return parentObj.sound.readWAVE(10) | 0;
 	}
 	//400009Bh - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x9B] = function (parentObj) {
-		return parentObj.sound.readWAVE(11);
+		return parentObj.sound.readWAVE(11) | 0;
 	}
 	//400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x9C] = function (parentObj) {
-		return parentObj.sound.readWAVE(12);
+		return parentObj.sound.readWAVE(12) | 0;
 	}
 	//400009Dh - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x9D] = function (parentObj) {
-		return parentObj.sound.readWAVE(13);
+		return parentObj.sound.readWAVE(13) | 0;
 	}
 	//400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x9E] = function (parentObj) {
-		return parentObj.sound.readWAVE(14);
+		return parentObj.sound.readWAVE(14) | 0;
 	}
 	//400009Fh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
 	this.readIO[0x9F] = function (parentObj) {
-		return parentObj.sound.readWAVE(15);
+		return parentObj.sound.readWAVE(15) | 0;
 	}
 	//40000A0h through 40000B9h - WRITE ONLY
 	this.fillReadTableUnused(0xA0, 0xB9);
 	//40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
 	this.readIO[0xBA] = function (parentObj) {
-		return parentObj.dma.readDMAControl0(0);
+		return parentObj.dma.readDMAControl0(0) | 0;
 	}
 	//40000BBh - DMA0CNT_H - DMA 0 Control (R/W)
 	this.readIO[0xBB] = function (parentObj) {
-		return parentObj.dma.readDMAControl1(0);
+		return parentObj.dma.readDMAControl1(0) | 0;
 	}
 	//40000BCh through 40000C5h - WRITE ONLY
 	this.fillReadTableUnused(0xBC, 0xC5);
 	//40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
 	this.readIO[0xC6] = function (parentObj) {
-		return parentObj.dma.readDMAControl0(1);
+		return parentObj.dma.readDMAControl0(1) | 0;
 	}
 	//40000C7h - DMA1CNT_H - DMA 1 Control (R/W)
 	this.readIO[0xC7] = function (parentObj) {
-		return parentObj.dma.readDMAControl1(1);
+		return parentObj.dma.readDMAControl1(1) | 0;
 	}
 	//40000C8h through 40000D1h - WRITE ONLY
 	this.fillReadTableUnused(0xC8, 0xD1);
 	//40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
 	this.readIO[0xD2] = function (parentObj) {
-		return parentObj.dma.readDMAControl0(2);
+		return parentObj.dma.readDMAControl0(2) | 0;
 	}
 	//40000D3h - DMA2CNT_H - DMA 2 Control (R/W)
 	this.readIO[0xD3] = function (parentObj) {
-		return parentObj.dma.readDMAControl1(2);
+		return parentObj.dma.readDMAControl1(2) | 0;
 	}
 	//40000D4h through 40000DDh - WRITE ONLY
 	this.fillReadTableUnused(0xD4, 0xDD);
 	//40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
 	this.readIO[0xDE] = function (parentObj) {
-		return parentObj.dma.readDMAControl0(3);
+		return parentObj.dma.readDMAControl0(3) | 0;
 	}
 	//40000DFh - DMA3CNT_H - DMA 3 Control (R/W)
 	this.readIO[0xDF] = function (parentObj) {
-		return parentObj.dma.readDMAControl1(3);
+		return parentObj.dma.readDMAControl1(3) | 0;
 	}
 	//40000E0h through 40000FFh - NOT USED - GLITCHED
 	this.fillReadTableUnused(0xE0, 0xFF);
@@ -2571,10 +2571,22 @@ GameBoyAdvanceMemory.prototype.remapWRAM = function (data) {
 		this.memoryReader[2] = ((data & 0x20) == 0x20) ? this.readExternalWRAM : this.readInternalWRAM;
 		this.memoryWriter[3] = this.writeInternalWRAM;
 		this.memoryReader[3] = this.readInternalWRAM;
+        this.memoryWriter8[3] = this.writeInternalWRAM8;
+		this.memoryReader8[3] = this.readInternalWRAM8;
+        this.memoryWriter16[3] = (this.internalRAM16) ? this.writeInternalWRAM16Optimized : this.writeInternalWRAM16Slow;
+		this.memoryReader16[3] = (this.externalRAM16) ? this.readInternalWRAM16Optimized : this.readInternalWRAM16Slow;
+        this.memoryWriter32[3] = (this.internalRAM32) ? this.writeInternalWRAM32Optimized : this.writeInternalWRAM32Slow;
+		this.memoryReader32[3] = (this.externalRAM32) ? this.readInternalWRAM32Optimized : this.readInternalWRAM32Slow;
 	}
 	else {
 		this.memoryWriter[2] = this.memoryWriter[3] = this.writeUnused;
 		this.memoryReader[2] = this.memoryReader[3] = this.readUnused;
+        this.memoryWriter8[2] = this.memoryWriter8[3] = this.writeUnused8;
+		this.memoryReader8[2] = this.memoryReader8[3] = this.readUnused8;
+        this.memoryWriter16[2] = this.memoryWriter16[3] = this.writeUnused16;
+		this.memoryReader16[2] = this.memoryReader16[3] = this.readUnused16;
+        this.memoryWriter32[2] = this.memoryWriter32[3] = this.writeUnused32;
+		this.memoryReader32[2] = this.memoryReader32[3] = this.readUnused32;
 	}
 }
 GameBoyAdvanceMemory.prototype.readBIOS = function (parentObj, address, busReqNumber) {
@@ -3014,7 +3026,7 @@ GameBoyAdvanceMemory.prototype.readZero = function (parentObj) {
 }
 GameBoyAdvanceMemory.prototype.readUnused = function (parentObj, address, busReqNumber) {
 	address = address | 0;
-    parentObj.wait.FASTAccess(busReqNumber);
+    parentObj.wait.FASTAccess(busReqNumber | 0);
 	return (parentObj.cpu.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused8 = function (parentObj, address) {
