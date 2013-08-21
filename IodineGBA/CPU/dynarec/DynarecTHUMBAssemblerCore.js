@@ -17,37 +17,41 @@
  */
 function DynarecTHUMBAssemblerCore(pc, records) {
     pc = pc >>> 0;
-    this.pcRaw = pc >>> 0;
-    this.pc = "0x" + this.pcRaw.toString(16);
+    this.currentPC = pc >>> 0;
+    this.startAddress = this.toHex(this.currentPC);
+    this.branched = false;
     this.records = records;
     this.compileInstructionMap();
     this.generateSpew();
 }
 DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
-    var batched = "\t//Stub Code For Address " + this.pc + ":\n" +
+    var batched = "\t//Stub Code For Address " + this.startAddress + ":\n" +
     "\tvar thumb = cpu.THUMB;\n";
     batched += this.generatePipelineSpew1();
     this.incrementInternalPC();
     batched += this.generatePipelineSpew2();
     this.incrementInternalPC();
     var length = this.records.length - 2;
-    for (var index = 0; index < length; index++) {
+    for (var index = 0; index < length && !this.branched; index++) {
         batched += this.generateBodySpew(index >>> 0, this.records[index >>> 0] >>> 0);
         this.incrementInternalPC();
     }
     this.stubCode = batched;
 }
+DynarecTHUMBAssemblerCore.prototype.toHex = function (toConvert) {
+    return "0x" + toConvert.toString(16);
+}
 DynarecTHUMBAssemblerCore.prototype.getStubCode = function () {
     return this.stubCode;
 }
 DynarecTHUMBAssemblerCore.prototype.incrementInternalPC = function () {
-    this.pcRaw = this.nextInstructionPC() >>> 0;
+    this.currentPC = this.nextInstructionPC() >>> 0;
 }
 DynarecTHUMBAssemblerCore.prototype.nextInstructionPC = function () {
-    return ((this.pcRaw >>> 0) + 2) >>> 0;
+    return ((this.currentPC >>> 0) + 2) >>> 0;
 }
 DynarecTHUMBAssemblerCore.prototype.currentInstructionPC = function () {
-    return ("0x" + (this.pcRaw >>> 0).toString(16));
+    return this.toHex(this.currentPC >>> 0);
 }
 DynarecTHUMBAssemblerCore.prototype.isInROM = function (relativePC) {
     //Get the address of the instruction:
@@ -89,16 +93,24 @@ DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (index, instruct
 }
 DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruction) {
     instruction = instruction | 0;
-    return "\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
+    var instructionID = this.instructionMap[instruction >> 6];
+    if (typeof this[instructionID] == "function") {
+        //Patch in our own inlined code:
+        return this[instructionID](instruction | 0);
+    }
+    else {
+        //Call out to the interpreter's stub:
+        return "\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
+    }
 }
 DynarecTHUMBAssemblerCore.prototype.insertMemoryInstabilityCheck = function (instruction) {
-    if (!!this.isInROM(((this.pcRaw >>> 0) - 4) >>> 0)) {
+    if (!!this.isInROM(((this.currentPC >>> 0) - 4) >>> 0)) {
         return "\t//Address of instruction located in ROM, skipping guard check!\n";
     }
     else {
         return "\t//Verify the cached instruction should be called:\n" +
-        "\tif ((thumb.execute | 0) != 0x" + instruction.toString(16) + ") {\n" +
-            "\t\tcpu.dynarec.findCache(" + this.pc + ").bailout();\n" +
+        "\tif ((thumb.execute | 0) != " + this.toHex(instruction) + ") {\n" +
+            "\t\tcpu.dynarec.findCache(" + this.startAddress + ").bailout();\n" +
             "\t\treturn;\n" +
         "\t}\n";
     }
@@ -106,7 +118,7 @@ DynarecTHUMBAssemblerCore.prototype.insertMemoryInstabilityCheck = function (ins
 DynarecTHUMBAssemblerCore.prototype.insertRunnableCheck = function () {
     return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
     "\tif (!!cpu.breakNormalExecution) {\n" +
-        "\t\tcpu.dynarec.findCache(" + this.pc + ").tickBad();\n" +
+        "\t\tcpu.dynarec.findCache(" + this.startAddress + ").tickBad();\n" +
         "\t\treturn;\n" +
 	"\t}\n";
 }
@@ -129,8 +141,8 @@ DynarecTHUMBAssemblerCore.prototype.insertPipelineStartSuffix = function () {
 }
 DynarecTHUMBAssemblerCore.prototype.insertPipelineSuffix = function (index) {
     return "\t//Push decode to execute and fetch to decode:\n" +
-    "\tthumb.execute = " + ((this.isInROM(((this.pcRaw >>> 0) - 2) >>> 0)) ? this.records[index + 1] : "thumb.decode | 0") + ";\n" +
-    "\tthumb.decode = " + ((this.isInROM(this.pcRaw >>> 0)) ? this.records[index + 2] : "thumb.fetch | 0") + ";\n";
+    "\tthumb.execute = " + ((this.isInROM(((this.currentPC >>> 0) - 2) >>> 0)) ? this.toHex(this.records[index + 1]) : "thumb.decode | 0") + ";\n" +
+    "\tthumb.decode = " + ((this.isInROM(this.currentPC >>> 0)) ? this.toHex(this.records[index + 2]) : "thumb.fetch | 0") + ";\n";
 }
 DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
     return "\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
@@ -142,7 +154,7 @@ DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
 	"\t}\n";
 }
 DynarecTHUMBAssemblerCore.prototype.incrementPC = function () {
-    return "\tcpu.registers[15] = 0x" + this.nextInstructionPC().toString(16) + ";\n";
+    return "\tcpu.registers[15] = " + this.toHex(this.nextInstructionPC()) + ";\n";
 }
 DynarecTHUMBAssemblerCore.prototype.compileInstructionMap = function () {
 	this.instructionMap = [];
@@ -321,4 +333,21 @@ DynarecTHUMBAssemblerCore.prototype.generateLowMap4 = function (instruction1, in
 	this.instructionMap.push(instruction2);
 	this.instructionMap.push(instruction3);
 	this.instructionMap.push(instruction4);
+}
+DynarecTHUMBAssemblerCore.prototype.LSLimm = function (instructionValue) {
+	var spew = "\t//LSL imm:\n" +
+    "\tvar source = cpu.registers[" + ((instructionValue >> 3) & 0x7) + "] | 0;\n";
+	var offset = (instructionValue >> 6) & 0x1F;
+	if (offset > 0) {
+		spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
+		"\tcpu.CPSRCarry = ((source << " + this.toHex(offset - 1) + ") < 0);\n" +
+		"\t//Perform shift:\n" + 
+		"\tsource <<= " + this.toHex(offset) + ";\n";
+	}
+	spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
+	"\tcpu.CPSRNegative = (source < 0);\n" +
+	"\tcpu.CPSRZero = (source == 0);\n" +
+	"\t//Update destination register:\n" +
+	"\tcpu.registers[" + (instructionValue & 0x7) + "] = source | 0;\n";
+    return spew;
 }
