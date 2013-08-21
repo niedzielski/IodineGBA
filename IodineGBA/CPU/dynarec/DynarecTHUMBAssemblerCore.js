@@ -336,7 +336,7 @@ DynarecTHUMBAssemblerCore.prototype.generateLowMap4 = function (instruction1, in
 }
 DynarecTHUMBAssemblerCore.prototype.LSLimm = function (instructionValue) {
 	var spew = "\t//LSL imm:\n" +
-    "\tvar source = cpu.registers[" + ((instructionValue >> 3) & 0x7) + "] | 0;\n";
+    "\tvar source = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
 	var offset = (instructionValue >> 6) & 0x1F;
 	if (offset > 0) {
 		spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
@@ -348,6 +348,27 @@ DynarecTHUMBAssemblerCore.prototype.LSLimm = function (instructionValue) {
 	"\tcpu.CPSRNegative = (source < 0);\n" +
 	"\tcpu.CPSRZero = (source == 0);\n" +
 	"\t//Update destination register:\n" +
-	"\tcpu.registers[" + (instructionValue & 0x7) + "] = source | 0;\n";
+	"\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LSRimm = function (instructionValue) {
+	var spew = "\t//LSR imm:\n" +
+    "\tvar source = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
+	var offset = (instructionValue >> 6) & 0x1F;
+	if (offset > 0) {
+		spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
+		"\tcpu.CPSRCarry = (((source >> " + this.toHex(offset - 1) + ") & 0x1) != 0);\n" +
+		"\t//Perform shift:\n" +
+		"\tsource = (source >>> " + this.toHex(offset) + ") | 0;\n";
+	}
+    else {
+        spew += "\tcpu.CPSRCarry = (source < 0);\n" +
+        "\tsource = 0;\n";
+    }
+	spew += "//Perform CPSR updates for N and Z (But not V):\n" +
+	"\tcpu.CPSRNegative = (source < 0);\n" +
+	"\tcpu.CPSRZero = (source == 0);\n" +
+	"\t//Update destination register:\n" +
+	"\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
 }
