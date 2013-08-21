@@ -19,6 +19,9 @@ function GameBoyAdvanceMemory(IOCore) {
 	//Reference to the emulator core:
     this.IOCore = IOCore;
     this.emulatorCore = this.IOCore.emulatorCore;
+    //WRAM Map Control Stuff:
+    this.memoryCaches = [];
+    this.WRAMControlFlags = 0x20;
 	//Load the BIOS:
     this.BIOS = getUint8Array(0x4000);
     this.BIOS16 = getUint16View(this.BIOS);
@@ -2565,29 +2568,62 @@ GameBoyAdvanceMemory.prototype.writeUnused32 = function (parentObj, address, dat
 	parentObj.wait.FASTAccess2();
 }
 GameBoyAdvanceMemory.prototype.remapWRAM = function (data) {
-	data = data | 0;
-    if ((data & 0x01) == 0) {
-		this.memoryWriter[2] = ((data & 0x20) == 0x20) ? this.writeExternalWRAM : this.writeInternalWRAM;
-		this.memoryReader[2] = ((data & 0x20) == 0x20) ? this.readExternalWRAM : this.readInternalWRAM;
-		this.memoryWriter[3] = this.writeInternalWRAM;
-		this.memoryReader[3] = this.readInternalWRAM;
-        this.memoryWriter8[3] = this.writeInternalWRAM8;
-		this.memoryReader8[3] = this.readInternalWRAM8;
-        this.memoryWriter16[3] = (this.internalRAM16) ? this.writeInternalWRAM16Optimized : this.writeInternalWRAM16Slow;
-		this.memoryReader16[3] = (this.externalRAM16) ? this.readInternalWRAM16Optimized : this.readInternalWRAM16Slow;
-        this.memoryWriter32[3] = (this.internalRAM32) ? this.writeInternalWRAM32Optimized : this.writeInternalWRAM32Slow;
-		this.memoryReader32[3] = (this.externalRAM32) ? this.readInternalWRAM32Optimized : this.readInternalWRAM32Slow;
-	}
-	else {
-		this.memoryWriter[2] = this.memoryWriter[3] = this.writeUnused;
-		this.memoryReader[2] = this.memoryReader[3] = this.readUnused;
-        this.memoryWriter8[2] = this.memoryWriter8[3] = this.writeUnused8;
-		this.memoryReader8[2] = this.memoryReader8[3] = this.readUnused8;
-        this.memoryWriter16[2] = this.memoryWriter16[3] = this.writeUnused16;
-		this.memoryReader16[2] = this.memoryReader16[3] = this.readUnused16;
-        this.memoryWriter32[2] = this.memoryWriter32[3] = this.writeUnused32;
-		this.memoryReader32[2] = this.memoryReader32[3] = this.readUnused32;
-	}
+	data = data & 0x21;
+    if ((data | 0) != (this.WRAMControlFlags | 0)) {
+        if ((data & 0x01) == 0) {
+            if ((data & 0x20) == 0x20) {
+                //Use External RAM:
+                this.memoryWriter[2] = this.writeExternalWRAM;
+                this.memoryReader[2] = this.readExternalWRAM;
+                this.memoryWriter8[2] = this.writeExternalWRAM8;
+                this.memoryReader8[2] = this.readExternalWRAM8;
+                this.memoryWriter16[2] = (this.externalRAM16) ? this.writeExternalWRAM16Optimized : this.writeExternalWRAM16Slow;
+                this.memoryReader16[2] = (this.externalRAM16) ? this.readExternalWRAM16Optimized : this.readExternalWRAM16Slow;
+                this.memoryWriter32[2] = (this.externalRAM32) ? this.writeExternalWRAM32Optimized : this.writeExternalWRAM32Slow;
+                this.memoryReader32[2] = (this.externalRAM32) ? this.readExternalWRAM32Optimized : this.readExternalWRAM32Slow;
+            }
+            else {
+                // Mirror Internal RAM to External:
+                this.memoryWriter[2] = this.writeInternalWRAM;
+                this.memoryReader[2] = this.readInternalWRAM;
+                this.memoryWriter8[2] = this.writeInternalWRAM8;
+                this.memoryReader8[2] = this.readInternalWRAM8;
+                this.memoryWriter16[2] = (this.internalRAM16) ? this.writeInternalWRAM16Optimized : this.writeInternalWRAM16Slow;
+                this.memoryReader16[2] = (this.internalRAM16) ? this.readInternalWRAM16Optimized : this.readInternalWRAM16Slow;
+                this.memoryWriter32[2] = (this.internalRAM32) ? this.writeInternalWRAM32Optimized : this.writeInternalWRAM32Slow;
+                this.memoryReader32[2] = (this.internalRAM32) ? this.readInternalWRAM32Optimized : this.readInternalWRAM32Slow;
+            }
+            this.memoryWriter[3] = this.writeInternalWRAM;
+            this.memoryReader[3] = this.readInternalWRAM;
+            this.memoryWriter8[3] = this.writeInternalWRAM8;
+            this.memoryReader8[3] = this.readInternalWRAM8;
+            this.memoryWriter16[3] = (this.internalRAM16) ? this.writeInternalWRAM16Optimized : this.writeInternalWRAM16Slow;
+            this.memoryReader16[3] = (this.internalRAM16) ? this.readInternalWRAM16Optimized : this.readInternalWRAM16Slow;
+            this.memoryWriter32[3] = (this.internalRAM32) ? this.writeInternalWRAM32Optimized : this.writeInternalWRAM32Slow;
+            this.memoryReader32[3] = (this.internalRAM32) ? this.readInternalWRAM32Optimized : this.readInternalWRAM32Slow;
+        }
+        else {
+            this.memoryWriter[2] = this.memoryWriter[3] = this.writeUnused;
+            this.memoryReader[2] = this.memoryReader[3] = this.readUnused;
+            this.memoryWriter8[2] = this.memoryWriter8[3] = this.writeUnused8;
+            this.memoryReader8[2] = this.memoryReader8[3] = this.readUnused8;
+            this.memoryWriter16[2] = this.memoryWriter16[3] = this.writeUnused16;
+            this.memoryReader16[2] = this.memoryReader16[3] = this.readUnused16;
+            this.memoryWriter32[2] = this.memoryWriter32[3] = this.writeUnused32;
+            this.memoryReader32[2] = this.memoryReader32[3] = this.readUnused32;
+        }
+        this.WRAMControlFlags = data | 0;
+        this.checkMemoryCacheValidity();
+    }
+}
+GameBoyAdvanceMemory.prototype.checkMemoryCacheValidity = function () {
+    var length = this.memoryCaches.length | 0;
+    for (var index = 0; (index | 0) < (length | 0); index = ((index | 0) + 1) | 0) {
+        this.memoryCaches[index | 0].invalidateIfWRAM();
+    }
+}
+GameBoyAdvanceMemory.prototype.addMemoryCacheRoot = function (root) {
+    this.memoryCaches.push(root);
 }
 GameBoyAdvanceMemory.prototype.readBIOS = function (parentObj, address, busReqNumber) {
 	address = address | 0;
