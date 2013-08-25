@@ -211,29 +211,33 @@ GameBoyAdvanceTimer.prototype.timer3ExternalTriggerCheck = function () {
 	}
 }
 GameBoyAdvanceTimer.prototype.writeTM0CNT_L0 = function (data) {
-	this.IOCore.sound.audioJIT();
+	data = data | 0;
+    this.IOCore.sound.audioJIT();
     this.timer0Reload &= 0xFF00;
 	this.timer0Reload |= data;
 }
 GameBoyAdvanceTimer.prototype.writeTM0CNT_L1 = function (data) {
-	this.IOCore.sound.audioJIT();
+	data = data | 0;
+    this.IOCore.sound.audioJIT();
     this.timer0Reload &= 0xFF;
 	this.timer0Reload |= data << 8;
 }
 GameBoyAdvanceTimer.prototype.writeTM0CNT_H = function (data) {
-	this.IOCore.sound.audioJIT();
-    this.timer0Control = data;
-	if (data > 0x7F) {
+	data = data | 0;
+    this.IOCore.sound.audioJIT();
+    this.timer0Control = data | 0;
+	if ((data | 0) > 0x7F) {
         if (!this.timer0Enabled) {
             this.timer0Counter = this.timer0Reload | 0;
             this.timer0Enabled = true;
+            this.timer0Precounter = 0;
         }
     }
     else {
         this.timer0Enabled = false;
     }
 	this.timer0IRQ = ((data & 0x40) == 0x40);
-	this.timer0Prescalar = this.prescalarLookup[data & 0x03];
+	this.timer0Prescalar = this.prescalarLookup[data & 0x03] | 0;
 }
 GameBoyAdvanceTimer.prototype.readTM0CNT_L0 = function () {
 	return this.timer0Counter & 0xFF;
@@ -245,22 +249,26 @@ GameBoyAdvanceTimer.prototype.readTM0CNT_H = function () {
 	return 0x38 | this.timer0Control;
 }
 GameBoyAdvanceTimer.prototype.writeTM1CNT_L0 = function (data) {
-	this.IOCore.sound.audioJIT();
+	data = data | 0;
+    this.IOCore.sound.audioJIT();
     this.timer1Reload &= 0xFF00;
 	this.timer1Reload |= data;
 }
 GameBoyAdvanceTimer.prototype.writeTM1CNT_L1 = function (data) {
-	this.IOCore.sound.audioJIT();
+	data = data | 0;
+    this.IOCore.sound.audioJIT();
     this.timer1Reload &= 0xFF;
 	this.timer1Reload |= data << 8;
 }
 GameBoyAdvanceTimer.prototype.writeTM1CNT_H = function (data) {
-	this.IOCore.sound.audioJIT();
-    this.timer1Control = data;
-	if (data > 0x7F) {
+	data = data | 0;
+    this.IOCore.sound.audioJIT();
+    this.timer1Control = data | 0;
+	if ((data | 0) > 0x7F) {
         if (!this.timer1Enabled) {
             this.timer1Counter = this.timer1Reload | 0;
             this.timer1Enabled = true;
+            this.timer1Precounter = 0;
         }
     }
     else {
@@ -268,7 +276,7 @@ GameBoyAdvanceTimer.prototype.writeTM1CNT_H = function (data) {
     }
 	this.timer1IRQ = ((data & 0x40) == 0x40);
     this.timer1CountUp = ((data & 0x4) == 0x4);
-	this.timer1Prescalar = this.prescalarLookup[data & 0x03];
+	this.timer1Prescalar = this.prescalarLookup[data & 0x03] | 0;
     this.preprocessTimer1();
 }
 GameBoyAdvanceTimer.prototype.readTM1CNT_L0 = function () {
@@ -281,19 +289,23 @@ GameBoyAdvanceTimer.prototype.readTM1CNT_H = function () {
 	return 0x38 | this.timer1Control;
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_L0 = function (data) {
+    data = data | 0;
     this.timer2Reload &= 0xFF00;
 	this.timer2Reload |= data;
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_L1 = function (data) {
+    data = data | 0;
     this.timer2Reload &= 0xFF;
 	this.timer2Reload |= data << 8;
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_H = function (data) {
-    this.timer2Control = data;
-	if (data > 0x7F) {
+    data = data | 0;
+    this.timer2Control = data | 0;
+	if ((data | 0) > 0x7F) {
         if (!this.timer2Enabled) {
             this.timer2Counter = this.timer2Reload | 0;
             this.timer2Enabled = true;
+            this.timer2Precounter = 0;
         }
     }
     else {
@@ -301,7 +313,7 @@ GameBoyAdvanceTimer.prototype.writeTM2CNT_H = function (data) {
     }
 	this.timer2IRQ = ((data & 0x40) == 0x40);
     this.timer2CountUp = ((data & 0x4) == 0x4);
-	this.timer2Prescalar = this.prescalarLookup[data & 0x03];
+	this.timer2Prescalar = this.prescalarLookup[data & 0x03] | 0;
     this.preprocessTimer2();
 }
 GameBoyAdvanceTimer.prototype.readTM2CNT_L0 = function () {
@@ -314,18 +326,22 @@ GameBoyAdvanceTimer.prototype.readTM2CNT_H = function () {
 	return 0x38 | this.timer2Control;
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_L0 = function (data) {
+    data = data | 0;
     this.timer3Reload &= 0xFF00;
 	this.timer3Reload |= data;
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_L1 = function (data) {
+    data = data | 0;
     this.timer3Reload &= 0xFF;
 	this.timer3Reload |= data << 8;
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_H = function (data) {
-    this.timer3Control = data;
-    if (data > 0x7F) {
+    data = data | 0;
+    this.timer3Control = data | 0;
+    if ((data | 0) > 0x7F) {
         if (!this.timer3Enabled) {
             this.timer3Counter = this.timer3Reload | 0;
+            this.timer3Precounter = 0;
             this.timer3Enabled = true;
         }
     }
@@ -334,7 +350,7 @@ GameBoyAdvanceTimer.prototype.writeTM3CNT_H = function (data) {
     }
 	this.timer3IRQ = ((data & 0x40) == 0x40);
     this.timer3CountUp = ((data & 0x4) == 0x4);
-	this.timer3Prescalar = this.prescalarLookup[data & 0x03];
+	this.timer3Prescalar = this.prescalarLookup[data & 0x03] | 0;
     this.preprocessTimer3();
 }
 GameBoyAdvanceTimer.prototype.readTM3CNT_L0 = function () {
@@ -491,14 +507,14 @@ GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function (clocks) {
     return Math.min(timer0 | 0, timer1 | 0) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer0IRQEventTime = function () {
-	return (this.timer0Enabled && this.timer0IRQ) ? this.nextTimer0Overflow(1) : -1;
+	return ((this.timer0Enabled && this.timer0IRQ) ? this.nextTimer0Overflow(1) : -1) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer1IRQEventTime = function () {
-	return (this.timer1Enabled && this.timer1IRQ) ? this.nextTimer1Overflow(1) : -1;
+	return ((this.timer1Enabled && this.timer1IRQ) ? this.nextTimer1Overflow(1) : -1) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer2IRQEventTime = function () {
-	return (this.timer2Enabled && this.timer2IRQ) ? this.nextTimer2Overflow(1) : -1;
+	return ((this.timer2Enabled && this.timer2IRQ) ? this.nextTimer2Overflow(1) : -1) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer3IRQEventTime = function () {
-	return (this.timer3Enabled && this.timer3IRQ) ? this.nextTimer3Overflow(1) : -1;
+	return ((this.timer3Enabled && this.timer3IRQ) ? this.nextTimer3Overflow(1) : -1) | 0;
 }

@@ -81,65 +81,117 @@ GameBoyAdvanceDMA.prototype.initialize = function () {
 	this.lastCurrentMatch = -1;
 	this.memoryAccessCache = new GameBoyAdvanceMemoryCache(this.IOCore.memory);
 }
-GameBoyAdvanceDMA.prototype.writeDMASource = function (dmaChannel, byteNumber, data) {
-	this.source[dmaChannel] &= ~(0xFF << (byteNumber << 3));
-	this.source[dmaChannel] |= data << (byteNumber << 3);
+GameBoyAdvanceDMA.prototype.writeDMASource0 = function (dmaChannel, data) {
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.source[dmaChannel | 0] &= 0xFFFFFF00;
+	this.source[dmaChannel | 0] |= data;
 }
-GameBoyAdvanceDMA.prototype.writeDMADestination = function (dmaChannel, byteNumber, data) {
-	this.destination[dmaChannel] &= ~(0xFF << (byteNumber << 3));
-	this.destination[dmaChannel] |= data << (byteNumber << 3);
+GameBoyAdvanceDMA.prototype.writeDMASource1 = function (dmaChannel, data) {
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.source[dmaChannel | 0] &= 0xFFFF00FF;
+	this.source[dmaChannel | 0] |= data << 8;
+}
+GameBoyAdvanceDMA.prototype.writeDMASource2 = function (dmaChannel, data) {
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.source[dmaChannel | 0] &= 0xFF00FFFF;
+	this.source[dmaChannel | 0] |= data << 16;
+}
+GameBoyAdvanceDMA.prototype.writeDMASource3 = function (dmaChannel, data) {
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.source[dmaChannel | 0] &= 0xFFFFFF;
+	this.source[dmaChannel | 0] |= data << 24;
+}
+GameBoyAdvanceDMA.prototype.writeDMADestination0 = function (dmaChannel, data) {
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.destination[dmaChannel | 0] &= 0xFFFFFF00;
+	this.destination[dmaChannel | 0] |= data;
+}
+GameBoyAdvanceDMA.prototype.writeDMADestination1 = function (dmaChannel, data) {
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.destination[dmaChannel | 0] &= 0xFFFF00FF;
+	this.destination[dmaChannel | 0] |= data << 8;
+}
+GameBoyAdvanceDMA.prototype.writeDMADestination2 = function (dmaChannel, data) {
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.destination[dmaChannel | 0] &= 0xFF00FFFF;
+	this.destination[dmaChannel | 0] |= data << 16;
+}
+GameBoyAdvanceDMA.prototype.writeDMADestination3 = function (dmaChannel, data) {
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.destination[dmaChannel | 0] &= 0xFFFFFF;
+	this.destination[dmaChannel | 0] |= data << 24;
 }
 GameBoyAdvanceDMA.prototype.writeDMAWordCount0 = function (dmaChannel, data) {
-	this.wordCount[dmaChannel] &= 0xFF00;
-	this.wordCount[dmaChannel] |= data;
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.wordCount[dmaChannel | 0] &= 0xFF00;
+	this.wordCount[dmaChannel | 0] |= data;
 }
 GameBoyAdvanceDMA.prototype.writeDMAWordCount1 = function (dmaChannel, data) {
-	this.wordCount[dmaChannel] &= 0xFF;
-	this.wordCount[dmaChannel] |= data << 8;
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	this.wordCount[dmaChannel | 0] &= 0xFF;
+	this.wordCount[dmaChannel | 0] |= data << 8;
 }
 GameBoyAdvanceDMA.prototype.writeDMAControl0 = function (dmaChannel, data) {
-	var control = this.control[dmaChannel];
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	var control = this.control[dmaChannel | 0];
 	control[5] = (data >> 5) & 0x3;
 	control[4] &= 0x2;
 	control[4] |= (data >> 7) & 0x1;
 }
 GameBoyAdvanceDMA.prototype.readDMAControl0 = function (dmaChannel) {
-	var control = this.control[dmaChannel];
+	dmaChannel = dmaChannel | 0;
+	var control = this.control[dmaChannel | 0];
 	return ((control[4] & 0x01) << 7) | (control[5] << 5);
 }
 GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
-	var control = this.control[dmaChannel];
+	dmaChannel = dmaChannel | 0;
+	data = data | 0;
+	var control = this.control[dmaChannel | 0];
 	control[4] &= 0x1;
 	control[4] |= (data & 0x1) << 1;
 	control[3] = ((data & 0x2) == 0x2);
 	control[2] = ((data & 0x4) == 0x4);
-	if (dmaChannel == 3) {
+	if ((dmaChannel | 0) == 3) {
 		this.gamePakDMA = ((data & 0x8) == 0x8);
 	}
 	control[1] = (data >> 4) & 0x3;
 	control[0] = ((data & 0x40) == 0x40);
-	if (data > 0x7F) {
-		if (this.enabled[dmaChannel] == 0) {
-			this.enabled[dmaChannel] = this.DMA_ENABLE_TYPE[dmaChannel][control[1]];
-			this.enableDMAChannel(dmaChannel);
+	if ((data | 0) > 0x7F) {
+		if ((this.enabled[dmaChannel | 0] | 0) == 0) {
+			this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel][control[1]] | 0;
+			this.enableDMAChannel(dmaChannel | 0);
 		}
 	}
 	else {
-		this.enabled[dmaChannel] = 0;
+		this.enabled[dmaChannel | 0] = 0;
+		this.pending[dmaChannel | 0] = 0;
 	}
 }
 GameBoyAdvanceDMA.prototype.readDMAControl1 = function (dmaChannel) {
-	var control = this.control[dmaChannel];
-	return (((this.enabled[dmaChannel] > 0) ? 0x80 : 0) |
+	dmaChannel = dmaChannel | 0;
+	var control = this.control[dmaChannel | 0];
+	return (((this.enabled[dmaChannel | 0] > 0) ? 0x80 : 0) |
 			((control[0]) ? 0x40 : 0) |
 			(control[1] << 4) |
-			((dmaChannel == 3 && this.gamePakDMA) ? 0x8 : 0) |
+			(((dmaChannel | 0) == 3 && this.gamePakDMA) ? 0x8 : 0) |
 			((control[2]) ? 0x4 : 0) |
 			((control[3]) ? 0x2 : 0) |
 			(control[4] >> 1)
 	);
 }
 GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
+	dmaChannel = dmaChannel | 0;
 	//Emulate the DMA preprocessing that occurs on DMA enabling:
 	var control = this.control[dmaChannel];
 	var controlShadow = this.controlShadow[dmaChannel];
@@ -387,14 +439,14 @@ GameBoyAdvanceDMA.prototype.nextIRQEventTime = function (dmaChannel) {
 	return clocks | 0;
 }
 GameBoyAdvanceDMA.prototype.nextDMA0IRQEventTime = function () {
-	return this.nextIRQEventTime(0);
+	return this.nextIRQEventTime(0) | 0;
 }
 GameBoyAdvanceDMA.prototype.nextDMA1IRQEventTime = function () {
-	return this.nextIRQEventTime(1);
+	return this.nextIRQEventTime(1) | 0;
 }
 GameBoyAdvanceDMA.prototype.nextDMA2IRQEventTime = function () {
-	return this.nextIRQEventTime(2);
+	return this.nextIRQEventTime(2) | 0;
 }
 GameBoyAdvanceDMA.prototype.nextDMA3IRQEventTime = function () {
-	return this.nextIRQEventTime(3);
+	return this.nextIRQEventTime(3) | 0;
 }

@@ -1134,35 +1134,35 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.fillWriteTableNOP(0xA8, 0xAF);
 	//40000B0h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
 	this.writeIO[0xB0] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(0, 0, data | 0);
+		parentObj.dma.writeDMASource0(0, data | 0);
 	}
 	//40000B1h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
 	this.writeIO[0xB1] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(0, 1, data | 0);
+		parentObj.dma.writeDMASource1(0, data | 0);
 	}
 	//40000B2h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
 	this.writeIO[0xB2] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(0, 2, data | 0);
+		parentObj.dma.writeDMASource2(0, data | 0);
 	}
 	//40000B3h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
 	this.writeIO[0xB3] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(0, 3, data & 0x7);	//Mask out the unused bits.
+		parentObj.dma.writeDMASource3(0, data & 0x7);	//Mask out the unused bits.
 	}
 	//40000B4h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)
 	this.writeIO[0xB4] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(0, 0, data | 0);
+		parentObj.dma.writeDMADestination0(0, data | 0);
 	}
 	//40000B5h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)
 	this.writeIO[0xB5] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(0, 1, data | 0);
+		parentObj.dma.writeDMADestination1(0, data | 0);
 	}
 	//40000B6h - DMA0DAH - DMA 0 Destination Address (W) (internal memory)
 	this.writeIO[0xB6] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(0, 2, data | 0);
+		parentObj.dma.writeDMADestination2(0, data | 0);
 	}
 	//40000B7h - DMA0DAH - DMA 0 Destination Address (W) (internal memory)
 	this.writeIO[0xB7] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(0, 3, data & 0x7);
+		parentObj.dma.writeDMADestination3(0, data & 0x7);
 	}
 	//40000B8h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)
 	this.writeIO[0xB8] = function (parentObj, data) {
@@ -1182,35 +1182,35 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	}
 	//40000BCh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
 	this.writeIO[0xBC] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(1, 0, data | 0);
+		parentObj.dma.writeDMASource0(1, data | 0);
 	}
 	//40000BDh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
 	this.writeIO[0xBD] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(1, 1, data | 0);
+		parentObj.dma.writeDMASource1(1, data | 0);
 	}
 	//40000BEh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
 	this.writeIO[0xBE] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(1, 2, data | 0);
+		parentObj.dma.writeDMASource2(1, data | 0);
 	}
 	//40000BFh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
 	this.writeIO[0xBF] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(1, 3, data & 0xF);	//Mask out the unused bits.
+		parentObj.dma.writeDMASource3(1, data & 0xF);	//Mask out the unused bits.
 	}
 	//40000C0h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
 	this.writeIO[0xC0] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(1, 0, data | 0);
+		parentObj.dma.writeDMADestination0(1, data | 0);
 	}
 	//40000C1h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
 	this.writeIO[0xC1] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(1, 1, data | 0);
+		parentObj.dma.writeDMADestination1(1, data | 0);
 	}
 	//40000C2h - DMA1DAH - DMA 1 Destination Address (W) (internal memory)
 	this.writeIO[0xC2] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(1, 2, data | 0);
+		parentObj.dma.writeDMADestination2(1, data | 0);
 	}
 	//40000C3h - DMA1DAH - DMA 1 Destination Address (W) (internal memory)
 	this.writeIO[0xC3] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(1, 3, data & 0x7);
+		parentObj.dma.writeDMADestination3(1, data & 0x7);
 	}
 	//40000C4h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)
 	this.writeIO[0xC4] = function (parentObj, data) {
@@ -1230,35 +1230,35 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	}
 	//40000C8h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
 	this.writeIO[0xC8] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(2, 0, data | 0);
+		parentObj.dma.writeDMASource0(2, data | 0);
 	}
 	//40000C9h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
 	this.writeIO[0xC9] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(2, 1, data | 0);
+		parentObj.dma.writeDMASource1(2, data | 0);
 	}
 	//40000CAh - DMA2SAH - DMA 2 Source Address (W) (internal memory)
 	this.writeIO[0xCA] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(2, 2, data | 0);
+		parentObj.dma.writeDMASource2(2, data | 0);
 	}
 	//40000CBh - DMA2SAH - DMA 2 Source Address (W) (internal memory)
 	this.writeIO[0xCB] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(2, 3, data & 0xF);	//Mask out the unused bits.
+		parentObj.dma.writeDMASource3(2, data & 0xF);	//Mask out the unused bits.
 	}
 	//40000CCh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)
 	this.writeIO[0xCC] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(2, 0, data | 0);
+		parentObj.dma.writeDMADestination0(2, data | 0);
 	}
 	//40000CDh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)
 	this.writeIO[0xCD] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(2, 1, data | 0);
+		parentObj.dma.writeDMADestination1(2, data | 0);
 	}
 	//40000CEh - DMA2DAH - DMA 2 Destination Address (W) (internal memory)
 	this.writeIO[0xCE] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(2, 2, data | 0);
+		parentObj.dma.writeDMADestination2(2, data | 0);
 	}
 	//40000CFh - DMA2DAH - DMA 2 Destination Address (W) (internal memory)
 	this.writeIO[0xCF] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(2, 3, data & 0x7);
+		parentObj.dma.writeDMADestination3(2, data & 0x7);
 	}
 	//40000D0h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)
 	this.writeIO[0xD0] = function (parentObj, data) {
@@ -1278,35 +1278,35 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	}
 	//40000D4h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
 	this.writeIO[0xD4] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(3, 0, data | 0);
+		parentObj.dma.writeDMASource0(3, data | 0);
 	}
 	//40000D5h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
 	this.writeIO[0xD5] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(3, 1, data | 0);
+		parentObj.dma.writeDMASource1(3, data | 0);
 	}
 	//40000D6h - DMA3SAH - DMA 3 Source Address (W) (internal memory)
 	this.writeIO[0xD6] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(3, 2, data | 0);
+		parentObj.dma.writeDMASource2(3, data | 0);
 	}
 	//40000D7h - DMA3SAH - DMA 3 Source Address (W) (internal memory)
 	this.writeIO[0xD7] = function (parentObj, data) {
-		parentObj.dma.writeDMASource(3, 3, data & 0xF);	//Mask out the unused bits.
+		parentObj.dma.writeDMASource3(3, data & 0xF);	//Mask out the unused bits.
 	}
 	//40000D8h - DMA3DAD - DMA 3 Destination Address (W) (internal memory)
 	this.writeIO[0xD8] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(3, 0, data | 0);
+		parentObj.dma.writeDMADestination0(3, data | 0);
 	}
 	//40000D9h - DMA3DAD - DMA 3 Destination Address (W) (internal memory)
 	this.writeIO[0xD9] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(3, 1, data | 0);
+		parentObj.dma.writeDMADestination1(3, data | 0);
 	}
 	//40000DAh - DMA3DAH - DMA 3 Destination Address (W) (internal memory)
 	this.writeIO[0xDA] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(3, 2, data | 0);
+		parentObj.dma.writeDMADestination2(3, data | 0);
 	}
 	//40000DBh - DMA3DAH - DMA 3 Destination Address (W) (internal memory)
 	this.writeIO[0xDB] = function (parentObj, data) {
-		parentObj.dma.writeDMADestination(3, 3, data & 0xF);
+		parentObj.dma.writeDMADestination3(3, data & 0xF);
 	}
 	//40000DCh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)
 	this.writeIO[0xDC] = function (parentObj, data) {
