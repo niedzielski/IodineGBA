@@ -164,7 +164,7 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
 	}
 	else {
 		this.enabled[dmaChannel | 0] = 0;
-		this.pending[dmaChannel | 0] = 0;
+		//this.pending[dmaChannel | 0] = 0;
 	}
 }
 GameBoyAdvanceDMA.prototype.readDMAControl1 = function (dmaChannel) {
