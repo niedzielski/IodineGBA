@@ -185,12 +185,16 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
 		this.IOCore.sound.checkFIFOAPendingSignal();
 		//Direct Sound DMA Hardwired To Wordcount Of 4:
 		this.wordCountShadow[dmaChannel | 0] = 4;
+		//Destination Hardwired to 0x40000A0:
+		this.destination[dmaChannel | 0] = 0x40000A0;
 	}
 	else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
 		//Assert the FIFO B DMA request signal:
 		this.IOCore.sound.checkFIFOBPendingSignal();
 		//Direct Sound DMA Hardwired To Wordcount Of 4:
 		this.wordCountShadow[dmaChannel | 0] = 4;
+		//Destination Hardwired to 0x40000A4:
+		this.destination[dmaChannel | 0] = 0x40000A4;
 	}
 	else {
 		if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
