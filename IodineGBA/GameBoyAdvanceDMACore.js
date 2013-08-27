@@ -69,12 +69,6 @@ GameBoyAdvanceDMA.prototype.initialize = function () {
 		[false, 0, false, false, 0, 0],
 		[false, 0, false, false, 0, 0]
 	];
-	this.controlShadow = [
-		[false, 0, false, false, 0, 0],
-		[false, 0, false, false, 0, 0],
-		[false, 0, false, false, 0, 0],
-		[false, 0, false, false, 0, 0]
-	];
 	//Game Pak DMA flag for DMA 3:
 	this.gamePakDMA = false;
 	this.currentMatch = -1;
@@ -169,7 +163,8 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
 	control[0] = ((data & 0x40) == 0x40);
 	if ((data | 0) > 0x7F) {
 		if ((this.enabled[dmaChannel | 0] | 0) == 0) {
-			this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel][control[1]] | 0;
+			this.pending[dmaChannel | 0] = 0;
+			this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel | 0][control[1] | 0] | 0;
 			this.enableDMAChannel(dmaChannel | 0);
 		}
 	}
@@ -192,90 +187,69 @@ GameBoyAdvanceDMA.prototype.readDMAControl1 = function (dmaChannel) {
 }
 GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
 	dmaChannel = dmaChannel | 0;
-	//Emulate the DMA preprocessing that occurs on DMA enabling:
-	var control = this.control[dmaChannel];
-	var controlShadow = this.controlShadow[dmaChannel];
-	var sourceShadow = this.source[dmaChannel];
-	var destinationShadow = this.destination[dmaChannel];
-	var wordCountShadow = this.wordCount[dmaChannel];
-	controlShadow[0] = control[0];
-	controlShadow[1] = control[1];
-	controlShadow[4] = control[4];
-	if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.FIFO_A || this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.FIFO_B) {
-		//Direct Sound DMA has some values hardwired:
-		destinationShadow = 0x40000A0 | ((dmaChannel - 1) << 2);
-		wordCountShadow = 4;
-		controlShadow[2] = true;
-		controlShadow[3] = control[3];
-		controlShadow[5] = 2;
-		if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.FIFO_A) {
-			//Assert the FIFO A DMA request signal:
-			this.IOCore.sound.checkFIFOAPendingSignal();
-		}
-		if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.FIFO_B) {
-			//Assert the FIFO B DMA request signal:
-			this.IOCore.sound.checkFIFOBPendingSignal();
-		}
+	if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_A | 0)) {
+		//Assert the FIFO A DMA request signal:
+		this.IOCore.sound.checkFIFOAPendingSignal();
+		//Direct Sound DMA Hardwired To Wordcount Of 4:
+		this.wordCountShadow[dmaChannel | 0] = 4;
 	}
-	else if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.DISPLAY_SYNC) {
-		//Display Sync DMA repeats until stopped by gfx hardware:
-		controlShadow[2] = control[2];
-		controlShadow[3] = true;
-		controlShadow[5] = control[5];
+	else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
+		//Assert the FIFO B DMA request signal:
+		this.IOCore.sound.checkFIFOBPendingSignal();
+		//Direct Sound DMA Hardwired To Wordcount Of 4:
+		this.wordCountShadow[dmaChannel | 0] = 4;
 	}
 	else {
-		//Flag immediate DMA transfers for processing now:
-		if (this.enabled[dmaChannel] == this.DMA_REQUEST_TYPE.IMMEDIATE) {
-			this.pending[dmaChannel] |= this.DMA_REQUEST_TYPE.IMMEDIATE;
+		if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
+			//Flag immediate DMA transfers for processing now:
+			this.pending[dmaChannel | 0] = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
 			this.IOCore.flagStepper(0x1);
 		}
-		//Copy all of the internal to shadow:
-		controlShadow[2] = control[2];
-		controlShadow[3] = control[3];
-		controlShadow[5] = control[5];
+		//Shadow copy the word count:
+		this.wordCountShadow[dmaChannel | 0] = this.wordCount[dmaChannel | 0] | 0;
 	}
-	this.sourceShadow[dmaChannel] = sourceShadow;
-	this.destinationShadow[dmaChannel] = destinationShadow;
-	this.wordCountShadow[dmaChannel] = wordCountShadow;
+	//Shadow copy the source address:
+	this.sourceShadow[dmaChannel | 0] = this.source[dmaChannel | 0] | 0;
+	//Shadow copy the destination address:
+	this.destinationShadow[dmaChannel | 0] = this.destination[dmaChannel | 0] | 0;
 }
 GameBoyAdvanceDMA.prototype.soundFIFOARequest = function () {
-	this.requestDMA(this.DMA_REQUEST_TYPE.FIFO_A);
+	this.requestDMA(this.DMA_REQUEST_TYPE.FIFO_A | 0);
 }
 GameBoyAdvanceDMA.prototype.soundFIFOBRequest = function () {
-	this.requestDMA(this.DMA_REQUEST_TYPE.FIFO_B);
+	this.requestDMA(this.DMA_REQUEST_TYPE.FIFO_B | 0);
 }
 GameBoyAdvanceDMA.prototype.gfxHBlankRequest = function () {
-	this.requestDMA(this.DMA_REQUEST_TYPE.H_BLANK);
+	this.requestDMA(this.DMA_REQUEST_TYPE.H_BLANK | 0);
 }
 GameBoyAdvanceDMA.prototype.gfxVBlankRequest = function () {
-	this.requestDMA(this.DMA_REQUEST_TYPE.V_BLANK);
+	this.requestDMA(this.DMA_REQUEST_TYPE.V_BLANK | 0);
 }
 GameBoyAdvanceDMA.prototype.gfxDisplaySyncRequest = function () {
-	this.requestDMA(this.DMA_REQUEST_TYPE.DISPLAY_SYNC);
+	this.requestDMA(this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0);
 }
 GameBoyAdvanceDMA.prototype.gfxDisplaySyncKillRequest = function () {
 	this.enabled[3] &= ~this.DMA_REQUEST_TYPE.DISPLAY_SYNC;
-	this.pending[3] &= ~this.DMA_REQUEST_TYPE.DISPLAY_SYNC;
 }
 GameBoyAdvanceDMA.prototype.requestDMA = function (DMAType) {
-	for (var dmaPriority = 0; dmaPriority < 4; ++dmaPriority) {
-		if ((this.enabled[dmaPriority] & DMAType) != 0) {
-			this.pending[dmaPriority] |= DMAType;
+	for (var dmaPriority = 0; (dmaPriority | 0) < 4; dmaPriority = ((dmaPriority | 0) + 1) | 0) {
+		if ((this.enabled[dmaPriority | 0] & DMAType) == (DMAType | 0)) {
+			this.pending[dmaPriority | 0] = DMAType | 0;
 			this.IOCore.flagStepper(0x1);
 		}
 	}
 }
 GameBoyAdvanceDMA.prototype.perform = function () {
 	//Solve for the highest priority DMA to process:
-	for (var dmaPriority = 0; dmaPriority < 4; ++dmaPriority) {
-		this.currentMatch = this.enabled[dmaPriority] & this.pending[dmaPriority];
-		if (this.currentMatch != 0) {
-			if (this.currentMatch != this.lastCurrentMatch) {
+	for (var dmaPriority = 0; (dmaPriority | 0) < 4; dmaPriority = ((dmaPriority | 0) + 1) | 0) {
+		this.currentMatch = this.enabled[dmaPriority | 0] & this.pending[dmaPriority | 0];
+		if ((this.currentMatch | 0) != 0) {
+			if ((this.currentMatch | 0) != (this.lastCurrentMatch | 0)) {
 				//Re-broadcasting on address bus, so non-seq:
 				this.IOCore.wait.NonSequentialBroadcast();
-				this.lastCurrentMatch = this.currentMatch;
+				this.lastCurrentMatch = this.currentMatch | 0;
 			}
-			this.handleDMACopy(dmaPriority);
+			this.handleDMACopy(dmaPriority | 0);
 			return false;
 		}
 	}
@@ -284,11 +258,12 @@ GameBoyAdvanceDMA.prototype.perform = function () {
 	return true;
 }
 GameBoyAdvanceDMA.prototype.handleDMACopy = function (dmaChannel) {
+	dmaChannel = dmaChannel | 0;
 	//Get the addesses:
-	var source = this.sourceShadow[dmaChannel];
-	var destination = this.destinationShadow[dmaChannel];
+	var source = this.sourceShadow[dmaChannel | 0] | 0;
+	var destination = this.destinationShadow[dmaChannel | 0] | 0;
 	//Load in the control register:
-	var control = this.controlShadow[dmaChannel];
+	var control = this.control[dmaChannel | 0];
 	//Transfer Data:
 	if (control[2]) {
 		//32-bit Transfer:
@@ -302,138 +277,195 @@ GameBoyAdvanceDMA.prototype.handleDMACopy = function (dmaChannel) {
 	}
 }
 GameBoyAdvanceDMA.prototype.decrementWordCount = function (control, dmaChannel, source, destination, transferred) {
-	var wordCountShadow = (this.wordCountShadow[dmaChannel] - 1) & ((dmaChannel < 3) ? 0x3FFF : 0xFFFF);
-	if (wordCountShadow == 0) {
-		if (!control[3]) {
-			//Disable the enable bit:
-			this.enabled[dmaChannel] = 0;
-		}
-		//Reload word count for DMA repeat:
-		wordCountShadow = this.wordCount[dmaChannel];
-		//DMA period has ended:
-		this.pending[dmaChannel] -= this.currentMatch;
-		//Assert the FIFO A DMA request signal:
-		if (dmaChannel == 1 && this.currentMatch == this.DMA_REQUEST_TYPE.FIFO_A) {
-			wordCountShadow = 4;
-			this.IOCore.sound.checkFIFOAPendingSignal();
-		}
-		//Assert the FIFO B DMA request signal:
-		if (dmaChannel == 2 && this.currentMatch == this.DMA_REQUEST_TYPE.FIFO_B) {
-			wordCountShadow = 4;
-			this.IOCore.sound.checkFIFOBPendingSignal();
-		}
-		//Check to see if we should flag for IRQ:
-		if (control[0]) {
-			var dmaIRQFlag = 0x100;
-			switch (dmaChannel) {
-				case 3:
-					dmaIRQFlag <<= 1;
-				case 2:
-					dmaIRQFlag <<= 1;
-				case 1:
-					dmaIRQFlag <<= 1;
-			}
-			this.IOCore.irq.requestIRQ(dmaIRQFlag);
-		}
-		//Update source address:
-		switch (control[4]) {
-			case 0:	//Increment
-				this.sourceShadow[dmaChannel] = (source + transferred) | 0;
-				break;
-			case 1:	//Decrement
-				this.sourceShadow[dmaChannel] = (source - transferred) | 0;
-				break;
-			case 3:	//Reload
-				//Prohibited code, should not get here:
-				this.sourceShadow[dmaChannel] = this.source[dmaChannel];
-		}
-		//Update destination address:
-		switch (control[5]) {
-			case 0:	//Increment
-				this.destinationShadow[dmaChannel] = (destination + transferred) | 0;
-				break;
-			case 1:	//Decrement
-				this.destinationShadow[dmaChannel] = (destination - transferred) | 0;
-				break;
-			case 3:	//Reload
-				this.destinationShadow[dmaChannel] = this.destination[dmaChannel];
-		}
+	dmaChannel = dmaChannel | 0;
+	source = source | 0;
+	destination = destination | 0;
+	transferred = transferred | 0;
+	//Decrement the word count:
+	var wordCountShadow = (this.wordCountShadow[dmaChannel | 0] - 1) & (((dmaChannel | 0) < 3) ? 0x3FFF : 0xFFFF);
+	if ((wordCountShadow | 0) == 0) {
+		//DMA transfer ended, handle accordingly:
+		wordCountShadow = this.finalizeDMA(control, dmaChannel | 0, source | 0, destination | 0, transferred | 0) | 0;
 	}
 	else {
-		//Update source address:
-		switch (control[4]) {
-			case 0:	//Increment
-			case 3:	//Prohibited code...
-				this.sourceShadow[dmaChannel] = (source + transferred) | 0;
-				break;
-			case 1:
-				this.sourceShadow[dmaChannel] = (source - transferred) | 0;
-		}
-		//Update destination address:
-		switch (control[5]) {
-			case 0:	//Increment
-			case 3:	//Increment
-				this.destinationShadow[dmaChannel] = (destination + transferred) | 0;
-				break;
-			case 1:	//Decrement
-				this.destinationShadow[dmaChannel] = (destination - transferred) | 0;
-		}
+		//Update addresses:
+		this.incrementDMAAddresses(dmaChannel | 0, source | 0, destination | 0, transferred | 0, control[4] | 0, control[5] | 0);
 	}
 	//Save the new word count:
-	this.wordCountShadow[dmaChannel] = wordCountShadow;
+	this.wordCountShadow[dmaChannel | 0] = wordCountShadow | 0;
+}
+GameBoyAdvanceDMA.prototype.finalizeDMA = function (control, dmaChannel, source, destination, transferred) {
+	dmaChannel = dmaChannel | 0;
+	source = source | 0;
+	destination = destination | 0;
+	transferred = transferred | 0;
+	var wordCountShadow = 0;
+	//Reset pending requests:
+	this.pending[dmaChannel | 0] = 0;
+	//Check Repeat Status:
+	if (!control[3]) {
+		//Disable the enable bit:
+		this.enabled[dmaChannel | 0] = 0;
+	}
+	else {
+		//Repeating the dma:
+		if ((this.currentMatch | 0) == (this.DMA_REQUEST_TYPE.FIFO_A | 0)) {
+			//Assert the FIFO A DMA request signal:
+			this.IOCore.sound.checkFIFOAPendingSignal();
+			//Direct Sound DMA Hardwired To Wordcount Of 4:
+			wordCountShadow = 4;
+		}
+		else if ((this.currentMatch | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
+			//Assert the FIFO B DMA request signal:
+			this.IOCore.sound.checkFIFOBPendingSignal();
+			//Direct Sound DMA Hardwired To Wordcount Of 4:
+			wordCountShadow = 4;
+		}
+		else {
+			//Reload word count:
+			wordCountShadow = this.wordCount[dmaChannel | 0] | 0;
+		}
+	}
+	//Check to see if we should flag for IRQ:
+	this.checkIRQTrigger(control[0], dmaChannel | 0);
+	//Update addresses:
+	this.finalDMAAddresses(dmaChannel | 0, source | 0, destination | 0, transferred | 0, control[4] | 0, control[5] | 0);
+	return wordCountShadow | 0;
+}
+GameBoyAdvanceDMA.prototype.checkIRQTrigger = function (doIRQ, dmaChannel) {
+	dmaChannel = dmaChannel | 0;
+	if (doIRQ) {
+		switch (dmaChannel | 0) {
+			case 0:
+				this.IOCore.irq.requestIRQ(0x100);
+				break;
+			case 1:
+				this.IOCore.irq.requestIRQ(0x200);
+				break;
+			case 2:
+				this.IOCore.irq.requestIRQ(0x400);
+				break;
+			case 3:
+				this.IOCore.irq.requestIRQ(0x800);
+		}
+	}
+}
+GameBoyAdvanceDMA.prototype.finalDMAAddresses = function (dmaChannel, source, destination, transferred, sourceControl, destinationControl) {
+	dmaChannel = dmaChannel | 0;
+	source = source | 0;
+	destination = destination | 0;
+	transferred = transferred | 0;
+	sourceControl = sourceControl | 0;
+	destinationControl = destinationControl | 0;
+	//Update source address:
+	switch (sourceControl | 0) {
+		case 0:	//Increment
+			this.sourceShadow[dmaChannel | 0] = ((source | 0) + (transferred | 0)) | 0;
+			break;
+		case 1:	//Decrement
+			this.sourceShadow[dmaChannel | 0] = ((source | 0) - (transferred | 0)) | 0;
+			break;
+		case 3:	//Reload
+			//Prohibited code, should not get here:
+			this.sourceShadow[dmaChannel | 0] = this.source[dmaChannel | 0] | 0;
+	}
+	//Don't update destination if in FIFO DMA mode:
+	if ((this.currentMatch | 0) != (this.DMA_REQUEST_TYPE.FIFO_A | 0) && (this.currentMatch | 0) != (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
+		//Update destination address:
+		switch (destinationControl | 0) {
+			case 0:	//Increment
+				this.destinationShadow[dmaChannel | 0] = ((destination | 0) + (transferred | 0)) | 0;
+				break;
+			case 1:	//Decrement
+				this.destinationShadow[dmaChannel | 0] = ((destination | 0) - (transferred | 0)) | 0;
+				break;
+			case 3:	//Reload
+				this.destinationShadow[dmaChannel | 0] = this.destination[dmaChannel | 0] | 0;
+		}
+	}
+}
+GameBoyAdvanceDMA.prototype.incrementDMAAddresses = function (dmaChannel, source, destination, transferred, sourceControl, destinationControl) {
+	dmaChannel = dmaChannel | 0;
+	source = source | 0;
+	destination = destination | 0;
+	transferred = transferred | 0;
+	sourceControl = sourceControl | 0;
+	destinationControl = destinationControl | 0;
+	//Update source address:
+	switch (sourceControl | 0) {
+		case 0:	//Increment
+		case 3:	//Prohibited code...
+			this.sourceShadow[dmaChannel | 0] = ((source | 0) + (transferred | 0)) | 0;
+			break;
+		case 1:
+			this.sourceShadow[dmaChannel | 0] = ((source | 0) - (transferred | 0)) | 0;
+	}
+	//Don't update destination if in FIFO DMA mode:
+	if ((this.currentMatch | 0) != (this.DMA_REQUEST_TYPE.FIFO_A | 0) && (this.currentMatch | 0) != (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
+		//Update destination address:
+		switch (destinationControl | 0) {
+			case 0:	//Increment
+			case 3:	//Increment
+				this.destinationShadow[dmaChannel | 0] = ((destination | 0) + (transferred | 0)) | 0;
+				break;
+			case 1:	//Decrement
+				this.destinationShadow[dmaChannel | 0] = ((destination | 0) - (transferred | 0)) | 0;
+		}
+	}
 }
 GameBoyAdvanceDMA.prototype.nextEventTime = function () {
 	var clocks = -1;
 	var workbench = -1;
-	for (var dmaChannel = 0; dmaChannel < 4; ++dmaChannel) {
-		switch (this.enabled[dmaChannel] & 0x3F) {
+	for (var dmaChannel = 0; (dmaChannel | 0) < 4; dmaChannel = ((dmaChannel | 0) + 1) | 0) {
+		switch (this.enabled[dmaChannel | 0] | 0) {
 			//V_BLANK
 			case 0x2:
-				workbench = this.IOCore.gfx.nextVBlankEventTime();
+				workbench = this.IOCore.gfx.nextVBlankEventTime() | 0;
 				break;
 			//H_BLANK:
 			case 0x4:
-				workbench = this.IOCore.gfx.nextHBlankDMAEventTime();
+				workbench = this.IOCore.gfx.nextHBlankDMAEventTime() | 0;
 				break;
 			//FIFO_A:
 			case 0x8:
-				workbench = this.IOCore.sound.nextFIFOAEventTime();
+				workbench = this.IOCore.sound.nextFIFOAEventTime() | 0;
 				break;
 			//FIFO_B:
 			case 0x10:
-				workbench = this.IOCore.sound.nextFIFOBEventTime();
+				workbench = this.IOCore.sound.nextFIFOBEventTime() | 0;
 				break;
 			//DISPLAY_SYNC:
 			case 0x20:
-				workbench = this.IOCore.gfx.nextDisplaySyncEventTime();
+				workbench = this.IOCore.gfx.nextDisplaySyncEventTime() | 0;
 		}
-		clocks = (clocks > -1) ? ((workbench > -1) ? Math.min(clocks, workbench) : clocks) : workbench;
+		clocks = (((clocks | 0) > -1) ? (((workbench | 0) > -1) ? Math.min(clocks | 0, workbench | 0) : (clocks | 0)) : (workbench | 0)) | 0;
 	}
 	return clocks | 0;
 }
 GameBoyAdvanceDMA.prototype.nextIRQEventTime = function (dmaChannel) {
+	dmaChannel = dmaChannel | 0;
 	var clocks = -1;
-	if (this.controlShadow[dmaChannel][0]) {
-		switch (this.enabled[dmaChannel] & 0x3F) {
+	if (this.control[dmaChannel | 0][0]) {
+		switch (this.enabled[dmaChannel | 0] | 0) {
 			//V_BLANK
 			case 0x2:
-				clocks = this.IOCore.gfx.nextVBlankEventTime();
+				clocks = this.IOCore.gfx.nextVBlankEventTime() | 0;
 				break;
 			//H_BLANK:
 			case 0x4:
-				clocks = this.IOCore.gfx.nextHBlankDMAEventTime();
+				clocks = this.IOCore.gfx.nextHBlankDMAEventTime() | 0;
 				break;
 			//FIFO_A:
 			case 0x8:
-				clocks = this.IOCore.sound.nextFIFOAEventTime();
+				clocks = this.IOCore.sound.nextFIFOAEventTime() | 0;
 				break;
 			//FIFO_B:
 			case 0x10:
-				clocks = this.IOCore.sound.nextFIFOBEventTime();
+				clocks = this.IOCore.sound.nextFIFOBEventTime() | 0;
 				break;
 			//DISPLAY_SYNC:
 			case 0x20:
-				clocks = this.IOCore.gfx.nextDisplaySyncEventTime();
+				clocks = this.IOCore.gfx.nextDisplaySyncEventTime() | 0;
 		}
 	}
 	return clocks | 0;
