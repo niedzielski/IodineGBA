@@ -161,16 +161,13 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
 	}
 	control[1] = (data >> 4) & 0x3;
 	control[0] = ((data & 0x40) == 0x40);
+	this.pending[dmaChannel | 0] = 0;
 	if ((data | 0) > 0x7F) {
-		if ((this.enabled[dmaChannel | 0] | 0) == 0) {
-			this.pending[dmaChannel | 0] = 0;
-			this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel | 0][control[1] | 0] | 0;
-			this.enableDMAChannel(dmaChannel | 0);
-		}
+		this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel | 0][control[1] | 0] | 0;
+		this.enableDMAChannel(dmaChannel | 0);
 	}
 	else {
 		this.enabled[dmaChannel | 0] = 0;
-		this.pending[dmaChannel | 0] = 0;
 	}
 }
 GameBoyAdvanceDMA.prototype.readDMAControl1 = function (dmaChannel) {
