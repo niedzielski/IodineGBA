@@ -76,10 +76,10 @@ GameBoyAdvanceWait.prototype.readWAITCNT1 = function () {
 	return this.WAITCNT1 | 0x20;
 }
 GameBoyAdvanceWait.prototype.writePOSTBOOT = function (data) {
-	this.POSTBOOT = data;
+	this.POSTBOOT = data | 0;
 }
 GameBoyAdvanceWait.prototype.readPOSTBOOT = function () {
-	return this.POSTBOOT;
+	return this.POSTBOOT | 0;
 }
 GameBoyAdvanceWait.prototype.writeHALTCNT = function (data) {
 	//HALT/STOP mode entrance:
@@ -89,20 +89,20 @@ GameBoyAdvanceWait.prototype.writeConfigureWRAM = function (address, data) {
 	switch (address & 0x3) {
 		case 3:
 			this.WRAMConfiguration[1] = data & 0x2F;
-			this.IOCore.remapWRAM(data);
+			this.memory.remapWRAM(data | 0);
 			break;
 		case 0:
-			this.WRAMWaitState = 0x10 - (data & 0xF);
-			this.WRAMConfiguration[0] = data;
+			this.WRAMWaitState = (0x10 - (data & 0xF)) | 0;
+			this.WRAMConfiguration[0] = data | 0;
 	}
 }
 GameBoyAdvanceWait.prototype.readConfigureWRAM = function (address) {
 	switch (address & 0x3) {
 		case 3:
-			return this.WRAMConfiguration[1];
+			return this.WRAMConfiguration[1] | 0;
 			break;
 		case 0:
-			return this.WRAMConfiguration[0];
+			return this.WRAMConfiguration[0] | 0;
 			break;
 		default:
 			return 0;
