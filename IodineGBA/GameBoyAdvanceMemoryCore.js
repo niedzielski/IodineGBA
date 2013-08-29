@@ -2323,7 +2323,7 @@ GameBoyAdvanceMemory.prototype.writeVRAM = function (parentObj, address, data, b
 	address = address | 0;
     data = data | 0;
     busReqNumber = busReqNumber | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess(busReqNumber | 0);
     if ((address & 0x10000) != 0) {
 		parentObj.gfx.writeVRAM(address & 0x17FFF, data | 0);
@@ -2335,7 +2335,7 @@ GameBoyAdvanceMemory.prototype.writeVRAM = function (parentObj, address, data, b
 GameBoyAdvanceMemory.prototype.writeVRAM8 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess8();
     if ((address & 0x10000) != 0) {
 		parentObj.gfx.writeVRAM(address & 0x17FFF, data | 0);
@@ -2347,7 +2347,7 @@ GameBoyAdvanceMemory.prototype.writeVRAM8 = function (parentObj, address, data) 
 GameBoyAdvanceMemory.prototype.writeVRAM16 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess16();
     if ((address & 0x10000) != 0) {
 		parentObj.gfx.writeVRAM16(address & 0x17FFF, data | 0);
@@ -2359,7 +2359,7 @@ GameBoyAdvanceMemory.prototype.writeVRAM16 = function (parentObj, address, data)
 GameBoyAdvanceMemory.prototype.writeVRAM32 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess32();
     if ((address & 0x10000) != 0) {
 		parentObj.gfx.writeVRAM32(address & 0x17FFF, data | 0);
@@ -2372,21 +2372,21 @@ GameBoyAdvanceMemory.prototype.writeOAM = function (parentObj, address, data, bu
 	address = address | 0;
     data = data | 0;
     busReqNumber = busReqNumber | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess(busReqNumber | 0);
     parentObj.gfx.writeOAM(address & 0x3FF, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeOAM8 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess8();
     parentObj.gfx.writeOAM(address & 0x3FF, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeOAM16 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess16();
     parentObj.gfx.writeOAM(address & 0x3FF, data & 0xFF);
     parentObj.gfx.writeOAM((address + 1) & 0x3FF, data >> 8);
@@ -2394,7 +2394,7 @@ GameBoyAdvanceMemory.prototype.writeOAM16 = function (parentObj, address, data) 
 GameBoyAdvanceMemory.prototype.writeOAM32 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess32();
     parentObj.gfx.writeOAM(address & 0x3FF, data & 0xFF);
     parentObj.gfx.writeOAM((address + 1) & 0x3FF, (data >> 8) & 0xFF);
@@ -2405,21 +2405,21 @@ GameBoyAdvanceMemory.prototype.writePalette = function (parentObj, address, data
 	address = address | 0;
     data = data | 0;
     busReqNumber = busReqNumber | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess(busReqNumber | 0);
     parentObj.gfx.writePalette(address & 0x3FF, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writePalette8 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess8();
     parentObj.gfx.writePalette(address & 0x3FF, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writePalette16 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess16();
     parentObj.gfx.writePalette(address & 0x3FF, data & 0xFF);
     parentObj.gfx.writePalette((address + 1) & 0x3FF, data >> 8);
@@ -2427,7 +2427,7 @@ GameBoyAdvanceMemory.prototype.writePalette16 = function (parentObj, address, da
 GameBoyAdvanceMemory.prototype.writePalette32 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess32();
     parentObj.gfx.writePalette(address & 0x3FF, data & 0xFF);
     parentObj.gfx.writePalette((address + 1) & 0x3FF, (data >> 8) & 0xFF);
@@ -2882,7 +2882,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch32 = function (parentObj, address) 
 GameBoyAdvanceMemory.prototype.readVRAM = function (parentObj, address, busReqNumber) {
 	address = address | 0;
     busReqNumber = busReqNumber | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess(busReqNumber | 0);
 	if ((address & 0x10000) != 0) {
 		return parentObj.gfx.readVRAM(address & 0x17FFF) | 0;
@@ -2893,7 +2893,7 @@ GameBoyAdvanceMemory.prototype.readVRAM = function (parentObj, address, busReqNu
 }
 GameBoyAdvanceMemory.prototype.readVRAM8 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess8();
 	if ((address & 0x10000) != 0) {
 		return parentObj.gfx.readVRAM(address & 0x17FFF) | 0;
@@ -2904,7 +2904,7 @@ GameBoyAdvanceMemory.prototype.readVRAM8 = function (parentObj, address) {
 }
 GameBoyAdvanceMemory.prototype.readVRAM16 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess16();
 	if ((address & 0x10000) != 0) {
 		return parentObj.gfx.readVRAM16(address & 0x17FFF) | 0;
@@ -2915,7 +2915,7 @@ GameBoyAdvanceMemory.prototype.readVRAM16 = function (parentObj, address) {
 }
 GameBoyAdvanceMemory.prototype.readVRAM32 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess32();
 	if ((address & 0x10000) != 0) {
 		return parentObj.gfx.readVRAM32(address & 0x17FFF) | 0;
@@ -2927,50 +2927,50 @@ GameBoyAdvanceMemory.prototype.readVRAM32 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readOAM = function (parentObj, address, busReqNumber) {
 	address = address | 0;
     busReqNumber = busReqNumber | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess(busReqNumber | 0);
 	return parentObj.gfx.readOAM(address & 0x3FF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readOAM8 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess8();
 	return parentObj.gfx.readOAM(address & 0x3FF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readOAM16 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess16();
 	return parentObj.gfx.readOAM16(address & 0x3FF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readOAM32 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess32();
 	return parentObj.gfx.readOAM32(address & 0x3FF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readPalette = function (parentObj, address, busReqNumber) {
 	address = address | 0;
     busReqNumber = busReqNumber | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess(busReqNumber | 0);
 	return parentObj.gfx.readPalette(address & 0x3FF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readPalette8 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess8();
 	return parentObj.gfx.readPalette(address & 0x3FF);
 }
 GameBoyAdvanceMemory.prototype.readPalette16 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess16();
 	return parentObj.gfx.readPalette16(address & 0x3FF);
 }
 GameBoyAdvanceMemory.prototype.readPalette32 = function (parentObj, address) {
 	address = address | 0;
-    parentObj.IOCore.updateCoreSpill();
+    parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess32();
 	return parentObj.gfx.readPalette32(address & 0x3FF);
 }
