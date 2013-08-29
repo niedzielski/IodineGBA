@@ -99,6 +99,14 @@ GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
     //clocks = this.findClosestEvent(clocks | 0, this.IOCore.cartridge.nextIRQEventTime() | 0, 0x2000) | 0;
 	return clocks | 0;
 }
+GameBoyAdvanceIRQ.prototype.nextIRQEventTime = function () {
+    var clocks = -1;
+    //Checks IME:
+    if (this.IME) {
+        clocks = this.nextEventTime() | 0;
+    }
+    return clocks | 0;
+}
 GameBoyAdvanceIRQ.prototype.findClosestEvent = function (oldClocks, newClocks, flagID) {
 	oldClocks = oldClocks | 0;
     newClocks = newClocks | 0;

@@ -139,7 +139,7 @@ GameBoyAdvanceIO.prototype.handleDMA = function () {
 GameBoyAdvanceIO.prototype.handleHalt = function () {
 	if (!this.irq.IRQMatch()) {
 		//Clock up to next IRQ match or DMA:
-		this.updateCore(this.cyclesUntilNextEvent() | 0);
+		this.updateCore(this.cyclesUntilNextHALTEvent() | 0);
 	}
 	else {
 		//Exit HALT promptly:
@@ -152,12 +152,32 @@ GameBoyAdvanceIO.prototype.handleStop = function () {
 	this.cyclesToIterate = 0;
 	//Exits when user presses joypad or from an external irq outside of GBA internal.
 }
-GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
-    //Find the clocks to the next event:
-    var clocks = this.irq.nextEventTime() | 0;
+GameBoyAdvanceIO.prototype.cyclesUntilNextHALTEvent = function () {
+    //Find the clocks to the next HALT leave or DMA event:
+    var haltClocks = this.irq.nextEventTime() | 0;
     var dmaClocks = this.dma.nextEventTime() | 0;
-    clocks = ((clocks > -1) ? ((dmaClocks > -1) ? Math.min(clocks | 0, dmaClocks | 0) : (clocks | 0)) : (dmaClocks | 0)) | 0;
-    clocks = ((clocks == -1 || clocks > this.cyclesToIterate) ? (this.cyclesToIterate | 0) : (clocks | 0)) | 0;
+    return this.solveClosestTime(haltClocks | 0, dmaClocks | 0) | 0;
+}
+GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
+    //Find the clocks to the next IRQ or DMA event:
+    var irqClocks = this.irq.nextIRQEventTime() | 0;
+    var dmaClocks = this.dma.nextEventTime() | 0;
+    return this.solveClosestTime(irqClocks | 0, dmaClocks | 0) | 0;
+}
+GameBoyAdvanceIO.prototype.solveClosestTime = function (clocks1, clocks2) {
+    //Find the clocks closest to the next event:
+    var clocks = this.cyclesToIterate | 0;
+    if ((clocks1 | 0) >= 0) {
+        if ((clocks2 | 0) >= 0) {
+            clocks = Math.min(clocks | 0, clocks1 | 0, clocks2 | 0) | 0;
+        }
+        else {
+            clocks = Math.min(clocks | 0, clocks1 | 0) | 0;
+        }
+    }
+    else if ((clocks2 | 0) >= 0) {
+        clocks = Math.min(clocks | 0, clocks2 | 0) | 0;
+    }
     return clocks | 0;
 }
 GameBoyAdvanceIO.prototype.deflagStepper = function (statusFlag) {
