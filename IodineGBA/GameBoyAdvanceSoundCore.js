@@ -777,17 +777,20 @@ GameBoyAdvanceSound.prototype.channel3UpdateCache = function () {
 	this.channel3OutputLevelCache();
 }
 GameBoyAdvanceSound.prototype.writeWAVE = function (address, data) {
-	if (this.channel3canPlay) {
+	address = address | 0;
+    data = data | 0;
+    if (this.channel3canPlay) {
 		this.audioJIT();
 	}
-	address += this.channel3WAVERAMBankSpecified;
-	this.WAVERAM[address] = data;
+	address = ((address | 0) + (this.channel3WAVERAMBankSpecified | 0)) | 0;
+	this.WAVERAM[address | 0] = data | 0;
 	address <<= 1;
-	this.channel3PCM[address] = data >> 4;
+	this.channel3PCM[address | 0] = data >> 4;
 	this.channel3PCM[address | 1] = data & 0xF;
 }
 GameBoyAdvanceSound.prototype.readWAVE = function (address) {
-	return this.WAVERAM[address + this.channel3WAVERAMBankSpecified];
+	address = ((address | 0) + (this.channel3WAVERAMBankSpecified | 0)) | 0;
+    return this.WAVERAM[address | 0] | 0;
 }
 GameBoyAdvanceSound.prototype.channel4UpdateCache = function () {
 	this.cachedChannel4Sample = this.noiseSampleTable[this.channel4currentVolume | this.channel4lastSampleLookup];
@@ -827,47 +830,47 @@ GameBoyAdvanceSound.prototype.AGBDirectSoundBFIFOClear = function () {
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundTimer0ClockTick = function () {
 	this.audioJIT();
-	if (this.AGBDirectSoundATimer == 0) {
+	if ((this.AGBDirectSoundATimer | 0) == 0) {
 		this.AGBDirectSoundATimerIncrement();
 	}
-	if (this.AGBDirectSoundBTimer == 0) {
+	if ((this.AGBDirectSoundBTimer | 0) == 0) {
 		this.AGBDirectSoundBTimerIncrement();
 	}
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundTimer1ClockTick = function () {
 	this.audioJIT();
-	if (this.AGBDirectSoundATimer == 1) {
+	if ((this.AGBDirectSoundATimer | 0) == 1) {
 		this.AGBDirectSoundATimerIncrement();
 	}
-	if (this.AGBDirectSoundBTimer == 1) {
+	if ((this.AGBDirectSoundBTimer | 0) == 1) {
 		this.AGBDirectSoundBTimerIncrement();
 	}
 }
 GameBoyAdvanceSound.prototype.nextFIFOAEventTime = function () {
-	if (!this.FIFOABuffer.requestingDMA()) {
-        if (this.AGBDirectSoundATimer == 0) {
-            return this.IOCore.timer.nextTimer0Overflow(this.FIFOABuffer.count - 0x10);
+	var nextEventTime = 0;
+    if (!this.FIFOABuffer.requestingDMA()) {
+        var samplesUntilDMA = this.FIFOABuffer.samplesUntilDMATrigger() | 0;
+        if ((this.AGBDirectSoundATimer | 0) == 0) {
+            nextEventTime = this.IOCore.timer.nextTimer0Overflow(samplesUntilDMA | 0) | 0;
         }
         else {
-            return this.IOCore.timer.nextTimer1Overflow(this.FIFOABuffer.count - 0x10);
+            nextEventTime = this.IOCore.timer.nextTimer1Overflow(samplesUntilDMA | 0) | 0;
         }
 	}
-	else {
-		return 0;
-	}
+    return nextEventTime | 0;
 }
 GameBoyAdvanceSound.prototype.nextFIFOBEventTime = function () {
-	if (!this.FIFOBBuffer.requestingDMA()) {
-		if (this.AGBDirectSoundBTimer == 0) {
-            return this.IOCore.timer.nextTimer0Overflow(this.FIFOBBuffer.count - 0x10);
+	var nextEventTime = 0;
+    if (!this.FIFOBBuffer.requestingDMA()) {
+        var samplesUntilDMA = this.FIFOBBuffer.samplesUntilDMATrigger() | 0;
+        if ((this.AGBDirectSoundBTimer | 0) == 0) {
+            nextEventTime = this.IOCore.timer.nextTimer0Overflow(samplesUntilDMA | 0) | 0;
         }
         else {
-            return this.IOCore.timer.nextTimer1Overflow(this.FIFOBBuffer.count - 0x10);
+            nextEventTime = this.IOCore.timer.nextTimer1Overflow(samplesUntilDMA | 0) | 0;
         }
 	}
-	else {
-		return 0;
-	}
+    return nextEventTime | 0;
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundATimerIncrement = function () {
 	this.AGBDirectSoundA = this.FIFOABuffer.shift() | 0;

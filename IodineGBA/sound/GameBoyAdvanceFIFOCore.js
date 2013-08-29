@@ -44,3 +44,6 @@ GameBoyAdvanceFIFO.prototype.shift = function () {
 GameBoyAdvanceFIFO.prototype.requestingDMA = function () {
 	return (this.count <= 0x10);
 }
+GameBoyAdvanceFIFO.prototype.samplesUntilDMATrigger = function () {
+	return ((this.count | 0) - 0x10) | 0;
+}
