@@ -3054,7 +3054,6 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
     if (address < 0x4000304) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
-        parentObj.IOCore.updateCoreSpill();
 		return parentObj.readIO[address & 0x3FF](parentObj) | 0;
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
@@ -3071,7 +3070,6 @@ GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) 
     if (address < 0x4000304) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
-        parentObj.IOCore.updateCoreSpill();
 		return parentObj.readIO[address & 0x3FF](parentObj) | (parentObj.readIO[(address + 1) & 0x3FF](parentObj) << 8);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
