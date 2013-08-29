@@ -80,7 +80,7 @@ GameBoyAdvanceTimer.prototype.addClocks = function (clocks) {
 GameBoyAdvanceTimer.prototype.clockSoundTimers = function (clocks) {
     clocks = clocks | 0;
     for (var audioClocks = clocks | 0; (audioClocks | 0) > 0; audioClocks = ((audioClocks | 0) - (predictedClocks | 0)) | 0) {
-        var overflowClocks = this.nextAudioTimerOverflow(audioClocks | 0) | 0;
+        var overflowClocks = this.nextAudioTimerOverflow() | 0;
         var predictedClocks = Math.min(audioClocks | 0, overflowClocks | 0) | 0;
         //See if timer channel 0 is enabled:
         this.clockTimer0(predictedClocks | 0);
@@ -438,17 +438,15 @@ GameBoyAdvanceTimer.prototype.nextTimer3OverflowSingle = function () {
 	}
 	return -1;
 }
-GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function (clocks) {
-	clocks = clocks | 0;
+GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function () {
     var timer0 = this.nextTimer0OverflowSingle();
     if (timer0 == -1) {
-        timer0 = ((clocks | 0) + 1) | 0;
+        timer0 = 0x7FFFFFFF;
     }
     var timer1 = this.nextTimer1OverflowSingle();
     if (timer1 == -1) {
-        timer1 = ((clocks | 0) + 1) | 0;
+        timer1 = 0x7FFFFFFF;
     }
-    //If we fall to 0x7FFFFFFF, the function that calls this is fine anyhow...
     return Math.min(timer0, timer1, 0x7FFFFFFF) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer0IRQEventTime = function () {
