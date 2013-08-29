@@ -851,26 +851,26 @@ GameBoyAdvanceSound.prototype.nextFIFOAEventTime = function () {
     if (!this.FIFOABuffer.requestingDMA()) {
         var samplesUntilDMA = this.FIFOABuffer.samplesUntilDMATrigger() | 0;
         if ((this.AGBDirectSoundATimer | 0) == 0) {
-            nextEventTime = this.IOCore.timer.nextTimer0Overflow(samplesUntilDMA | 0) | 0;
+            nextEventTime = this.IOCore.timer.nextTimer0Overflow(samplesUntilDMA | 0);
         }
         else {
-            nextEventTime = this.IOCore.timer.nextTimer1Overflow(samplesUntilDMA | 0) | 0;
+            nextEventTime = this.IOCore.timer.nextTimer1Overflow(samplesUntilDMA | 0);
         }
 	}
-    return nextEventTime | 0;
+    return Math.min(nextEventTime, this.IOCore.cyclesToIterate | 0) | 0;
 }
 GameBoyAdvanceSound.prototype.nextFIFOBEventTime = function () {
 	var nextEventTime = 0;
     if (!this.FIFOBBuffer.requestingDMA()) {
         var samplesUntilDMA = this.FIFOBBuffer.samplesUntilDMATrigger() | 0;
         if ((this.AGBDirectSoundBTimer | 0) == 0) {
-            nextEventTime = this.IOCore.timer.nextTimer0Overflow(samplesUntilDMA | 0) | 0;
+            nextEventTime = this.IOCore.timer.nextTimer0Overflow(samplesUntilDMA | 0);
         }
         else {
-            nextEventTime = this.IOCore.timer.nextTimer1Overflow(samplesUntilDMA | 0) | 0;
+            nextEventTime = this.IOCore.timer.nextTimer1Overflow(samplesUntilDMA | 0);
         }
 	}
-    return nextEventTime | 0;
+    return Math.min(nextEventTime, this.IOCore.cyclesToIterate | 0) | 0;
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundATimerIncrement = function () {
 	this.AGBDirectSoundA = this.FIFOABuffer.shift() | 0;
