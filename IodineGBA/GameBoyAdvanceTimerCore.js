@@ -448,7 +448,8 @@ GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function (clocks) {
     if (timer1 == -1) {
         timer1 = ((clocks | 0) + 1) | 0;
     }
-    return Math.min(timer0, timer1, this.IOCore.cyclesToIterate) | 0;
+    //If we fall to 0x7FFFFFFF, the function that calls this is fine anyhow...
+    return Math.min(timer0, timer1, 0x7FFFFFFF) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer0IRQEventTime = function () {
 	return ((this.timer0Enabled && this.timer0IRQ) ? (Math.min(this.nextTimer0OverflowSingle(), this.IOCore.cyclesToIterate) | 0) : -1) | 0;

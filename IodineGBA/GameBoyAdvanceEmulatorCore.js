@@ -141,7 +141,7 @@ GameBoyAdvanceEmulator.prototype.resetMetrics = function () {
 }
 GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
 	this.clocksPerSecond = this.emulatorSpeed * 0x1000000;
-	this.CPUCyclesTotal = this.CPUCyclesPerIteration = Math.min(this.clocksPerSecond / 1000 * this.timerIntervalRate, 0x7FFFFFFF) | 0;
+	this.CPUCyclesTotal = this.CPUCyclesPerIteration = (this.clocksPerSecond / 1000 * this.timerIntervalRate) | 0;
 }
 GameBoyAdvanceEmulator.prototype.getSpeedPercentage = function () {
     var metricEnd = new Date();
