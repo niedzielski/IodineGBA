@@ -66,48 +66,24 @@ GameBoyAdvanceMemoryCache.prototype.memoryWriteFast32 = function (address, data)
 GameBoyAdvanceMemoryCache.prototype.memoryRead16 = function (address) {
 	address = address >>> 0;
     //Half-Word Read:
-    if ((address & 0x1) == 0) {
-        //Use optimized path for aligned:
-        return this.memoryReadFast16(address >>> 0) | 0;
-    }
-    else {
-        return this.memory.memoryRead16Unaligned(address >>> 0) | 0;
-    }
+    return this.memoryReadFast16((address & -2) >>> 0) | 0;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryRead32 = function (address) {
 	address = address >>> 0;
     //Word Read:
-    if ((address & 0x3) == 0) {
-        //Use optimized path for aligned:
-        return this.memoryReadFast32(address >>> 0) | 0;
-    }
-    else {
-        return this.memory.memoryRead32Unaligned(address >>> 0) | 0;
-    }
+    return this.memoryReadFast32((address & -3) >>> 0) | 0;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryWrite16 = function (address, data) {
 	address = address >>> 0;
     data = data | 0;
     //Half-Word Write:
-	if ((address & 0x1) == 0) {
-        //Use optimized path for aligned:
-        this.memoryWriteFast16(address >>> 0, data | 0);
-    }
-    else {
-        this.memory.memoryWrite16Unaligned(address >>> 0, data | 0);
-    }
+    this.memoryWriteFast16((address & -2) >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.memoryWrite32 = function (address, data) {
 	address = address >>> 0;
     data = data | 0;
     //Word Write:
-	if ((address & 0x3) == 0) {
-        //Use optimized path for aligned:
-        this.memoryWriteFast32(address >>> 0, data | 0);
-    }
-    else {
-        this.memory.memoryWrite32Unaligned(address >>> 0, data | 0);
-    }
+    this.memoryWriteFast32((address & -3) >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.invalidateIfWRAM = function () {
     if (this.addressRead16 == 0x2 || this.addressRead16 == 0x3) {

@@ -467,7 +467,7 @@ GameBoyAdvanceSWI.prototype.BitUnPack = function () {
     unpackSource += 0x2;
     var widthSource = this.IOCore.memory.memoryRead16(unpackSource >>> 0);
     unpackSource += 0x1;
-    var widthDestination = this.IOCore.memory.memoryRead8(unpackSource >>> 0);
+    var widthDestination = this.IOCore.memory.memoryReadFast8(unpackSource >>> 0);
     unpackSource += 0x1;
     var offset = this.IOCore.memory.memoryRead32(unpackSource >>> 0);
     var dataOffset = offset & 0x7FFFFFFF;
@@ -477,7 +477,7 @@ GameBoyAdvanceSWI.prototype.BitUnPack = function () {
         var resultWidth = 0;
         while (length > 0) {
             var result = 0;
-            var readByte = this.IOCore.memory.memoryRead8((source++) >>> 0);
+            var readByte = this.IOCore.memory.memoryReadFast8((source++) >>> 0);
             for (var index = 0, widthIndex = 0; index < 8; index += widthSource, widthIndex += widthDestination) {
                 var temp = (readByte >> index) & ((widthSource << 1) - 1);
                 if (temp > 0 || zeroData) {

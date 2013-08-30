@@ -279,20 +279,8 @@ GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
 	this.nonSequential = true;
 	this.ROMPrebuffer = 0;
 }
-GameBoyAdvanceWait.prototype.FASTAccess = function (reqByteNumber) {
-    if ((reqByteNumber & 0x1) == 0x1 || this.width == 8) {
-        this.IOCore.updateCore(1);
-        this.nonSequential = false;
-    }
-}
 GameBoyAdvanceWait.prototype.FASTAccess2 = function () {
 	this.IOCore.updateCore(1);
-	this.nonSequential = false;
-}
-GameBoyAdvanceWait.prototype.WRAMAccess = function (reqByteNumber) {
-	if ((reqByteNumber & 0x1) == 0x1 || this.width == 8) {
-		this.IOCore.updateCore(this.WRAMWaitState | 0);
-	}
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.WRAMAccess8 = function () {
@@ -306,17 +294,6 @@ GameBoyAdvanceWait.prototype.WRAMAccess16 = function () {
 GameBoyAdvanceWait.prototype.WRAMAccess32 = function () {
     this.IOCore.updateCore(this.WRAMWaitState << 1);
 	this.nonSequential = false;
-}
-GameBoyAdvanceWait.prototype.ROM0Access = function (reqByteNumber) {
-	if ((reqByteNumber & 0x1) == 0x1 || this.width == 8) {
-		if (this.nonSequential) {
-			this.IOCore.updateCore(this.CARTWaitState0First | 0);
-			this.nonSequential = false;
-		}
-		else {
-			this.IOCore.updateCore(this.CARTWaitState0Second | 0);
-		}
-	}
 }
 GameBoyAdvanceWait.prototype.ROM0Access8 = function () {
     if (this.nonSequential) {
@@ -345,17 +322,6 @@ GameBoyAdvanceWait.prototype.ROM0Access32 = function () {
         this.IOCore.updateCore(this.CARTWaitState0Second << 1);
     }
 }
-GameBoyAdvanceWait.prototype.ROM1Access = function (reqByteNumber) {
-	if ((reqByteNumber & 0x1) == 0x1 || this.width == 8) {
-		if (this.nonSequential) {
-			this.IOCore.updateCore(this.CARTWaitState1First | 0);
-			this.nonSequential = false;
-		}
-		else {
-			this.IOCore.updateCore(this.CARTWaitState1Second | 0);
-		}
-	}
-}
 GameBoyAdvanceWait.prototype.ROM1Access8 = function () {
     if (this.nonSequential) {
         this.IOCore.updateCore(this.CARTWaitState1First | 0);
@@ -382,17 +348,6 @@ GameBoyAdvanceWait.prototype.ROM1Access32 = function () {
     else {
         this.IOCore.updateCore(this.CARTWaitState1Second << 1);
     }
-}
-GameBoyAdvanceWait.prototype.ROM2Access = function (reqByteNumber) {
-	if ((reqByteNumber & 0x1) == 0x1 || this.width == 8) {
-		if (this.nonSequential) {
-			this.IOCore.updateCore(this.CARTWaitState2First | 0);
-			this.nonSequential = false;
-		}
-		else {
-			this.IOCore.updateCore(this.CARTWaitState2Second | 0);
-		}
-	}
 }
 GameBoyAdvanceWait.prototype.ROM2Access8 = function () {
     if (this.nonSequential) {
@@ -425,12 +380,6 @@ GameBoyAdvanceWait.prototype.SRAMAccess = function () {
 	this.IOCore.updateCore(this.SRAMWaitState | 0);
 	this.nonSequential = false;
 }
-GameBoyAdvanceWait.prototype.VRAMAccess = function (reqByteNumber) {
-	if ((reqByteNumber & 0x1) == 0x1 || this.width == 8) {
-		this.IOCore.updateCore((this.IOCore.gfx.isRendering()) ? 2 : 1);
-	}
-	this.nonSequential = false;
-}
 GameBoyAdvanceWait.prototype.VRAMAccess8 = function () {
     this.IOCore.updateCore((this.IOCore.gfx.isRendering()) ? 2 : 1);
 	this.nonSequential = false;
@@ -441,21 +390,6 @@ GameBoyAdvanceWait.prototype.VRAMAccess16 = function () {
 }
 GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
     this.IOCore.updateCore((this.IOCore.gfx.isRendering()) ? 4 : 2);
-	this.nonSequential = false;
-}
-GameBoyAdvanceWait.prototype.OAMAccess = function (reqByteNumber) {
-	switch (reqByteNumber | 0) {
-		case 0:
-			if (this.width != 8) {
-				return;
-			}
-		case 1:
-			if (this.width != 16) {
-				return;
-			}
-		case 3:
-			this.IOCore.updateCore(this.IOCore.gfx.OAMLockedCycles() + 1);
-	}
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.OAMAccess8 = function () {
