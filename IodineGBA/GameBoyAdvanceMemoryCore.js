@@ -567,11 +567,13 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x4] = function (parentObj, data) {
 		parentObj.IOCore.updateGraphicsClocking();
         parentObj.gfx.writeDISPSTAT0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000005h - DISPSTAT - General LCD Status (Read/Write)
 	this.writeIO[0x5] = function (parentObj, data) {
 		parentObj.IOCore.updateGraphicsClocking();
         parentObj.gfx.writeDISPSTAT1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000006h - VCOUNT - Vertical Counter (Read only)
 	this.writeIO[0x6] = this.NOP;
@@ -1307,7 +1309,9 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	}
 	//40000BBh - DMA0CNT_H - DMA 0 Control (R/W)
 	this.writeIO[0xBB] = function (parentObj, data) {
-		parentObj.dma.writeDMAControl1(0, data | 0);
+		parentObj.IOCore.updateCoreClocking();
+        parentObj.dma.writeDMAControl1(0, data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//40000BCh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
 	this.writeIO[0xBC] = function (parentObj, data) {
@@ -1355,7 +1359,9 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	}
 	//40000C7h - DMA1CNT_H - DMA 1 Control (R/W)
 	this.writeIO[0xC7] = function (parentObj, data) {
-		parentObj.dma.writeDMAControl1(1, data | 0);
+		parentObj.IOCore.updateCoreClocking();
+        parentObj.dma.writeDMAControl1(1, data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//40000C8h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
 	this.writeIO[0xC8] = function (parentObj, data) {
@@ -1403,7 +1409,9 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	}
 	//40000D3h - DMA2CNT_H - DMA 2 Control (R/W)
 	this.writeIO[0xD3] = function (parentObj, data) {
-		parentObj.dma.writeDMAControl1(2, data | 0);
+		parentObj.IOCore.updateCoreClocking();
+        parentObj.dma.writeDMAControl1(2, data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//40000D4h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
 	this.writeIO[0xD4] = function (parentObj, data) {
@@ -1451,7 +1459,9 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	}
 	//40000DFh - DMA3CNT_H - DMA 3 Control (R/W)
 	this.writeIO[0xDF] = function (parentObj, data) {
-		parentObj.dma.writeDMAControl1(3, data | 0);
+		parentObj.IOCore.updateCoreClocking();
+        parentObj.dma.writeDMAControl1(3, data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//40000E0h through 40000FFh - NOT USED - GLITCHED
 	this.fillWriteTableNOP(0xE0, 0xFF);
@@ -1459,16 +1469,19 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x100] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM0CNT_L0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000101h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
 	this.writeIO[0x101] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM0CNT_L1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000102h - TM0CNT_H - Timer 0 Control (R/W)
 	this.writeIO[0x102] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM0CNT_H(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000103h - TM0CNT_H - Timer 0 Control (R/W)
 	this.writeIO[0x103] = this.NOP;
@@ -1476,16 +1489,19 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x104] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM1CNT_L0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000105h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
 	this.writeIO[0x105] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM1CNT_L1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000106h - TM1CNT_H - Timer 1 Control (R/W)
 	this.writeIO[0x106] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM1CNT_H(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000107h - TM1CNT_H - Timer 1 Control (R/W)
 	this.writeIO[0x107] = this.NOP;
@@ -1493,16 +1509,19 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x108] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM2CNT_L0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000109h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
 	this.writeIO[0x109] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM2CNT_L1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//400010Ah - TM2CNT_H - Timer 2 Control (R/W)
 	this.writeIO[0x10A] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM2CNT_H(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//400010Bh - TM2CNT_H - Timer 2 Control (R/W)
 	this.writeIO[0x10B] = this.NOP;
@@ -1510,16 +1529,19 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x10C] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM3CNT_L0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//400010Dh - TM3CNT_L - Timer 3 Counter/Reload (R/W)
 	this.writeIO[0x10D] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM3CNT_L1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//400010Eh - TM3CNT_H - Timer 3 Control (R/W)
 	this.writeIO[0x10E] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.timer.writeTM3CNT_H(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//400010Fh - TM3CNT_H - Timer 3 Control (R/W)
 	this.writeIO[0x10F] = this.NOP;
@@ -1529,61 +1551,73 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x120] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA_A0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000121h - Serial Data A (R/W)
 	this.writeIO[0x121] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA_A1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000122h - Serial Data B (R/W)
 	this.writeIO[0x122] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA_B0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000123h - Serial Data B (R/W)
 	this.writeIO[0x123] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA_B1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000124h - Serial Data C (R/W)
 	this.writeIO[0x124] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA_C0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000125h - Serial Data C (R/W)
 	this.writeIO[0x125] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA_C1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000126h - Serial Data D (R/W)
 	this.writeIO[0x126] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA_D0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000127h - Serial Data D (R/W)
 	this.writeIO[0x127] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA_D1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000128h - SIOCNT - SIO Sub Mode Control (R/W)
 	this.writeIO[0x128] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIOCNT0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000129h - SIOCNT - SIO Sub Mode Control (R/W)
 	this.writeIO[0x129] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIOCNT1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//400012Ah - SIOMLT_SEND - Data Send Register (R/W)
 	this.writeIO[0x12A] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA8_0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//400012Bh - SIOMLT_SEND - Data Send Register (R/W)
 	this.writeIO[0x12B] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeSIODATA8_1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//400012Ch through 400012Fh - NOT USED - GLITCHED
 	this.fillWriteTableNOP(0x12C, 0x12F);
@@ -1603,11 +1637,13 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x134] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeRCNT0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000135h - RCNT (R/W) - Mode Selection
 	this.writeIO[0x135] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeRCNT1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000136h through 400013Fh - NOT USED - GLITCHED
 	this.fillWriteTableNOP(0x136, 0x13F);
@@ -1615,6 +1651,7 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x140] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYCNT(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000141h - JOYCNT - JOY BUS Control Register (R/W)
 	this.writeIO[0x141] = this.NOP;
@@ -1624,46 +1661,55 @@ GameBoyAdvanceMemory.prototype.compileIOWriteDispatch = function () {
 	this.writeIO[0x150] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_RECV0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000151h - JoyBus Receive (R/W)
 	this.writeIO[0x151] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_RECV1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000152h - JoyBus Receive (R/W)
 	this.writeIO[0x152] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_RECV2(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000153h - JoyBus Receive (R/W)
 	this.writeIO[0x153] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_RECV3(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000154h - JoyBus Send (R/W)
 	this.writeIO[0x154] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_SEND0(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000155h - JoyBus Send (R/W)
 	this.writeIO[0x155] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_SEND1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000156h - JoyBus Send (R/W)
 	this.writeIO[0x156] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_SEND2(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000157h - JoyBus Send (R/W)
 	this.writeIO[0x157] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_SEND3(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000158h - JoyBus Stat (R/W)
 	this.writeIO[0x158] = function (parentObj, data) {
 		parentObj.IOCore.updateSerialClocking();
         parentObj.serial.writeJOYBUS_STAT(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000159h through 40001FFh - NOT USED - GLITCHED
 	this.fillWriteTableNOP(0x159, 0x1FF);
@@ -2345,12 +2391,10 @@ GameBoyAdvanceMemory.prototype.compileIOReadDispatch = function () {
 	}
 	//4000202h - IF - Interrupt Request Flags / IRQ Acknowledge
 	this.readIO[0x202] = function (parentObj) {
-		parentObj.IOCore.updateCoreClocking();
         return parentObj.irq.readIF0() | 0;
 	}
 	//4000203h - IF - Interrupt Request Flags / IRQ Acknowledge
 	this.readIO[0x203] = function (parentObj) {
-		parentObj.IOCore.updateCoreClocking();
         return parentObj.irq.readIF1() | 0;
 	}
 	//4000204h - WAITCNT - Waitstate Control (R/W)
@@ -3037,7 +3081,6 @@ GameBoyAdvanceMemory.prototype.readIODispatch = function (parentObj, address, bu
     if (address < 0x4000304) {
 		//IO Read:
 		parentObj.wait.FASTAccess(busReqNumber | 0);
-        parentObj.IOCore.updateCoreSpill();
 		return parentObj.readIO[address & 0x3FF](parentObj) | 0;
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
