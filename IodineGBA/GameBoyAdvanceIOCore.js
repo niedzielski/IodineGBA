@@ -155,6 +155,7 @@ GameBoyAdvanceIO.prototype.handleDMA = function () {
 	if (this.dma.perform()) {
 		//If DMA is done, exit it:
         this.deflagStepper(0x1);
+        this.updateCoreSpill();
 	}
 }
 GameBoyAdvanceIO.prototype.handleHalt = function () {
