@@ -182,7 +182,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (parentObj, address, 
 	address = address | 0;
     data = data | 0;
     parentObj.wait.FASTAccess2();
-	if ((address | 0) < 0x4000304) {
+	if ((address | 0) < 0x4000302) {
 		//IO Write:
         parentObj.writeIO8[address & 0x3FF](parentObj, data | 0);
 	}
@@ -195,7 +195,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (parentObj, address,
 	address = address | 0;
     data = data | 0;
     parentObj.wait.FASTAccess2();
-	if ((address | 0) < 0x4000303) {
+	if ((address | 0) < 0x4000301) {
 		//IO Write:
         address = address >> 1;
         parentObj.writeIO16[address & 0x1FF](parentObj, data & 0xFFFF);

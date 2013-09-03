@@ -2248,12 +2248,6 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO8 = functio
 	writeIO[0x301] = function (parentObj, data) {
 		parentObj.wait.writeHALTCNT(data | 0);
 	}
-	//4000302h - NOT USED - ZERO
-	writeIO[0x302] = this.memory.NOP;
-	//4000303h - NOT USED - ZERO
-	writeIO[0x303] = this.memory.NOP;
-    //4000304h through 40003FFh - NOT USED - GLITCHED
-	this.fillWriteTableNOP(writeIO, 0x304, 0x3FF);
     return writeIO;
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO16 = function () {
@@ -3141,10 +3135,6 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO16 = functi
         parentObj.wait.writePOSTBOOT(data & 0xFF);
 		parentObj.wait.writeHALTCNT(data >> 8);
 	}
-	//4000302h - NOT USED - ZERO
-	writeIO[0x302 >> 1] = this.memory.NOP;
-    //4000304h through 40003FFh - NOT USED - GLITCHED
-	this.fillWriteTableNOP(writeIO, 0x304 >> 1, 0x3FE >> 1);
     return writeIO;
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = function () {
@@ -3823,8 +3813,6 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.wait.writePOSTBOOT(data & 0xFF);
 		parentObj.wait.writeHALTCNT((data >> 8) & 0xFF);
 	}
-    //4000304h through 40003FFh - NOT USED - GLITCHED
-	this.fillWriteTableNOP(writeIO, 0x304 >> 2, 0x3FC >> 2);
     return writeIO;
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.fillWriteTableNOP = function (writeIO, from, to) {
