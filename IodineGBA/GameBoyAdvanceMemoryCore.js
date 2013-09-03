@@ -42,6 +42,7 @@ function GameBoyAdvanceMemory(IOCore) {
     this.readIO8 = generator.generateMemoryReadIO8();
     this.writeIO8 = generator.generateMemoryWriteIO8();
     this.writeIO16 = generator.generateMemoryWriteIO16();
+    this.writeIO32 = generator.generateMemoryWriteIO32();
     this.memoryReader8 = generator.generateMemoryRead8();
     this.memoryWriter8 = generator.generateMemoryWrite8();
     this.memoryReader16 = generator.generateMemoryRead16();
@@ -181,7 +182,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (parentObj, address, 
 	address = address | 0;
     data = data | 0;
     parentObj.wait.FASTAccess2();
-	if (address < 0x4000304) {
+	if ((address | 0) < 0x4000304) {
 		//IO Write:
         parentObj.writeIO8[address & 0x3FF](parentObj, data | 0);
 	}
@@ -194,11 +195,10 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (parentObj, address,
 	address = address | 0;
     data = data | 0;
     parentObj.wait.FASTAccess2();
-	if (address < 0x4000303) {
+	if ((address | 0) < 0x4000303) {
 		//IO Write:
-        address = address & 0x3FF;
         address = address >> 1;
-        parentObj.writeIO16[address | 0](parentObj, data & 0xFFFF);
+        parentObj.writeIO16[address & 0x1FF](parentObj, data | 0);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
@@ -210,12 +210,10 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (parentObj, address,
 	address = address | 0;
     data = data | 0;
     parentObj.wait.FASTAccess2();
-	if (address < 0x4000301) {
+	if ((address | 0) < 0x4000301) {
 		//IO Write:
-        address = address & 0x3FF;
-        address = address >> 1;
-        parentObj.writeIO16[address | 0](parentObj, data & 0xFFFF);
-        parentObj.writeIO16[address | 1](parentObj, (data >> 16) & 0xFFFF);
+        address = address >> 2;
+        parentObj.writeIO32[address & 0xFF](parentObj, data | 0);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
@@ -461,7 +459,7 @@ GameBoyAdvanceMemory.prototype.addMemoryCacheRoot = function (root) {
 GameBoyAdvanceMemory.prototype.readBIOS8 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
-	if (address < 0x4000) {
+	if ((address | 0) < 0x4000) {
 		if (parentObj.cpu.registers[15] < 0x4000) {
 			//If reading from BIOS while executing it:
 			parentObj.lastBIOSREAD[address & 0x3] = (parentObj.cpu.registers[15] >> ((address & 0x3) << 3)) & 0xFF;
@@ -479,7 +477,7 @@ GameBoyAdvanceMemory.prototype.readBIOS8 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readBIOS16Slow = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
-	if (address < 0x4000) {
+	if ((address | 0) < 0x4000) {
 		if (parentObj.cpu.registers[15] < 0x4000) {
 			//If reading from BIOS while executing it:
 			parentObj.lastBIOSREAD[address & 0x3] = (parentObj.cpu.registers[15] >> ((address & 0x3) << 3)) & 0xFF;
@@ -498,7 +496,7 @@ GameBoyAdvanceMemory.prototype.readBIOS16Slow = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readBIOS16Optimized = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
-	if (address < 0x4000) {
+	if ((address | 0) < 0x4000) {
         address >>= 1;
 		if (parentObj.cpu.registers[15] < 0x4000) {
 			//If reading from BIOS while executing it:
@@ -517,7 +515,7 @@ GameBoyAdvanceMemory.prototype.readBIOS16Optimized = function (parentObj, addres
 GameBoyAdvanceMemory.prototype.readBIOS32Slow = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
-	if (address < 0x4000) {
+	if ((address | 0) < 0x4000) {
 		if (parentObj.cpu.registers[15] < 0x4000) {
 			//If reading from BIOS while executing it:
 			parentObj.lastBIOSREAD[0] = parentObj.cpu.registers[15] & 0xFF;
@@ -538,7 +536,7 @@ GameBoyAdvanceMemory.prototype.readBIOS32Slow = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readBIOS32Optimized = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
-	if (address < 0x4000) {
+	if ((address | 0) < 0x4000) {
         address >>= 2;
 		if (parentObj.cpu.registers[15] < 0x4000) {
 			//If reading from BIOS while executing it:
@@ -612,7 +610,7 @@ GameBoyAdvanceMemory.prototype.readInternalWRAM32Optimized = function (parentObj
 }
 GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
 	address = address | 0;
-    if (address < 0x4000304) {
+    if ((address | 0) < 0x4000304) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
 		return parentObj.readIO8[address & 0x3FF](parentObj) | 0;
@@ -628,7 +626,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
 }
 GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) {
 	address = address | 0;
-    if (address < 0x4000304) {
+    if ((address | 0) < 0x4000303) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
 		return parentObj.readIO8[address & 0x3FF](parentObj) | (parentObj.readIO8[(address + 1) & 0x3FF](parentObj) << 8);
@@ -644,7 +642,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) 
 }
 GameBoyAdvanceMemory.prototype.readIODispatch32 = function (parentObj, address) {
 	address = address | 0;
-    if (address < 0x4000304) {
+    if ((address | 0) < 0x4000301) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
 		return parentObj.readIO8[address & 0x3FF](parentObj) | (parentObj.readIO8[(address + 1) & 0x3FF](parentObj) << 8) | (parentObj.readIO8[(address + 2) & 0x3FF](parentObj) << 16) | (parentObj.readIO8[(address + 3) & 0x3FF](parentObj) << 24);
