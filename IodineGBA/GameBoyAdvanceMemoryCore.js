@@ -198,7 +198,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (parentObj, address,
 	if ((address | 0) < 0x4000303) {
 		//IO Write:
         address = address >> 1;
-        parentObj.writeIO16[address & 0x1FF](parentObj, data | 0);
+        parentObj.writeIO16[address & 0x1FF](parentObj, data & 0xFFFF);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
@@ -212,8 +212,10 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (parentObj, address,
     parentObj.wait.FASTAccess2();
 	if ((address | 0) < 0x4000301) {
 		//IO Write:
-        address = address >> 2;
-        parentObj.writeIO32[address & 0xFF](parentObj, data | 0);
+        address = address & 0x3FF;
+        address = address >> 1;
+        parentObj.writeIO16[address | 0](parentObj, data & 0xFFFF);
+        parentObj.writeIO16[address | 1](parentObj, (data >> 16) & 0xFFFF);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:

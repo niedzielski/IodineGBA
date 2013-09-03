@@ -1599,6 +1599,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO8 = functio
 	writeIO[0x83] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
         parentObj.sound.writeSOUNDCNT_H1(data | 0);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)
 	writeIO[0x84] = function (parentObj, data) {
@@ -2662,6 +2663,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO16 = functi
         parentObj.IOCore.updateTimerClocking();
         parentObj.sound.writeSOUNDCNT_H0(data & 0xFF);
         parentObj.sound.writeSOUNDCNT_H1(data >> 8);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)
 	writeIO[0x84 >> 1] = function (parentObj, data) {
@@ -3369,7 +3371,6 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.IOCore.updateTimerClocking();
         parentObj.sound.writeSOUND1CNT_L(data & 0xFF);
         //NR11:
-        parentObj.IOCore.updateTimerClocking();
         parentObj.sound.writeSOUND1CNT_H0((data >> 16) & 0xFF);
 		//NR12:
         parentObj.sound.writeSOUND1CNT_H1((data >> 24) & 0xFF);
@@ -3457,6 +3458,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.sound.writeSOUNDCNT_L1((data >> 8) & 0xFF);
         parentObj.sound.writeSOUNDCNT_H0((data >> 16) & 0xFF);
         parentObj.sound.writeSOUNDCNT_H1((data >> 24) & 0xFF);
+        parentObj.IOCore.updateCoreEventTime();
 	}
 	//4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)
 	//4000086h - NOT USED - ZERO
