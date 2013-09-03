@@ -40,6 +40,7 @@ function GameBoyAdvanceMemory(IOCore) {
     //After all sub-objects initialized, initialize dispatches:
 	var generator = new GameBoyAdvanceMemoryDispatchGenerator(this);
     this.readIO8 = generator.generateMemoryReadIO8();
+    this.readIO16 = generator.generateMemoryReadIO16();
     this.writeIO8 = generator.generateMemoryWriteIO8();
     this.writeIO16 = generator.generateMemoryWriteIO16();
     this.writeIO32 = generator.generateMemoryWriteIO32();
@@ -626,10 +627,11 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
 }
 GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) {
 	address = address | 0;
-    if ((address | 0) < 0x4000303) {
+    if ((address | 0) < 0x4000301) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
-		return parentObj.readIO8[address & 0x3FF](parentObj) | (parentObj.readIO8[(address + 1) & 0x3FF](parentObj) << 8);
+		address >>= 1;
+        return parentObj.readIO16[address & 0x1FF](parentObj) | 0;
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
@@ -645,7 +647,8 @@ GameBoyAdvanceMemory.prototype.readIODispatch32 = function (parentObj, address) 
     if ((address | 0) < 0x4000301) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
-		return parentObj.readIO8[address & 0x3FF](parentObj) | (parentObj.readIO8[(address + 1) & 0x3FF](parentObj) << 8) | (parentObj.readIO8[(address + 2) & 0x3FF](parentObj) << 16) | (parentObj.readIO8[(address + 3) & 0x3FF](parentObj) << 24);
+        address >>= 1;
+		return parentObj.readIO16[address & 0x1FF](parentObj) | (parentObj.readIO16[(address | 1) & 0x1FF](parentObj) << 16);
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:

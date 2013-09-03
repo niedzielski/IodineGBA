@@ -360,10 +360,6 @@ GameBoyAdvanceDMA.prototype.finalDMAAddresses = function (dmaChannel, source, de
 			break;
 		case 1:	//Decrement
 			this.sourceShadow[dmaChannel | 0] = ((source | 0) - (transferred | 0)) | 0;
-			break;
-		case 3:	//Reload
-			//Prohibited code, should not get here:
-			this.sourceShadow[dmaChannel | 0] = this.source[dmaChannel | 0] | 0;
 	}
 	//Don't update destination if in FIFO DMA mode:
 	if ((this.currentMatch | 0) != (this.DMA_REQUEST_TYPE.FIFO_A | 0) && (this.currentMatch | 0) != (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
@@ -388,7 +384,6 @@ GameBoyAdvanceDMA.prototype.incrementDMAAddresses = function (dmaChannel, source
 	//Update source address:
 	switch (this.sourceControl[dmaChannel | 0] | 0) {
 		case 0:	//Increment
-		case 3:	//Prohibited code...
 			this.sourceShadow[dmaChannel | 0] = ((source | 0) + (transferred | 0)) | 0;
 			break;
 		case 1:
