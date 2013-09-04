@@ -4442,6 +4442,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
 	//400012Ch through 400012Fh - NOT USED - GLITCHED
 	this.fillWriteTableNOP(writeIO, 0x12C >> 2, 0x12C >> 2);
 	//4000130h - KEYINPUT - Key Status (R)
+	//4000132h - KEYCNT - Key Interrupt Control (R/W)
 	writeIO[0x130 >> 2] = function (parentObj, data) {
 		data = data | 0;
         parentObj.joypad.writeKeyControl0((data >> 16) & 0xFF);
