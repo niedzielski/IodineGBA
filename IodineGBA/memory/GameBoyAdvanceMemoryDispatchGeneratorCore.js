@@ -1094,7 +1094,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO16 = functio
 	//4000066h - NOT USED - ZERO
 	readIO[0x66 >> 1] = this.memory.readZero;
 	//4000068h - SOUND2CNT_L (NR21, NR22) - Channel 2 Duty/Length/Envelope (R/W)
-	readIO[0x68] = function (parentObj) {
+	readIO[0x68 >> 1] = function (parentObj) {
 		//NR21:
         //NR22:
 		return parentObj.sound.readSOUND2CNT_L0() | (parentObj.sound.readSOUND2CNT_L1() << 8);
@@ -1389,6 +1389,365 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO16 = functio
 	readIO[0x302 >> 1] = this.memory.readZero;
     return readIO;
 }
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO32 = function () {
+	var readIO = [];
+	//4000000h - DISPCNT - LCD Control (Read/Write)
+    //4000002h - Undocumented - Green Swap (R/W)
+	readIO[0] = function (parentObj) {
+		return parentObj.gfx.readDISPCNT0() |
+        (parentObj.gfx.readDISPCNT1() << 8) |
+        (parentObj.gfx.readGreenSwap() << 16);
+	}
+	//4000004h - DISPSTAT - General LCD Status (Read/Write)
+	//4000006h - VCOUNT - Vertical Counter (Read only)
+    readIO[0x4 >> 2] = function (parentObj) {
+		parentObj.IOCore.updateGraphicsClocking();
+        return parentObj.gfx.readDISPSTAT0() |
+        (parentObj.gfx.readDISPSTAT1() << 8) |
+        (parentObj.gfx.readVCOUNT() << 16);
+	}
+	//4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
+	//400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
+    readIO[0x8 >> 2] = function (parentObj) {
+		return parentObj.gfx.readBG0CNT0() |
+        (parentObj.gfx.readBG0CNT1() << 8) |
+        (parentObj.gfx.readBG1CNT0() << 16) |
+        (parentObj.gfx.readBG1CNT1() << 24);
+	}
+	//400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
+    //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
+	readIO[0xC >> 2] = function (parentObj) {
+		return parentObj.gfx.readBG2CNT0() |
+        (parentObj.gfx.readBG2CNT1() << 8) |
+        (parentObj.gfx.readBG3CNT0() << 16) |
+        (parentObj.gfx.readBG3CNT1() << 24);
+	}
+	//4000010h through 4000047h - WRITE ONLY
+	this.fillReadTableUnused32(readIO, 0x10 >> 2, 0x44 >> 2);
+	//4000048h - WININ - Control of Inside of Window(s) (R/W)
+	//400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
+    readIO[0x48 >> 2] = function (parentObj) {
+		return parentObj.gfx.readWININ0() |
+        (parentObj.gfx.readWININ1() << 8) |
+        (parentObj.gfx.readWINOUT0() << 16) |
+        (parentObj.gfx.readWINOUT1() << 24);
+	}
+	//400004Ch - MOSAIC - Mosaic Size (W)
+	readIO[0x4C >> 2] = this.memory.readUnused32;
+	//4000050h - BLDCNT - Color Special Effects Selection (R/W)
+	//4000052h - BLDALPHA - Alpha Blending Coefficients (W)
+    readIO[0x50 >> 2] = function (parentObj) {
+		return parentObj.gfx.readBLDCNT0() | (parentObj.gfx.readBLDCNT1() << 8);
+	}
+	//4000054h through 400005Fh - NOT USED - GLITCHED
+	this.fillReadTableUnused32(readIO, 0x54 >> 2, 0x5C >> 2);
+	//4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
+	//4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
+    readIO[0x60 >> 2] = function (parentObj) {
+		//NR10:
+        //NR11:
+        //NR12:
+		return parentObj.sound.readSOUND1CNT_L() |
+        (parentObj.sound.readSOUND1CNT_H0() << 16) |
+        (parentObj.sound.readSOUND1CNT_H1() << 24);
+	}
+	//4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
+	//4000066h - NOT USED - ZERO
+    readIO[0x64 >> 2] = function (parentObj) {
+		//NR14:
+		return parentObj.sound.readSOUND1CNT_X() << 8;
+	}
+	//4000068h - SOUND2CNT_L (NR21, NR22) - Channel 2 Duty/Length/Envelope (R/W)
+	//400006Ah - NOT USED - ZERO
+    readIO[0x68 >> 2] = function (parentObj) {
+		//NR21:
+        //NR22:
+		return parentObj.sound.readSOUND2CNT_L0() | (parentObj.sound.readSOUND2CNT_L1() << 8);
+	}
+	//400006Ch - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
+	//400006Eh - NOT USED - ZERO
+    readIO[0x6C >> 2] = function (parentObj) {
+		//NR24:
+		return parentObj.sound.readSOUND2CNT_H() << 8;
+	}
+	//4000070h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)
+	//4000073h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
+    readIO[0x70 >> 2] = function (parentObj) {
+		//NR30:
+        //NR32:
+		return parentObj.sound.readSOUND3CNT_L() | (parentObj.sound.readSOUND3CNT_H() << 24);
+	}
+	//4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
+	readIO[0x74 >> 1] = function (parentObj) {
+		//NR34:
+		return parentObj.sound.readSOUND3CNT_X() << 8;
+	}
+	//4000076h - NOT USED - ZERO
+	readIO[0x76 >> 1] = this.memory.readZero;
+	//4000078h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
+	readIO[0x78 >> 1] = function (parentObj) {
+		//NR42:
+		return parentObj.sound.readSOUND4CNT_L() << 8;
+	}
+	//400007Ah - NOT USED - ZERO
+	readIO[0x7A >> 1] = this.memory.readZero;
+	//400007Ch - SOUND4CNT_H (NR43, NR44) - Channel 4 Frequency/Control (R/W)
+	readIO[0x7C >> 1] = function (parentObj) {
+		//NR43:
+        //NR44:
+		return parentObj.sound.readSOUND4CNT_H0() | (parentObj.sound.readSOUND4CNT_H1() << 8);
+	}
+	//400007Eh - NOT USED - ZERO
+	readIO[0x7E >> 1] = this.memory.readZero;
+	//4000080h - SOUNDCNT_L (NR50, NR51) - Channel L/R Volume/Enable (R/W)
+	readIO[0x80 >> 1] = function (parentObj) {
+		//NR50:
+        //NR51:
+		return parentObj.sound.readSOUNDCNT_L0() | (parentObj.sound.readSOUNDCNT_L1() << 8);
+	}
+	//4000082h - SOUNDCNT_H (GBA only) - DMA Sound Control/Mixing (R/W)
+	readIO[0x82 >> 1] = function (parentObj) {
+		return parentObj.sound.readSOUNDCNT_H0() | (parentObj.sound.readSOUNDCNT_H1() << 8);
+	}
+	//4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)
+	readIO[0x84 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readSOUNDCNT_X() | 0;
+	}
+	//4000086h - NOT USED - ZERO
+	readIO[0x86 >> 1] = this.memory.readZero;
+	//4000088h - SOUNDBIAS - Sound PWM Control (R/W, see below)
+	readIO[0x88 >> 1] = function (parentObj) {
+		return parentObj.sound.readSOUNDBIAS0() | (parentObj.sound.readSOUNDBIAS1() << 8);
+	}
+	//400008Ah - NOT USED - ZERO
+	readIO[0x8A >> 1] = this.memory.readZero;
+	//400008Ch - NOT USED - GLITCHED
+	readIO[0x8C >> 1] = this.memory.readUnused16;
+	//400008Eh - NOT USED - GLITCHED
+	readIO[0x8E >> 1] = this.memory.readUnused16;
+	//4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
+	readIO[0x90 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readWAVE(0) | (parentObj.sound.readWAVE(1) << 8);
+	}
+	//4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
+	readIO[0x92 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readWAVE(2) | (parentObj.sound.readWAVE(3) << 8);
+	}
+	//4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
+	readIO[0x94 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readWAVE(4) | (parentObj.sound.readWAVE(5) << 8);
+	}
+	//4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
+	readIO[0x96 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readWAVE(6) | (parentObj.sound.readWAVE(7) << 8);
+	}
+	//4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
+	readIO[0x98 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readWAVE(8) | (parentObj.sound.readWAVE(9) << 8);
+	}
+	//400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
+	readIO[0x9A >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readWAVE(10) | (parentObj.sound.readWAVE(11) << 8);
+	}
+	//400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
+	readIO[0x9C >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readWAVE(12) | (parentObj.sound.readWAVE(13) << 8);
+	}
+	//400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
+	readIO[0x9E >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.sound.readWAVE(14) | (parentObj.sound.readWAVE(15) << 8);
+	}
+	//40000A0h through 40000B9h - WRITE ONLY
+	this.fillReadTableUnused16(readIO, 0xA0 >> 1, 0xB8 >> 1);
+	//40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
+	readIO[0xBA >> 1] = function (parentObj) {
+		return parentObj.dma.readDMAControl0(0) | (parentObj.dma.readDMAControl1(0) << 8);
+	}
+	//40000BCh through 40000C5h - WRITE ONLY
+	this.fillReadTableUnused16(readIO, 0xBC >> 1, 0xC4 >> 1);
+	//40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
+	readIO[0xC6 >> 1] = function (parentObj) {
+		return parentObj.dma.readDMAControl0(1) | (parentObj.dma.readDMAControl1(1) << 8);
+	}
+	//40000C8h through 40000D1h - WRITE ONLY
+	this.fillReadTableUnused16(readIO, 0xC8 >> 1, 0xD0 >> 1);
+	//40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
+	readIO[0xD2 >> 1] = function (parentObj) {
+		return parentObj.dma.readDMAControl0(2) | (parentObj.dma.readDMAControl1(2) << 8);
+	}
+	//40000D4h through 40000DDh - WRITE ONLY
+	this.fillReadTableUnused16(readIO, 0xD4 >> 1, 0xDC >> 1);
+	//40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
+	readIO[0xDE >> 1] = function (parentObj) {
+		return parentObj.dma.readDMAControl0(3) | (parentObj.dma.readDMAControl1(3) << 8);
+	}
+	//40000E0h through 40000FFh - NOT USED - GLITCHED
+	this.fillReadTableUnused16(readIO, 0xE0 >> 1, 0xFE >> 1);
+	//4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
+	readIO[0x100 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.timer.readTM0CNT_L0() | (parentObj.timer.readTM0CNT_L1() << 8);
+	}
+	//4000102h - TM0CNT_H - Timer 0 Control (R/W)
+	readIO[0x102 >> 1] = function (parentObj) {
+		return parentObj.timer.readTM0CNT_H() | 0;
+	}
+	//4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
+	readIO[0x104 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.timer.readTM1CNT_L0() | (parentObj.timer.readTM1CNT_L1() << 8);
+	}
+	//4000106h - TM1CNT_H - Timer 1 Control (R/W)
+	readIO[0x106 >> 1] = function (parentObj) {
+		return parentObj.timer.readTM1CNT_H() | 0;
+	}
+	//4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
+	readIO[0x108 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.timer.readTM2CNT_L0() | (parentObj.timer.readTM2CNT_L1() << 8);
+	}
+	//400010Ah - TM2CNT_H - Timer 2 Control (R/W)
+	readIO[0x10A >> 1] = function (parentObj) {
+		return parentObj.timer.readTM2CNT_H() | 0;
+	}
+	//400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
+	readIO[0x10C >> 1] = function (parentObj) {
+		parentObj.IOCore.updateTimerClocking();
+        return parentObj.timer.readTM3CNT_L0() | (parentObj.timer.readTM3CNT_L1() << 8);
+	}
+	//400010Eh - TM3CNT_H - Timer 3 Control (R/W)
+	readIO[0x10E >> 1] = function (parentObj) {
+		return parentObj.timer.readTM3CNT_H() | 0;
+	}
+	//4000110h through 400011Fh - NOT USED - GLITCHED
+	this.fillReadTableUnused16(readIO, 0x110 >> 1, 0x11E >> 1);
+	//4000120h - Serial Data A (R/W)
+	readIO[0x120 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readSIODATA_A0() | (parentObj.serial.readSIODATA_A1() << 8);
+	}
+	//4000122h - Serial Data B (R/W)
+	readIO[0x122 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readSIODATA_B0() | (parentObj.serial.readSIODATA_B1() << 8);
+	}
+	//4000124h - Serial Data C (R/W)
+	readIO[0x124 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readSIODATA_C0() | (parentObj.serial.readSIODATA_C1() << 8);
+	}
+	//4000126h - Serial Data D (R/W)
+	readIO[0x126 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readSIODATA_D0() | (parentObj.serial.readSIODATA_D1() << 8);
+	}
+	//4000128h - SIOCNT - SIO Sub Mode Control (R/W)
+	readIO[0x128 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readSIOCNT0() | (parentObj.serial.readSIOCNT1() << 8);
+	}
+	//400012Ah - SIOMLT_SEND - Data Send Register (R/W)
+	readIO[0x12A >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readSIODATA8_0() | (parentObj.serial.readSIODATA8_1() << 8);
+	}
+	//400012Ch through 400012Fh - NOT USED - GLITCHED
+	this.fillReadTableUnused16(readIO, 0x12C >> 1, 0x12E >> 1);
+	//4000130h - KEYINPUT - Key Status (R)
+	readIO[0x130 >> 1] = function (parentObj) {
+		return parentObj.joypad.readKeyStatus0() | (parentObj.joypad.readKeyStatus1() << 8);
+	}
+	//4000132h - KEYCNT - Key Interrupt Control (R/W)
+	readIO[0x132 >> 1] = function (parentObj) {
+		return parentObj.joypad.readKeyControl0() | (parentObj.joypad.readKeyControl1() << 8);
+	}
+	//4000134h - RCNT (R/W) - Mode Selection
+	readIO[0x134 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readRCNT0() | (parentObj.serial.readRCNT1() << 8);
+	}
+	//4000136h - NOT USED - ZERO
+	readIO[0x136 >> 1] = this.memory.readZero;
+	//4000138h through 400013Fh - NOT USED - GLITCHED
+	this.fillReadTableUnused16(readIO, 0x138 >> 1, 0x13E >> 1);
+	//4000140h - JOYCNT - JOY BUS Control Register (R/W)
+	readIO[0x140 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readJOYCNT() | 0;
+	}
+	//4000142h - NOT USED - ZERO
+	readIO[0x142 >> 1] = this.memory.readZero;
+	//4000144h through 400014Fh - NOT USED - GLITCHED
+	this.fillReadTableUnused16(readIO, 0x144 >> 1, 0x14E >> 1);
+	//4000150h - JoyBus Receive (R/W)
+	readIO[0x150 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readJOYBUS_RECV0() | (parentObj.serial.readJOYBUS_RECV1() << 8);
+	}
+	//4000152h - JoyBus Receive (R/W)
+	readIO[0x152 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readJOYBUS_RECV2() | (parentObj.serial.readJOYBUS_RECV3() << 8);
+	}
+	//4000154h - JoyBus Send (R/W)
+	readIO[0x154 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readJOYBUS_SEND0() | (parentObj.serial.readJOYBUS_SEND1() << 8);
+	}
+	//4000156h - JoyBus Send (R/W)
+	readIO[0x156 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readJOYBUS_SEND2() | (parentObj.serial.readJOYBUS_SEND3() << 8);
+	}
+	//4000158h - JoyBus Stat (R/W)
+	readIO[0x158 >> 1] = function (parentObj) {
+		parentObj.IOCore.updateSerialClocking();
+        return parentObj.serial.readJOYBUS_STAT() | 0;
+	}
+	//400015Ah - NOT USED - ZERO
+	readIO[0x15A >> 1] = this.memory.readZero;
+	//400015Ch through 40001FFh - NOT USED - GLITCHED
+	this.fillReadTableUnused16(readIO, 0x15C >> 1, 0x1FE >> 1);
+	//4000200h - IE - Interrupt Enable Register (R/W)
+	readIO[0x200 >> 1] = function (parentObj) {
+        return parentObj.irq.readIE0() | (parentObj.irq.readIE1() << 8);
+	}
+	//4000202h - IF - Interrupt Request Flags / IRQ Acknowledge
+	readIO[0x202 >> 1] = function (parentObj) {
+        parentObj.IOCore.updateCoreSpill();
+        return parentObj.irq.readIF0() | (parentObj.irq.readIF1() << 8);
+	}
+	//4000204h - WAITCNT - Waitstate Control (R/W)
+	readIO[0x204 >> 1] = function (parentObj) {
+		return parentObj.wait.readWAITCNT0() | (parentObj.wait.readWAITCNT1() << 8);
+	}
+	//4000206h - NOT USED - ZERO
+	readIO[0x206 >> 1] = this.memory.readZero;
+	//4000208h - IME - Interrupt Master Enable Register (R/W)
+	readIO[0x208 >> 1] = function (parentObj) {
+		return parentObj.irq.readIME() | 0;
+	}
+	//400020Ah - NOT USED - ZERO
+	readIO[0x20A >> 1] = this.memory.readZero;
+	//400020Ch through 40002FFh - NOT USED - GLITCHED
+	this.fillReadTableUnused16(readIO, 0x20C >> 1, 0x2FE >> 1);
+	//4000300h - POSTFLG - BYTE - Undocumented - Post Boot / Debug Control (R/W)
+	readIO[0x300 >> 1] = function (parentObj) {
+		return parentObj.wait.readPOSTBOOT() | 0;
+	}
+    //4000302h - NOT USED - ZERO
+	readIO[0x302 >> 1] = this.memory.readZero;
+    return readIO;
+}
 GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused8 = function (readIO, from, to) {
 	//Fill in slots of the i/o read table:
 	while (from <= to) {
@@ -1402,6 +1761,12 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused16 = function
 	//Fill in slots of the i/o read table:
 	while (from <= to) {
 		readIO[from++] = this.memory.readUnused16;
+	}
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused32 = function (readIO, from, to) {
+	//Fill in slots of the i/o read table:
+	while (from <= to) {
+		readIO[from++] = this.memory.readUnused32;
 	}
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO8 = function () {
