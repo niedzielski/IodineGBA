@@ -41,6 +41,7 @@ function GameBoyAdvanceMemory(IOCore) {
 	var generator = new GameBoyAdvanceMemoryDispatchGenerator(this);
     this.readIO8 = generator.generateMemoryReadIO8();
     this.readIO16 = generator.generateMemoryReadIO16();
+    this.readIO32 = generator.generateMemoryReadIO32();
     this.writeIO8 = generator.generateMemoryWriteIO8();
     this.writeIO16 = generator.generateMemoryWriteIO16();
     this.writeIO32 = generator.generateMemoryWriteIO32();
@@ -647,8 +648,8 @@ GameBoyAdvanceMemory.prototype.readIODispatch32 = function (parentObj, address) 
     if ((address | 0) < 0x4000301) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
-        address >>= 1;
-		return parentObj.readIO16[address & 0x1FF](parentObj) | (parentObj.readIO16[(address | 1) & 0x1FF](parentObj) << 16);
+        address >>= 2;
+		return parentObj.readIO32[address & 0xFF](parentObj) | 0;
 	}
 	else if ((address & 0x4FF0800) == 0x4000800) {
 		//WRAM wait state control:
