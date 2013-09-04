@@ -27,6 +27,7 @@ GameBoyAdvanceTimer.prototype.prescalarLookup = [
 	0x400
 ];
 GameBoyAdvanceTimer.prototype.initialize = function () {
+    this.nextTimer0OverflowSingle = (!!Math.imul) ? this.nextTimer0OverflowSingleFast : this.nextTimer0OverflowSingleSlow;
     this.initializeTimers();
 }
 GameBoyAdvanceTimer.prototype.initializeTimers = function () {
@@ -375,11 +376,18 @@ GameBoyAdvanceTimer.prototype.nextTimer0Overflow = function (numOverflows) {
 	}
 	return -1;
 }
-GameBoyAdvanceTimer.prototype.nextTimer0OverflowSingle = function () {
+GameBoyAdvanceTimer.prototype.nextTimer0OverflowSingleSlow = function () {
     if (this.timer0Enabled) {
 		return ((0x10000 - this.timer0Counter) * this.timer0Prescalar) - this.timer0Precounter;
 	}
 	return -1;
+}
+GameBoyAdvanceTimer.prototype.nextTimer0OverflowSingleFast = function () {
+    var eventTime = -1;
+    if (this.timer0Enabled) {
+		eventTime = (Math.imul((0x10000 - (this.timer0Counter | 0)), this.timer0Prescalar | 0) - (this.timer0Precounter | 0)) | 0;
+	}
+	return eventTime | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer1Overflow = function (numOverflows) {
     --numOverflows;
@@ -439,25 +447,25 @@ GameBoyAdvanceTimer.prototype.nextTimer3OverflowSingle = function () {
 	return -1;
 }
 GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function () {
-    var timer0 = this.nextTimer0OverflowSingle();
-    if (timer0 == -1) {
+    var timer0 = this.nextTimer0OverflowSingle() | 0;
+    if ((timer0 | 0) == -1) {
         timer0 = 0x7FFFFFFF;
     }
     var timer1 = this.nextTimer1OverflowSingle();
     if (timer1 == -1) {
         timer1 = 0x7FFFFFFF;
     }
-    return Math.min(timer0, timer1, 0x7FFFFFFF) | 0;
+    return Math.min(timer0 | 0, timer1, 0x7FFFFFFF) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer0IRQEventTime = function () {
-	return ((this.timer0Enabled && this.timer0IRQ) ? (Math.min(this.nextTimer0OverflowSingle(), this.IOCore.cyclesToIterate) | 0) : -1) | 0;
+	return ((this.timer0Enabled && this.timer0IRQ) ? (Math.min(this.nextTimer0OverflowSingle() | 0, this.IOCore.cyclesToIterate | 0) | 0) : -1) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer1IRQEventTime = function () {
-	return ((this.timer1Enabled && this.timer1IRQ) ? (Math.min(this.nextTimer1OverflowSingle(), this.IOCore.cyclesToIterate) | 0) : -1) | 0;
+	return ((this.timer1Enabled && this.timer1IRQ) ? (Math.min(this.nextTimer1OverflowSingle(), this.IOCore.cyclesToIterate | 0) | 0) : -1) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer2IRQEventTime = function () {
-	return ((this.timer2Enabled && this.timer2IRQ) ? (Math.min(this.nextTimer2OverflowSingle(), this.IOCore.cyclesToIterate) | 0) : -1) | 0;
+	return ((this.timer2Enabled && this.timer2IRQ) ? (Math.min(this.nextTimer2OverflowSingle(), this.IOCore.cyclesToIterate | 0) | 0) : -1) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer3IRQEventTime = function () {
-	return ((this.timer3Enabled && this.timer3IRQ) ? (Math.min(this.nextTimer3OverflowSingle(), this.IOCore.cyclesToIterate) | 0) : -1) | 0;
+	return ((this.timer3Enabled && this.timer3IRQ) ? (Math.min(this.nextTimer3OverflowSingle(), this.IOCore.cyclesToIterate | 0) | 0) : -1) | 0;
 }
