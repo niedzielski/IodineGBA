@@ -281,7 +281,7 @@ GameBoyAdvanceDMA.prototype.handleDMACopy = function (dmaChannel) {
 		//16-bit Transfer:
 		this.fetch = this.memoryAccessCache.memoryRead16(source >>> 0) | 0;
 		this.memoryAccessCache.memoryWrite16(destination >>> 0, this.fetch | 0);
-		//this.fetch |= this.fetch << 16;	//Mirror extreme edge case?
+		this.fetch |= this.fetch << 16;	//Mirror extreme edge case?
 		this.decrementWordCount(dmaChannel | 0, source | 0, destination | 0, 2);
 	}
 }
