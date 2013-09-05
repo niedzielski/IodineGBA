@@ -56,6 +56,9 @@ THUMBInstructionSet.prototype.getLR = function () {
 THUMBInstructionSet.prototype.getIRQLR = function () {
 	return this.registers[15] | 0;
 }
+THUMBInstructionSet.prototype.getCurrentFetchValue = function () {
+	return this.fetch | (this.fetch << 16);
+}
 THUMBInstructionSet.prototype.executeIteration = function () {
 	//Push the new fetch access:
 	this.fetch = this.wait.CPUGetOpcode16(this.registers[15] | 0) | 0;

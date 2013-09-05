@@ -107,14 +107,14 @@ GameBoyAdvanceWait.prototype.readConfigureWRAM = function (address) {
 			return 0;
 	}
 }
-GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (address, clocks) {
-	address = address | 0;
+GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (clocks) {
     clocks = clocks | 0;
     //Clock for idle CPU time:
 	this.IOCore.updateCore(clocks | 0);
 	//Check for ROM prefetching:
 	if (this.prefetchEnabled) {
-		//We were already in ROM, so if prefetch do so as sequential:
+		var address = this.IOCore.cpu.registers[15] | 0;
+        //We were already in ROM, so if prefetch do so as sequential:
 		//Only case for non-sequential ROM prefetch is invalid anyways:
 		switch ((address >>> 24) & 0xFF) {
 			case 0x8:
