@@ -78,6 +78,11 @@ GameBoyAdvanceIO.prototype.updateCoreSpill = function () {
     this.updateCoreClocking();
     this.updateCoreEventTime();
 }
+GameBoyAdvanceIO.prototype.updateCoreSpillRetain = function () {
+    //Keep the last prediction, just decrement it out, as it's still valid:
+    this.nextEventClocks = ((this.nextEventClocks | 0) - (this.accumulatedClocks | 0)) | 0;
+    this.updateCoreClocking();
+}
 GameBoyAdvanceIO.prototype.updateCoreClocking = function () {
     var clocks = this.accumulatedClocks | 0;
     //Decrement the clocks per iteration counter:

@@ -973,12 +973,12 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO8 = function
 	}
 	//4000202h - IF - Interrupt Request Flags / IRQ Acknowledge
 	readIO[0x202] = function (parentObj) {
-        parentObj.IOCore.updateCoreSpill();
+        parentObj.IOCore.updateCoreSpillRetain();
         return parentObj.irq.readIF0() | 0;
 	}
 	//4000203h - IF - Interrupt Request Flags / IRQ Acknowledge
 	readIO[0x203] = function (parentObj) {
-        parentObj.IOCore.updateCoreSpill();
+        parentObj.IOCore.updateCoreSpillRetain();
         return parentObj.irq.readIF1() | 0;
 	}
 	//4000204h - WAITCNT - Waitstate Control (R/W)
@@ -1364,7 +1364,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO16 = functio
 	}
 	//4000202h - IF - Interrupt Request Flags / IRQ Acknowledge
 	readIO[0x202 >> 1] = function (parentObj) {
-        parentObj.IOCore.updateCoreSpill();
+        parentObj.IOCore.updateCoreSpillRetain();
         return parentObj.irq.readIF0() | (parentObj.irq.readIF1() << 8);
 	}
 	//4000204h - WAITCNT - Waitstate Control (R/W)
@@ -1698,7 +1698,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO32 = functio
 	//4000200h - IE - Interrupt Enable Register (R/W)
 	//4000202h - IF - Interrupt Request Flags / IRQ Acknowledge
     readIO[0x200 >> 2] = function (parentObj) {
-        parentObj.IOCore.updateCoreSpill();
+        parentObj.IOCore.updateCoreSpillRetain();
         return parentObj.irq.readIE0() |
         (parentObj.irq.readIE1() << 8) |
         (parentObj.irq.readIF0() << 16) |
