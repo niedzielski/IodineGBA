@@ -64,6 +64,7 @@ GameBoyAdvanceMemory.prototype.loadReferences = function () {
 	this.cartridge = this.IOCore.cartridge;
 	this.wait = this.IOCore.wait;
 	this.cpu = this.IOCore.cpu;
+    this.saves = this.IOCore.saves;
 }
 GameBoyAdvanceMemory.prototype.memoryWriteFast8 = function (address, data) {
     address = address >>> 0;
@@ -272,7 +273,7 @@ GameBoyAdvanceMemory.prototype.writeOAM16 = function (parentObj, address, data) 
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess16();
     parentObj.gfx.writeOAM(address & 0x3FF, data & 0xFF);
-    parentObj.gfx.writeOAM((address + 1) & 0x3FF, data >> 8);
+    parentObj.gfx.writeOAM(((address | 0) + 1) & 0x3FF, data >> 8);
 }
 GameBoyAdvanceMemory.prototype.writeOAM32 = function (parentObj, address, data) {
 	address = address | 0;
@@ -280,9 +281,9 @@ GameBoyAdvanceMemory.prototype.writeOAM32 = function (parentObj, address, data) 
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess32();
     parentObj.gfx.writeOAM(address & 0x3FF, data & 0xFF);
-    parentObj.gfx.writeOAM((address + 1) & 0x3FF, (data >> 8) & 0xFF);
-    parentObj.gfx.writeOAM((address + 2) & 0x3FF, (data >> 16) & 0xFF);
-    parentObj.gfx.writeOAM((address + 3) & 0x3FF, (data >> 24) & 0xFF);
+    parentObj.gfx.writeOAM(((address | 0) + 1) & 0x3FF, (data >> 8) & 0xFF);
+    parentObj.gfx.writeOAM(((address | 0) + 2) & 0x3FF, (data >> 16) & 0xFF);
+    parentObj.gfx.writeOAM(((address | 0) + 3) & 0x3FF, (data >> 24) & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writePalette8 = function (parentObj, address, data) {
 	address = address | 0;
@@ -297,7 +298,7 @@ GameBoyAdvanceMemory.prototype.writePalette16 = function (parentObj, address, da
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess16();
     parentObj.gfx.writePalette(address & 0x3FF, data & 0xFF);
-    parentObj.gfx.writePalette((address + 1) & 0x3FF, data >> 8);
+    parentObj.gfx.writePalette(((address | 0) + 1) & 0x3FF, data >> 8);
 }
 GameBoyAdvanceMemory.prototype.writePalette32 = function (parentObj, address, data) {
 	address = address | 0;
@@ -305,93 +306,93 @@ GameBoyAdvanceMemory.prototype.writePalette32 = function (parentObj, address, da
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess32();
     parentObj.gfx.writePalette(address & 0x3FF, data & 0xFF);
-    parentObj.gfx.writePalette((address + 1) & 0x3FF, (data >> 8) & 0xFF);
-    parentObj.gfx.writePalette((address + 2) & 0x3FF, (data >> 16) & 0xFF);
-    parentObj.gfx.writePalette((address + 3) & 0x3FF, (data >> 24) & 0xFF);
+    parentObj.gfx.writePalette(((address | 0) + 1) & 0x3FF, (data >> 8) & 0xFF);
+    parentObj.gfx.writePalette(((address | 0) + 2) & 0x3FF, (data >> 16) & 0xFF);
+    parentObj.gfx.writePalette(((address | 0) + 3) & 0x3FF, (data >> 24) & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeROM08 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM0Access8();
-	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data | 0);
+	parentObj.cartridge.writeROM8(address & 0x1FFFFFF, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeROM016 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM0Access16();
-	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
-    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, data >> 8);
+	parentObj.cartridge.writeROM8(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM8(((address | 0) + 1) & 0x1FFFFFF, data >> 8);
 }
 GameBoyAdvanceMemory.prototype.writeROM032 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM0Access32();
-    parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
-    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
-    parentObj.cartridge.writeROM((address + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
-    parentObj.cartridge.writeROM((address + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
+    parentObj.cartridge.writeROM8(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM8(((address | 0) + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
+    parentObj.cartridge.writeROM8(((address | 0) + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
+    parentObj.cartridge.writeROM8(((address | 0) + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeROM18 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM1Access8();
-	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data | 0);
+	parentObj.cartridge.writeROM8(address & 0x1FFFFFF, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeROM116 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM1Access16();
-	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
-    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, data >> 8);
+	parentObj.cartridge.writeROM8(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM8(((address | 0) + 1) & 0x1FFFFFF, data >> 8);
 }
 GameBoyAdvanceMemory.prototype.writeROM132 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM1Access32();
-    parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
-    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
-    parentObj.cartridge.writeROM((address + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
-    parentObj.cartridge.writeROM((address + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
+    parentObj.cartridge.writeROM8(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM8(((address | 0) + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
+    parentObj.cartridge.writeROM8(((address | 0) + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
+    parentObj.cartridge.writeROM8(((address | 0) + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeROM28 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM2Access8();
-	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data | 0);
+	parentObj.cartridge.writeROM8Space2(address & 0x1FFFFFF, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeROM216 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM2Access16();
-	parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
-    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, data >> 8);
+	parentObj.cartridge.writeROM8Space2(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM8Space2(((address | 0) + 1) & 0x1FFFFFF, data >> 8);
 }
 GameBoyAdvanceMemory.prototype.writeROM232 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.ROM2Access32();
-    parentObj.cartridge.writeROM(address & 0x1FFFFFF, data & 0xFF);
-    parentObj.cartridge.writeROM((address + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
-    parentObj.cartridge.writeROM((address + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
-    parentObj.cartridge.writeROM((address + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
+    parentObj.cartridge.writeROM8Space2(address & 0x1FFFFFF, data & 0xFF);
+    parentObj.cartridge.writeROM8Space2(((address | 0) + 1) & 0x1FFFFFF, (data >> 8) & 0xFF);
+    parentObj.cartridge.writeROM8Space2(((address | 0) + 2) & 0x1FFFFFF, (data >> 16) & 0xFF);
+    parentObj.cartridge.writeROM8Space2(((address | 0) + 3) & 0x1FFFFFF, (data >> 24) & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeSRAM8 = function (parentObj, address, data) {
     address = address | 0;
     data = data | 0;
     parentObj.wait.SRAMAccess();
-    parentObj.cartridge.writeSRAM(address & 0xFFFF, data & 0xFF);
+    parentObj.saves.writeSRAM(address & 0xFFFF, data & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeSRAM16 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.SRAMAccess();
-	parentObj.cartridge.writeSRAM(address & 0xFFFF, (data >> ((address & 0x1) << 3)) & 0xFF);
+	parentObj.saves.writeSRAM(address & 0xFFFF, (data >> ((address & 0x1) << 3)) & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeSRAM32 = function (parentObj, address, data) {
 	address = address | 0;
     data = data | 0;
     parentObj.wait.SRAMAccess();
-	parentObj.cartridge.writeSRAM(address & 0xFFFF, (data >> ((address & 0x3) << 3)) & 0xFF);
+	parentObj.saves.writeSRAM(address & 0xFFFF, (data >> ((address & 0x3) << 3)) & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.NOP = function (parentObj, data) {
 	//Ignore the data write...
@@ -732,7 +733,7 @@ GameBoyAdvanceMemory.prototype.readPalette32 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readROM08 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.ROM0Access8();
-	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM8(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM016 = function (parentObj, address) {
 	address = address | 0;
@@ -747,7 +748,7 @@ GameBoyAdvanceMemory.prototype.readROM032 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readROM18 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.ROM1Access8();
-	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM8(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM116 = function (parentObj, address) {
 	address = address | 0;
@@ -762,7 +763,7 @@ GameBoyAdvanceMemory.prototype.readROM132 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readROM28 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.ROM2Access8();
-	return parentObj.cartridge.readROM(address & 0x1FFFFFF) | 0;
+	return parentObj.cartridge.readROM8(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM216 = function (parentObj, address) {
 	address = address | 0;
@@ -774,20 +775,35 @@ GameBoyAdvanceMemory.prototype.readROM232 = function (parentObj, address) {
     parentObj.wait.ROM2Access32();
 	return parentObj.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 }
+GameBoyAdvanceMemory.prototype.readROM28 = function (parentObj, address) {
+	address = address | 0;
+    parentObj.wait.ROM2Access8();
+	return parentObj.cartridge.readROM8Space2(address & 0x1FFFFFF) | 0;
+}
+GameBoyAdvanceMemory.prototype.readROM216 = function (parentObj, address) {
+	address = address | 0;
+    parentObj.wait.ROM2Access16();
+	return parentObj.cartridge.readROM16Space2(address & 0x1FFFFFF) | 0;
+}
+GameBoyAdvanceMemory.prototype.readROM232 = function (parentObj, address) {
+	address = address | 0;
+    parentObj.wait.ROM2Access32();
+	return parentObj.cartridge.readROM32Space2(address & 0x1FFFFFF) | 0;
+}
 GameBoyAdvanceMemory.prototype.readSRAM8 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.SRAMAccess();
-	return parentObj.cartridge.readSRAM(address & 0xFFFF) | 0;
+	return parentObj.saves.readSRAM(address & 0xFFFF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readSRAM16 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.SRAMAccess();
-	return ((parentObj.cartridge.readSRAM(address & 0xFFFF) | 0) * 0x101) | 0;
+	return ((parentObj.saves.readSRAM(address & 0xFFFF) | 0) * 0x101) | 0;
 }
 GameBoyAdvanceMemory.prototype.readSRAM32 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.SRAMAccess();
-	return ((parentObj.cartridge.readSRAM(address & 0xFFFF) | 0) * 0x1010101) | 0;
+	return ((parentObj.saves.readSRAM(address & 0xFFFF) | 0) * 0x1010101) | 0;
 }
 GameBoyAdvanceMemory.prototype.readZero = function (parentObj) {
 	return 0;

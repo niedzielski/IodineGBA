@@ -40,7 +40,8 @@ function GameBoyAdvanceIO(emulatorCore) {
 	this.serial = new GameBoyAdvanceSerial(this);
 	this.joypad = new GameBoyAdvanceJoyPad(this);
 	this.cartridge = new GameBoyAdvanceCartridge(this);
-	this.wait = new GameBoyAdvanceWait(this);
+	this.saves = new GameBoyAdvanceSaves(this);
+    this.wait = new GameBoyAdvanceWait(this);
 	this.cpu = new GameBoyAdvanceCPU(this);
     this.memory.loadReferences();
     this.preprocessCPUHandler(0);   //Start in interpreter.

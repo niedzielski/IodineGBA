@@ -24,236 +24,188 @@ GameBoyAdvanceCartridge.prototype.initialize = function () {
     this.ROM16 = getUint16View(this.ROM);
     this.ROM32 = getInt32View(this.ROM);
     this.preprocessROMAccess();
-	this.saveType = 0;
-	this.saveSize = 0;
-	this.saveRTC = false;
-	this.lookupCartridgeType();
 }
 GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
     this.ROMLength = (old_array.length >> 2) << 2;
-    var newArray = getUint8Array(this.ROMLength);
-    for (var index = 0; index < this.ROMLength; ++index) {
-        newArray[index] = old_array[index];
+    var newArray = getUint8Array(this.ROMLength | 0);
+    for (var index = 0; (index | 0) < (this.ROMLength | 0); index = ((index | 0) + 1) | 0) {
+        newArray[index | 0] = old_array[index | 0] | 0;
     }
     return newArray;
 }
 GameBoyAdvanceCartridge.prototype.preprocessROMAccess = function () {
-    this.readROM16 = (this.ROM16) ? this.readROM16Optimized : this.readROM16Slow;
-    this.readROM32 = (this.ROM32) ? this.readROM32Optimized : this.readROM32Slow;
+    this.readROMOnly16 = (this.ROM16) ? this.readROMOnly16Optimized : this.readROMOnly16Slow;
+    this.readROMOnly32 = (this.ROM32) ? this.readROMOnly32Optimized : this.readROMOnly32Slow;
 }
-GameBoyAdvanceCartridge.prototype.readROM = function (address) {
-	if ((address | 0) >= (this.ROMLength | 0)) {
-        return 0;
+GameBoyAdvanceCartridge.prototype.readROMOnly8 = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((address | 0) < (this.ROMLength | 0)) {
+        data = this.ROM[address & 0x1FFFFFF] | 0;
     }
-    return this.ROM[address & 0x1FFFFFF] | 0;
-    /*if (!this.saveRTC) {
-		return this.ROM[address & 0x1FFFFFF] | 0;
-	}
-	else {
-		//GPIO Chip (RTC):
-		switch (address) {
-			case 0xC4:
-				return this.rtc.read0();
-			case 0xC5:
-				return 0;
-			case 0xC6:
-				return this.rtc.read1();
-			case 0xC7:
-				return 0;
-			case 0xC8:
-				return this.rtc.read2();
-			case 0xC9:
-				return 0;
-			default:
-				return this.ROM[address & 0x1FFFFFF] | 0;
-		}
-	}*/
+    return data | 0;
 }
-GameBoyAdvanceCartridge.prototype.readROM16Slow = function (address) {
-    if ((address | 0) >= (this.ROMLength | 0)) {
-        return 0;
+GameBoyAdvanceCartridge.prototype.readROMOnly16Slow = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((address | 0) < (this.ROMLength | 0)) {
+        data = this.ROM[address] | (this.ROM[address | 1] << 8);
     }
-    return this.ROM[address] | (this.ROM[address | 1] << 8);
+    return data | 0;
 }
-GameBoyAdvanceCartridge.prototype.readROM16Optimized = function (address) {
-    if ((address | 0) >= (this.ROMLength | 0)) {
-        return 0;
+GameBoyAdvanceCartridge.prototype.readROMOnly16Optimized = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((address | 0) < (this.ROMLength | 0)) {
+        data = this.ROM16[(address >> 1) & 0xFFFFFF] | 0;
     }
-    return this.ROM16[(address >> 1) & 0xFFFFFF] | 0;
+    return data | 0;
 }
-GameBoyAdvanceCartridge.prototype.readROM32Slow = function (address) {
-    if ((address | 0) >= (this.ROMLength | 0)) {
-        return 0;
+GameBoyAdvanceCartridge.prototype.readROMOnly32Slow = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((address | 0) < (this.ROMLength | 0)) {
+        data = this.ROM[address] | (this.ROM[address | 1] << 8) | (this.ROM[address | 2] << 16)  | (this.ROM[address | 3] << 24);
     }
-    return this.ROM[address] | (this.ROM[address | 1] << 8) | (this.ROM[address | 2] << 16)  | (this.ROM[address | 3] << 24);
+    return data | 0;
 }
-GameBoyAdvanceCartridge.prototype.readROM32Optimized = function (address) {
-    if ((address | 0) >= (this.ROMLength | 0)) {
-        return 0;
+GameBoyAdvanceCartridge.prototype.readROMOnly32Optimized = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((address | 0) < (this.ROMLength | 0)) {
+        data = this.ROM32[(address >> 2) & 0x7FFFFF] | 0;
     }
-    return this.ROM32[(address >> 2) & 0x7FFFFF] | 0;
+    return data | 0;
 }
-GameBoyAdvanceCartridge.prototype.writeROM = function (address, data) {
-	if (this.saveRTC) {
-		//GPIO Chip (RTC):
-		switch (address) {
-			case 0xC4:
-				this.rtc.write0(data);
-			case 0xC6:
-				this.rtc.write1(data);
-			case 0xC8:
-				this.rtc.write2(data);
-		}
-	}
-}
-GameBoyAdvanceCartridge.prototype.readSRAM = function (address) {
+GameBoyAdvanceCartridge.prototype.readROM8 = function (address) {
 	address = address | 0;
-    return (this.saveType > 0) ? this.sram.read(address | 0) : 0;
+    var data = 0;
+    if ((address | 0) >= 0x100 && (address | 0) < 0x1FE0000) {
+        //Definitely ROM:
+        data = this.readROMOnly8(address | 0) | 0;
+    }
+    else if ((address | 0) >= 0x1FE0000) {
+        //Possibly Flash:
+        data = this.IOCore.saves.readFLASH8(address & 0x1FFFF) | 0;
+    }
+    else {
+        //Possibly GPIO:
+        data = this.IOCore.saves.readGPIO8(address & 0xFF) | 0;
+    }
+    return data | 0;
 }
-GameBoyAdvanceCartridge.prototype.writeSRAM = function (address, data) {
+GameBoyAdvanceCartridge.prototype.readROM16 = function (address) {
+	address = address | 0;
+    var data = 0;
+    if ((address | 0) >= 0x100 && (address | 0) < 0x1FE0000) {
+        //Definitely ROM:
+        data = this.readROMOnly16(address | 0) | 0;
+    }
+    else if ((address | 0) >= 0x1FE0000) {
+        //Possibly Flash:
+        data = this.IOCore.saves.readFLASH16(address & 0x1FFFF) | 0;
+    }
+    else {
+        //Possibly GPIO:
+        data = this.IOCore.saves.readGPIO16(address & 0xFF) | 0;
+    }
+    return data | 0;
+}
+GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
+	address = address | 0;
+    var data = 0;
+    if ((address | 0) >= 0x100 && (address | 0) < 0x1FE0000) {
+        //Definitely ROM:
+        data = this.readROMOnly32(address | 0) | 0;
+    }
+    else if ((address | 0) >= 0x1FE0000) {
+        //Possibly Flash:
+        data = this.IOCore.saves.readFLASH32(address & 0x1FFFF) | 0;
+    }
+    else {
+        //Possibly GPIO:
+        data = this.IOCore.saves.readGPIO32(address & 0xFF) | 0;
+    }
+    return data | 0;
+}
+GameBoyAdvanceCartridge.prototype.readROM8Space2 = function (address) {
+	address = address | 0;
+    var data = 0;
+    if ((address | 0) < 0x100) {
+        //Possibly GPIO:
+        data = this.IOCore.saves.readGPIO8(address & 0xFF) | 0;
+    }
+    else if ((address | 0) > 0x1FDFFFF) {
+        //Possibly Flash:
+        data = this.IOCore.saves.readFLASH8(address & 0x1FFFF) | 0;
+    }
+    else if ((address | 0) > 0xFFFFFF) {
+        //Possibly EEPROM:
+        data = this.IOCore.saves.readEEPROM8(address & 0xFFFFFF) | 0;
+    }
+    else {
+        //Definitely ROM:
+        data = this.readROMOnly8(address | 0) | 0;
+    }
+    return data | 0;
+}
+GameBoyAdvanceCartridge.prototype.readROM16Space2 = function (address) {
+	address = address | 0;
+    var data = 0;
+    if ((address | 0) < 0x100) {
+        //Possibly GPIO:
+        data = this.IOCore.saves.readGPIO16(address & 0xFF) | 0;
+    }
+    else if ((address | 0) > 0x1FDFFFF) {
+        //Possibly Flash:
+        data = this.IOCore.saves.readFLASH16(address & 0x1FFFF) | 0;
+    }
+    else if ((address | 0) > 0xFFFFFF) {
+        //Possibly EEPROM:
+        data = this.IOCore.saves.readEEPROM16(address & 0xFFFFFF) | 0;
+    }
+    else {
+        //Definitely ROM:
+        data = this.readROMOnly16(address | 0) | 0;
+    }
+    return data | 0;
+}
+GameBoyAdvanceCartridge.prototype.readROM32Space2 = function (address) {
+	address = address | 0;
+    var data = 0;
+    if ((address | 0) < 0x100) {
+        //Possibly GPIO:
+        data = this.IOCore.saves.readGPIO32(address & 0xFF) | 0;
+    }
+    else if ((address | 0) > 0x1FDFFFF) {
+        //Possibly Flash:
+        data = this.IOCore.saves.readFLASH32(address & 0x1FFFF) | 0;
+    }
+    else if ((address | 0) > 0xFFFFFF) {
+        //Possibly EEPROM:
+        data = this.IOCore.saves.readEEPROM32(address & 0xFFFFFF) | 0;
+    }
+    else {
+        //Definitely ROM:
+        data = this.readROMOnly32(address | 0) | 0;
+    }
+    return data | 0;
+}
+GameBoyAdvanceCartridge.prototype.writeROM8 = function (address, data) {
 	address = address | 0;
     data = data | 0;
-    if (this.saveType > 0) {
-		this.sram.write(address | 0, data | 0);
+    if ((address | 0) >= 0x1FE0000) {
+        //Flash Memory:
+        this.IOCore.saves.writeFLASH8(address & 0x1FFFF, data | 0);
+    }
+    else if ((address < 0x100)) {
+		//GPIO Chip (RTC):
+		this.IOCore.saves.writeGPIO8(address & 0xFF, data | 0);
 	}
-}
-GameBoyAdvanceCartridge.prototype.lookupCartridgeType = function () {
-	this.gameID = ([
-		String.fromCharCode(this.ROM[0xAC]),
-		String.fromCharCode(this.ROM[0xAD]),
-		String.fromCharCode(this.ROM[0xAE]),
-		String.fromCharCode(this.ROM[0xAF])
-	]).join("");
-	this.IDLookup();
-	//Initialize the SRAM:
-	this.mapSRAM();
-	//Initialize the RTC:
-	//this.mapRTC();
-}
-GameBoyAdvanceCartridge.prototype.mapSRAM = function () {
-	switch (this.saveType) {
-		//Flash
-		case 1:
-			this.sram = new GameBoyAdvanceFlash(this, this.saveSize);
-			this.loadExisting();
-			break;
-		//SRAM
-		case 2:
-			this.sram = new GameBoyAdvanceSRAM(this);
-			this.loadExisting();
-			break;
-		//EEPROM
-		/*case 3:
-			this.sram = new GameBoyAdvanceEEPROM(this, this.saveSize);
-			this.loadExisting();*/
-		default:
-			this.saveType = 0;
-	}
-}
-GameBoyAdvanceCartridge.prototype.mapRTC = function () {
-	if (this.saveRTC) {
-		this.rtc = new GameBoyAdvanceRTC(this);
-		var data = this.IOCore.emulatorCore.loadRTC(this.gameID);
-		if (data && data.length) {
-			this.rtc.load(data);
-		}
-	}
-}
-GameBoyAdvanceCartridge.prototype.IDLookup = function () {
-	var found = 0;
-	var length = this.ROM.length - 6;
-	for (var index = 0; index < length; ++index) {
-		switch (this.ROM[index]) {
-			/*case 0x45:	//E
-				if (this.isEEPROMCart(index)) {
-					found |= 2;
-					if (found == 3) {
-						return;
-					}
-				}
-				break;*/
-			case 0x46:	//F
-				if (this.isFLASHCart(index)) {
-					found |= 2;
-					if (found == 3) {
-						return;
-					}
-				}
-				break;
-			case 0x52:	//R
-				if (this.isRTCCart(index)) {
-					found |= 1;
-					if (found == 3) {
-						return;
-					}
-				}
-				break;
-			case 0x53:	//S
-				if (this.isSRAMCart(index)) {
-					found |= 2;
-					if (found == 3) {
-						return;
-					}
-				}
-		}
-	}
-}
-GameBoyAdvanceCartridge.prototype.isFLASHCart = function (index) {
-	if (String.fromCharCode(this.ROM[++index]) == "L") {
-		if (String.fromCharCode(this.ROM[++index]) == "A") {
-			if (String.fromCharCode(this.ROM[++index]) == "S") {
-				if (String.fromCharCode(this.ROM[++index]) == "H") {
-					switch (String.fromCharCode(this.ROM[index])) {
-						case "_":
-						case "5":
-							this.saveType = 1;
-							this.saveSize = 0x10000;
-							return true;
-						case "1":
-							this.saveType = 1;
-							this.saveSize = 0x20000;
-							return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-GameBoyAdvanceCartridge.prototype.isRTCCart = function (index) {
-	if (String.fromCharCode(this.ROM[++index]) == "T") {
-		if (String.fromCharCode(this.ROM[++index]) == "C") {
-			if (String.fromCharCode(this.ROM[++index]) == "_") {
-				if (String.fromCharCode(this.ROM[index]) == "V") {
-					this.saveRTC = true;
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-GameBoyAdvanceCartridge.prototype.isSRAMCart = function (index) {
-	if (String.fromCharCode(this.ROM[++index]) == "R") {
-		if (String.fromCharCode(this.ROM[++index]) == "A") {
-			if (String.fromCharCode(this.ROM[++index]) == "M") {
-				if (String.fromCharCode(this.ROM[++index]) == "_") {
-					if (String.fromCharCode(this.ROM[index]) == "V") {
-						this.saveType = 2;
-						this.saveSize = 0x8000;
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-GameBoyAdvanceCartridge.prototype.loadExisting = function () {
-	var data = this.IOCore.emulatorCore.loadSRAM(this.gameID);
-	if (data && data.length) {
-		this.sram.load(data);
-	}
+    else {
+        //EEPROM/Other:
+		this.IOCore.saves.writeROM8(address & 0x1FFFFFF, data | 0);
+    }
 }
 GameBoyAdvanceCartridge.prototype.nextIRQEventTime = function () {
 	//Nothing yet implement that would fire an IRQ:
