@@ -187,17 +187,21 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
 		//Assert the FIFO A DMA request signal:
 		this.IOCore.sound.checkFIFOAPendingSignal();
 		//Direct Sound DMA Hardwired To Wordcount Of 4:
-		this.wordCountShadow[dmaChannel | 0] = 4;
+		this.wordCountShadow[1] = 0x4;
 		//Destination Hardwired to 0x40000A0:
-		this.destination[dmaChannel | 0] = 0x40000A0;
+		this.destination[1] = 0x40000A0;
+		//Bit-mode Hardwired to 32-bit:
+		this.is32Bit[1] = 0x4;
 	}
 	else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
 		//Assert the FIFO B DMA request signal:
 		this.IOCore.sound.checkFIFOBPendingSignal();
 		//Direct Sound DMA Hardwired To Wordcount Of 4:
-		this.wordCountShadow[dmaChannel | 0] = 4;
+		this.wordCountShadow[2] = 0x4;
 		//Destination Hardwired to 0x40000A4:
-		this.destination[dmaChannel | 0] = 0x40000A4;
+		this.destination[2] = 0x40000A4;
+		//Bit-mode Hardwired to 32-bit:
+		this.is32Bit[2] = 0x4;
 	}
 	else {
 		if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
@@ -311,13 +315,13 @@ GameBoyAdvanceDMA.prototype.finalizeDMA = function (dmaChannel, source, destinat
 			//Assert the FIFO A DMA request signal:
 			this.IOCore.sound.checkFIFOAPendingSignal();
 			//Direct Sound DMA Hardwired To Wordcount Of 4:
-			wordCountShadow = 4;
+			wordCountShadow = 0x4;
 		}
 		else if ((this.currentMatch | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
 			//Assert the FIFO B DMA request signal:
 			this.IOCore.sound.checkFIFOBPendingSignal();
 			//Direct Sound DMA Hardwired To Wordcount Of 4:
-			wordCountShadow = 4;
+			wordCountShadow = 0x4;
 		}
 		else {
 			//Reload word count:
