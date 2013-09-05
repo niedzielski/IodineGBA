@@ -207,6 +207,22 @@ GameBoyAdvanceCartridge.prototype.writeROM8 = function (address, data) {
 		this.IOCore.saves.writeROM8(address & 0x1FFFFFF, data | 0);
     }
 }
+GameBoyAdvanceCartridge.prototype.writeROM8Space2 = function (address, data) {
+	address = address | 0;
+    data = data | 0;
+    if ((address | 0) >= 0x1FE0000) {
+        //Flash Memory:
+        this.IOCore.saves.writeFLASH8(address & 0x1FFFF, data | 0);
+    }
+    else if ((address < 0x100)) {
+		//GPIO Chip (RTC):
+		this.IOCore.saves.writeGPIO8(address & 0xFF, data | 0);
+	}
+    else {
+        //EEPROM/Other:
+		this.IOCore.saves.writeROM8(address & 0x1FFFFFF, data | 0);
+    }
+}
 GameBoyAdvanceCartridge.prototype.nextIRQEventTime = function () {
 	//Nothing yet implement that would fire an IRQ:
 	return -1;
