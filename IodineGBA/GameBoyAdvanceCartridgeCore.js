@@ -198,7 +198,7 @@ GameBoyAdvanceCartridge.prototype.writeROM8 = function (address, data) {
         //Flash Memory:
         this.IOCore.saves.writeFLASH8(address & 0x1FFFF, data | 0);
     }
-    else if ((address < 0x100)) {
+    else if ((address | 0) < 0x100) {
 		//GPIO Chip (RTC):
 		this.IOCore.saves.writeGPIO8(address & 0xFF, data | 0);
 	}
@@ -214,7 +214,7 @@ GameBoyAdvanceCartridge.prototype.writeROM8Space2 = function (address, data) {
         //Flash Memory:
         this.IOCore.saves.writeFLASH8(address & 0x1FFFF, data | 0);
     }
-    else if ((address < 0x100)) {
+    else if ((address | 0) < 0x100) {
 		//GPIO Chip (RTC):
 		this.IOCore.saves.writeGPIO8(address & 0xFF, data | 0);
 	}
