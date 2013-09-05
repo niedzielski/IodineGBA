@@ -795,28 +795,35 @@ GameBoyAdvanceMemory.prototype.readZero = function (parentObj) {
 GameBoyAdvanceMemory.prototype.readUnused8 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
-	return (parentObj.cpu.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
+	var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    return (controller.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused16 = function (parentObj, address) {
 	address = address | 0;
     parentObj.wait.FASTAccess2();
-	return (parentObj.cpu.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+	var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    return (controller.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused32 = function (parentObj, address) {
 	parentObj.wait.FASTAccess2();
-	return parentObj.cpu.getCurrentFetchValue() | 0;
+    var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+	return controller.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.readUnused0 = function (parentObj) {
-	return parentObj.cpu.getCurrentFetchValue() & 0xFF;
+	var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    return controller.getCurrentFetchValue() & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused1 = function (parentObj) {
-	return (parentObj.cpu.getCurrentFetchValue() >> 8) & 0xFF;
+	var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    return (controller.getCurrentFetchValue() >> 8) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused2 = function (parentObj) {
-	return (parentObj.cpu.getCurrentFetchValue() >> 16) & 0xFF;
+	var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    return (controller.getCurrentFetchValue() >> 16) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused3 = function (parentObj) {
-	return (parentObj.cpu.getCurrentFetchValue() >> 24) & 0xFF;
+	var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    return (controller.getCurrentFetchValue() >> 24) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.loadBIOS = function () {
 	//Ensure BIOS is of correct length:

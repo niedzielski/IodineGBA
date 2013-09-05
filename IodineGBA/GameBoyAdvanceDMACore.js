@@ -73,6 +73,7 @@ GameBoyAdvanceDMA.prototype.initialize = function () {
 	this.gamePakDMA = false;
 	this.currentMatch = -1;
 	this.lastCurrentMatch = -1;
+	this.fetch = 0;
 	this.memoryAccessCache = new GameBoyAdvanceMemoryCache(this.IOCore.memory);
 }
 GameBoyAdvanceDMA.prototype.writeDMASource0 = function (dmaChannel, data) {
@@ -181,6 +182,9 @@ GameBoyAdvanceDMA.prototype.readDMAControl1 = function (dmaChannel) {
 			(this.sourceControl[dmaChannel | 0] >> 1)
 	);
 }
+GameBoyAdvanceDMA.prototype.getCurrentFetchValue = function () {
+	return this.fetch | 0;
+}
 GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
 	dmaChannel = dmaChannel | 0;
 	if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_A | 0)) {
@@ -269,12 +273,14 @@ GameBoyAdvanceDMA.prototype.handleDMACopy = function (dmaChannel) {
 	//Transfer Data:
 	if ((this.is32Bit[dmaChannel | 0] | 0) == 4) {
 		//32-bit Transfer:
-		this.memoryAccessCache.memoryWrite32(destination >>> 0, this.memoryAccessCache.memoryRead32(source >>> 0) | 0);
+		this.fetch = this.memoryAccessCache.memoryRead32(source >>> 0) | 0;
+		this.memoryAccessCache.memoryWrite32(destination >>> 0, this.fetch | 0);
 		this.decrementWordCount(dmaChannel | 0, source | 0, destination | 0, 4);
 	}
 	else {
 		//16-bit Transfer:
-		this.memoryAccessCache.memoryWrite16(destination >>> 0, this.memoryAccessCache.memoryRead16(source >>> 0) | 0);
+		this.fetch = this.memoryAccessCache.memoryRead16(source >>> 0) | 0;
+		this.memoryAccessCache.memoryWrite16(destination >>> 0, this.fetch | 0);
 		this.decrementWordCount(dmaChannel | 0, source | 0, destination | 0, 2);
 	}
 }
