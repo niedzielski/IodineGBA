@@ -2350,77 +2350,77 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO8 = functio
 	//4000091h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x91] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(2, data | 0);
+        parentObj.sound.writeWAVE(0x1, data | 0);
 	}
 	//4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x92] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(4, data | 0);
+        parentObj.sound.writeWAVE(0x2, data | 0);
 	}
 	//4000093h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x93] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(6, data | 0);
+        parentObj.sound.writeWAVE(0x3, data | 0);
 	}
 	//4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x94] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(8, data | 0);
+        parentObj.sound.writeWAVE(0x4, data | 0);
 	}
 	//4000095h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x95] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(10, data | 0);
+        parentObj.sound.writeWAVE(0x5, data | 0);
 	}
 	//4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x96] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(12, data | 0);
+        parentObj.sound.writeWAVE(0x6, data | 0);
 	}
 	//4000097h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x97] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(14, data | 0);
+        parentObj.sound.writeWAVE(0x7, data | 0);
 	}
 	//4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x98] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(16, data | 0);
+        parentObj.sound.writeWAVE(0x8, data | 0);
 	}
 	//4000099h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x99] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(18, data | 0);
+        parentObj.sound.writeWAVE(0x9, data | 0);
 	}
 	//400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9A] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(20, data | 0);
+        parentObj.sound.writeWAVE(0xA, data | 0);
 	}
 	//400009Bh - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9B] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(22, data | 0);
+        parentObj.sound.writeWAVE(0xB, data | 0);
 	}
 	//400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9C] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(24, data | 0);
+        parentObj.sound.writeWAVE(0xC, data | 0);
 	}
 	//400009Dh - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9D] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(26, data | 0);
+        parentObj.sound.writeWAVE(0xD, data | 0);
 	}
 	//400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9E] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(28, data | 0);
+        parentObj.sound.writeWAVE(0xE, data | 0);
 	}
 	//400009Fh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9F] = function (parentObj, data) {
 		parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(30, data | 0);
+        parentObj.sound.writeWAVE(0xF, data | 0);
 	}
 	//40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
 	writeIO[0xA0] = function (parentObj, data) {
@@ -3399,56 +3399,56 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO16 = functi
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
         parentObj.sound.writeWAVE(0, data & 0xFF);
-        parentObj.sound.writeWAVE(2, data >> 8);
+        parentObj.sound.writeWAVE(0x1, data >> 8);
 	}
 	//4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x92 >> 1] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(4, data & 0xFF);
-        parentObj.sound.writeWAVE(6, data >> 8);
+        parentObj.sound.writeWAVE(0x2, data & 0xFF);
+        parentObj.sound.writeWAVE(0x3, data >> 8);
 	}
 	//4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x94 >> 1] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(8, data & 0xFF);
-        parentObj.sound.writeWAVE(10, data >> 8);
+        parentObj.sound.writeWAVE(0x4, data & 0xFF);
+        parentObj.sound.writeWAVE(0x5, data >> 8);
 	}
 	//4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x96 >> 1] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(12, data & 0xFF);
-        parentObj.sound.writeWAVE(14, data >> 8);
+        parentObj.sound.writeWAVE(0x6, data & 0xFF);
+        parentObj.sound.writeWAVE(0x7, data >> 8);
 	}
 	//4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x98 >> 1] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(16, data & 0xFF);
-        parentObj.sound.writeWAVE(18, data >> 8);
+        parentObj.sound.writeWAVE(0x8, data & 0xFF);
+        parentObj.sound.writeWAVE(0x9, data >> 8);
 	}
 	//400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9A >> 1] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(20, data & 0xFF);
-        parentObj.sound.writeWAVE(22, data >> 8);
+        parentObj.sound.writeWAVE(0xA, data & 0xFF);
+        parentObj.sound.writeWAVE(0xB, data >> 8);
 	}
 	//400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9C >> 1] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(24, data & 0xFF);
-        parentObj.sound.writeWAVE(26, data >> 8);
+        parentObj.sound.writeWAVE(0xC, data & 0xFF);
+        parentObj.sound.writeWAVE(0xD, data >> 8);
 	}
 	//400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9E >> 1] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(28, data & 0xFF);
-        parentObj.sound.writeWAVE(30, data >> 8);
+        parentObj.sound.writeWAVE(0xE, data & 0xFF);
+        parentObj.sound.writeWAVE(0xF, data >> 8);
 	}
 	//40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
 	writeIO[0xA0 >> 1] = function (parentObj, data) {
@@ -4190,39 +4190,39 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
         parentObj.sound.writeWAVE(0, data & 0xFF);
-        parentObj.sound.writeWAVE(2, (data >> 8) & 0xFF);
-        parentObj.sound.writeWAVE(4, (data >> 16) & 0xFF);
-        parentObj.sound.writeWAVE(6, (data >> 24) & 0xFF);
+        parentObj.sound.writeWAVE(0x1, (data >> 8) & 0xFF);
+        parentObj.sound.writeWAVE(0x2, (data >> 16) & 0xFF);
+        parentObj.sound.writeWAVE(0x3, (data >> 24) & 0xFF);
 	}
 	//4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
 	//4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x94 >> 2] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(8, data & 0xFF);
-        parentObj.sound.writeWAVE(10, (data >> 8) & 0xFF);
-        parentObj.sound.writeWAVE(12, (data >> 16) & 0xFF);
-        parentObj.sound.writeWAVE(14, (data >> 24) & 0xFF);
+        parentObj.sound.writeWAVE(0x4, data & 0xFF);
+        parentObj.sound.writeWAVE(0x5, (data >> 8) & 0xFF);
+        parentObj.sound.writeWAVE(0x6, (data >> 16) & 0xFF);
+        parentObj.sound.writeWAVE(0x7, (data >> 24) & 0xFF);
 	}
 	//4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
 	//400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x98 >> 2] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(16, data & 0xFF);
-        parentObj.sound.writeWAVE(18, (data >> 8) & 0xFF);
-        parentObj.sound.writeWAVE(20, (data >> 16) & 0xFF);
-        parentObj.sound.writeWAVE(22, (data >> 24) & 0xFF);
+        parentObj.sound.writeWAVE(0x8, data & 0xFF);
+        parentObj.sound.writeWAVE(0x9, (data >> 8) & 0xFF);
+        parentObj.sound.writeWAVE(0xA, (data >> 16) & 0xFF);
+        parentObj.sound.writeWAVE(0xB, (data >> 24) & 0xFF);
 	}
 	//400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
 	//400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
 	writeIO[0x9C >> 2] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateTimerClocking();
-        parentObj.sound.writeWAVE(24, data & 0xFF);
-        parentObj.sound.writeWAVE(26, (data >> 8) & 0xFF);
-        parentObj.sound.writeWAVE(28, (data >> 16) & 0xFF);
-        parentObj.sound.writeWAVE(30, (data >> 24) & 0xFF);
+        parentObj.sound.writeWAVE(0xC, data & 0xFF);
+        parentObj.sound.writeWAVE(0xD, (data >> 8) & 0xFF);
+        parentObj.sound.writeWAVE(0xE, (data >> 16) & 0xFF);
+        parentObj.sound.writeWAVE(0xF, (data >> 24) & 0xFF);
 	}
 	//40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
 	//40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
