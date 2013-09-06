@@ -772,7 +772,7 @@ GameBoyAdvanceSound.prototype.CGBMixerOutputLevelCache = function () {
 	this.CGBFolder();
 }
 GameBoyAdvanceSound.prototype.channel3UpdateCache = function () {
-	if ((this.channel3patternType | 0) < 7) {
+	if ((this.channel3patternType | 0) != 3) {
 		this.cachedChannel3Sample = this.channel3PCM[this.channel3lastSampleLookup | 0] >> (this.channel3patternType | 0);
 	}
 	else {
@@ -1143,7 +1143,22 @@ GameBoyAdvanceSound.prototype.writeSOUND3CNT_H1 = function (data) {
     //NR32:
 	if (this.soundMasterEnabled) {
 		this.audioJIT();
-		this.channel3patternType = (data < 0x20) ? 7 : (((data >> 5) - 1) | 0);
+        switch (data >> 5) {
+            case 0:
+                this.channel3patternType = 4;
+                break;
+            case 1:
+                this.channel3patternType = 0;
+                break;
+            case 2:
+                this.channel3patternType = 1;
+                break;
+            case 3:
+                this.channel3patternType = 2;
+                break;
+            default:
+                this.channel3patternType = 3;
+        }
 		this.nr32 = data | 0;
 	}
 }
