@@ -27,6 +27,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.HBlankIntervalFree = false;
 	this.VRAMOneDimensional = false;
 	this.forcedBlank = true;
+    this.isRendering = false;
 	this.displayBG0 = false;
 	this.displayBG1 = false;
 	this.displayBG2 = false;
@@ -144,7 +145,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
             //De-clock for starting on new scan-line:
             this.LCDTicks = ((this.LCDTicks | 0) - 1232) | 0;             //We start out at the beginning of the next line.
             //Increment scanline counter:
-            this.currentScanLine = (this.currentScanLine + 1) | 0;        //Increment to the next scan line.
+            this.currentScanLine = ((this.currentScanLine | 0) + 1) | 0;        //Increment to the next scan line.
             //Handle switching in/out of vblank:
             if ((this.currentScanLine | 0) >= 160) {
                 //Handle special case scan lines of vblank:
@@ -168,6 +169,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
                  this.checkDisplaySync();                                   //Check for display sync.
             }
             this.checkVCounter();                                           //We're on a new scan line, so check the VCounter for match.
+            this.isRenderingCheckPreprocess();                              //Update a check value.
             //Recursive clocking of the LCD state:
             this.clockLCDState();
         }
@@ -179,10 +181,11 @@ GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
         if (this.IRQHBlank) {
             this.IOCore.irq.requestIRQ(0x2);                        //Check for IRQ.
         }
-        if (this.currentScanLine < 160) {
+        if ((this.currentScanLine | 0) < 160) {
             this.incrementScanLineQueue();                          //Tell the gfx JIT to queue another line to draw.
             this.IOCore.dma.gfxHBlankRequest();                     //Check for HDMA Trigger.
         }
+        this.isRenderingCheckPreprocess();                          //Update a check value.
 	}
 }
 GameBoyAdvanceGraphics.prototype.checkDisplaySync = function () {
@@ -222,7 +225,7 @@ GameBoyAdvanceGraphics.prototype.nextHBlankDMAEventTime = function () {
     return ((((((228 - (this.currentScanLine | 0)) * 1232) | 0) + 1006) | 0) - (this.LCDTicks | 0)) | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextVCounterEventTime = function () {
-    if (this.VCounter > 227) {
+    if ((this.VCounter | 0) > 227) {
         //Never will match:
         return -1;
     }
@@ -232,11 +235,11 @@ GameBoyAdvanceGraphics.prototype.nextVCounterIRQEventTime = function () {
 	return (this.IRQVCounter) ? (this.nextVCounterEventTime() | 0) : -1;
 }
 GameBoyAdvanceGraphics.prototype.nextDisplaySyncEventTime = function () {
-	if (this.currentScanLine < 2) {
+	if ((this.currentScanLine | 0) < 2) {
 		//Doesn't start until line 2:
         return ((((2 - (this.currentScanLine | 0)) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
 	}
-	else if (this.currentScanLine < 161) {
+	else if ((this.currentScanLine | 0) < 161) {
 		//Line 2 through line 161:
         return (1232 - (this.LCDTicks | 0)) | 0;
 	}
@@ -251,7 +254,7 @@ GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
 		this.IOCore.irq.requestIRQ(0x1);
 	}
 	//Ensure JIT framing alignment:
-	if (this.totalLinesPassed < 160) {
+	if ((this.totalLinesPassed | 0) < 160) {
 		//Make sure our gfx are up-to-date:
 		this.graphicsJITVBlank();
 		//Draw the frame:
@@ -267,47 +270,47 @@ GameBoyAdvanceGraphics.prototype.graphicsJIT = function () {
 }
 GameBoyAdvanceGraphics.prototype.graphicsJITVBlank = function () {
 	//JIT the graphics to v-blank framing:
-	this.totalLinesPassed += this.queuedScanLines;
+	this.totalLinesPassed = ((this.totalLinesPassed | 0) + (this.queuedScanLines | 0)) | 0;
 	this.graphicsJITScanlineGroup();
 }
 GameBoyAdvanceGraphics.prototype.graphicsJITScanlineGroup = function () {
 	//Normal rendering JIT, where we try to do groups of scanlines at once:
-	while (this.queuedScanLines > 0) {
-		this.renderer.renderScanLine(this.lastUnrenderedLine);
-		if (this.lastUnrenderedLine < 159) {
-			++this.lastUnrenderedLine;
+	while ((this.queuedScanLines | 0) > 0) {
+		this.renderer.renderScanLine(this.lastUnrenderedLine | 0);
+		if ((this.lastUnrenderedLine | 0) < 159) {
+			this.lastUnrenderedLine = ((this.lastUnrenderedLine | 0) + 1) | 0;
 		}
 		else {
 			this.lastUnrenderedLine = 0;
 		}
-		--this.queuedScanLines;
+        this.queuedScanLines = ((this.queuedScanLines | 0) - 1) | 0;
 	}
 }
 GameBoyAdvanceGraphics.prototype.incrementScanLineQueue = function () {
-	if (this.queuedScanLines < 160) {
-		++this.queuedScanLines;
+	if ((this.queuedScanLines | 0) < 160) {
+        this.queuedScanLines = ((this.queuedScanLines | 0) + 1) | 0;
 	}
 	else {
-		if (this.lastUnrenderedLine < 159) {
-			++this.lastUnrenderedLine;
+		if ((this.lastUnrenderedLine | 0) < 159) {
+            this.lastUnrenderedLine = ((this.lastUnrenderedLine | 0) + 1) | 0;
 		}
 		else {
 			this.lastUnrenderedLine = 0;
 		}
 	}
 }
-GameBoyAdvanceGraphics.prototype.isRendering = function () {
-	return (!this.forcedBlank && this.currentScanLine < 160 && !this.inHBlank);
+GameBoyAdvanceGraphics.prototype.isRenderingCheckPreprocess = function () {
+	this.isRendering = (!this.forcedBlank && (this.currentScanLine | 0) < 160 && !this.inHBlank);
 }
 GameBoyAdvanceGraphics.prototype.OAMLockedCycles = function () {
-	if (!this.forcedBlank && this.currentScanLine < 160) {
+	if (!this.forcedBlank && (this.currentScanLine | 0) < 160) {
 		if (this.HBlankIntervalFree) {
 			//Delay OAM access until horizontal blank:
-			return this.nextHBlankEventTime();
+			return this.nextHBlankEventTime() | 0;
 		}
 		else {
 			//Delay OAM access until vertical blank:
-			return this.nextVBlankEventTime();
+			return this.nextVBlankEventTime() | 0;
 		}
 	}
 	return 0;
@@ -366,7 +369,8 @@ GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
 	this.HBlankIntervalFree = ((data & 0x20) == 0x20);
 	this.VRAMOneDimensional = ((data & 0x40) == 0x40);
 	this.forcedBlank = ((data & 0x80) == 0x80);
-	switch (this.BGMode) {
+    this.isRenderingCheckPreprocess();
+	switch (this.BGMode | 0) {
 		case 0:
 			this.renderer = this.mode0Renderer;
 			break;
@@ -378,7 +382,7 @@ GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
 			break;
 		default:
 			this.renderer = this.modeFrameBufferRenderer;
-			this.renderer.preprocess(Math.min(this.BGMode, 5));
+			this.renderer.preprocess(Math.min(this.BGMode | 0, 5) | 0);
 	}
 }
 GameBoyAdvanceGraphics.prototype.readDISPCNT0 = function () {

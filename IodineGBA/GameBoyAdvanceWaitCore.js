@@ -380,15 +380,15 @@ GameBoyAdvanceWait.prototype.SRAMAccess = function () {
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess8 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering()) ? 2 : 1);
+    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess16 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering()) ? 2 : 1);
+    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering()) ? 4 : 2);
+    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 4 : 2);
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.OAMAccess8 = function () {
