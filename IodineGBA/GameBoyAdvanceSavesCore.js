@@ -21,10 +21,10 @@ function GameBoyAdvanceSaves(IOCore) {
 }
 GameBoyAdvanceSaves.prototype.initialize = function () {
     this.SRAM = getUint8Array(0x10000);
-    this.FLASHOffset = 0x2000000;
+    this.FLASHSize = 0;
     if ((this.IOCore.cartridge.ROMLength | 0) < 0x2000000) {
-        this.FLASHOffset = ((this.FLASHOffset | 0) - (this.IOCore.cartridge.ROMLength | 0)) | 0;
-        this.FLASH = getUint8Array(this.FLASHOffset | 0);
+        this.FLASHSize = (0x2000000 - (Math.max(this.IOCore.cartridge.ROMLength | 0, 0x1FE0000) | 0)) | 0;
+        this.FLASH = getUint8Array(this.FLASHSize | 0);
     }
 }
 GameBoyAdvanceSaves.prototype.readGPIO8 = function (address) {
@@ -33,8 +33,8 @@ GameBoyAdvanceSaves.prototype.readGPIO8 = function (address) {
 }
 GameBoyAdvanceSaves.prototype.readFLASH8 = function (address) {
     address = address | 0;
-    var offset = ((address | 0) - (this.FLASHOffset | 0)) | 0;
-    if ((offset | 0) >= 0) {
+    var offset = ((address | 0) - 0x1FE0000) | 0;
+    if ((offset | 0) >= 0 && (offset | 0) < (this.FLASHSize | 0)) {
         return this.FLASH[offset | 0] | 0;
     }
     else {
@@ -51,8 +51,8 @@ GameBoyAdvanceSaves.prototype.readGPIO16 = function (address) {
 }
 GameBoyAdvanceSaves.prototype.readFLASH16 = function (address) {
     address = address | 0;
-    var offset = ((address | 0) - (this.FLASHOffset | 0)) | 0;
-    if ((offset | 0) >= 0) {
+    var offset = ((address | 0) - 0x1FE0000) | 0;
+    if ((offset | 0) >= 0 && (offset | 0) < (this.FLASHSize | 0)) {
         return this.FLASH[offset | 0] | (this.FLASH[offset | 1] << 8);
     }
     else {
@@ -69,8 +69,8 @@ GameBoyAdvanceSaves.prototype.readGPIO32 = function (address) {
 }
 GameBoyAdvanceSaves.prototype.readFLASH32 = function (address) {
     address = address | 0;
-    var offset = ((address | 0) - (this.FLASHOffset | 0)) | 0;
-    if ((offset | 0) >= 0) {
+    var offset = ((address | 0) - 0x1FE0000) | 0;
+    if ((offset | 0) >= 0 && (offset | 0) < (this.FLASHSize | 0)) {
         return this.FLASH[offset | 0] | (this.FLASH[offset | 1] << 8) | (this.FLASH[offset | 2] << 16) | (this.FLASH[offset | 3] << 24);
     }
     else {
@@ -92,8 +92,8 @@ GameBoyAdvanceSaves.prototype.writeGPIO8 = function (address, data) {
 GameBoyAdvanceSaves.prototype.writeFLASH8 = function (address, data) {
     address = address | 0;
     data = data | 0;
-    var offset = ((address | 0) - (this.FLASHOffset | 0)) | 0;
-    if ((offset | 0) >= 0) {
+    var offset = ((address | 0) - 0x1FE0000) | 0;
+    if ((offset | 0) >= 0 && (offset | 0) < (this.FLASHSize | 0)) {
         this.FLASH[offset | 0] = data | 0;
     }
 }
