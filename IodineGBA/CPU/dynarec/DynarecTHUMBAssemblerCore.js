@@ -57,9 +57,11 @@ DynarecTHUMBAssemblerCore.prototype.isInROM = function (relativePC) {
     //Get the address of the instruction:
     var relativePC = relativePC >>> 0;
     //Check for instruction address being in ROM:
-    if ((relativePC >>> 0) > 0x8000000) {
-        if ((relativePC >>> 0) < 0xE000000) {
-            return true;
+    if ((relativePC >>> 0) > 0x80000FF) {
+        if ((relativePC >>> 0) < 0xD000000) {
+            if ((relativePC & 0x1FFFFFF) < 0x1FE0000) {
+                return true;
+            }
         }
     }
     else if ((relativePC >>> 0) < 0x4000) {
