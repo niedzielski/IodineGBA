@@ -534,12 +534,12 @@ GameBoyAdvanceSound.prototype.runAudioSweep = function () {
 }
 GameBoyAdvanceSound.prototype.channel1AudioSweepPerformDummy = function () {
 	//Channel 1:
-	if (this.channel1frequencySweepDivider > 0) {
+	if ((this.channel1frequencySweepDivider | 0) > 0) {
 		if (!this.channel1decreaseSweep) {
-			var channel1ShadowFrequency = this.channel1ShadowFrequency + (this.channel1ShadowFrequency >> this.channel1frequencySweepDivider);
-			if (channel1ShadowFrequency <= 0x7FF) {
+			var channel1ShadowFrequency = ((this.channel1ShadowFrequency | 0) + (this.channel1ShadowFrequency >> (this.channel1frequencySweepDivider | 0))) | 0;
+			if ((channel1ShadowFrequency | 0) <= 0x7FF) {
 				//Run overflow check twice:
-				if ((channel1ShadowFrequency + (channel1ShadowFrequency >> this.channel1frequencySweepDivider)) > 0x7FF) {
+				if ((((channel1ShadowFrequency | 0) + (channel1ShadowFrequency >> (this.channel1frequencySweepDivider | 0))) | 0) > 0x7FF) {
 					this.channel1SweepFault = true;
 					this.channel1EnableCheck();
 					this.nr52 &= 0xFE;	//Channel #1 On Flag Off
