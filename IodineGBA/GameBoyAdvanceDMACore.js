@@ -312,7 +312,7 @@ GameBoyAdvanceDMA.prototype.finalizeDMA = function (dmaChannel, source, destinat
 	//Reset pending requests:
 	this.pending[dmaChannel | 0] = 0;
 	//Check Repeat Status:
-	if ((this.repeat[dmaChannel | 0] | 0) == 0) {
+	if ((this.repeat[dmaChannel | 0] | 0) == 0 || (this.currentMatch | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
 		//Disable the enable bit:
 		this.enabled[dmaChannel | 0] = 0;
 	}
