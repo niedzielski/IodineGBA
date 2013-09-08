@@ -457,10 +457,14 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO8 = function
 	readIO[0x51] = function (parentObj) {
 		return parentObj.gfx.readBLDCNT1() | 0;
 	}
-	//4000052h - BLDALPHA - Alpha Blending Coefficients (W)
-	readIO[0x52] = this.memory.readZero;
-	//4000053h - BLDALPHA - Alpha Blending Coefficients (W)
-	readIO[0x53] = this.memory.readZero;
+	//4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
+    readIO[0x52] = function (parentObj) {
+		return parentObj.gfx.readBLDALPHA0() | 0;
+	}
+	//4000053h - BLDALPHA - Alpha Blending Coefficients (R/W)
+    readIO[0x53] = function (parentObj) {
+		return parentObj.gfx.readBLDALPHA1() | 0;
+	}
 	//4000054h through 400005Fh - NOT USED - GLITCHED
 	this.fillReadTableUnused8(readIO, 0x54, 0x5F);
 	//4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
@@ -1071,8 +1075,10 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO16 = functio
 	readIO[0x50 >> 1] = function (parentObj) {
 		return parentObj.gfx.readBLDCNT0() | (parentObj.gfx.readBLDCNT1() << 8);
 	}
-	//4000052h - BLDALPHA - Alpha Blending Coefficients (W)
-	readIO[0x52 >> 1] = this.memory.readZero;
+	//4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
+    readIO[0x52 >> 1] = function (parentObj) {
+		return parentObj.gfx.readBLDALPHA0() | (parentObj.gfx.readBLDALPHA1() << 8);
+	}
 	//4000054h through 400005Fh - NOT USED - GLITCHED
 	this.fillReadTableUnused16(readIO, 0x54 >> 1, 0x5E >> 1);
 	//4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
@@ -1435,9 +1441,12 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO32 = functio
 	//400004Ch - MOSAIC - Mosaic Size (W)
 	readIO[0x4C >> 2] = this.memory.readUnused32;
 	//4000050h - BLDCNT - Color Special Effects Selection (R/W)
-	//4000052h - BLDALPHA - Alpha Blending Coefficients (W)
+	//4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
     readIO[0x50 >> 2] = function (parentObj) {
-		return parentObj.gfx.readBLDCNT0() | (parentObj.gfx.readBLDCNT1() << 8);
+		return parentObj.gfx.readBLDCNT0() |
+        (parentObj.gfx.readBLDCNT1() << 8) |
+        (parentObj.gfx.readBLDALPHA0() << 16) |
+        (parentObj.gfx.readBLDALPHA1() << 24);
 	}
 	//4000054h through 400005Fh - NOT USED - GLITCHED
 	this.fillReadTableUnused32(readIO, 0x54 >> 2, 0x5C >> 2);
@@ -2143,12 +2152,12 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO8 = functio
 		parentObj.IOCore.updateGraphicsClocking();
         parentObj.gfx.writeBLDCNT1(data | 0);
 	}
-	//4000052h - BLDALPHA - Alpha Blending Coefficients (W)
+	//4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
 	writeIO[0x52] = function (parentObj, data) {
 		parentObj.IOCore.updateGraphicsClocking();
         parentObj.gfx.writeBLDALPHA0(data | 0);
 	}
-	//4000053h - BLDALPHA - Alpha Blending Coefficients (W)
+	//4000053h - BLDALPHA - Alpha Blending Coefficients (R/W)
 	writeIO[0x53] = function (parentObj, data) {
 		parentObj.IOCore.updateGraphicsClocking();
         parentObj.gfx.writeBLDALPHA1(data | 0);
@@ -3247,7 +3256,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO16 = functi
         parentObj.gfx.writeBLDCNT0(data & 0xFF);
         parentObj.gfx.writeBLDCNT1(data >> 8);
 	}
-	//4000052h - BLDALPHA - Alpha Blending Coefficients (W)
+	//4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
 	writeIO[0x52 >> 1] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateGraphicsClocking();
@@ -4054,7 +4063,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeMOSAIC1((data >> 8) & 0xFF);
 	}
 	//4000050h - BLDCNT - Color Special Effects Selection (R/W)
-	//4000052h - BLDALPHA - Alpha Blending Coefficients (W)
+	//4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
     writeIO[0x50 >> 2] = function (parentObj, data) {
 		data = data | 0;
         parentObj.IOCore.updateGraphicsClocking();

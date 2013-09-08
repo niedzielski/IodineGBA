@@ -155,11 +155,19 @@ GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDCNT1 = function (data) {
 GameBoyAdvanceColorEffectsRenderer.prototype.readBLDCNT1 = function (data) {
     return this.effectsTarget2 >> 16;
 }
+GameBoyAdvanceColorEffectsRenderer.prototype.readBLDALPHA0 = function () {
+    return this.alphaBlendAmountTarget1Scratch | 0;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.readBLDALPHA1 = function () {
+    return this.alphaBlendAmountTarget2Scratch | 0;
+}
 GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDALPHA0 = function (data) {
-    this.alphaBlendAmountTarget1 = Math.min(data & 0x1F, 0x10) | 0;
+    this.alphaBlendAmountTarget1Scratch = data & 0x1F;
+    this.alphaBlendAmountTarget1 = Math.min(this.alphaBlendAmountTarget1Scratch | 0, 0x10) | 0;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDALPHA1 = function (data) {
-    this.alphaBlendAmountTarget2 = Math.min(data & 0x1F, 0x10) | 0;
+    this.alphaBlendAmountTarget2Scratch = data & 0x1F;
+    this.alphaBlendAmountTarget2 = Math.min(this.alphaBlendAmountTarget2Scratch | 0, 0x10) | 0;
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDY = function (data) {
     this.brightnessEffectAmount = Math.min(data & 0x1F, 0x10) | 0;

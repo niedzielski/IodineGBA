@@ -945,7 +945,7 @@ GameBoyAdvanceGraphics.prototype.writeBLDCNT0 = function (data) {
 	this.colorEffectsRenderer.writeBLDCNT0(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT0 = function () {
-	return this.colorEffectsRenderer.readBLDCNT0();
+	return this.colorEffectsRenderer.readBLDCNT0() | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDCNT1 = function (data) {
 	data = data | 0;
@@ -953,17 +953,23 @@ GameBoyAdvanceGraphics.prototype.writeBLDCNT1 = function (data) {
 	this.colorEffectsRenderer.writeBLDCNT1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readBLDCNT1 = function () {
-	return this.colorEffectsRenderer.readBLDCNT1();
+	return this.colorEffectsRenderer.readBLDCNT1() | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA0 = function (data) {
 	data = data | 0;
     this.graphicsJIT();
 	this.colorEffectsRenderer.writeBLDALPHA0(data | 0);
 }
+GameBoyAdvanceGraphics.prototype.readBLDALPHA0 = function () {
+	return this.colorEffectsRenderer.readBLDALPHA0() | 0;
+}
 GameBoyAdvanceGraphics.prototype.writeBLDALPHA1 = function (data) {
 	data = data | 0;
     this.graphicsJIT();
 	this.colorEffectsRenderer.writeBLDALPHA1(data | 0);
+}
+GameBoyAdvanceGraphics.prototype.readBLDALPHA1 = function () {
+	return this.colorEffectsRenderer.readBLDALPHA1() | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
     data = data | 0;
