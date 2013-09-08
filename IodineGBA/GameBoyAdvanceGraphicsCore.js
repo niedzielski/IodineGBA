@@ -205,48 +205,70 @@ GameBoyAdvanceGraphics.prototype.checkVCounter = function () {
 	}
 }
 GameBoyAdvanceGraphics.prototype.nextVBlankEventTime = function () {
-	return ((((1 + ((387 - (this.currentScanLine | 0)) % 228)) * 1232) | 0) - (this.LCDTicks | 0));
+	return ((((1 + ((387 - (this.currentScanLine | 0)) % 228)) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextVBlankIRQEventTime = function () {
-	return (this.IRQVBlank) ? (this.nextVBlankEventTime() | 0) : -1;
+    var nextEventTime = -1;
+	if (this.IRQVBlank) {
+        //Only give a time if we're allowed to irq:
+        nextEventTime = this.nextVBlankEventTime() | 0;
+    }
+    return nextEventTime | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankEventTime = function () {
 	return ((2238 - (this.LCDTicks | 0)) % 1232) | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankIRQEventTime = function () {
-	return (this.IRQHBlank) ? this.nextHBlankEventTime() : -1;
+    var nextEventTime = -1;
+	if (this.IRQHBlank) {
+        //Only give a time if we're allowed to irq:
+        nextEventTime = this.nextHBlankEventTime() | 0;
+    }
+    return nextEventTime | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankDMAEventTime = function () {
-    //Go to next HBlank time inside screen draw:
+    var nextEventTime = -1
     if ((this.currentScanLine | 0) < 159 || (!this.inHBlank && (this.currentScanLine | 0) == 159)) {
-        return this.nextHBlankEventTime() | 0;
+       //Go to next HBlank time inside screen draw:
+        nextEventTime = this.nextHBlankEventTime() | 0;
     }
-    //No HBlank DMA in VBlank:
-    return ((((((228 - (this.currentScanLine | 0)) * 1232) | 0) + 1006) | 0) - (this.LCDTicks | 0)) | 0;
+    else {
+        //No HBlank DMA in VBlank:
+        nextEventTime = ((((((228 - (this.currentScanLine | 0)) * 1232) | 0) + 1006) | 0) - (this.LCDTicks | 0)) | 0;
+    }
+    return nextEventTime | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextVCounterEventTime = function () {
-    if ((this.VCounter | 0) > 227) {
-        //Never will match:
-        return -1;
+    var nextEventTime = -1;
+    if ((this.VCounter | 0) <= 227) {
+        //Only match lines within screen or vblank:
+        nextEventTime = (((((1 + (((227 + (this.VCounter | 0) - (this.currentScanLine | 0)) | 0) % 228)) | 0) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
     }
-	return (((((1 + (((227 + (this.VCounter | 0) - (this.currentScanLine | 0)) | 0) % 228)) | 0) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
+	return nextEventTime | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextVCounterIRQEventTime = function () {
-	return (this.IRQVCounter) ? (this.nextVCounterEventTime() | 0) : -1;
+    var nextEventTime = -1;
+	if (this.IRQVCounter) {
+        //Only give a time if we're allowed to irq:
+        nextEventTime = this.nextVCounterEventTime() | 0;
+    }
+    return nextEventTime | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextDisplaySyncEventTime = function () {
-	if ((this.currentScanLine | 0) < 2) {
+	var nextEventTime = -1;
+    if ((this.currentScanLine | 0) < 2) {
 		//Doesn't start until line 2:
-        return ((((2 - (this.currentScanLine | 0)) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
+        nextEventTime = ((((2 - (this.currentScanLine | 0)) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
 	}
 	else if ((this.currentScanLine | 0) < 161) {
 		//Line 2 through line 161:
-        return (1232 - (this.LCDTicks | 0)) | 0;
+        nextEventTime = (1232 - (this.LCDTicks | 0)) | 0;
 	}
 	else {
 		//Skip to line 2 metrics:
-        return ((((230 - (this.currentScanLine | 0)) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
+        nextEventTime = ((((230 - (this.currentScanLine | 0)) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
 	}
+    return nextEventTime | 0;
 }
 GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
 	this.inVBlank = true;								//Mark VBlank.
@@ -1032,30 +1054,32 @@ GameBoyAdvanceGraphics.prototype.readOAM32 = function (address) {
     return this.objRenderer.readOAM32(address | 0) | 0;
 }
 GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
-	this.graphicsJIT();
-	this.paletteRAM[address] = data;
+	data = data | 0;
+    address = address | 0;
+    this.graphicsJIT();
+	this.paletteRAM[address | 0] = data | 0;
 	var palette = ((this.paletteRAM[address | 1] << 8) | this.paletteRAM[address & 0x3FE]) & 0x7FFF;
 	address >>= 1;
 	if ((address & 0xFF) == 0) {
-		palette |= this.transparency;
+		palette = this.transparency | palette;
         if (address == 0) {
             this.backdrop = palette | 0x200000;
         }
 	}
 	if (address < 0x100) {
-		this.palette256[address] = palette;
+		this.palette256[address | 0] = palette | 0;
 	}
 	else {
-		this.paletteOBJ256[address & 0xFF] = palette;
+		this.paletteOBJ256[address & 0xFF] = palette | 0;
 	}
 	if ((address & 0xF) == 0) {
-		palette |= this.transparency;
+		palette = this.transparency | palette;
 	}
 	if (address < 0x100) {
-		this.palette16[address >> 4][address & 0xF] = palette;
+		this.palette16[address >> 4][address & 0xF] = palette | 0;
 	}
 	else {
-		this.paletteOBJ16[(address >> 4) & 0xF][address & 0xF] = palette;
+		this.paletteOBJ16[(address >> 4) & 0xF][address & 0xF] = palette | 0;
 	}
 }
 GameBoyAdvanceGraphics.prototype.readPalette = function (address) {

@@ -50,10 +50,8 @@ GameBoyAdvanceOBJRenderer.prototype.initialize = function (line) {
     this.initializeOAMTable();
 }
 GameBoyAdvanceOBJRenderer.prototype.initializeMatrixStorage = function () {
-	this.OBJMatrixParametersRaw = [];
 	this.OBJMatrixParameters = [];
 	for (var index = 0; index < 0x20;) {
-		this.OBJMatrixParametersRaw[index] = getUint16Array(0x4);
 		this.OBJMatrixParameters[index++] = getInt32Array(0x4);
 	}
 }
@@ -345,14 +343,12 @@ GameBoyAdvanceOBJRenderer.prototype.writeOAM = function (address, data) {
 			break;
             //Scaling/Rotation Parameter:
 		case 6:
-			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] &= 0xFF00;
-			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] |= data;
-			this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] << 16) >> 16;
+            var OBJMatrixParametersRaw = data | (this.OAMRAM[address | 1] << 8);
+			this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (OBJMatrixParametersRaw << 16) >> 16;
 			break;
 		default:
-			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] &= 0x00FF;
-			this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] |= data << 8;
-			this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (this.OBJMatrixParametersRaw[address >> 5][(address >> 3) & 0x3] << 16) >> 16;
+			var OBJMatrixParametersRaw = this.OAMRAM[address & 0x3FE] | (data << 8);
+            this.OBJMatrixParameters[address >> 5][(address >> 3) & 0x3] = (OBJMatrixParametersRaw << 16) >> 16;
 	}
 	this.OAMRAM[address & 0x3FF] = data | 0;
 }
