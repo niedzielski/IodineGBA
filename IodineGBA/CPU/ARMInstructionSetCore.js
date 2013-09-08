@@ -1085,7 +1085,7 @@ ARMInstructionSet.prototype.SWP = function (parentObj, operand2OP) {
 	var data = parentObj.CPUCore.read32(base | 0) | 0;
 	//Clock a cycle for the processing delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(1);
-	parentObj.CPUCore.write32(base, parentObj.readRegister(parentObj.execute & 0xF) | 0);
+	parentObj.CPUCore.write32(base | 0, parentObj.readRegister(parentObj.execute & 0xF) | 0);
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, data | 0);
 }
 ARMInstructionSet.prototype.SWPB = function (parentObj, operand2OP) {
@@ -1093,7 +1093,7 @@ ARMInstructionSet.prototype.SWPB = function (parentObj, operand2OP) {
 	var data = parentObj.CPUCore.read8(base | 0) | 0;
 	//Clock a cycle for the processing delaying the CPU:
 	parentObj.wait.CPUInternalCyclePrefetch(1);
-	parentObj.CPUCore.write8(base, parentObj.readRegister(parentObj.execute & 0xF) | 0);
+	parentObj.CPUCore.write8(base | 0, parentObj.readRegister(parentObj.execute & 0xF) | 0);
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, data | 0);
 }
 ARMInstructionSet.prototype.SWI = function (parentObj, operand2OP) {

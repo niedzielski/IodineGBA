@@ -69,17 +69,17 @@ GameBoyAdvanceMemory.prototype.loadReferences = function () {
 GameBoyAdvanceMemory.prototype.memoryWriteFast8 = function (address, data) {
     address = address >>> 0;
 	data = data | 0;
-    this.memoryWriter8[address >>> 24](this, address >>> 0, data | 0);
+    this.memoryWriter8[address >>> 24](this, address >>> 0, data & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.memoryWrite16 = function (address, data) {
 	address = address >>> 0;
     data = data | 0;
-    this.memoryWriter16[address >>> 24](this, (address & -2) >>> 0, data | 0);
+    this.memoryWriter16[address >>> 24](this, (address & -2) >>> 0, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.memoryWriteFast16 = function (address, data) {
 	address = address >>> 0;
     data = data | 0;
-    this.memoryWriter16[address >>> 24](this, address >>> 0, data | 0);
+    this.memoryWriter16[address >>> 24](this, address >>> 0, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.memoryWrite32 = function (address, data) {
 	address = address >>> 0;
