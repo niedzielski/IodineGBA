@@ -236,7 +236,7 @@ GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
         if ((0x500F & (1 << rListPosition)) != 0) {
             //Load a register from memory:
             this.registers[rListPosition & 0xF] = this.randomMemoryCache.memoryRead32(currentAddress >>> 0) | 0;
-            currentAddress = (currentAddress + 4) | 0;
+            currentAddress = ((currentAddress | 0) + 4) | 0;
         }
     }
     //Store the updated base address back into register:

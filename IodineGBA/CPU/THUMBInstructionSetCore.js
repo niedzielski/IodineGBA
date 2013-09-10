@@ -639,7 +639,7 @@ THUMBInstructionSet.prototype.STMIA = function (parentObj) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				parentObj.memory.memoryWrite32(currentAddress >>> 0, parentObj.registers[rListPosition | 0] | 0);
-				currentAddress = (currentAddress + 4) | 0;
+				currentAddress = ((currentAddress | 0) + 4) | 0;
 			}
 		}
 		//Store the updated base address back into register:
@@ -660,7 +660,7 @@ THUMBInstructionSet.prototype.LDMIA = function (parentObj) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				parentObj.registers[rListPosition | 0] = parentObj.memory.memoryRead32(currentAddress >>> 0) | 0;
-				currentAddress = (currentAddress + 4) | 0;
+				currentAddress = ((currentAddress | 0) + 4) | 0;
 			}
 		}
 		//Store the updated base address back into register:
