@@ -24,7 +24,7 @@ GameBoyAdvanceWait.prototype.GAMEPAKWaitStateTable = [
 	5, 4, 3, 9
 ];
 GameBoyAdvanceWait.prototype.initialize = function () {
-	this.WRAMConfiguration = [0xD, 0x20];	//WRAM configuration control register current data.
+	this.WRAMConfiguration = 0xD000020;     //WRAM configuration control register current data.
 	this.WRAMWaitState = 3;					//External WRAM wait state.
 	this.SRAMWaitState = 5;
 	this.CARTWaitState0First = 5;
@@ -84,28 +84,68 @@ GameBoyAdvanceWait.prototype.writeHALTCNT = function (data) {
 	//HALT/STOP mode entrance:
     this.IOCore.flagStepper((data < 0x80) ? 2 : 4);
 }
-GameBoyAdvanceWait.prototype.writeConfigureWRAM = function (address, data) {
-	switch (address & 0x3) {
-		case 3:
-			this.WRAMConfiguration[1] = data & 0x2F;
-			this.memory.remapWRAM(data | 0);
-			break;
+GameBoyAdvanceWait.prototype.writeConfigureWRAM8 = function (address, data) {
+	address = address | 0;
+    data = data | 0;
+    switch (address & 0x3) {
 		case 0:
+            this.memory.remapWRAM(data & 0x21);
+            this.WRAMConfiguration = (this.WRAMConfiguration & 0xFFFFFF00) | data;
+            break;
+        case 1:
+            this.WRAMConfiguration = (this.WRAMConfiguration & 0xFFFF00FF) | (data << 8);
+            break;
+        case 2:
+            this.WRAMConfiguration = (this.WRAMConfiguration & 0xFF00FFFF) | (data << 16);
+            break;
+        case 3:
 			this.WRAMWaitState = (0x10 - (data & 0xF)) | 0;
-			this.WRAMConfiguration[0] = data | 0;
+            this.WRAMConfiguration = (this.WRAMConfiguration & 0xFFFFFF) | (data << 24);
 	}
 }
-GameBoyAdvanceWait.prototype.readConfigureWRAM = function (address) {
-	switch (address & 0x3) {
-		case 3:
-			return this.WRAMConfiguration[1] | 0;
-			break;
-		case 0:
-			return this.WRAMConfiguration[0] | 0;
-			break;
-		default:
-			return 0;
-	}
+GameBoyAdvanceWait.prototype.writeConfigureWRAM16 = function (address, data) {
+	address = address | 0;
+    data = data | 0;
+    if ((address & 0x2) == 0) {
+        this.WRAMConfiguration = (this.WRAMConfiguration & 0xFFFF0000) | (data & 0xFFFF);
+        this.memory.remapWRAM(data & 0x21);
+    }
+    else {
+        this.WRAMConfiguration = (data << 16) | (this.WRAMConfiguration & 0xFFFF);
+        this.WRAMWaitState = (0x10 - ((data >> 8) & 0xF)) | 0;
+    }
+}
+GameBoyAdvanceWait.prototype.writeConfigureWRAM32 = function (data) {
+	data = data | 0;
+    this.WRAMConfiguration = data | 0;
+    this.WRAMWaitState = (0x10 - ((data >> 24) & 0xF)) | 0;
+    this.memory.remapWRAM(data & 0x21);
+}
+GameBoyAdvanceWait.prototype.readConfigureWRAM8 = function (address) {
+	address = address | 0;
+    var data = 0;
+    switch (address & 0x3) {
+        case 0:
+            data = this.WRAMConfiguration & 0x2F;
+            break;
+        case 3:
+            data = (this.WRAMConfiguration >> 24) & 0xFF;
+    }
+    return data | 0;
+}
+GameBoyAdvanceWait.prototype.readConfigureWRAM16 = function (address) {
+	address = address | 0;
+    var data = 0;
+    if ((address & 0x2) == 0) {
+        data = this.WRAMConfiguration & 0x2F;
+    }
+    else {
+        data = (this.WRAMConfiguration >> 16) & 0xFF00;
+    }
+    return data | 0;
+}
+GameBoyAdvanceWait.prototype.readConfigureWRAM32 = function () {
+    return this.WRAMConfiguration & 0xFF00002F;
 }
 GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (clocks) {
     clocks = clocks | 0;
