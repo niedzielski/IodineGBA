@@ -189,7 +189,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (parentObj, address, 
 		//IO Write:
         parentObj.writeIO8[address & 0x3FF](parentObj, data | 0);
 	}
-	else if ((address & 0x4FF0800) == 0x4000800) {
+	else if ((address & 0x4000800) == 0x4000800) {
 		//WRAM wait state control:
 		parentObj.wait.writeConfigureWRAM8(address | 0, data | 0);
 	}
@@ -203,7 +203,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (parentObj, address,
         address = address >> 1;
         parentObj.writeIO16[address & 0x1FF](parentObj, data | 0);
 	}
-	else if ((address & 0x4FF0800) == 0x4000800) {
+	else if ((address & 0x4000800) == 0x4000800) {
 		//WRAM wait state control:
 		parentObj.wait.writeConfigureWRAM16(address | 0, data | 0);
 	}
@@ -217,7 +217,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (parentObj, address,
         address = address >> 2;
         parentObj.writeIO32[address & 0xFF](parentObj, data | 0);
 	}
-	else if ((address & 0x4FF0800) == 0x4000800) {
+	else if ((address & 0x4000800) == 0x4000800) {
 		//WRAM wait state control:
 		parentObj.wait.writeConfigureWRAM32(data | 0);
 	}
@@ -617,7 +617,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
 		parentObj.wait.FASTAccess2();
 		data = parentObj.readIO8[address & 0x3FF](parentObj) | 0;
 	}
-	else if ((address & 0x4FF0800) == 0x4000800) {
+	else if ((address & 0x4000800) == 0x4000800) {
 		//WRAM wait state control:
 		parentObj.wait.FASTAccess2();
 		data = parentObj.wait.readConfigureWRAM8(address | 0) | 0;
@@ -636,7 +636,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) 
 		address >>= 1;
         data = parentObj.readIO16[address & 0x1FF](parentObj) | 0;
 	}
-	else if ((address & 0x4FF0800) == 0x4000800) {
+	else if ((address & 0x4000800) == 0x4000800) {
 		//WRAM wait state control:
 		parentObj.wait.FASTAccess2();
 		data = parentObj.wait.readConfigureWRAM16(address | 0) | 0;
@@ -655,7 +655,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch32 = function (parentObj, address) 
         address >>= 2;
 		data = parentObj.readIO32[address & 0xFF](parentObj) | 0;
 	}
-	else if ((address & 0x4FF0800) == 0x4000800) {
+	else if ((address & 0x4000800) == 0x4000800) {
 		//WRAM wait state control:
 		parentObj.wait.FASTAccess2();
 		data = parentObj.wait.readConfigureWRAM32() | 0;
