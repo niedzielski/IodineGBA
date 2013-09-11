@@ -111,14 +111,15 @@ GameBoyAdvanceIRQ.prototype.findClosestEvent = function (oldClocks, newClocks, f
 	oldClocks = oldClocks | 0;
     newClocks = newClocks | 0;
     flagID = flagID | 0;
-    if ((this.interruptsEnabled & flagID) == 0) {
-        return oldClocks | 0;
+    if ((this.interruptsEnabled & flagID) != 0) {
+        if ((newClocks | 0) >= 0) {
+            if ((oldClocks | 0) >= 0) {
+                oldClocks = Math.min(oldClocks | 0, newClocks | 0) | 0;
+            }
+            else {
+                oldClocks = newClocks | 0;
+            }
+        }
     }
-    if (oldClocks > -1) {
-		if (newClocks > -1) {
-            return Math.min(oldClocks | 0, newClocks | 0) | 0;
-		}
-		return oldClocks | 0;
-	}
-	return newClocks | 0;
+    return oldClocks | 0;
 }

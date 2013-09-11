@@ -156,7 +156,7 @@ GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (clocks) {
 		var address = this.IOCore.cpu.registers[15] | 0;
         //We were already in ROM, so if prefetch do so as sequential:
 		//Only case for non-sequential ROM prefetch is invalid anyways:
-		switch ((address >>> 24) & 0xFF) {
+		switch ((address >> 24) & 0xFF) {
 			case 0x8:
 			case 0x9:
 				while ((clocks | 0) >= (this.CARTWaitState0Second | 0)) {
@@ -319,7 +319,7 @@ GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
 	this.ROMPrebuffer = 0;
 }
 GameBoyAdvanceWait.prototype.FASTAccess2 = function () {
-	this.IOCore.updateCore(1);
+	this.IOCore.updateCoreSingle();
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.WRAMAccess8 = function () {
@@ -354,7 +354,7 @@ GameBoyAdvanceWait.prototype.ROM0Access16 = function () {
 }
 GameBoyAdvanceWait.prototype.ROM0Access32 = function () {
     if (this.nonSequential) {
-        this.IOCore.updateCore(((this.CARTWaitState0First | 0) + (this.CARTWaitState0Second | 0)));
+        this.IOCore.updateCore(((this.CARTWaitState0First | 0) + (this.CARTWaitState0Second | 0)) | 0);
         this.nonSequential = false;
     }
     else {
