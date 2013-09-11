@@ -50,7 +50,7 @@ GameBoyAdvanceIO.prototype.iterate = function () {
 	//Find out how many clocks to iterate through this run:
 	this.cyclesToIterate = ((this.emulatorCore.CPUCyclesTotal | 0) - (this.cyclesIteratedPreviously | 0)) | 0;
     //An extra check to make sure we don't do stuff if we did too much last run:
-    if (this.cyclesToIterate > 0) {
+    if ((this.cyclesToIterate | 0) > 0) {
         //Update our core event prediction:
         this.updateCoreEventTime();
         //If clocks remaining, run iterator:

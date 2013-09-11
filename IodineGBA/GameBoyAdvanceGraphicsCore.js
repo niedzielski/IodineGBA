@@ -999,7 +999,9 @@ GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
     this.colorEffectsRenderer.writeBLDY(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM = function (address, data) {
-	this.graphicsJIT();
+	address = address | 0;
+    data = data | 0;
+    this.graphicsJIT();
 	this.VRAM[address | 0] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM16Slow = function (address, data) {
@@ -1008,11 +1010,12 @@ GameBoyAdvanceGraphics.prototype.writeVRAM16Slow = function (address, data) {
     this.VRAM[address | 1] = data >> 8;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM16Optimized = function (address, data) {
-	this.graphicsJIT();
+	address = address | 0;
+    data = data | 0;
+    this.graphicsJIT();
 	this.VRAM16[address >> 1] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM32Slow = function (address, data) {
-	
     this.graphicsJIT();
 	this.VRAM[address | 0] = data & 0xFF;
     this.VRAM[address | 1] = (data >> 8) & 0xFF;
@@ -1020,7 +1023,9 @@ GameBoyAdvanceGraphics.prototype.writeVRAM32Slow = function (address, data) {
     this.VRAM[address | 3] = (data >> 24) & 0xFF;
 }
 GameBoyAdvanceGraphics.prototype.writeVRAM32Optimized = function (address, data) {
-	this.graphicsJIT();
+	address = address | 0;
+    data = data | 0;
+    this.graphicsJIT();
 	this.VRAM32[address >> 2] = data | 0;
 }
 GameBoyAdvanceGraphics.prototype.readVRAM = function (address) {

@@ -129,7 +129,7 @@ GameBoyAdvanceMemory.prototype.writeExternalWRAM16Optimized = function (parentOb
     data = data | 0;
     //External WRAM:
 	parentObj.wait.WRAMAccess16();
-	parentObj.externalRAM16[(address & 0x3FFFF) >> 1] = data | 0;
+	parentObj.externalRAM16[(address >> 1) & 0x1FFFF] = data | 0;
 }
 GameBoyAdvanceMemory.prototype.writeExternalWRAM32Slow = function (parentObj, address, data) {
 	//External WRAM:
@@ -144,7 +144,7 @@ GameBoyAdvanceMemory.prototype.writeExternalWRAM32Optimized = function (parentOb
     data = data | 0;
     //External WRAM:
 	parentObj.wait.WRAMAccess32();
-	parentObj.externalRAM32[(address & 0x3FFFF) >> 2] = data | 0;
+	parentObj.externalRAM32[(address >> 2) & 0xFFFF] = data | 0;
 }
 GameBoyAdvanceMemory.prototype.writeInternalWRAM8 = function (parentObj, address, data) {
 	address = address | 0;
@@ -164,7 +164,7 @@ GameBoyAdvanceMemory.prototype.writeInternalWRAM16Optimized = function (parentOb
     data = data | 0;
     //Internal WRAM:
 	parentObj.wait.FASTAccess2();
-	parentObj.internalRAM16[(address & 0x7FFF) >> 1] = data | 0;
+	parentObj.internalRAM16[(address >> 1) & 0x3FFF] = data | 0;
 }
 GameBoyAdvanceMemory.prototype.writeInternalWRAM32Slow = function (parentObj, address, data) {
 	//Internal WRAM:
@@ -179,7 +179,7 @@ GameBoyAdvanceMemory.prototype.writeInternalWRAM32Optimized = function (parentOb
     data = data | 0;
     //Internal WRAM:
 	parentObj.wait.FASTAccess2();
-	parentObj.internalRAM32[(address & 0x7FFF) >> 2] = data | 0;
+	parentObj.internalRAM32[(address >> 2) & 0x1FFF] = data | 0;
 }
 GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (parentObj, address, data) {
 	address = address | 0;
@@ -859,10 +859,10 @@ GameBoyAdvanceMemory.prototype.readUnused3 = function (parentObj) {
 }
 GameBoyAdvanceMemory.prototype.loadBIOS = function () {
 	//Ensure BIOS is of correct length:
-	if (this.emulatorCore.BIOS.length == 0x4000) {
+	if ((this.emulatorCore.BIOS.length | 0) == 0x4000) {
 		this.IOCore.BIOSFound = true;
-        for (var index = 0; index < 0x4000; ++index) {
-            this.BIOS[index] = this.emulatorCore.BIOS[index];
+        for (var index = 0; (index | 0) < 0x4000; index = ((index | 0) + 1) | 0) {
+            this.BIOS[index & 0x3FFF] = this.emulatorCore.BIOS[index & 0x3FFF] & 0xFF;
         }
 	}
 	else {
