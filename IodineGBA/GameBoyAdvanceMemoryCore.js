@@ -515,6 +515,7 @@ GameBoyAdvanceMemory.prototype.readBIOS16Optimized = function (parentObj, addres
 	else {
 		data = parentObj.readUnused16(parentObj, address | 0) | 0;
 	}
+    return data | 0;
 }
 GameBoyAdvanceMemory.prototype.readBIOS32Slow = function (parentObj, address) {
 	address = address | 0;
