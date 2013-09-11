@@ -284,6 +284,7 @@ GameBoyAdvanceEmulator.prototype.disableAudio = function () {
 	if (this.audioFound) {
 		this.audio.changeVolume(0);
 		this.audioSetState(false);
+        this.calculateTimings();    //Re-Fix timing if it was adjusted by our audio code.
 	}
 }
 GameBoyAdvanceEmulator.prototype.initializeAudioBuffering = function () {

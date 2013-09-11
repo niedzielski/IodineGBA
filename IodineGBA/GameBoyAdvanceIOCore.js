@@ -49,14 +49,17 @@ function GameBoyAdvanceIO(emulatorCore) {
 GameBoyAdvanceIO.prototype.iterate = function () {
 	//Find out how many clocks to iterate through this run:
 	this.cyclesToIterate = ((this.emulatorCore.CPUCyclesTotal | 0) - (this.cyclesIteratedPreviously | 0)) | 0;
-	//Update our core event prediction:
-    this.updateCoreEventTime();
-    //If clocks remaining, run iterator:
-	this.runIterator();
-    //Spill our core event clocking:
-    this.updateCoreClocking();
-	//Ensure audio buffers at least once per iteration:
-	this.sound.audioJIT();
+    //An extra check to make sure we don't do stuff if we did too much last run:
+    if (this.cyclesToIterate > 0) {
+        //Update our core event prediction:
+        this.updateCoreEventTime();
+        //If clocks remaining, run iterator:
+        this.runIterator();
+        //Spill our core event clocking:
+        this.updateCoreClocking();
+        //Ensure audio buffers at least once per iteration:
+        this.sound.audioJIT();
+    }
 	//If we clocked just a little too much, subtract the extra from the next run:
 	this.cyclesIteratedPreviously = this.cyclesToIterate | 0;
 }
@@ -113,7 +116,12 @@ GameBoyAdvanceIO.prototype.updateSerialClocking = function () {
     this.serialClocks = this.accumulatedClocks | 0;
 }
 GameBoyAdvanceIO.prototype.updateCoreEventTime = function () {
+    //Predict how many clocks until the next DMA or IRQ event:
     this.nextEventClocks = this.cyclesUntilNextEvent() | 0;
+}
+GameBoyAdvanceIO.prototype.getRemainingCycles = function () {
+	//Return the number of cycles left until iteration end:
+	return Math.max(this.cyclesToIterate | 0, 0) | 0;
 }
 GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
 	switch (this.systemStatus | 0) {
@@ -176,7 +184,7 @@ GameBoyAdvanceIO.prototype.handleHalt = function () {
 }
 GameBoyAdvanceIO.prototype.handleStop = function () {
 	//Update sound system to add silence to buffer:
-	this.sound.addClocks(this.cyclesToIterate | 0);
+	this.sound.addClocks(this.getRemainingCycles() | 0);
 	this.cyclesToIterate = 0;
 	//Exits when user presses joypad or from an external irq outside of GBA internal.
 }
@@ -193,8 +201,10 @@ GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
     return this.solveClosestTime(irqClocks | 0, dmaClocks | 0) | 0;
 }
 GameBoyAdvanceIO.prototype.solveClosestTime = function (clocks1, clocks2) {
+    clocks1 = clocks1 | 0;
+    clocks2 = clocks2 | 0;
     //Find the clocks closest to the next event:
-    var clocks = this.cyclesToIterate | 0;
+    var clocks = this.getRemainingCycles() | 0;
     if ((clocks1 | 0) >= 0) {
         if ((clocks2 | 0) >= 0) {
             clocks = Math.min(clocks | 0, clocks1 | 0, clocks2 | 0) | 0;
