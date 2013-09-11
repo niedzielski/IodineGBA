@@ -84,7 +84,7 @@ GameBoyAdvanceMemory.prototype.memoryWriteFast16 = function (address, data) {
 GameBoyAdvanceMemory.prototype.memoryWrite32 = function (address, data) {
 	address = address >>> 0;
     data = data | 0;
-    this.memoryWriter32[address >>> 24](this, (address & -3) >>> 0, data | 0);
+    this.memoryWriter32[address >>> 24](this, (address & -4) >>> 0, data | 0);
 }
 GameBoyAdvanceMemory.prototype.memoryWriteFast32 = function (address, data) {
 	address = address >>> 0;
@@ -105,7 +105,7 @@ GameBoyAdvanceMemory.prototype.memoryReadFast16 = function (address) {
 }
 GameBoyAdvanceMemory.prototype.memoryRead32 = function (address) {
 	address = address >>> 0;
-    return this.memoryReader32[address >>> 24](this, (address & -3) >>> 0) | 0;
+    return this.memoryReader32[address >>> 24](this, (address & -4) >>> 0) | 0;
 }
 GameBoyAdvanceMemory.prototype.memoryReadFast32 = function (address) {
 	address = address >>> 0;

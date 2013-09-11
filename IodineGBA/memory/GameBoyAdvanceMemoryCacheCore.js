@@ -71,7 +71,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryRead16 = function (address) {
 GameBoyAdvanceMemoryCache.prototype.memoryRead32 = function (address) {
 	address = address >>> 0;
     //Word Read:
-    return this.memoryReadFast32((address & -3) >>> 0) | 0;
+    return this.memoryReadFast32((address & -4) >>> 0) | 0;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryWrite16 = function (address, data) {
 	address = address >>> 0;
@@ -83,7 +83,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryWrite32 = function (address, data) {
 	address = address >>> 0;
     data = data | 0;
     //Word Write:
-    this.memoryWriteFast32((address & -3) >>> 0, data | 0);
+    this.memoryWriteFast32((address & -4) >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.invalidateIfWRAM = function () {
     if (this.addressRead16 == 0x2 || this.addressRead16 == 0x3) {
