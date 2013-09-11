@@ -42,17 +42,17 @@ GameBoyAdvanceAffineBGRenderer.prototype.renderScanLine = function (line, BGObje
     line = line | 0;
     var x = this.pb | 0;
     var y = this.pd | 0;
-    if (this.gfx.BGMosaic[this.BGLayer | 0]) {
+    if (this.gfx.BGMosaic[this.BGLayer & 3]) {
 		//Correct line number for mosaic:
         var mosaicY = this.gfx.mosaicRenderer.getMosaicYOffset(line | 0) | 0;
 		x = ((x | 0) - ((this.actualBGdmx | 0) * (mosaicY | 0))) | 0;
 		y = ((y | 0) - ((this.actualBGdmy | 0) * (mosaicY | 0))) | 0;
 	}
-	for (var position = 0; position < 240; position = (position + 1) | 0, x = ((x | 0) + (this.actualBGdx | 0)) | 0, y = ((y | 0) + (this.actualBGdy | 0)) | 0) {
+	for (var position = 0; position < 240; position = ((position | 0) + 1) | 0, x = ((x | 0) + (this.actualBGdx | 0)) | 0, y = ((y | 0) + (this.actualBGdy | 0)) | 0) {
 		//Fetch pixel:
 		this.scratchBuffer[position | 0] = (this.priorityFlag | 0) | (BGObject.fetchPixel(x >> 8, y >> 8) | 0);
 	}
-	if (this.gfx.BGMosaic[this.BGLayer | 0]) {
+	if (this.gfx.BGMosaic[this.BGLayer & 3]) {
 		//Pixelize the line horizontally:
 		this.gfx.mosaicRenderer.renderMosaicHorizontal(this.scratchBuffer);
 	}

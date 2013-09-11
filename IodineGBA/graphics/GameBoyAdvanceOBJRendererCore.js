@@ -57,7 +57,7 @@ GameBoyAdvanceOBJRenderer.prototype.initializeMatrixStorage = function () {
 }
 GameBoyAdvanceOBJRenderer.prototype.initializeOAMTable = function () {
 	this.OAMTable = [];
-	for (var spriteNumber = 0; spriteNumber < 128; spriteNumber = (spriteNumber + 1) | 0) {
+	for (var spriteNumber = 0; (spriteNumber | 0) < 128; spriteNumber = ((spriteNumber | 0) + 1) | 0) {
 		this.OAMTable[spriteNumber | 0] = new GameBoyAdvanceOAMAttributeTable();
 	}
 }

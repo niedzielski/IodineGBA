@@ -209,10 +209,10 @@ GameBoyAdvanceCPU.prototype.HLEIRQEnter = function () {
     //Updating the address bus away from PC fetch:
     this.wait.NonSequentialBroadcast();
     //Push register(s) into memory:
-    for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+    for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
             if ((0x500F & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
-                currentAddress = (currentAddress - 4) | 0;
+                currentAddress = ((currentAddress | 0) - 4) | 0;
                 this.randomMemoryCache.memoryWrite32(currentAddress >>> 0, this.registers[rListPosition >>> 0] | 0);
             }
     }
@@ -232,7 +232,7 @@ GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
     //Updating the address bus away from PC fetch:
     this.wait.NonSequentialBroadcast();
     //Load register(s) from memory:
-    for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
+    for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
         if ((0x500F & (1 << rListPosition)) != 0) {
             //Load a register from memory:
             this.registers[rListPosition & 0xF] = this.randomMemoryCache.memoryRead32(currentAddress >>> 0) | 0;

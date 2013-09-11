@@ -216,7 +216,7 @@ ARMInstructionSet.prototype.readUserRegister = function (address) {
 ARMInstructionSet.prototype.readDelayedPCRegister = function () {
     //Get the PC register data clocked 4 exta:
     var register = this.registers[0xF] | 0;
-    register = (register + 4) | 0;
+    register = ((register | 0) + 4) | 0;
 	return register | 0;
 }
 ARMInstructionSet.prototype.guardRegisterRead = function (address) {
@@ -768,7 +768,7 @@ ARMInstructionSet.prototype.STMIA = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
-		for (var rListPosition = 0; rListPosition < 0x10; rListPosition = (rListPosition + 1) | 0) {
+		for (var rListPosition = 0; rListPosition < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				parentObj.stackMemoryCache.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
@@ -787,7 +787,7 @@ ARMInstructionSet.prototype.STMIAW = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
-		for (var rListPosition = 0; rListPosition < 0x10; rListPosition = (rListPosition + 1) | 0) {
+		for (var rListPosition = 0; rListPosition < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				parentObj.stackMemoryCache.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
@@ -808,11 +808,11 @@ ARMInstructionSet.prototype.STMDA = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
-		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				parentObj.stackMemoryCache.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
-				currentAddress = (currentAddress - 4) | 0;
+				currentAddress = ((currentAddress | 0) - 4) | 0;
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -827,11 +827,11 @@ ARMInstructionSet.prototype.STMDAW = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
-		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				parentObj.stackMemoryCache.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
-				currentAddress = (currentAddress - 4) | 0;
+				currentAddress = ((currentAddress | 0) - 4) | 0;
 			}
 		}
 		//Store the updated base address back into register:
@@ -848,7 +848,7 @@ ARMInstructionSet.prototype.STMIB = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
-		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
+		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				currentAddress = ((currentAddress | 0) + 4) | 0;
@@ -867,7 +867,7 @@ ARMInstructionSet.prototype.STMIBW = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
-		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
+		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
 				currentAddress = ((currentAddress | 0) + 4) | 0;
@@ -888,10 +888,10 @@ ARMInstructionSet.prototype.STMDB = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
-		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				currentAddress = (currentAddress - 4) | 0;
+				currentAddress = ((currentAddress | 0) - 4) | 0;
 				parentObj.stackMemoryCache.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition | 0) | 0);
 			}
 		}
@@ -907,10 +907,10 @@ ARMInstructionSet.prototype.STMDBW = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
-		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				currentAddress = (currentAddress - 4) | 0;
+				currentAddress = ((currentAddress | 0) - 4) | 0;
 				parentObj.stackMemoryCache.memoryWrite32(currentAddress >>> 0, operand2OP(parentObj, rListPosition >>> 0) | 0);
 			}
 		}
@@ -928,7 +928,7 @@ ARMInstructionSet.prototype.LDMIA = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load register(s) from memory:
-		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
+		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				operand2OP(parentObj, rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(currentAddress >>> 0) | 0);
@@ -947,7 +947,7 @@ ARMInstructionSet.prototype.LDMIAW = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load register(s) from memory:
-		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
+		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				operand2OP(parentObj, rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(currentAddress >>> 0) | 0);
@@ -968,11 +968,11 @@ ARMInstructionSet.prototype.LDMDA = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load register(s) from memory:
-		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				operand2OP(parentObj, rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(currentAddress >>> 0) | 0);
-				currentAddress = (currentAddress - 4) | 0;
+				currentAddress = ((currentAddress | 0) - 4) | 0;
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -987,11 +987,11 @@ ARMInstructionSet.prototype.LDMDAW = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load register(s) from memory:
-		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				operand2OP(parentObj, rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(currentAddress >>> 0) | 0);
-				currentAddress = (currentAddress - 4) | 0;
+				currentAddress = ((currentAddress | 0) - 4) | 0;
 			}
 		}
 		//Store the updated base address back into register:
@@ -1008,7 +1008,7 @@ ARMInstructionSet.prototype.LDMIB = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load register(s) from memory:
-		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
+		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				currentAddress = ((currentAddress | 0) + 4) | 0;
@@ -1027,7 +1027,7 @@ ARMInstructionSet.prototype.LDMIBW = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load register(s) from memory:
-		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = (rListPosition + 1) | 0) {
+		for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
 				currentAddress = ((currentAddress | 0) + 4) | 0;
@@ -1048,10 +1048,10 @@ ARMInstructionSet.prototype.LDMDB = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load register(s) from memory:
-		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				currentAddress = (currentAddress - 4) | 0;
+				currentAddress = ((currentAddress | 0) - 4) | 0;
 				operand2OP(parentObj, rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(currentAddress >>> 0) | 0);
 			}
 		}
@@ -1067,10 +1067,10 @@ ARMInstructionSet.prototype.LDMDBW = function (parentObj, operand2OP) {
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load register(s) from memory:
-		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = (rListPosition - 1) | 0) {
+		for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				currentAddress = (currentAddress - 4) | 0;
+				currentAddress = ((currentAddress | 0) - 4) | 0;
 				operand2OP(parentObj, rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(currentAddress >>> 0) | 0);
 			}
 		}
