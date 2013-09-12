@@ -88,11 +88,10 @@ THUMBInstructionSet.prototype.writePC = function (data) {
 	//Update the program counter to branch address:
 	this.CPUCore.branch(data & -2);
 }
-THUMBInstructionSet.prototype.offsetPC = function (data) {
-	data = data | 0;
+THUMBInstructionSet.prototype.offsetPC = function () {
     //We performed a branch:
 	//Update the program counter to branch address:
-	this.CPUCore.branch(((this.readPC() | 0) + ((data << 24) >> 23)) | 0);
+	this.CPUCore.branch(((this.readPC() | 0) + ((this.execute << 24) >> 23)) | 0);
 }
 THUMBInstructionSet.prototype.getLR = function () {
 	//Read back the value for the LR register upon Exception:
@@ -703,85 +702,85 @@ THUMBInstructionSet.prototype.LDMIA = function (parentObj) {
 THUMBInstructionSet.prototype.BEQ = function (parentObj) {
 	//Branch if EQual:
 	if (parentObj.CPUCore.CPSRZero) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BNE = function (parentObj) {
 	//Branch if Not Equal:
 	if (!parentObj.CPUCore.CPSRZero) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BCS = function (parentObj) {
 	//Branch if Carry Set:
 	if (parentObj.CPUCore.CPSRCarry) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BCC = function (parentObj) {
 	//Branch if Carry Clear:
 	if (!parentObj.CPUCore.CPSRCarry) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BMI = function (parentObj) {
 	//Branch if Negative Set:
 	if (parentObj.CPUCore.CPSRNegative) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BPL = function (parentObj) {
 	//Branch if Negative Clear:
 	if (!parentObj.CPUCore.CPSRNegative) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BVS = function (parentObj) {
 	//Branch if Overflow Set:
 	if (parentObj.CPUCore.CPSROverflow) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BVC = function (parentObj) {
 	//Branch if Overflow Clear:
 	if (!parentObj.CPUCore.CPSROverflow) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BHI = function (parentObj) {
 	//Branch if Carry & Non-Zero:
 	if (parentObj.CPUCore.CPSRCarry && !parentObj.CPUCore.CPSRZero) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BLS = function (parentObj) {
 	//Branch if Carry Clear or is Zero Set:
 	if (!parentObj.CPUCore.CPSRCarry || parentObj.CPUCore.CPSRZero) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BGE = function (parentObj) {
 	//Branch if Negative equal to Overflow
 	if (parentObj.CPUCore.CPSRNegative == parentObj.CPUCore.CPSROverflow) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BLT = function (parentObj) {
 	//Branch if Negative NOT equal to Overflow
 	if (parentObj.CPUCore.CPSRNegative != parentObj.CPUCore.CPSROverflow) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BGT = function (parentObj) {
 	//Branch if Zero Clear and Negative equal to Overflow
 	if (!parentObj.CPUCore.CPSRZero && parentObj.CPUCore.CPSRNegative == parentObj.CPUCore.CPSROverflow) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.BLE = function (parentObj) {
 	//Branch if Zero Set or Negative NOT equal to Overflow
 	if (parentObj.CPUCore.CPSRZero || parentObj.CPUCore.CPSRNegative != parentObj.CPUCore.CPSROverflow) {
-		parentObj.offsetPC(parentObj.execute | 0);
+		parentObj.offsetPC();
 	}
 }
 THUMBInstructionSet.prototype.SWI = function (parentObj) {
