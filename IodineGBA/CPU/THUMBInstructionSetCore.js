@@ -190,47 +190,47 @@ THUMBInstructionSet.prototype.MOVimm8 = function (parentObj) {
 	//Get the 8-bit value to move into the register:
 	var result = parentObj.execute & 0xFF;
 	parentObj.CPUCore.CPSRNegative = false;
-	parentObj.CPUCore.CPSRZero = (result == 0);
+	parentObj.CPUCore.CPSRZero = ((result | 0) == 0);
 	//Update destination register:
-	parentObj.registers[(parentObj.execute >> 8) & 0x7] = result | 0;
+	parentObj.writeLowRegister((parentObj.execute >> 8) | 0, result | 0);
 }
 THUMBInstructionSet.prototype.CMPimm8 = function (parentObj) {
 	//Compare an 8-bit immediate value with a register:
-	var operand1 = parentObj.registers[(parentObj.execute >> 8) & 0x7] | 0;
-	var operand2 = parentObj.execute & 0xFF;
+	var operand1 = parentObj.readLowRegister((parentObj.execute >> 8) | 0) | 0;
+    var operand2 = parentObj.execute & 0xFF;
 	parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.ADDimm8 = function (parentObj) {
 	//Add an 8-bit immediate value with a register:
-	var operand1 = parentObj.registers[(parentObj.execute >> 8) & 0x7] | 0;
+	var operand1 = parentObj.readLowRegister((parentObj.execute >> 8) | 0) | 0;
 	var operand2 = parentObj.execute & 0xFF;
-	parentObj.registers[(parentObj.execute >> 8) & 0x7] = parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0;
+    parentObj.writeLowRegister(parentObj.execute >> 8, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.SUBimm8 = function (parentObj) {
 	//Subtract an 8-bit immediate value from a register:
-	var operand1 = parentObj.registers[(parentObj.execute >> 8) & 0x7] | 0;
+	var operand1 = parentObj.readLowRegister((parentObj.execute >> 8) | 0) | 0;
 	var operand2 = parentObj.execute & 0xFF;
-	parentObj.registers[(parentObj.execute >> 8) & 0x7] = parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0;
+    parentObj.writeLowRegister(parentObj.execute >> 8, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.AND = function (parentObj) {
-	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
-	var destination = parentObj.registers[parentObj.execute & 0x7] | 0;
+	var source = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
+	var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
 	//Perform bitwise AND:
 	var result = source & destination;
-	parentObj.CPUCore.CPSRNegative = (result < 0);
-	parentObj.CPUCore.CPSRZero = (result == 0);
+	parentObj.CPUCore.CPSRNegative = ((result | 0) < 0);
+	parentObj.CPUCore.CPSRZero = ((result | 0) == 0);
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = result | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, result | 0);
 }
 THUMBInstructionSet.prototype.EOR = function (parentObj) {
-	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
-	var destination = parentObj.registers[parentObj.execute & 0x7] | 0;
+	var source = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
+	var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
 	//Perform bitwise EOR:
 	var result = source ^ destination;
-	parentObj.CPUCore.CPSRNegative = (result < 0);
-	parentObj.CPUCore.CPSRZero = (result == 0);
+	parentObj.CPUCore.CPSRNegative = ((result | 0) < 0);
+	parentObj.CPUCore.CPSRZero = ((result | 0) == 0);
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = result | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, result | 0);
 }
 THUMBInstructionSet.prototype.LSL = function (parentObj) {
 	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] & 0xFF;
