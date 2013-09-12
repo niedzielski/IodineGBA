@@ -34,7 +34,7 @@ ARMInstructionSet.prototype.initialize = function () {
 }
 ARMInstructionSet.prototype.executeIteration = function () {
 	//Push the new fetch access:
-	this.fetch = this.wait.CPUGetOpcode32(this.registers[15] | 0) | 0;
+	this.fetch = this.wait.CPUGetOpcode32(this.readPC() | 0) | 0;
 	//Execute Conditional Instruction:
 	this.executeARM();
 	//Update the pipelining state:
@@ -46,7 +46,8 @@ ARMInstructionSet.prototype.executeARM = function () {
 	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
         //Check the condition code:
 		if (this.conditionCodeTest()) {
-			this.instructionMapReduced[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]();
+            var instruction = ((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF);
+			this.instructionMapReduced[instruction & 0xFFF]();
 		}
 	}
 }
@@ -93,7 +94,7 @@ ARMInstructionSet.prototype.conditionCodeTest = function () {
 	}
 }
 ARMInstructionSet.prototype.getLR = function () {
-	return ((this.readRegister(15) | 0) - 4) | 0;
+	return ((this.readPC(15) | 0) - 4) | 0;
 }
 ARMInstructionSet.prototype.getIRQLR = function () {
 	return this.getLR() | 0;
@@ -202,6 +203,10 @@ ARMInstructionSet.prototype.baseRegisterWrite = function (address, data, userMod
     else {
         this.guardUserRegisterWrite(address | 0, data | 0);
     }
+}
+ARMInstructionSet.prototype.readPC = function () {
+	//PC register read:
+    return this.registers[0xF] | 0;
 }
 ARMInstructionSet.prototype.readRegister = function (address) {
 	//Unguarded register read:
