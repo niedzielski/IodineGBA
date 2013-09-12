@@ -411,76 +411,76 @@ THUMBInstructionSet.prototype.MVN = function (parentObj) {
 	parentObj.writeLowRegister(parentObj.execute | 0, source | 0);
 }
 THUMBInstructionSet.prototype.ADDH_LL = function (parentObj) {
-	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
-	var destination = parentObj.registers[parentObj.execute & 0x7] | 0;
+	var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
+    var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
 	//Perform Addition:
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = (source + destination) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, ((operand1 | 0) + (operand2 | 0)) | 0);
 }
 THUMBInstructionSet.prototype.ADDH_LH = function (parentObj) {
-	var source = parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)] | 0;
-	var destination = parentObj.registers[parentObj.execute & 0x7] | 0;
+    var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
+    var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
 	//Perform Addition:
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = (source + destination) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, ((operand1 | 0) + (operand2 | 0)) | 0);
 }
 THUMBInstructionSet.prototype.ADDH_HL = function (parentObj) {
-	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
-	var destination = parentObj.registers[0x8 | (parentObj.execute & 0x7)] | 0;
+	var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
+    var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
 	//Perform Addition:
 	//Update destination register:
-	parentObj.guardHighRegisterWrite((source + destination) | 0);
+	parentObj.guardHighRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
 }
 THUMBInstructionSet.prototype.ADDH_HH = function (parentObj) {
-	var source = parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)] | 0;
-	var destination = parentObj.registers[0x8 | (parentObj.execute & 0x7)] | 0;
-	//Perform Addition:
+	var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
+	var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
+    //Perform Addition:
 	//Update destination register:
-	parentObj.guardHighRegisterWrite((source + destination) | 0);
+	parentObj.guardHighRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
 }
 THUMBInstructionSet.prototype.CMPH_LL = function (parentObj) {
 	//Compare two registers:
-	var operand1 = parentObj.registers[parentObj.execute & 0x7] | 0;
-	var operand2 = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+	var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
+    var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
 	parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.CMPH_LH = function (parentObj) {
 	//Compare two registers:
-	var operand1 = parentObj.registers[parentObj.execute & 0x7] | 0;
-	var operand2 = parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)] | 0;
+	var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
+    var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
 	parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.CMPH_HL = function (parentObj) {
 	//Compare two registers:
-	var operand1 = parentObj.registers[0x8 | (parentObj.execute & 0x7)] | 0;
-	var operand2 = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+	var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
+    var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
 	parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.CMPH_HH = function (parentObj) {
 	//Compare two registers:
-	var operand1 = parentObj.registers[0x8 | (parentObj.execute & 0x7)] | 0;
-	var operand2 = parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)] | 0;
+	var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
+    var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
     parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.MOVH_LL = function (parentObj) {
 	//Move a register to another register:
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.readLowRegister(parentObj.execute >> 3) | 0);
 }
 THUMBInstructionSet.prototype.MOVH_LH = function (parentObj) {
 	//Move a register to another register:
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)] | 0;
+    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.readHighRegister(parentObj.execute >> 3) | 0);
 }
 THUMBInstructionSet.prototype.MOVH_HL = function (parentObj) {
 	//Move a register to another register:
-	parentObj.guardHighRegisterWrite(parentObj.registers[(parentObj.execute >> 3) & 0x7]);
+	parentObj.guardHighRegisterWrite(parentObj.readLowRegister(parentObj.execute >> 3) | 0);
 }
 THUMBInstructionSet.prototype.MOVH_HH = function (parentObj) {
 	//Move a register to another register:
-	parentObj.guardHighRegisterWrite(parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)]);
+	parentObj.guardHighRegisterWrite(parentObj.readHighRegister(parentObj.execute >> 3) | 0);
 }
 THUMBInstructionSet.prototype.BX_L = function (parentObj) {
 	//Branch & eXchange:
-	var address = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+	var address = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
 	if ((address & 0x1) == 0) {
 		//Enter ARM mode:
         parentObj.CPUCore.enterARM();
@@ -493,7 +493,7 @@ THUMBInstructionSet.prototype.BX_L = function (parentObj) {
 }
 THUMBInstructionSet.prototype.BX_H = function (parentObj) {
 	//Branch & eXchange:
-	var address = parentObj.registers[0x8 | ((parentObj.execute >> 3) & 0x7)] | 0;
+	var address = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
 	if ((address & 0x1) == 0) {
 		//Enter ARM mode:
 		parentObj.CPUCore.enterARM();
