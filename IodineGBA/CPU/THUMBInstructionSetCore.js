@@ -29,36 +29,6 @@ THUMBInstructionSet.prototype.initialize = function () {
 	this.execute = 0;
 	this.compileInstructionMap();
 }
-THUMBInstructionSet.prototype.guardHighRegisterWrite = function (data) {
-	var address = 0x8 | (this.execute & 0x7);
-	if (address == 15) {
-		//We performed a branch:
-		this.CPUCore.branch(data & -2);
-	}
-	else {
-		//Regular Data Write:
-		this.registers[address | 0] = data | 0;
-	}
-}
-THUMBInstructionSet.prototype.writePC = function (data) {
-	//We performed a branch:
-	//Update the program counter to branch address:
-	this.CPUCore.branch(data & -2);
-}
-THUMBInstructionSet.prototype.offsetPC = function (data) {
-	//We performed a branch:
-	//Update the program counter to branch address:
-	this.CPUCore.branch((this.registers[15] + ((data << 24) >> 23)) | 0);
-}
-THUMBInstructionSet.prototype.getLR = function () {
-	return (this.registers[15] - 2) | 0;
-}
-THUMBInstructionSet.prototype.getIRQLR = function () {
-	return this.registers[15] | 0;
-}
-THUMBInstructionSet.prototype.getCurrentFetchValue = function () {
-	return this.fetch | (this.fetch << 16);
-}
 THUMBInstructionSet.prototype.executeIteration = function () {
 	//Push the new fetch access:
 	this.fetch = this.wait.CPUGetOpcode16(this.registers[15] | 0) | 0;
@@ -78,44 +48,105 @@ THUMBInstructionSet.prototype.incrementProgramCounter = function () {
 	//Increment The Program Counter:
 	this.registers[15] = ((this.registers[15] | 0) + 2) | 0;
 }
+THUMBInstructionSet.prototype.readLowRegister = function (address) {
+	//Low register read:
+    address = address | 0;
+    return this.registers[address & 0x7] | 0;
+}
+THUMBInstructionSet.prototype.readHighRegister = function (address) {
+	//High register read:
+    address = address | 0x8;
+    return this.registers[address & 0xF] | 0;
+}
+THUMBInstructionSet.prototype.writeLowRegister = function (address, data) {
+	//Low register write:
+    address = address | 0;
+    data = data | 0;
+    this.registers[address & 0x7] = data | 0;
+}
+THUMBInstructionSet.prototype.writeRegister = function (address, data) {
+	//Full range register write:
+    address = address | 0;
+    data = data | 0;
+    this.registers[address & 0xF] = data | 0;
+}
+THUMBInstructionSet.prototype.guardHighRegisterWrite = function (data) {
+	data = data | 0;
+    var address = 0x8 | (this.execute & 0x7);
+	if ((address | 0) < 0xF) {
+		//Regular Data Write:
+		this.writeRegister(address | 0, data | 0);
+	}
+	else {
+        //We performed a branch:
+		this.CPUCore.branch(data & -2);
+	}
+}
+THUMBInstructionSet.prototype.writePC = function (data) {
+	data = data | 0;
+    //We performed a branch:
+	//Update the program counter to branch address:
+	this.CPUCore.branch(data & -2);
+}
+THUMBInstructionSet.prototype.offsetPC = function (data) {
+	data = data | 0;
+    //We performed a branch:
+	//Update the program counter to branch address:
+	this.CPUCore.branch(((this.readPC() | 0) + ((data << 24) >> 23)) | 0);
+}
+THUMBInstructionSet.prototype.getLR = function () {
+	//Read back the value for the LR register upon Exception:
+    return ((this.readPC() | 0) - 2) | 0;
+}
+THUMBInstructionSet.prototype.getIRQLR = function () {
+	//Read back the value for the LR register upon IRQ:
+    return this.readPC() | 0;
+}
+THUMBInstructionSet.prototype.readPC = function () {
+	//Read back the current PC:
+    return this.registers[0xF] | 0;
+}
+THUMBInstructionSet.prototype.getCurrentFetchValue = function () {
+	return this.fetch | (this.fetch << 16);
+}
 THUMBInstructionSet.prototype.LSLimm = function (parentObj) {
-	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+	var source = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
 	var offset = (parentObj.execute >> 6) & 0x1F;
-	if (offset > 0) {
+	if ((offset | 0) > 0) {
 		//CPSR Carry is set by the last bit shifted out:
-		parentObj.CPUCore.CPSRCarry = ((source << (offset - 1)) < 0);
+		parentObj.CPUCore.CPSRCarry = ((source << (((offset | 0) - 1) | 0)) < 0);
 		//Perform shift:
-		source <<= offset;
+		source <<= (offset | 0);
 	}
 	//Perform CPSR updates for N and Z (But not V):
-	parentObj.CPUCore.CPSRNegative = (source < 0);
-	parentObj.CPUCore.CPSRZero = (source == 0);
+	parentObj.CPUCore.CPSRNegative = ((source | 0) < 0);
+	parentObj.CPUCore.CPSRZero = ((source | 0) == 0);
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = source | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, source | 0);
 }
 THUMBInstructionSet.prototype.LSRimm = function (parentObj) {
-	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+	var source = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
 	var offset = (parentObj.execute >> 6) & 0x1F;
-	if (offset > 0) {
+	if ((offset | 0) > 0) {
 		//CPSR Carry is set by the last bit shifted out:
-		parentObj.CPUCore.CPSRCarry = (((source >> (offset - 1)) & 0x1) != 0);
+		parentObj.CPUCore.CPSRCarry = (((source >> (((offset | 0) - 1) | 0)) & 0x1) != 0);
 		//Perform shift:
-		source = (source >>> offset) | 0;
+		source = (source >>> (offset | 0)) | 0;
 	}
     else {
-        parentObj.CPUCore.CPSRCarry = (source < 0);
+        parentObj.CPUCore.CPSRCarry = ((source | 0) < 0);
         source = 0;
     }
 	//Perform CPSR updates for N and Z (But not V):
-	parentObj.CPUCore.CPSRNegative = (source < 0);
-	parentObj.CPUCore.CPSRZero = (source == 0);
+	parentObj.CPUCore.CPSRNegative = ((source | 0) < 0);
+	parentObj.CPUCore.CPSRZero = ((source | 0) == 0);
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = source | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, source | 0);
 }
 THUMBInstructionSet.prototype.ASRimm = function (parentObj) {
-	var source = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+	var source = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
 	var offset = (parentObj.execute >> 6) & 0x1F;
-	if (offset > 0) {
+	if ((offset | 0) > 0) {
 		//CPSR Carry is set by the last bit shifted out:
 		parentObj.CPUCore.CPSRCarry = (((source >> (offset - 1)) & 0x1) != 0);
 		//Perform shift:
@@ -129,31 +160,31 @@ THUMBInstructionSet.prototype.ASRimm = function (parentObj) {
 	parentObj.CPUCore.CPSRNegative = (source < 0);
 	parentObj.CPUCore.CPSRZero = (source == 0);
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = source | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, source | 0);
 }
 THUMBInstructionSet.prototype.ADDreg = function (parentObj) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
-	var operand2 = parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0;
+	var operand1 = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
+	var operand2 = parentObj.readLowRegister((parentObj.execute >> 6) | 0) | 0;
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.SUBreg = function (parentObj) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
-	var operand2 = parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0;
+	var operand1 = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
+	var operand2 = parentObj.readLowRegister((parentObj.execute >> 6) | 0) | 0;
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.ADDimm3 = function (parentObj) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+	var operand1 = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
 	var operand2 = (parentObj.execute >> 6) & 0x7;
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.SUBimm3 = function (parentObj) {
-	var operand1 = parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0;
+	var operand1 = parentObj.readLowRegister((parentObj.execute >> 3) | 0) | 0;
 	var operand2 = (parentObj.execute >> 6) & 0x7;
 	//Update destination register:
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.MOVimm8 = function (parentObj) {
 	//Get the 8-bit value to move into the register:
