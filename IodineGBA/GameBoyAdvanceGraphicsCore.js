@@ -324,19 +324,6 @@ GameBoyAdvanceGraphics.prototype.incrementScanLineQueue = function () {
 GameBoyAdvanceGraphics.prototype.isRenderingCheckPreprocess = function () {
 	this.isRendering = (!this.forcedBlank && (this.currentScanLine | 0) < 160 && !this.inHBlank);
 }
-GameBoyAdvanceGraphics.prototype.OAMLockedCycles = function () {
-	if (!this.forcedBlank && (this.currentScanLine | 0) < 160) {
-		if (this.HBlankIntervalFree) {
-			//Delay OAM access until horizontal blank:
-			return this.nextHBlankEventTime() | 0;
-		}
-		else {
-			//Delay OAM access until vertical blank:
-			return this.nextVBlankEventTime() | 0;
-		}
-	}
-	return 0;
-}
 GameBoyAdvanceGraphics.prototype.compositorPreprocess = function () {
 	this.compositor.preprocess(this.WINEffectsOutside || (!this.displayObjectWindowFlag && !this.displayWindow1Flag && !this.displayWindow0Flag));
 }

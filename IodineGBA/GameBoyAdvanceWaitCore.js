@@ -437,14 +437,14 @@ GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.OAMAccess8 = function () {
-    this.IOCore.updateCore(((this.IOCore.gfx.OAMLockedCycles() | 0) + 1) | 0);
+    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.OAMAccess16 = function () {
-    this.IOCore.updateCore(((this.IOCore.gfx.OAMLockedCycles() | 0) + 1) | 0);
+    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
-    this.IOCore.updateCore(((this.IOCore.gfx.OAMLockedCycles() | 0) + 1) | 0);
+    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
 	this.nonSequential = false;
 }

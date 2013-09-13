@@ -228,10 +228,14 @@ GameBoyAdvanceMemory.prototype.writeVRAM8 = function (parentObj, address, data) 
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess8();
     if ((address & 0x10000) != 0) {
-		parentObj.gfx.writeVRAM(address & 0x17FFF, data | 0);
+        if ((address & 0x17FFF) < 0x14000 && (parentObj.gfx.BGMode | 0) >= 3) {
+            parentObj.gfx.writeVRAM(address & 0x17FFE, data | 0);
+            parentObj.gfx.writeVRAM((address | 1) & 0x17FFF, data | 0);
+        }
 	}
 	else {
-		parentObj.gfx.writeVRAM(address & 0xFFFF, data | 0);
+		parentObj.gfx.writeVRAM(address & 0xFFFE, data | 0);
+        parentObj.gfx.writeVRAM((address | 1) & 0xFFFF, data | 0);
 	}
 }
 GameBoyAdvanceMemory.prototype.writeVRAM16 = function (parentObj, address, data) {
@@ -288,7 +292,8 @@ GameBoyAdvanceMemory.prototype.writePalette8 = function (parentObj, address, dat
     data = data | 0;
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.VRAMAccess8();
-    parentObj.gfx.writePalette(address & 0x3FF, data | 0);
+    parentObj.gfx.writePalette(address & 0x3FE, data | 0);
+    parentObj.gfx.writePalette((address | 1) & 0x3FF, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writePalette16 = function (parentObj, address, data) {
 	address = address | 0;
