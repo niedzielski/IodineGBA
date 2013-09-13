@@ -64,12 +64,6 @@ THUMBInstructionSet.prototype.writeLowRegister = function (address, data) {
     data = data | 0;
     this.registers[address & 0x7] = data | 0;
 }
-THUMBInstructionSet.prototype.writeRegister = function (address, data) {
-	//Full range register write:
-    address = address | 0;
-    data = data | 0;
-    this.registers[address & 0xF] = data | 0;
-}
 THUMBInstructionSet.prototype.guardHighRegisterWrite = function (data) {
 	data = data | 0;
     var address = 0x8 | (this.execute & 0x7);
@@ -79,7 +73,7 @@ THUMBInstructionSet.prototype.guardHighRegisterWrite = function (data) {
 	}
 	else {
         //Regular Data Write:
-		this.writeRegister(address | 0, data | 0);
+        this.registers[address & 0xF] = data | 0;
 	}
 }
 THUMBInstructionSet.prototype.writeSP = function (data) {
