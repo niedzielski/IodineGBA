@@ -28,6 +28,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
 	this.VRAMOneDimensional = false;
 	this.forcedBlank = true;
     this.isRendering = false;
+    this.isOAMRendering = false;
 	this.displayBG0 = false;
 	this.displayBG1 = false;
 	this.displayBG2 = false;
@@ -322,7 +323,9 @@ GameBoyAdvanceGraphics.prototype.incrementScanLineQueue = function () {
 	}
 }
 GameBoyAdvanceGraphics.prototype.isRenderingCheckPreprocess = function () {
-	this.isRendering = (!this.forcedBlank && (this.currentScanLine | 0) < 160 && !this.inHBlank);
+    var isInVisibleLines = (!this.forcedBlank && (this.currentScanLine | 0) < 160);
+	this.isRendering = (isInVisibleLines && !this.inHBlank);
+    this.isOAMRendering = (isInVisibleLines && (!this.inHBlank || !this.HBlankIntervalFree));
 }
 GameBoyAdvanceGraphics.prototype.compositorPreprocess = function () {
 	this.compositor.preprocess(this.WINEffectsOutside || (!this.displayObjectWindowFlag && !this.displayWindow1Flag && !this.displayWindow0Flag));

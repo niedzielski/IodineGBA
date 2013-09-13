@@ -425,26 +425,56 @@ GameBoyAdvanceWait.prototype.SRAMAccess = function () {
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess8 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
+    if (!this.IOCore.gfx.isRendering) {
+        this.IOCore.updateCoreSingle();
+    }
+    else {
+        this.IOCore.updateCoreTwice();
+    }
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess16 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
+    if (!this.IOCore.gfx.isRendering) {
+        this.IOCore.updateCoreSingle();
+    }
+    else {
+        this.IOCore.updateCoreTwice();
+    }
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 4 : 2);
+    if (!this.IOCore.gfx.isRendering) {
+        this.IOCore.updateCoreTwice();
+    }
+    else {
+        this.IOCore.updateCore(4);
+    }
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.OAMAccess8 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
+    if (!this.IOCore.gfx.isOAMRendering) {
+        this.IOCore.updateCoreSingle();
+    }
+    else {
+       this.IOCore.updateCoreTwice();
+    }
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.OAMAccess16 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
+    if (!this.IOCore.gfx.isOAMRendering) {
+        this.IOCore.updateCoreSingle();
+    }
+    else {
+        this.IOCore.updateCoreTwice();
+    }
 	this.nonSequential = false;
 }
 GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
-    this.IOCore.updateCore((this.IOCore.gfx.isRendering) ? 2 : 1);
+    if (!this.IOCore.gfx.isOAMRendering) {
+        this.IOCore.updateCoreSingle();
+    }
+    else {
+        this.IOCore.updateCoreTwice();
+    }
 	this.nonSequential = false;
 }
