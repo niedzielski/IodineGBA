@@ -20,9 +20,8 @@ function ARMInstructionSet(CPUCore) {
 	this.initialize();
 }
 ARMInstructionSet.prototype.initialize = function () {
-	this.IOCore = this.CPUCore.IOCore;
-    this.memory = this.IOCore.memory;
-	this.wait = this.IOCore.wait;
+    this.memory = this.CPUCore.memory;
+	this.wait = this.CPUCore.wait;
 	this.registers = this.CPUCore.registers;
     this.registersUSR = this.CPUCore.registersUSR;
 	this.fetch = 0;
