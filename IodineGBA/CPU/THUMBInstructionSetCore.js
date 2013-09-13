@@ -173,17 +173,17 @@ THUMBInstructionSet.prototype.ASRimm = function (parentObj) {
 	var offset = (parentObj.execute >> 6) & 0x1F;
 	if ((offset | 0) > 0) {
 		//CPSR Carry is set by the last bit shifted out:
-		parentObj.CPUCore.CPSRCarry = (((source >> (offset - 1)) & 0x1) != 0);
+		parentObj.CPUCore.CPSRCarry = (((source >> (((offset | 0) - 1) | 0)) & 0x1) != 0);
 		//Perform shift:
 		source >>= offset;
 	}
     else {
-        parentObj.CPUCore.CPSRCarry = (source < 0);
+        parentObj.CPUCore.CPSRCarry = ((source | 0) < 0);
         source >>= 0x1F;
     }
 	//Perform CPSR updates for N and Z (But not V):
-	parentObj.CPUCore.CPSRNegative = (source < 0);
-	parentObj.CPUCore.CPSRZero = (source == 0);
+	parentObj.CPUCore.CPSRNegative = ((source | 0) < 0);
+	parentObj.CPUCore.CPSRZero = ((source | 0) == 0);
 	//Update destination register:
 	parentObj.writeLowRegister(parentObj.execute | 0, source | 0);
 }
@@ -262,12 +262,12 @@ THUMBInstructionSet.prototype.LSL = function (parentObj) {
 	var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
 	//Check to see if we need to update CPSR:
     if ((source | 0) > 0) {
-        if ((source | 0) < 32) {
+        if ((source | 0) < 0x20) {
             //Shift the register data left:
             parentObj.CPUCore.CPSRCarry = ((destination << (((source | 0) - 1) | 0)) < 0);
             destination <<= source;
         }
-        else if ((source | 0) == 32) {
+        else if ((source | 0) == 0x20) {
             //Shift bit 0 into carry:
             parentObj.CPUCore.CPSRCarry = ((destination & 0x1) == 0x1);
             destination = 0;
@@ -289,12 +289,12 @@ THUMBInstructionSet.prototype.LSR = function (parentObj) {
 	var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     //Check to see if we need to update CPSR:
 	if ((source | 0) > 0) {
-        if ((source | 0) < 32) {
+        if ((source | 0) < 0x20) {
             //Shift the register data right logically:
             parentObj.CPUCore.CPSRCarry = (((destination >> (((source | 0) - 1) | 0)) & 0x1) == 0x1);
             destination = (destination >>> (source | 0)) | 0;
         }
-        else if ((source | 0) == 32) {
+        else if ((source | 0) == 0x20) {
             //Shift bit 31 into carry:
             parentObj.CPUCore.CPSRCarry = ((destination | 0) < 0);
             destination = 0;

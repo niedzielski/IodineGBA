@@ -184,6 +184,11 @@ GameBoyAdvanceWait.prototype.CPUInternalCyclePrefetch = function (clocks) {
 		}
 	}
 }
+GameBoyAdvanceWait.prototype.CPUInternalSingleCyclePrefetch = function () {
+    //Clock for idle CPU time:
+	this.IOCore.updateCoreSingle();
+    //Not enough time for prebuffer buffering, so skip it.
+}
 GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 	address = address | 0;
     var data = 0;

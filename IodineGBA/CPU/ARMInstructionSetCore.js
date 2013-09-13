@@ -1089,7 +1089,7 @@ ARMInstructionSet.prototype.SWP = function (parentObj, operand2OP) {
 	var base = parentObj.readRegister((parentObj.execute >> 16) & 0xF) | 0;
 	var data = parentObj.CPUCore.read32(base | 0) | 0;
 	//Clock a cycle for the processing delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	parentObj.CPUCore.write32(base | 0, parentObj.readRegister(parentObj.execute & 0xF) | 0);
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, data | 0);
 }
@@ -1097,7 +1097,7 @@ ARMInstructionSet.prototype.SWPB = function (parentObj, operand2OP) {
 	var base = parentObj.readRegister((parentObj.execute >> 16) & 0xF) | 0;
 	var data = parentObj.CPUCore.read8(base | 0) | 0;
 	//Clock a cycle for the processing delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	parentObj.CPUCore.write8(base | 0, parentObj.readRegister(parentObj.execute & 0xF) | 0);
 	parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, data | 0);
 }
@@ -1139,7 +1139,7 @@ ARMInstructionSet.prototype.lli2 = function (operand) {
 	//Get the register data to be shifted:
 	var register = this.readRegister(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	this.wait.CPUInternalCyclePrefetch(1);
+	this.wait.CPUInternalSingleCyclePrefetch();
 	//Shift the register data left:
 	var shifter = (operand >> 7) & 0x1F;
 	return register << shifter;
@@ -1150,7 +1150,7 @@ ARMInstructionSet.prototype.llis = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.readRegister(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Get the shift amount:
 	var shifter = (operand >> 7) & 0x1F;
 	//Check to see if we need to update CPSR:
@@ -1167,7 +1167,7 @@ ARMInstructionSet.prototype.llr = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.guardRegisterRead(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Shift the register data left:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	return (shifter < 0x20) ? (register << shifter) : 0;
@@ -1179,17 +1179,17 @@ ARMInstructionSet.prototype.llrs = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.guardRegisterRead(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Get the shift amount:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
-    if (shifter > 0) {
-        if (shifter < 32) {
+    if ((shifter | 0) > 0) {
+        if ((shifter | 0) < 0x20) {
             //Shift the register data left:
-            parentObj.CPUCore.CPSRCarry = ((register << (shifter - 1)) < 0);
+            parentObj.CPUCore.CPSRCarry = ((register << (((shifter | 0) - 1) | 0)) < 0);
             return register << shifter;
         }
-        else if (shifter == 32) {
+        else if ((shifter | 0) == 0x20) {
             //Shift bit 0 into carry:
             parentObj.CPUCore.CPSRCarry = ((register & 0x1) == 0x1);
         }
@@ -1212,7 +1212,7 @@ ARMInstructionSet.prototype.lri2 = function (operand) {
 	//Get the register data to be shifted:
 	var register = this.readRegister(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	this.wait.CPUInternalCyclePrefetch(1);
+	this.wait.CPUInternalSingleCyclePrefetch();
 	//Shift the register data right logically:
 	var shifter = (operand >> 7) & 0x1F;
     if (shifter == 0) {
@@ -1227,7 +1227,7 @@ ARMInstructionSet.prototype.lris = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.readRegister(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Get the shift amount:
 	var shifter = (operand >> 7) & 0x1F;
 	//Check to see if we need to update CPSR:
@@ -1248,7 +1248,7 @@ ARMInstructionSet.prototype.lrr = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.guardRegisterRead(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Shift the register data right logically:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	return (shifter < 0x20) ? ((register >>> shifter) | 0) : 0;
@@ -1260,19 +1260,19 @@ ARMInstructionSet.prototype.lrrs = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.guardRegisterRead(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Get the shift amount:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
-	if (shifter > 0) {
-        if (shifter < 32) {
+	if ((shifter | 0) > 0) {
+        if ((shifter | 0) < 0x20) {
             //Shift the register data right logically:
-            parentObj.CPUCore.CPSRCarry = (((register >> (shifter - 1)) & 0x1) == 0x1);
-            return (register >>> shifter) | 0;
+            parentObj.CPUCore.CPSRCarry = (((register >> (((shifter | 0) - 1) | 0)) & 0x1) == 0x1);
+            return (register >>> (shifter | 0)) | 0;
         }
-        else if (shifter == 32) {
+        else if ((shifter | 0) == 0x20) {
             //Shift bit 31 into carry:
-            parentObj.CPUCore.CPSRCarry = (register < 0);
+            parentObj.CPUCore.CPSRCarry = ((register | 0) < 0);
         }
         else {
             //Everything Zero'd:
@@ -1293,7 +1293,7 @@ ARMInstructionSet.prototype.ari2 = function (operand) {
 	//Get the register data to be shifted:
 	var register = this.readRegister(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	this.wait.CPUInternalCyclePrefetch(1);
+	this.wait.CPUInternalSingleCyclePrefetch();
 	//Get the shift amount:
 	var shifter = (operand >> 7) & 0x1F;
 	if (shifter == 0) {
@@ -1309,7 +1309,7 @@ ARMInstructionSet.prototype.aris = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.readRegister(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Get the shift amount:
 	var shifter = (operand >> 7) & 0x1F;
 	//Check to see if we need to update CPSR:
@@ -1331,7 +1331,7 @@ ARMInstructionSet.prototype.arr = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.guardRegisterRead(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Shift the register data right:
 	return register >> Math.min(parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF, 0x1F);
 }
@@ -1342,19 +1342,19 @@ ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.guardRegisterRead(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Get the shift amount:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
-	if (shifter > 0) {
-        if (shifter < 32) {
+	if ((shifter | 0) > 0) {
+        if ((shifter | 0) < 0x20) {
             //Shift the register data right arithmetically:
-            parentObj.CPUCore.CPSRCarry = (((register >> (shifter - 1)) & 0x1) == 0x1);
+            parentObj.CPUCore.CPSRCarry = (((register >> (((shifter | 0) - 1) | 0)) & 0x1) == 0x1);
             return register >> shifter;
         }
         else {
             //Set all bits with bit 31:
-            parentObj.CPUCore.CPSRCarry = (register < 0);
+            parentObj.CPUCore.CPSRCarry = ((register | 0) < 0);
             return register >> 0x1F;
         }
     }
@@ -1371,7 +1371,7 @@ ARMInstructionSet.prototype.rri2 = function (operand) {
 	//Get the register data to be shifted:
 	var register = this.readRegister(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	this.wait.CPUInternalCyclePrefetch(1);
+	this.wait.CPUInternalSingleCyclePrefetch();
 	//Rotate the register right:
 	var shifter = (operand >> 7) & 0x1F;
     if (shifter > 0) {
@@ -1390,7 +1390,7 @@ ARMInstructionSet.prototype.rris = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.readRegister(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Rotate the register right:
 	var shifter = (operand >> 7) & 0x1F;
     if (shifter > 0) {
@@ -1412,7 +1412,7 @@ ARMInstructionSet.prototype.rrr = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.guardRegisterRead(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Rotate the register right:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0x1F;
 	if (shifter > 0) {
@@ -1429,7 +1429,7 @@ ARMInstructionSet.prototype.rrrs = function (parentObj, operand) {
 	//Get the register data to be shifted:
 	var register = parentObj.guardRegisterRead(registerSelected | 0) | 0;
 	//Clock a cycle for the shift delaying the CPU:
-	parentObj.wait.CPUInternalCyclePrefetch(1);
+	parentObj.wait.CPUInternalSingleCyclePrefetch();
 	//Rotate the register right:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	if (shifter > 0) {

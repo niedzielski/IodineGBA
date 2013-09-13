@@ -526,7 +526,7 @@ GameBoyAdvanceMemory.prototype.readBIOS32Slow = function (parentObj, address) {
 			parentObj.lastBIOSREAD[0] = parentObj.cpu.registers[15] & 0xFF;
 			parentObj.lastBIOSREAD[1] = (parentObj.cpu.registers[15] >> 8) & 0xFF;
 			parentObj.lastBIOSREAD[2] = (parentObj.cpu.registers[15] >> 16) & 0xFF;
-			parentObj.lastBIOSREAD[3] = (parentObj.cpu.registers[15] >> 32) & 0xFF;
+			parentObj.lastBIOSREAD[3] = (parentObj.cpu.registers[15] >> 24) & 0xFF;
             return parentObj.BIOS[address] | (parentObj.BIOS[address | 1] << 8) | (parentObj.BIOS[address | 2] << 16)  | (parentObj.BIOS[address | 3] << 24);
 		}
 		else {
