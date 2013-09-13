@@ -20,13 +20,12 @@ function THUMBInstructionSet(CPUCore) {
 	this.initialize();
 }
 THUMBInstructionSet.prototype.initialize = function () {
-	this.IOCore = this.CPUCore.IOCore;
-    this.memory = this.IOCore.memory;
-	this.wait = this.IOCore.wait;
+	this.wait = this.CPUCore.wait;
 	this.registers = this.CPUCore.registers;
 	this.fetch = 0;
 	this.decode = 0;
 	this.execute = 0;
+    this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.CPUCore.memory);
 	this.compileInstructionMap();
 }
 THUMBInstructionSet.prototype.executeIteration = function () {
@@ -637,7 +636,7 @@ THUMBInstructionSet.prototype.PUSH = function (parentObj) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push register onto the stack:
 				parentObj.SPDecrementWord();
-				parentObj.memory.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
+				parentObj.stackMemoryCache.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -649,13 +648,13 @@ THUMBInstructionSet.prototype.PUSHlr = function (parentObj) {
 	parentObj.wait.NonSequentialBroadcast();
 	//Push link register onto the stack:
 	parentObj.SPDecrementWord();
-	parentObj.IOCore.memory.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLR() | 0);
+	parentObj.stackMemoryCache.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLR() | 0);
 	//Push register(s) onto the stack:
 	for (var rListPosition = 7; (rListPosition | 0) > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 		if ((parentObj.execute & (1 << rListPosition)) != 0) {
 			//Push register onto the stack:
 			parentObj.SPDecrementWord();
-			parentObj.memory.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
+			parentObj.stackMemoryCache.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
 		}
 	}
 	//Updating the address bus back to PC fetch:
@@ -670,7 +669,7 @@ THUMBInstructionSet.prototype.POP = function (parentObj) {
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//POP stack into a register:
-                parentObj.writeLowRegister(rListPosition | 0, parentObj.memory.memoryRead32(parentObj.readSP() >>> 0) | 0);
+                parentObj.writeLowRegister(rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(parentObj.readSP() >>> 0) | 0);
                 parentObj.SPIncrementWord();
 			}
 		}
@@ -685,12 +684,12 @@ THUMBInstructionSet.prototype.POPpc = function (parentObj) {
 	for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
 		if ((parentObj.execute & (1 << rListPosition)) != 0) {
 			//POP stack into a register:
-			parentObj.writeLowRegister(rListPosition | 0, parentObj.memory.memoryRead32(parentObj.readSP() >>> 0) | 0);
+			parentObj.writeLowRegister(rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(parentObj.readSP() >>> 0) | 0);
             parentObj.SPIncrementWord();
 		}
 	}
 	//POP stack into the program counter (r15):
-	parentObj.writePC(parentObj.memory.memoryRead32(parentObj.readSP() >>> 0) | 0);
+	parentObj.writePC(parentObj.stackMemoryCache.memoryRead32(parentObj.readSP() >>> 0) | 0);
 	parentObj.SPIncrementWord();
 	//Updating the address bus back to PC fetch:
 	parentObj.wait.NonSequentialBroadcast();
@@ -706,7 +705,7 @@ THUMBInstructionSet.prototype.STMIA = function (parentObj) {
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				parentObj.memory.memoryWrite32(currentAddress >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
+				parentObj.stackMemoryCache.memoryWrite32(currentAddress >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
 				currentAddress = ((currentAddress | 0) + 4) | 0;
 			}
 		}
@@ -727,7 +726,7 @@ THUMBInstructionSet.prototype.LDMIA = function (parentObj) {
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				parentObj.writeLowRegister(rListPosition | 0, parentObj.memory.memoryRead32(currentAddress >>> 0) | 0);
+				parentObj.writeLowRegister(rListPosition | 0, parentObj.stackMemoryCache.memoryRead32(currentAddress >>> 0) | 0);
 				currentAddress = ((currentAddress | 0) + 4) | 0;
 			}
 		}
