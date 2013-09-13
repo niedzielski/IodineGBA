@@ -82,6 +82,24 @@ THUMBInstructionSet.prototype.guardHighRegisterWrite = function (data) {
 		this.writeRegister(address | 0, data | 0);
 	}
 }
+THUMBInstructionSet.prototype.writeSP = function (data) {
+	//Update the stack pointer:
+    data = data | 0;
+    this.registers[0xD] = data | 0;
+}
+THUMBInstructionSet.prototype.SPDecrementWord = function () {
+    //Decrement the stack pointer by one word:
+    this.registers[0xD] = ((this.registers[0xD] | 0) - 4) | 0;
+}
+THUMBInstructionSet.prototype.SPIncrementWord = function () {
+    //Increment the stack pointer by one word:
+    this.registers[0xD] = ((this.registers[0xD] | 0) + 4) | 0;
+}
+THUMBInstructionSet.prototype.writeLR = function (data) {
+	//Update the link register:
+    data = data | 0;
+    this.registers[0xE] = data | 0;
+}
 THUMBInstructionSet.prototype.writePC = function (data) {
 	data = data | 0;
     //We performed a branch:
@@ -100,6 +118,14 @@ THUMBInstructionSet.prototype.getLR = function () {
 THUMBInstructionSet.prototype.getIRQLR = function () {
 	//Read back the value for the LR register upon IRQ:
     return this.readPC() | 0;
+}
+THUMBInstructionSet.prototype.readSP = function () {
+	//Read back the current SP:
+    return this.registers[0xD] | 0;
+}
+THUMBInstructionSet.prototype.readLR = function () {
+	//Read back the current LR:
+    return this.registers[0xE] | 0;
 }
 THUMBInstructionSet.prototype.readPC = function () {
 	//Read back the current PC:
@@ -505,88 +531,106 @@ THUMBInstructionSet.prototype.BX_H = function (parentObj) {
 }
 THUMBInstructionSet.prototype.LDRPC = function (parentObj) {
 	//PC-Relative Load
-	var result = parentObj.CPUCore.read32(((parentObj.registers[15] & -3) + ((parentObj.execute & 0xFF) << 2)) | 0) | 0;
-	parentObj.registers[(parentObj.execute >> 8) & 0x7] = result | 0;
+	var data = parentObj.CPUCore.read32(((parentObj.readPC() & -3) + ((parentObj.execute & 0xFF) << 2)) | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute >> 8, data | 0);
 }
 THUMBInstructionSet.prototype.STRreg = function (parentObj) {
 	//Store Word From Register
-	parentObj.CPUCore.write32(((parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0, parentObj.registers[parentObj.execute & 0x7] | 0);
+    var address = ((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0;
+	parentObj.CPUCore.write32(address | 0, parentObj.readLowRegister(parentObj.execute | 0) | 0);
 }
 THUMBInstructionSet.prototype.STRHreg = function (parentObj) {
 	//Store Hald-Word From Register
-	parentObj.CPUCore.write16(((parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0, parentObj.registers[parentObj.execute & 0x7] | 0);
+    var address = ((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0;
+	parentObj.CPUCore.write16(address | 0, parentObj.readLowRegister(parentObj.execute | 0) | 0);
 }
 THUMBInstructionSet.prototype.STRBreg = function (parentObj) {
 	//Store Byte From Register
-	parentObj.CPUCore.write8(((parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0, parentObj.registers[parentObj.execute & 0x7] | 0);
+    var address = ((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0;
+	parentObj.CPUCore.write8(address | 0, parentObj.readLowRegister(parentObj.execute | 0) | 0);
 }
 THUMBInstructionSet.prototype.LDRSBreg = function (parentObj) {
 	//Load Signed Byte Into Register
-	parentObj.registers[parentObj.execute & 0x7] = (parentObj.CPUCore.read8(((parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0) << 24) >> 24;
+    var data = (parentObj.CPUCore.read8(((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0) << 24) >> 24;
+	parentObj.writeLowRegister(parentObj.execute | 0, data | 0);
 }
 THUMBInstructionSet.prototype.LDRreg = function (parentObj) {
 	//Load Word Into Register
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.read32(((parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0) | 0;
+	var data = parentObj.CPUCore.read32(((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0) | 0;
+    parentObj.writeLowRegister(parentObj.execute | 0, data | 0);
 }
 THUMBInstructionSet.prototype.LDRHreg = function (parentObj) {
 	//Load Half-Word Into Register
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.read16(((parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0) | 0;
+    var data = parentObj.CPUCore.read16(((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0) | 0;
+    parentObj.writeLowRegister(parentObj.execute | 0, data | 0);
 }
 THUMBInstructionSet.prototype.LDRBreg = function (parentObj) {
 	//Load Byte Into Register
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.read8(((parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0) | 0;
+    var data = parentObj.CPUCore.read8(((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0) | 0;
+    parentObj.writeLowRegister(parentObj.execute | 0, data | 0);
 }
 THUMBInstructionSet.prototype.LDRSHreg = function (parentObj) {
 	//Load Signed Half-Word Into Register
-	parentObj.registers[parentObj.execute & 0x7] = (parentObj.CPUCore.read16(((parentObj.registers[(parentObj.execute >> 6) & 0x7] | 0) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0) << 16) >> 16;
+    var data = (parentObj.CPUCore.read16(((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0) << 16) >> 16;
+	parentObj.writeLowRegister(parentObj.execute | 0, data | 0);
 }
 THUMBInstructionSet.prototype.STRimm5 = function (parentObj) {
 	//Store Word From Register
-	parentObj.CPUCore.write32(((((parentObj.execute >> 6) & 0x1F) << 2) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0, parentObj.registers[parentObj.execute & 0x7] | 0);
+    var address = ((((parentObj.execute >> 6) & 0x1F) << 2) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0;
+	parentObj.CPUCore.write32(address | 0, parentObj.readLowRegister(parentObj.execute | 0) | 0);
 }
 THUMBInstructionSet.prototype.LDRimm5 = function (parentObj) {
 	//Load Word Into Register
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.read32(((((parentObj.execute >> 6) & 0x1F) << 2) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0) | 0;
+    var data = parentObj.CPUCore.read32(((((parentObj.execute >> 6) & 0x1F) << 2) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, data | 0);
 }
 THUMBInstructionSet.prototype.STRBimm5 = function (parentObj) {
 	//Store Byte From Register
-	parentObj.CPUCore.write8((((parentObj.execute >> 6) & 0x1F) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0, parentObj.registers[parentObj.execute & 0x7] | 0);
+    var address = (((parentObj.execute >> 6) & 0x1F) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0;
+	parentObj.CPUCore.write8(address | 0, parentObj.readLowRegister(parentObj.execute | 0) | 0);
 }
 THUMBInstructionSet.prototype.LDRBimm5 = function (parentObj) {
 	//Load Byte Into Register
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.read8((((parentObj.execute >> 6) & 0x1F) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0) | 0;
+    var data = parentObj.CPUCore.read8((((parentObj.execute >> 6) & 0x1F) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, data | 0);
 }
 THUMBInstructionSet.prototype.STRHimm5 = function (parentObj) {
 	//Store Half-Word From Register
-	parentObj.CPUCore.write16(((((parentObj.execute >> 6) & 0x1F) << 1) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0, parentObj.registers[parentObj.execute & 0x7] | 0);
+    var address = ((((parentObj.execute >> 6) & 0x1F) << 1) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0;
+	parentObj.CPUCore.write16(address | 0, parentObj.readLowRegister(parentObj.execute | 0) | 0);
 }
 THUMBInstructionSet.prototype.LDRHimm5 = function (parentObj) {
 	//Load Half-Word Into Register
-	parentObj.registers[parentObj.execute & 0x7] = parentObj.CPUCore.read16(((((parentObj.execute >> 6) & 0x1F) << 1) + (parentObj.registers[(parentObj.execute >> 3) & 0x7] | 0)) | 0) | 0;
+    var data = parentObj.CPUCore.read16(((((parentObj.execute >> 6) & 0x1F) << 1) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute | 0, data | 0);
 }
 THUMBInstructionSet.prototype.STRSP = function (parentObj) {
 	//Store Word From Register
-	parentObj.CPUCore.write32((((parentObj.execute & 0xFF) << 2) + (parentObj.registers[13] | 0)) | 0, parentObj.registers[(parentObj.execute >> 8) & 0x7] | 0);
+    var address = (((parentObj.execute & 0xFF) << 2) + (parentObj.readSP() | 0)) | 0;
+	parentObj.CPUCore.write32(address | 0, parentObj.readLowRegister(parentObj.execute >> 8) | 0);
 }
 THUMBInstructionSet.prototype.LDRSP = function (parentObj) {
 	//Load Word Into Register
-	parentObj.registers[(parentObj.execute >> 8) & 0x7] = parentObj.CPUCore.read32(((parentObj.execute & 0xFF) << 2) + (parentObj.registers[13] | 0)) | 0;
+    var data = parentObj.CPUCore.read32((((parentObj.execute & 0xFF) << 2) + (parentObj.readSP() | 0)) | 0) | 0;
+	parentObj.writeLowRegister(parentObj.execute >> 8, data | 0);
 }
 THUMBInstructionSet.prototype.ADDPC = function (parentObj) {
 	//Add PC With Offset Into Register
-	parentObj.registers[(parentObj.execute >> 8) & 0x7] = ((parentObj.registers[15] & -3) + ((parentObj.execute & 0xFF) << 2)) | 0;
+    var data = ((parentObj.readPC() & -3) + ((parentObj.execute & 0xFF) << 2)) | 0;
+    parentObj.writeLowRegister(parentObj.execute >> 8, data | 0);
 }
 THUMBInstructionSet.prototype.ADDSP = function (parentObj) {
 	//Add SP With Offset Into Register
-	parentObj.registers[(parentObj.execute >> 8) & 0x7] = (((parentObj.execute & 0xFF) << 2) + (parentObj.registers[13] | 0)) | 0;
+    var data = (((parentObj.execute & 0xFF) << 2) + (parentObj.readSP() | 0)) | 0;
+    parentObj.writeLowRegister(parentObj.execute >> 8, data | 0);
 }
 THUMBInstructionSet.prototype.ADDSPimm7 = function (parentObj) {
 	//Add Signed Offset Into SP
 	if ((parentObj.execute & 0x80) != 0) {
-		parentObj.registers[13] = ((parentObj.registers[13] | 0) - ((parentObj.execute & 0x7F) << 2)) | 0;
+		parentObj.writeSP(((parentObj.readSP() | 0) - ((parentObj.execute & 0x7F) << 2)) | 0);
 	}
 	else {
-		parentObj.registers[13] = ((parentObj.registers[13] | 0) + ((parentObj.execute & 0x7F) << 2)) | 0;
+		parentObj.writeSP(((parentObj.readSP() | 0) + ((parentObj.execute & 0x7F) << 2)) | 0);
 	}
 }
 THUMBInstructionSet.prototype.PUSH = function (parentObj) {
@@ -598,8 +642,8 @@ THUMBInstructionSet.prototype.PUSH = function (parentObj) {
 		for (var rListPosition = 7; (rListPosition | 0) > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push register onto the stack:
-				parentObj.registers[13] = ((parentObj.registers[13] | 0) - 4) | 0;
-				parentObj.memory.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[rListPosition & 0x7] | 0);
+				parentObj.SPDecrementWord();
+				parentObj.memory.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -610,14 +654,14 @@ THUMBInstructionSet.prototype.PUSHlr = function (parentObj) {
 	//Updating the address bus away from PC fetch:
 	parentObj.wait.NonSequentialBroadcast();
 	//Push link register onto the stack:
-	parentObj.registers[13] = ((parentObj.registers[13] | 0) - 4) | 0;
-	parentObj.IOCore.memory.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[14] | 0);
+	parentObj.SPDecrementWord();
+	parentObj.IOCore.memory.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLR() | 0);
 	//Push register(s) onto the stack:
 	for (var rListPosition = 7; (rListPosition | 0) > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
 		if ((parentObj.execute & (1 << rListPosition)) != 0) {
 			//Push register onto the stack:
-			parentObj.registers[13] = ((parentObj.registers[13] | 0) - 4) | 0;
-			parentObj.memory.memoryWrite32(parentObj.registers[13] >>> 0, parentObj.registers[rListPosition & 0x7] | 0);
+			parentObj.SPDecrementWord();
+			parentObj.memory.memoryWrite32(parentObj.readSP() >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
 		}
 	}
 	//Updating the address bus back to PC fetch:
@@ -632,8 +676,8 @@ THUMBInstructionSet.prototype.POP = function (parentObj) {
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//POP stack into a register:
-				parentObj.registers[rListPosition & 0x7] = parentObj.memory.memoryRead32(parentObj.registers[13] >>> 0) | 0;
-				parentObj.registers[13] = ((parentObj.registers[13] | 0) + 4) | 0;
+                parentObj.writeLowRegister(rListPosition | 0, parentObj.memory.memoryRead32(parentObj.readSP() >>> 0) | 0);
+                parentObj.SPIncrementWord();
 			}
 		}
 		//Updating the address bus back to PC fetch:
@@ -647,13 +691,13 @@ THUMBInstructionSet.prototype.POPpc = function (parentObj) {
 	for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
 		if ((parentObj.execute & (1 << rListPosition)) != 0) {
 			//POP stack into a register:
-			parentObj.registers[rListPosition & 0x7] = parentObj.memory.memoryRead32(parentObj.registers[13] >>> 0) | 0;
-			parentObj.registers[13] = ((parentObj.registers[13] | 0) + 4) | 0;
+			parentObj.writeLowRegister(rListPosition | 0, parentObj.memory.memoryRead32(parentObj.readSP() >>> 0) | 0);
+            parentObj.SPIncrementWord();
 		}
 	}
 	//POP stack into the program counter (r15):
-	parentObj.writePC(parentObj.memory.memoryRead32(parentObj.registers[13] >>> 0) | 0);
-	parentObj.registers[13] = ((parentObj.registers[13] | 0) + 4) | 0;
+	parentObj.writePC(parentObj.memory.memoryRead32(parentObj.readSP() >>> 0) | 0);
+	parentObj.SPIncrementWord();
 	//Updating the address bus back to PC fetch:
 	parentObj.wait.NonSequentialBroadcast();
 }
@@ -661,19 +705,19 @@ THUMBInstructionSet.prototype.STMIA = function (parentObj) {
 	//Only initialize the STMIA sequence if the register list is non-empty:
 	if ((parentObj.execute & 0xFF) > 0) {
 		//Get the base address:
-		var currentAddress = parentObj.registers[(parentObj.execute >> 8) & 0x7] | 0;
+		var currentAddress = parentObj.readLowRegister(parentObj.execute >> 8) | 0;
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Push register(s) into memory:
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Push a register into memory:
-				parentObj.memory.memoryWrite32(currentAddress >>> 0, parentObj.registers[rListPosition & 0x7] | 0);
+				parentObj.memory.memoryWrite32(currentAddress >>> 0, parentObj.readLowRegister(rListPosition | 0) | 0);
 				currentAddress = ((currentAddress | 0) + 4) | 0;
 			}
 		}
 		//Store the updated base address back into register:
-		parentObj.registers[(parentObj.execute >> 8) & 0x7] = currentAddress | 0;
+        parentObj.writeLowRegister(parentObj.execute >> 8, currentAddress | 0);
 		//Updating the address bus back to PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 	}
@@ -682,19 +726,19 @@ THUMBInstructionSet.prototype.LDMIA = function (parentObj) {
 	//Only initialize the LDMIA sequence if the register list is non-empty:
 	if ((parentObj.execute & 0xFF) > 0) {
 		//Get the base address:
-		var currentAddress = parentObj.registers[(parentObj.execute >> 8) & 0x7] | 0;
+		var currentAddress = parentObj.readLowRegister(parentObj.execute >> 8) | 0;
 		//Updating the address bus away from PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 		//Load  register(s) from memory:
 		for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
 			if ((parentObj.execute & (1 << rListPosition)) != 0) {
 				//Load a register from memory:
-				parentObj.registers[rListPosition & 0x7] = parentObj.memory.memoryRead32(currentAddress >>> 0) | 0;
+				parentObj.writeLowRegister(rListPosition | 0, parentObj.memory.memoryRead32(currentAddress >>> 0) | 0);
 				currentAddress = ((currentAddress | 0) + 4) | 0;
 			}
 		}
 		//Store the updated base address back into register:
-		parentObj.registers[(parentObj.execute >> 8) & 0x7] = currentAddress | 0;
+		parentObj.writeLowRegister(parentObj.execute >> 8, currentAddress | 0);
 		//Updating the address bus back to PC fetch:
 		parentObj.wait.NonSequentialBroadcast();
 	}
@@ -790,23 +834,23 @@ THUMBInstructionSet.prototype.SWI = function (parentObj) {
 THUMBInstructionSet.prototype.B = function (parentObj) {
 	//Unconditional Branch:
 	//Update the program counter to branch address:
-	parentObj.CPUCore.branch((parentObj.registers[15] + ((parentObj.execute << 21) >> 20)) | 0);
+	parentObj.CPUCore.branch(((parentObj.readPC() | 0) + ((parentObj.execute << 21) >> 20)) | 0);
 }
 THUMBInstructionSet.prototype.BLsetup = function (parentObj) {
 	//Brank with Link (High offset)
 	//Update the link register to branch address:
-	parentObj.registers[14] = (parentObj.registers[15] + (((parentObj.execute & 0x7FF) << 21) >> 9)) | 0;
+	parentObj.writeLR(((parentObj.readPC() | 0) + (((parentObj.execute & 0x7FF) << 21) >> 9)) | 0);
 }
 THUMBInstructionSet.prototype.BLoff = function (parentObj) {
 	//Brank with Link (Low offset)
 	//Update the link register to branch address:
-	parentObj.registers[14] = (parentObj.registers[14] + ((parentObj.execute & 0x7FF) << 1)) | 0;
+	parentObj.writeLR(((parentObj.readLR() | 0) + ((parentObj.execute & 0x7FF) << 1)) | 0);
 	//Copy LR to PC:
-	var oldPC = parentObj.registers[15] | 0;
+	var oldPC = parentObj.readPC() | 0;
 	//Flush Pipeline & Block PC Increment:
-	parentObj.CPUCore.branch(parentObj.registers[14] & -0x2);
+	parentObj.CPUCore.branch(parentObj.readLR() & -0x2);
 	//Set bit 0 of LR high:
-	parentObj.registers[14] = (oldPC - 0x2) | 0x1;
+	parentObj.writeLR(((oldPC | 0) - 0x2) | 0x1);
 }
 THUMBInstructionSet.prototype.UNDEFINED = function (parentObj) {
 	//Undefined Exception:
