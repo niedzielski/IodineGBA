@@ -46,8 +46,7 @@ ARMInstructionSet.prototype.executeARM = function () {
 	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
         //Check the condition code:
 		if (this.conditionCodeTest()) {
-            var instruction = ((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF);
-			this.instructionMapReduced[instruction & 0xFFF]();
+			this.instructionMapReduced[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]();
 		}
 	}
 }

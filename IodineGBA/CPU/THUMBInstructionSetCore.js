@@ -41,7 +41,7 @@ THUMBInstructionSet.prototype.executeIteration = function () {
 THUMBInstructionSet.prototype.executeTHUMB = function () {
 	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
         //No condition code:
-		this.instructionMap[(this.execute >> 6) & 0x3FF](this);
+		this.instructionMap[this.execute >> 6](this);
 	}
 }
 THUMBInstructionSet.prototype.incrementProgramCounter = function () {
