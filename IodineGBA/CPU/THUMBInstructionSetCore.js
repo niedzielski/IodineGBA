@@ -130,11 +130,11 @@ THUMBInstructionSet.prototype.getCurrentFetchValue = function () {
 THUMBInstructionSet.prototype.LSLimm = function (parentObj) {
 	var source = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
 	var offset = (parentObj.execute >> 6) & 0x1F;
-	if ((offset | 0) > 0) {
+	if (offset > 0) {
 		//CPSR Carry is set by the last bit shifted out:
-		parentObj.CPUCore.CPSRCarry = ((source << (((offset | 0) - 1) | 0)) < 0);
+		parentObj.CPUCore.CPSRCarry = ((source << ((offset - 1) | 0)) < 0);
 		//Perform shift:
-		source <<= (offset | 0);
+		source <<= offset;
 	}
 	//Perform CPSR updates for N and Z (But not V):
 	parentObj.CPUCore.CPSRNegative = (source < 0);
@@ -145,11 +145,11 @@ THUMBInstructionSet.prototype.LSLimm = function (parentObj) {
 THUMBInstructionSet.prototype.LSRimm = function (parentObj) {
 	var source = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
 	var offset = (parentObj.execute >> 6) & 0x1F;
-	if ((offset | 0) > 0) {
+	if (offset > 0) {
 		//CPSR Carry is set by the last bit shifted out:
-		parentObj.CPUCore.CPSRCarry = (((source >> (((offset | 0) - 1) | 0)) & 0x1) != 0);
+		parentObj.CPUCore.CPSRCarry = (((source >> ((offset - 1) | 0)) & 0x1) != 0);
 		//Perform shift:
-		source = (source >>> (offset | 0)) | 0;
+		source = (source >>> offset) | 0;
 	}
     else {
         parentObj.CPUCore.CPSRCarry = (source < 0);
@@ -164,9 +164,9 @@ THUMBInstructionSet.prototype.LSRimm = function (parentObj) {
 THUMBInstructionSet.prototype.ASRimm = function (parentObj) {
 	var source = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
 	var offset = (parentObj.execute >> 6) & 0x1F;
-	if ((offset | 0) > 0) {
+	if (offset > 0) {
 		//CPSR Carry is set by the last bit shifted out:
-		parentObj.CPUCore.CPSRCarry = (((source >> (((offset | 0) - 1) | 0)) & 0x1) != 0);
+		parentObj.CPUCore.CPSRCarry = (((source >> ((offset - 1) | 0)) & 0x1) != 0);
 		//Perform shift:
 		source >>= offset;
 	}
@@ -254,13 +254,13 @@ THUMBInstructionSet.prototype.LSL = function (parentObj) {
     var source = parentObj.readLowRegister(parentObj.execute >> 3) & 0xFF;
 	var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
 	//Check to see if we need to update CPSR:
-    if ((source | 0) > 0) {
-        if ((source | 0) < 0x20) {
+    if (source > 0) {
+        if (source < 0x20) {
             //Shift the register data left:
-            parentObj.CPUCore.CPSRCarry = ((destination << (((source | 0) - 1) | 0)) < 0);
+            parentObj.CPUCore.CPSRCarry = ((destination << ((source - 1) | 0)) < 0);
             destination <<= source;
         }
-        else if ((source | 0) == 0x20) {
+        else if (source == 0x20) {
             //Shift bit 0 into carry:
             parentObj.CPUCore.CPSRCarry = ((destination & 0x1) == 0x1);
             destination = 0;
@@ -281,13 +281,13 @@ THUMBInstructionSet.prototype.LSR = function (parentObj) {
 	var source = parentObj.readLowRegister(parentObj.execute >> 3) & 0xFF;
 	var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     //Check to see if we need to update CPSR:
-	if ((source | 0) > 0) {
-        if ((source | 0) < 0x20) {
+	if (source > 0) {
+        if (source < 0x20) {
             //Shift the register data right logically:
-            parentObj.CPUCore.CPSRCarry = (((destination >> (((source | 0) - 1) | 0)) & 0x1) == 0x1);
-            destination = (destination >>> (source | 0)) | 0;
+            parentObj.CPUCore.CPSRCarry = (((destination >> ((source - 1) | 0)) & 0x1) == 0x1);
+            destination = (destination >>> source) | 0;
         }
-        else if ((source | 0) == 0x20) {
+        else if (source == 0x20) {
             //Shift bit 31 into carry:
             parentObj.CPUCore.CPSRCarry = (destination < 0);
             destination = 0;
@@ -308,10 +308,10 @@ THUMBInstructionSet.prototype.ASR = function (parentObj) {
 	var source = parentObj.readLowRegister(parentObj.execute >> 3) & 0xFF;
 	var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     //Check to see if we need to update CPSR:
-	if ((source | 0) > 0) {
-		if ((source | 0) < 0x20) {
+	if (source > 0) {
+		if (source < 0x20) {
 			//Shift the register data right arithmetically:
-			parentObj.CPUCore.CPSRCarry = (((destination >> (((source | 0) - 1) | 0)) & 0x1) == 0x1);
+			parentObj.CPUCore.CPSRCarry = (((destination >> ((source - 1) | 0)) & 0x1) == 0x1);
 			destination >>= source;
 		}
 		else {
@@ -341,13 +341,13 @@ THUMBInstructionSet.prototype.SBC = function (parentObj) {
 THUMBInstructionSet.prototype.ROR = function (parentObj) {
     var source = parentObj.readLowRegister(parentObj.execute >> 3) & 0xFF;
 	var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
-	if ((source | 0) > 0) {
+	if (source > 0) {
         source &= 0x1F;
-        if ((source | 0) > 0) {
+        if (source > 0) {
             //CPSR Carry is set by the last bit shifted out:
-            parentObj.CPUCore.CPSRCarry = (((destination >>> (((source | 0) - 1) | 0)) & 0x1) != 0);
+            parentObj.CPUCore.CPSRCarry = (((destination >>> ((source - 1) | 0)) & 0x1) != 0);
             //Perform rotate:
-            destination = (destination << ((0x20 - (source | 0)) | 0)) | (destination >>> (source | 0));
+            destination = (destination << ((0x20 - source) | 0)) | (destination >>> source);
         }
         else {
             parentObj.CPUCore.CPSRCarry = (destination < 0);
@@ -369,9 +369,9 @@ THUMBInstructionSet.prototype.TST = function (parentObj) {
 }
 THUMBInstructionSet.prototype.NEG = function (parentObj) {
     var source = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
-	parentObj.CPUCore.CPSROverflow = ((source ^ (-(source | 0))) == 0);
+	parentObj.CPUCore.CPSROverflow = ((source ^ (-source)) == 0);
 	//Perform Subtraction:
-	source = (-(source | 0)) | 0;
+	source = (-source) | 0;
 	parentObj.CPUCore.CPSRNegative = (source < 0);
 	parentObj.CPUCore.CPSRZero = (source == 0);
 	//Update destination register:

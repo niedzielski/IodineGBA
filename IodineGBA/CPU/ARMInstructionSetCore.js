@@ -1181,13 +1181,13 @@ ARMInstructionSet.prototype.llrs = function (parentObj, operand) {
 	//Get the shift amount:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
-    if ((shifter | 0) > 0) {
-        if ((shifter | 0) < 0x20) {
+    if (shifter > 0) {
+        if (shifter < 0x20) {
             //Shift the register data left:
-            parentObj.CPUCore.CPSRCarry = ((register << (((shifter | 0) - 1) | 0)) < 0);
+            parentObj.CPUCore.CPSRCarry = ((register << ((shifter - 1) | 0)) < 0);
             return register << shifter;
         }
-        else if ((shifter | 0) == 0x20) {
+        else if (shifter == 0x20) {
             //Shift bit 0 into carry:
             parentObj.CPUCore.CPSRCarry = ((register & 0x1) == 0x1);
         }
@@ -1262,13 +1262,13 @@ ARMInstructionSet.prototype.lrrs = function (parentObj, operand) {
 	//Get the shift amount:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
-	if ((shifter | 0) > 0) {
-        if ((shifter | 0) < 0x20) {
+	if (shifter > 0) {
+        if (shifter < 0x20) {
             //Shift the register data right logically:
-            parentObj.CPUCore.CPSRCarry = (((register >> (((shifter | 0) - 1) | 0)) & 0x1) == 0x1);
-            return (register >>> (shifter | 0)) | 0;
+            parentObj.CPUCore.CPSRCarry = (((register >> ((shifter - 1) | 0)) & 0x1) == 0x1);
+            return (register >>> shifter) | 0;
         }
-        else if ((shifter | 0) == 0x20) {
+        else if (shifter == 0x20) {
             //Shift bit 31 into carry:
             parentObj.CPUCore.CPSRCarry = (register < 0);
         }
@@ -1344,10 +1344,10 @@ ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
 	//Get the shift amount:
 	var shifter = parentObj.guardRegisterRead((operand >> 8) & 0xF) & 0xFF;
 	//Check to see if we need to update CPSR:
-	if ((shifter | 0) > 0) {
-        if ((shifter | 0) < 0x20) {
+	if (shifter > 0) {
+        if (shifter < 0x20) {
             //Shift the register data right arithmetically:
-            parentObj.CPUCore.CPSRCarry = (((register >> (((shifter | 0) - 1) | 0)) & 0x1) == 0x1);
+            parentObj.CPUCore.CPSRCarry = (((register >> ((shifter - 1) | 0)) & 0x1) == 0x1);
             return register >> shifter;
         }
         else {
