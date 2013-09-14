@@ -323,7 +323,7 @@ GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
 }
 GameBoyAdvanceEmulator.prototype.audioPushNewState = function () {
 	if (this.audioUpdateState) {
-		this.IOCore.sound.initializeOutput(this.audioFound, this.audioResamplerFirstPassFactor);
+		this.IOCore.sound.initializeOutput(this.audioFound, this.audioResamplerFirstPassFactor | 0);
 		this.audioUpdateState = false;
 	}
 }

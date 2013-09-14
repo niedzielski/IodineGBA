@@ -42,7 +42,7 @@ GameBoyAdvanceSound.prototype.initializeOutput = function (enabled, audioResampl
 	this.audioIndex = 0;
     this.downsampleInputLeft = 0;
     this.downsampleInputRight = 0;
-	this.audioResamplerFirstPassFactor = audioResamplerFirstPassFactor;
+	this.audioResamplerFirstPassFactor = audioResamplerFirstPassFactor | 0;
 }
 GameBoyAdvanceSound.prototype.intializeWhiteNoise = function () {
 	//Noise Sample Tables:
