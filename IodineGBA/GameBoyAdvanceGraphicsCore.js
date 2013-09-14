@@ -235,7 +235,7 @@ GameBoyAdvanceGraphics.prototype.nextHBlankDMAEventTime = function () {
     }
     else {
         //No HBlank DMA in VBlank:
-        nextEventTime = ((((((228 - (this.currentScanLine | 0)) * 1232) | 0) + 1006) | 0) - (this.LCDTicks | 0)) | 0;
+        nextEventTime = ((((228 - (this.currentScanLine | 0)) * 1232) | 0) + 1006 - (this.LCDTicks | 0)) | 0;
     }
     return nextEventTime | 0;
 }
@@ -243,7 +243,7 @@ GameBoyAdvanceGraphics.prototype.nextVCounterEventTime = function () {
     var nextEventTime = -1;
     if ((this.VCounter | 0) <= 227) {
         //Only match lines within screen or vblank:
-        nextEventTime = (((((1 + (((227 + (this.VCounter | 0) - (this.currentScanLine | 0)) | 0) % 228)) | 0) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
+        nextEventTime = (((((((227 + (this.VCounter | 0) - (this.currentScanLine | 0)) | 0) % 228) | 0) * 1232) | 0) + 1232 - (this.LCDTicks | 0)) | 0;
     }
 	return nextEventTime | 0;
 }
