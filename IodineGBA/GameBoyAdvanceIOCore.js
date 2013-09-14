@@ -21,7 +21,7 @@ function GameBoyAdvanceIO(emulatorCore) {
 	//State Machine Tracking:
 	this.systemStatus = 0;
 	this.cyclesToIterate = 0;
-	this.cyclesIteratedPreviously = 0;
+	this.cyclesOveriteratedPreviously = 0;
     this.accumulatedClocks = 0;
     this.graphicsClocks = 0;
     this.timerClocks = 0;
@@ -48,7 +48,7 @@ function GameBoyAdvanceIO(emulatorCore) {
 }
 GameBoyAdvanceIO.prototype.iterate = function () {
 	//Find out how many clocks to iterate through this run:
-	this.cyclesToIterate = ((this.emulatorCore.CPUCyclesTotal | 0) - (this.cyclesIteratedPreviously | 0)) | 0;
+	this.cyclesToIterate = ((this.emulatorCore.CPUCyclesTotal | 0) + (this.cyclesOveriteratedPreviously | 0)) | 0;
     //An extra check to make sure we don't do stuff if we did too much last run:
     if ((this.cyclesToIterate | 0) > 0) {
         //Update our core event prediction:
@@ -61,7 +61,7 @@ GameBoyAdvanceIO.prototype.iterate = function () {
         this.sound.audioJIT();
     }
 	//If we clocked just a little too much, subtract the extra from the next run:
-	this.cyclesIteratedPreviously = this.cyclesToIterate | 0;
+	this.cyclesOveriteratedPreviously = this.cyclesToIterate | 0;
 }
 GameBoyAdvanceIO.prototype.runIterator = function () {
 	//Clock through the state machine:

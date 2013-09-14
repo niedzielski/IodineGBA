@@ -206,7 +206,7 @@ GameBoyAdvanceGraphics.prototype.checkVCounter = function () {
 	}
 }
 GameBoyAdvanceGraphics.prototype.nextVBlankEventTime = function () {
-	return ((((1 + ((387 - (this.currentScanLine | 0)) % 228)) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
+	return (((((387 - (this.currentScanLine | 0)) % 228) * 1232) | 0) + 1232 - (this.LCDTicks | 0)) | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextVBlankIRQEventTime = function () {
     var nextEventTime = -1;
@@ -257,7 +257,7 @@ GameBoyAdvanceGraphics.prototype.nextVCounterIRQEventTime = function () {
 }
 GameBoyAdvanceGraphics.prototype.nextDisplaySyncEventTime = function () {
 	var nextEventTime = -1;
-    if ((this.currentScanLine | 0) < 2) {
+    if ((this.currentScanLine | 0) == 0) {
 		//Doesn't start until line 2:
         nextEventTime = ((((2 - (this.currentScanLine | 0)) * 1232) | 0) - (this.LCDTicks | 0)) | 0;
 	}
