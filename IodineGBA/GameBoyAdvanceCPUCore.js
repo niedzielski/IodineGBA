@@ -108,7 +108,7 @@ GameBoyAdvanceCPU.prototype.executeIterationWithoutIRQ = function () {
 }
 GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	branchTo = branchTo | 0;
-    if (branchTo > 0x3FFF || this.IOCore.BIOSFound) {
+    if ((branchTo | 0) > 0x3FFF || this.IOCore.BIOSFound) {
 		//Tell the JIT information on the state before branch:
          if (this.emulatorCore.dynarecEnabled) {
             this.dynarec.listen(this.registers[15] | 0, branchTo | 0, !!this.InTHUMB);
@@ -122,7 +122,7 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	}
 	else {
 		//We're branching into BIOS, handle specially:
-		if (branchTo == 0x130) {
+		if ((branchTo | 0) == 0x130) {
             //IRQ mode exit handling:
             //ROM IRQ handling returns back from its own subroutine back to BIOS at this address.
             this.HLEIRQExit();
@@ -134,11 +134,11 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
 	}
 }
 GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
-	this.triggeredIRQ = !!didFire;
+	this.triggeredIRQ = didFire;
     this.assertIRQ();
 }
 GameBoyAdvanceCPU.prototype.assertIRQ = function () {
-	this.processIRQ = !!this.triggeredIRQ && !this.IRQDisabled;
+	this.processIRQ = this.triggeredIRQ && !this.IRQDisabled;
     if (this.processIRQ) {
         this.executeIteration = this.executeIterationWithIRQ;
     }
@@ -162,11 +162,11 @@ GameBoyAdvanceCPU.prototype.getLR = function () {
 }
 GameBoyAdvanceCPU.prototype.getIRQLR = function () {
 	//Get the previous instruction address:
-	var lr = this.instructionHandle.getIRQLR();
+	var lr = this.instructionHandle.getIRQLR() | 0;
     var modeOffset = (this.InTHUMB) ? 2 : 4;
-    if (this.pipelineInvalid > 1) {
-        while (this.pipelineInvalid > 1) {
-            lr = (lr + modeOffset) | 0;
+    if ((this.pipelineInvalid | 0) > 1) {
+        while ((this.pipelineInvalid | 0) > 1) {
+            lr = ((lr | 0) + (modeOffset | 0)) | 0;
             this.pipelineInvalid >>= 1;
         }
     }
@@ -209,8 +209,8 @@ GameBoyAdvanceCPU.prototype.HLEIRQEnter = function () {
     //Updating the address bus away from PC fetch:
     this.wait.NonSequentialBroadcast();
     //Push register(s) into memory:
-    for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
-            if ((0x500F & (1 << rListPosition)) != 0) {
+    for (var rListPosition = 0xF; (rListPosition | 0) > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((0x500F & (1 << (rListPosition | 0))) != 0) {
                 //Push a register into memory:
                 currentAddress = ((currentAddress | 0) - 4) | 0;
                 this.randomMemoryCache.memoryWrite32(currentAddress >>> 0, this.registers[rListPosition >>> 0] | 0);
@@ -232,8 +232,8 @@ GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
     //Updating the address bus away from PC fetch:
     this.wait.NonSequentialBroadcast();
     //Load register(s) from memory:
-    for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
-        if ((0x500F & (1 << rListPosition)) != 0) {
+    for (var rListPosition = 0; (rListPosition | 0) < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+        if ((0x500F & (1 << (rListPosition | 0))) != 0) {
             //Load a register from memory:
             this.registers[rListPosition & 0xF] = this.randomMemoryCache.memoryRead32(currentAddress >>> 0) | 0;
             currentAddress = ((currentAddress | 0) + 4) | 0;
@@ -358,114 +358,114 @@ GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
     switch (this.MODEBits | 0) {
 		case 0x10:
 		case 0x1F:
-			this.registersUSR[0] = this.registers[8];
-			this.registersUSR[1] = this.registers[9];
-			this.registersUSR[2] = this.registers[10];
-			this.registersUSR[3] = this.registers[11];
-			this.registersUSR[4] = this.registers[12];
-			this.registersUSR[5] = this.registers[13];
-			this.registersUSR[6] = this.registers[14];
+			this.registersUSR[0] = this.registers[8] | 0;
+			this.registersUSR[1] = this.registers[9] | 0;
+			this.registersUSR[2] = this.registers[10] | 0;
+			this.registersUSR[3] = this.registers[11] | 0;
+			this.registersUSR[4] = this.registers[12] | 0;
+			this.registersUSR[5] = this.registers[13] | 0;
+			this.registersUSR[6] = this.registers[14] | 0;
 			break;
 		case 0x11:
-			this.registersFIQ[0] = this.registers[8];
-			this.registersFIQ[1] = this.registers[9];
-			this.registersFIQ[2] = this.registers[10];
-			this.registersFIQ[3] = this.registers[11];
-			this.registersFIQ[4] = this.registers[12];
-			this.registersFIQ[5] = this.registers[13];
-			this.registersFIQ[6] = this.registers[14];
+			this.registersFIQ[0] = this.registers[8] | 0;
+			this.registersFIQ[1] = this.registers[9] | 0;
+			this.registersFIQ[2] = this.registers[10] | 0;
+			this.registersFIQ[3] = this.registers[11] | 0;
+			this.registersFIQ[4] = this.registers[12] | 0;
+			this.registersFIQ[5] = this.registers[13] | 0;
+			this.registersFIQ[6] = this.registers[14] | 0;
 			break;
 		case 0x12:
-			this.registersUSR[0] = this.registers[8];
-			this.registersUSR[1] = this.registers[9];
-			this.registersUSR[2] = this.registers[10];
-			this.registersUSR[3] = this.registers[11];
-			this.registersUSR[4] = this.registers[12];
-            this.registersIRQ[0] = this.registers[13];
-			this.registersIRQ[1] = this.registers[14];
+			this.registersUSR[0] = this.registers[8] | 0;
+			this.registersUSR[1] = this.registers[9] | 0;
+			this.registersUSR[2] = this.registers[10] | 0;
+			this.registersUSR[3] = this.registers[11] | 0;
+			this.registersUSR[4] = this.registers[12] | 0;
+            this.registersIRQ[0] = this.registers[13] | 0;
+			this.registersIRQ[1] = this.registers[14] | 0;
 			break;
 		case 0x13:
-			this.registersUSR[0] = this.registers[8];
-			this.registersUSR[1] = this.registers[9];
-			this.registersUSR[2] = this.registers[10];
-			this.registersUSR[3] = this.registers[11];
-			this.registersUSR[4] = this.registers[12];
-            this.registersSVC[0] = this.registers[13];
-			this.registersSVC[1] = this.registers[14];
+			this.registersUSR[0] = this.registers[8] | 0;
+			this.registersUSR[1] = this.registers[9] | 0;
+			this.registersUSR[2] = this.registers[10] | 0;
+			this.registersUSR[3] = this.registers[11] | 0;
+			this.registersUSR[4] = this.registers[12] | 0;
+            this.registersSVC[0] = this.registers[13] | 0;
+			this.registersSVC[1] = this.registers[14] | 0;
 			break;
 		case 0x17:
-			this.registersUSR[0] = this.registers[8];
-			this.registersUSR[1] = this.registers[9];
-			this.registersUSR[2] = this.registers[10];
-			this.registersUSR[3] = this.registers[11];
-			this.registersUSR[4] = this.registers[12];
-            this.registersABT[0] = this.registers[13];
-			this.registersABT[1] = this.registers[14];
+			this.registersUSR[0] = this.registers[8] | 0;
+			this.registersUSR[1] = this.registers[9] | 0;
+			this.registersUSR[2] = this.registers[10] | 0;
+			this.registersUSR[3] = this.registers[11] | 0;
+			this.registersUSR[4] = this.registers[12] | 0;
+            this.registersABT[0] = this.registers[13] | 0;
+			this.registersABT[1] = this.registers[14] | 0;
 			break;
 		case 0x1B:
-			this.registersUSR[0] = this.registers[8];
-			this.registersUSR[1] = this.registers[9];
-			this.registersUSR[2] = this.registers[10];
-			this.registersUSR[3] = this.registers[11];
-			this.registersUSR[4] = this.registers[12];
-            this.registersUND[0] = this.registers[13];
-			this.registersUND[1] = this.registers[14];
+			this.registersUSR[0] = this.registers[8] | 0;
+			this.registersUSR[1] = this.registers[9] | 0;
+			this.registersUSR[2] = this.registers[10] | 0;
+			this.registersUSR[3] = this.registers[11] | 0;
+			this.registersUSR[4] = this.registers[12] | 0;
+            this.registersUND[0] = this.registers[13] | 0;
+			this.registersUND[1] = this.registers[14] | 0;
 	}
 	switch (newMode | 0) {
 		case 0x10:
 		case 0x1F:
-            this.registers[8] = this.registersUSR[0];
-			this.registers[9] = this.registersUSR[1];
-			this.registers[10] = this.registersUSR[2];
-			this.registers[11] = this.registersUSR[3];
-			this.registers[12] = this.registersUSR[4];
-			this.registers[13] = this.registersUSR[5];
-			this.registers[14] = this.registersUSR[6];
+            this.registers[8] = this.registersUSR[0] | 0;
+			this.registers[9] = this.registersUSR[1] | 0;
+			this.registers[10] = this.registersUSR[2] | 0;
+			this.registers[11] = this.registersUSR[3] | 0;
+			this.registers[12] = this.registersUSR[4] | 0;
+			this.registers[13] = this.registersUSR[5] | 0;
+			this.registers[14] = this.registersUSR[6] | 0;
 			break;
 		case 0x11:
-			this.registers[8] = this.registersFIQ[0];
-			this.registers[9] = this.registersFIQ[1];
-			this.registers[10] = this.registersFIQ[2];
-			this.registers[11] = this.registersFIQ[3];
-			this.registers[12] = this.registersFIQ[4];
-			this.registers[13] = this.registersFIQ[5];
-			this.registers[14] = this.registersFIQ[6];
+			this.registers[8] = this.registersFIQ[0] | 0;
+			this.registers[9] = this.registersFIQ[1] | 0;
+			this.registers[10] = this.registersFIQ[2] | 0;
+			this.registers[11] = this.registersFIQ[3] | 0;
+			this.registers[12] = this.registersFIQ[4] | 0;
+			this.registers[13] = this.registersFIQ[5] | 0;
+			this.registers[14] = this.registersFIQ[6] | 0;
 			break;
 		case 0x12:
-			this.registers[8] = this.registersUSR[0];
-			this.registers[9] = this.registersUSR[1];
-			this.registers[10] = this.registersUSR[2];
-			this.registers[11] = this.registersUSR[3];
-			this.registers[12] = this.registersUSR[4];
-            this.registers[13] = this.registersIRQ[0];
-			this.registers[14] = this.registersIRQ[1];
+			this.registers[8] = this.registersUSR[0] | 0;
+			this.registers[9] = this.registersUSR[1] | 0;
+			this.registers[10] = this.registersUSR[2] | 0;
+			this.registers[11] = this.registersUSR[3] | 0;
+			this.registers[12] = this.registersUSR[4] | 0;
+            this.registers[13] = this.registersIRQ[0] | 0;
+			this.registers[14] = this.registersIRQ[1] | 0;
 			break;
 		case 0x13:
-			this.registers[8] = this.registersUSR[0];
-			this.registers[9] = this.registersUSR[1];
-			this.registers[10] = this.registersUSR[2];
-			this.registers[11] = this.registersUSR[3];
-			this.registers[12] = this.registersUSR[4];
-            this.registers[13] = this.registersSVC[0];
-			this.registers[14] = this.registersSVC[1];
+			this.registers[8] = this.registersUSR[0] | 0;
+			this.registers[9] = this.registersUSR[1] | 0;
+			this.registers[10] = this.registersUSR[2] | 0;
+			this.registers[11] = this.registersUSR[3] | 0;
+			this.registers[12] = this.registersUSR[4] | 0;
+            this.registers[13] = this.registersSVC[0] | 0;
+			this.registers[14] = this.registersSVC[1] | 0;
 			break;
 		case 0x17:
-			this.registers[8] = this.registersUSR[0];
-			this.registers[9] = this.registersUSR[1];
-			this.registers[10] = this.registersUSR[2];
-			this.registers[11] = this.registersUSR[3];
-			this.registers[12] = this.registersUSR[4];
-            this.registers[13] = this.registersABT[0];
-			this.registers[14] = this.registersABT[1];
+			this.registers[8] = this.registersUSR[0] | 0;
+			this.registers[9] = this.registersUSR[1] | 0;
+			this.registers[10] = this.registersUSR[2] | 0;
+			this.registers[11] = this.registersUSR[3] | 0;
+			this.registers[12] = this.registersUSR[4] | 0;
+            this.registers[13] = this.registersABT[0] | 0;
+			this.registers[14] = this.registersABT[1] | 0;
 			break;
 		case 0x1B:
-			this.registers[8] = this.registersUSR[0];
-			this.registers[9] = this.registersUSR[1];
-			this.registers[10] = this.registersUSR[2];
-			this.registers[11] = this.registersUSR[3];
-			this.registers[12] = this.registersUSR[4];
-            this.registers[13] = this.registersUND[0];
-			this.registers[14] = this.registersUND[1];
+			this.registers[8] = this.registersUSR[0] | 0;
+			this.registers[9] = this.registersUSR[1] | 0;
+			this.registers[10] = this.registersUSR[2] | 0;
+			this.registers[11] = this.registersUSR[3] | 0;
+			this.registers[12] = this.registersUSR[4] | 0;
+            this.registers[13] = this.registersUND[0] | 0;
+			this.registers[14] = this.registersUND[1] | 0;
 	}
 	this.MODEBits = newMode | 0;
 }
@@ -477,8 +477,8 @@ GameBoyAdvanceCPU.prototype.setADDFlags = function (operand1, operand2) {
     var result = unsignedResult | 0;
     this.setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
 	this.CPSRCarry = (unsignedResult > 0xFFFFFFFF);
-	this.CPSRNegative = (result < 0);
-	this.CPSRZero = (result == 0);
+	this.CPSRNegative = ((result | 0) < 0);
+	this.CPSRZero = ((result | 0) == 0);
     return result | 0;
 }
 GameBoyAdvanceCPU.prototype.setADCFlags = function (operand1, operand2) {
@@ -489,8 +489,8 @@ GameBoyAdvanceCPU.prototype.setADCFlags = function (operand1, operand2) {
     var result = unsignedResult | 0;
     this.setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
 	this.CPSRCarry = (unsignedResult > 0xFFFFFFFF);
-	this.CPSRNegative = (result < 0);
-	this.CPSRZero = (result == 0);
+	this.CPSRNegative = ((result | 0) < 0);
+	this.CPSRZero = ((result | 0) == 0);
     return result | 0;
 }
 GameBoyAdvanceCPU.prototype.setSUBFlags = function (operand1, operand2) {
@@ -500,8 +500,8 @@ GameBoyAdvanceCPU.prototype.setSUBFlags = function (operand1, operand2) {
     var result = ((operand1 | 0) - (operand2 | 0)) | 0;
     this.setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
 	this.CPSRCarry = (operand1 >= operand2);
-	this.CPSRNegative = (result < 0);
-	this.CPSRZero = (result == 0);
+	this.CPSRNegative = ((result | 0) < 0);
+	this.CPSRZero = ((result | 0) == 0);
     return result | 0;
 }
 GameBoyAdvanceCPU.prototype.setSBCFlags = function (operand1, operand2) {
@@ -512,8 +512,8 @@ GameBoyAdvanceCPU.prototype.setSBCFlags = function (operand1, operand2) {
     var result = unsignedResult | 0;
     this.setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
 	this.CPSRCarry = (unsignedResult >= 0);
-	this.CPSRNegative = (result < 0);
-	this.CPSRZero = (result == 0);
+	this.CPSRNegative = ((result | 0) < 0);
+	this.CPSRZero = ((result | 0) == 0);
     return result | 0;
 }
 GameBoyAdvanceCPU.prototype.setCMPFlags = function (operand1, operand2) {
@@ -523,8 +523,8 @@ GameBoyAdvanceCPU.prototype.setCMPFlags = function (operand1, operand2) {
     var result = ((operand1 | 0) - (operand2 | 0)) | 0;
     this.setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
 	this.CPSRCarry = (operand1 >= operand2);
-	this.CPSRNegative = (result < 0);
-	this.CPSRZero = (result == 0);
+	this.CPSRNegative = ((result | 0) < 0);
+	this.CPSRZero = ((result | 0) == 0);
 }
 GameBoyAdvanceCPU.prototype.setCMNFlags = function (operand1, operand2) {
     //Update flags for an addition operation:
@@ -534,8 +534,8 @@ GameBoyAdvanceCPU.prototype.setCMNFlags = function (operand1, operand2) {
     var result = unsignedResult | 0;
     this.setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
 	this.CPSRCarry = (unsignedResult > 0xFFFFFFFF);
-	this.CPSRNegative = (result < 0);
-	this.CPSRZero = (result == 0);
+	this.CPSRNegative = ((result | 0) < 0);
+	this.CPSRZero = ((result | 0) == 0);
 }
 GameBoyAdvanceCPU.prototype.setVFlagForADD = function (operand1, operand2, result) {
     operand1 = operand1 | 0;
