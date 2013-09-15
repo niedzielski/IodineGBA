@@ -39,8 +39,8 @@ GameBoyAdvanceWait.prototype.initialize = function () {
 	this.prefetchEnabled = false;
 	this.WAITCNT0 = 0;
 	this.WAITCNT1 = 0;
-    this.getROMRead16 = this.getROMRead16Prefetch;
-    this.getROMRead32 = this.getROMRead32Prefetch;
+    this.getROMRead16 = this.getROMRead16NoPrefetch;
+    this.getROMRead32 = this.getROMRead32NoPrefetch;
     this.opcodeCache = new GameBoyAdvanceMemoryCache(this.memory);
 }
 GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
