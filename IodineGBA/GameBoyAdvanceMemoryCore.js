@@ -641,7 +641,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) {
 	address = address | 0;
     var data = 0;
-    if ((address | 0) < 0x4000301) {
+    if ((address | 0) < 0x4000303) {
 		//IO Read:
 		parentObj.wait.FASTAccess2();
 		address >>= 1;
