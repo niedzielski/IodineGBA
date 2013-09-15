@@ -18,16 +18,12 @@
 function GameBoyAdvanceMemoryCache(memory) {
 	//Build references:
 	this.memory = memory;
-    //this.addressRead8 = 0x100;
     this.addressRead16 = 0x100;
 	this.addressRead32 = 0x100;
-    //this.addressWrite8 = 0x100;
     this.addressWrite16 = 0x100;
     this.addressWrite32 = 0x100;
-    //this.cacheRead8 = this.memory.readUnused8;
     this.cacheRead16 = this.memory.readUnused16;
     this.cacheRead32 = this.memory.readUnused32;
-    //this.cacheWrite8 = this.memory.writeUnused8;
     this.cacheWrite16 = this.memory.writeUnused16;
     this.cacheWrite32 = this.memory.writeUnused32;
     //Make the memory core aware of us so it can invalidate us:
@@ -120,10 +116,6 @@ GameBoyAdvanceMemoryCache.prototype.memoryWrite32 = function (address, data) {
     this.cacheWrite32(this.memory, address >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.invalidateIfWRAM = function () {
-    /*if (this.addressRead8 == 0x2 || this.addressRead8 == 0x3) {
-        //Invalidate the check address:
-        this.addressRead8 = 0x100;
-    }*/
     if (this.addressRead16 == 0x2 || this.addressRead16 == 0x3) {
         //Invalidate the check address:
         this.addressRead16 = 0x100;
@@ -132,10 +124,6 @@ GameBoyAdvanceMemoryCache.prototype.invalidateIfWRAM = function () {
         //Invalidate the check address:
         this.addressRead32 = 0x100;
     }
-    /*if (this.addressWrite8 == 0x2 || this.addressWrite8 == 0x3) {
-        //Invalidate the check address:
-        this.addressWrite8 = 0x100;
-    }*/
     if (this.addressWrite16 == 0x2 || this.addressWrite16 == 0x3) {
         //Invalidate the check address:
         this.addressWrite16 = 0x100;
