@@ -33,6 +33,9 @@ GameBoyAdvanceWait.prototype.initialize = function () {
 	this.CARTWaitState1Second = 2;
 	this.CARTWaitState2First = 4;
 	this.CARTWaitState2Second = 2;
+    this.CARTWaitState0Combined = 6;
+	this.CARTWaitState1Combined = 6;
+	this.CARTWaitState2Combined = 6;
 	this.POSTBOOT = 0;
 	this.nonSequential = true;
 	this.ROMPrebuffer = 0;
@@ -50,6 +53,8 @@ GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
 	this.CARTWaitState0Second = ((data & 0x10) == 0x10) ? 0x1 : 0x2;
 	this.CARTWaitState1First = this.GAMEPAKWaitStateTable[(data >> 5) & 0x3] | 0;
 	this.CARTWaitState1Second = (data > 0x7F) ? 0x1 : 0x4;
+    this.CARTWaitState0Combined = ((this.CARTWaitState0First | 0) + (this.CARTWaitState0Second | 0)) | 0;
+	this.CARTWaitState1Combined = ((this.CARTWaitState1First | 0) + (this.CARTWaitState1Second | 0)) | 0;
 	this.WAITCNT0 = data | 0;
     //this.IOCore.cpu.dynarec.invalidateCaches();
 }
@@ -60,6 +65,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
 	data = data | 0;
     this.CARTWaitState2First = this.GAMEPAKWaitStateTable[data & 0x3] | 0;
 	this.CARTWaitState2Second = ((data & 0x8) == 0x8) ? 0x1 : 0x8;
+    this.CARTWaitState2Combined = ((this.CARTWaitState2First | 0) + (this.CARTWaitState2Second | 0)) | 0;
 	this.prefetchEnabled = ((data & 0x40) == 0x40);
 	if (!this.prefetchEnabled) {
 		this.ROMPrebuffer = 0;
@@ -309,13 +315,13 @@ GameBoyAdvanceWait.prototype.getROMRead32NoPrefetch = function (address) {
     address = address | 0;
     var clocks = 0;
     if ((address | 0) < 0xA000000) {
-        clocks = ((this.CARTWaitState0First | 0) + (this.CARTWaitState0Second | 0)) | 0;
+        clocks = this.CARTWaitState0Combined | 0;
     }
     else if ((address | 0) < 0xC000000) {
-        clocks = ((this.CARTWaitState1First | 0) + (this.CARTWaitState1Second | 0)) | 0;
+        clocks = this.CARTWaitState1Combined | 0;
     }
     else {
-        clocks = ((this.CARTWaitState2First | 0) + (this.CARTWaitState2Second | 0)) | 0;
+        clocks = this.CARTWaitState2Combined | 0;
     }
     this.IOCore.updateCore(clocks | 0);
     this.nonSequential = false;
