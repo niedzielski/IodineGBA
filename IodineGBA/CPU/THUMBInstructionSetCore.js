@@ -347,7 +347,7 @@ THUMBInstructionSet.prototype.ROR = function (parentObj) {
             //CPSR Carry is set by the last bit shifted out:
             parentObj.CPUCore.CPSRCarry = (((destination >>> ((source - 1) | 0)) & 0x1) != 0);
             //Perform rotate:
-            destination = (destination << ((0x20 - source) | 0)) | (destination >>> source);
+            destination = (destination << ((0x20 - source) | 0)) | (destination >>> (source | 0));
         }
         else {
             parentObj.CPUCore.CPSRCarry = (destination < 0);
@@ -369,9 +369,9 @@ THUMBInstructionSet.prototype.TST = function (parentObj) {
 }
 THUMBInstructionSet.prototype.NEG = function (parentObj) {
     var source = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
-	parentObj.CPUCore.CPSROverflow = ((source ^ (-source)) == 0);
+	parentObj.CPUCore.CPSROverflow = ((source ^ (-(source | 0))) == 0);
 	//Perform Subtraction:
-	source = (-source) | 0;
+	source = (-(source | 0)) | 0;
 	parentObj.CPUCore.CPSRNegative = (source < 0);
 	parentObj.CPUCore.CPSRZero = (source == 0);
 	//Update destination register:
