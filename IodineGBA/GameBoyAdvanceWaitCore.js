@@ -296,10 +296,10 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
             clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState0Second << 1);
         }
         else if ((address | 0) < 0xC000000) {
-            clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState1Second << 1);
+            clocks = (this.nonSequential) ? (this.CARTWaitState1Combined | 0) : (this.CARTWaitState1Second << 1);
         }
         else {
-            clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState2Second << 1);
+            clocks = (this.nonSequential) ? (this.CARTWaitState2Combined | 0) : (this.CARTWaitState2Second << 1);
         }
         this.IOCore.updateCore(clocks | 0);
         this.nonSequential = false;
@@ -317,10 +317,10 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
                 clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState0Second << 1);
             }
             else if ((address | 0) < 0xC000000) {
-                clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState1Second << 1);
+                clocks = (this.nonSequential) ? (this.CARTWaitState1Combined | 0) : (this.CARTWaitState1Second << 1);
             }
             else {
-                clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState2Second << 1);
+                clocks = (this.nonSequential) ? (this.CARTWaitState2Combined | 0) : (this.CARTWaitState2Second << 1);
             }
             this.IOCore.updateCore(clocks | 0);
             this.nonSequential = false;
@@ -336,10 +336,10 @@ GameBoyAdvanceWait.prototype.getROMRead32NoPrefetch = function (address) {
         clocks = (this.nonSequential || this.nonSequentialROM) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState0Second << 1);
     }
     else if ((address | 0) < 0xC000000) {
-        clocks = (this.nonSequential || this.nonSequentialROM) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState1Second << 1);
+        clocks = (this.nonSequential || this.nonSequentialROM) ? (this.CARTWaitState1Combined | 0) : (this.CARTWaitState1Second << 1);
     }
     else {
-        clocks = (this.nonSequential || this.nonSequentialROM) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState2Second << 1);
+        clocks = (this.nonSequential || this.nonSequentialROM) ? (this.CARTWaitState2Combined | 0) : (this.CARTWaitState2Second << 1);
     }
     this.IOCore.updateCore(clocks | 0);
     this.nonSequentialROM = this.nonSequential = false;
@@ -385,7 +385,7 @@ GameBoyAdvanceWait.prototype.ROM0Access16 = function () {
 }
 GameBoyAdvanceWait.prototype.ROM0Access32 = function () {
     if (this.nonSequential) {
-        this.IOCore.updateCore(((this.CARTWaitState0First | 0) + (this.CARTWaitState0Second | 0)) | 0);
+        this.IOCore.updateCore(this.CARTWaitState0Combined | 0);
         this.nonSequential = false;
     }
     else {
@@ -412,7 +412,7 @@ GameBoyAdvanceWait.prototype.ROM1Access16 = function () {
 }
 GameBoyAdvanceWait.prototype.ROM1Access32 = function () {
     if (this.nonSequential) {
-        this.IOCore.updateCore(((this.CARTWaitState1First | 0) + (this.CARTWaitState1Second | 0)));
+        this.IOCore.updateCore(this.CARTWaitState1Combined | 0);
         this.nonSequential = false;
     }
     else {
@@ -439,7 +439,7 @@ GameBoyAdvanceWait.prototype.ROM2Access16 = function () {
 }
 GameBoyAdvanceWait.prototype.ROM2Access32 = function () {
     if (this.nonSequential) {
-        this.IOCore.updateCore(((this.CARTWaitState2First | 0) + (this.CARTWaitState2Second | 0)));
+        this.IOCore.updateCore(this.CARTWaitState2Combined | 0);
         this.nonSequential = false;
     }
     else {
