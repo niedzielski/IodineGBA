@@ -273,14 +273,14 @@ GameBoyAdvanceDMA.prototype.handleDMACopy = function (dmaChannel) {
 	//Transfer Data:
 	if ((this.is32Bit[dmaChannel | 0] | 0) == 4) {
 		//32-bit Transfer:
-		this.fetch = this.memoryAccessCache.memoryRead32(source >>> 0) | 0;
-		this.memoryAccessCache.memoryWrite32(destination >>> 0, this.fetch | 0);
+		this.fetch = this.memoryAccessCache.memoryReadFast32((source & -4) >>> 0) | 0;
+		this.memoryAccessCache.memoryWriteFast32((destination & -4) >>> 0, this.fetch | 0);
 		this.decrementWordCount(dmaChannel | 0, source | 0, destination | 0, 4);
 	}
 	else {
 		//16-bit Transfer:
-		this.fetch = this.memoryAccessCache.memoryRead16(source >>> 0) | 0;
-		this.memoryAccessCache.memoryWrite16(destination >>> 0, this.fetch | 0);
+		this.fetch = this.memoryAccessCache.memoryReadFast16((source & -2) >>> 0) | 0;
+		this.memoryAccessCache.memoryWriteFast16((destination & -2) >>> 0, this.fetch | 0);
 		this.fetch |= this.fetch << 16;	//Mirror extreme edge case?
 		this.decrementWordCount(dmaChannel | 0, source | 0, destination | 0, 2);
 	}

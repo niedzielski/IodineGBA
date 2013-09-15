@@ -39,7 +39,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryReadFast8 = function (address) {
         this.addressRead8 = address >>> 24;
         this.cacheRead8 = this.memory.memoryReader8[address >>> 24];
     }
-    return this.cacheRead8(this.memory, address >>> 0) & 0xFF;
+    return this.cacheRead8(this.memory, address >>> 0) | 0;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryReadFast16 = function (address) {
     address = address >>> 0;
@@ -47,7 +47,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryReadFast16 = function (address) {
         this.addressRead16 = address >>> 24;
         this.cacheRead16 = this.memory.memoryReader16[address >>> 24];
     }
-    return this.cacheRead16(this.memory, address >>> 0) & 0xFFFF;
+    return this.cacheRead16(this.memory, address >>> 0) | 0;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryReadFast32 = function (address) {
     address = address >>> 0;
@@ -64,7 +64,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryWriteFast8 = function (address, data) 
         this.addressWrite8 = address >>> 24;
         this.cacheWrite8 = this.memory.memoryWriter8[address >>> 24];
     }
-    this.cacheWrite8(this.memory, address >>> 0, data & 0xFF);
+    this.cacheWrite8(this.memory, address >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.memoryWriteFast16 = function (address, data) {
     address = address >>> 0;
@@ -73,7 +73,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryWriteFast16 = function (address, data)
         this.addressWrite16 = address >>> 24;
         this.cacheWrite16 = this.memory.memoryWriter16[address >>> 24];
     }
-    this.cacheWrite16(this.memory, address >>> 0, data & 0xFFFF);
+    this.cacheWrite16(this.memory, address >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.memoryWriteFast32 = function (address, data) {
     address = address >>> 0;
@@ -85,26 +85,39 @@ GameBoyAdvanceMemoryCache.prototype.memoryWriteFast32 = function (address, data)
     this.cacheWrite32(this.memory, address >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.memoryRead16 = function (address) {
-	address = address >>> 0;
+	address = (address & -2) >>> 0;
     //Half-Word Read:
-    return this.memoryReadFast16((address & -2) >>> 0) | 0;
+    if ((address >>> 24) != (this.addressRead16 >>> 0)) {
+        this.addressRead16 = address >>> 24;
+        this.cacheRead16 = this.memory.memoryReader16[address >>> 24];
+    }
+    return this.cacheRead16(this.memory, address >>> 0) | 0;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryRead32 = function (address) {
-	address = address >>> 0;
-    //Word Read:
-    return this.memoryReadFast32((address & -4) >>> 0) | 0;
+    address = (address & -4) >>> 0;
+    if ((address >>> 24) != (this.addressRead32 >>> 0)) {
+        this.addressRead32 = address >>> 24;
+        this.cacheRead32 = this.memory.memoryReader32[address >>> 24];
+    }
+    return this.cacheRead32(this.memory, address >>> 0) | 0;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryWrite16 = function (address, data) {
-	address = address >>> 0;
+    address = (address & -2) >>> 0;
     data = data | 0;
-    //Half-Word Write:
-    this.memoryWriteFast16((address & -2) >>> 0, data | 0);
+    if ((address >>> 24) != (this.addressWrite16 >>> 0)) {
+        this.addressWrite16 = address >>> 24;
+        this.cacheWrite16 = this.memory.memoryWriter16[address >>> 24];
+    }
+    this.cacheWrite16(this.memory, address >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.memoryWrite32 = function (address, data) {
-	address = address >>> 0;
+    address = (address & -4) >>> 0;
     data = data | 0;
-    //Word Write:
-    this.memoryWriteFast32((address & -4) >>> 0, data | 0);
+    if ((address >>> 24) != (this.addressWrite32 >>> 0)) {
+        this.addressWrite32 = address >>> 24;
+        this.cacheWrite32 = this.memory.memoryWriter32[address >>> 24];
+    }
+    this.cacheWrite32(this.memory, address >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.invalidateIfWRAM = function () {
     if (this.addressRead8 == 0x2 || this.addressRead8 == 0x3) {
