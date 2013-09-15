@@ -18,7 +18,7 @@
 function DynarecCacheManagerCore(dynarec, start, end, InTHUMB) {
     this.dynarec = dynarec;
     this.CPUCore = dynarec.CPUCore;
-    this.memory = this.CPUCore.memory;
+    this.memory = this.CPUCore.IOCore.memory;
     this.start = start >>> 0;
     end = ((end >>> 0) - ((!!InTHUMB) ? 0x4 : 0x8)) >>> 0;
     this.end = end >>> 0;

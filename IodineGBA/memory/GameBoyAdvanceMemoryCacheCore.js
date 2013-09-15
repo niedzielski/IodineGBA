@@ -39,7 +39,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryReadFast8 = function (address) {
         this.addressRead8 = address >>> 24;
         this.cacheRead8 = this.memory.memoryReader8[address >>> 24];
     }
-    return this.cacheRead8(this.memory, address >>> 0) | 0;
+    return this.cacheRead8(this.memory, address >>> 0) & 0xFF;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryReadFast16 = function (address) {
     address = address >>> 0;
@@ -47,7 +47,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryReadFast16 = function (address) {
         this.addressRead16 = address >>> 24;
         this.cacheRead16 = this.memory.memoryReader16[address >>> 24];
     }
-    return this.cacheRead16(this.memory, address >>> 0) | 0;
+    return this.cacheRead16(this.memory, address >>> 0) & 0xFFFF;
 }
 GameBoyAdvanceMemoryCache.prototype.memoryReadFast32 = function (address) {
     address = address >>> 0;

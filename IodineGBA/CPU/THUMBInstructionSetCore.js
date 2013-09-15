@@ -25,7 +25,7 @@ THUMBInstructionSet.prototype.initialize = function () {
 	this.fetch = 0;
 	this.decode = 0;
 	this.execute = 0;
-    this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.CPUCore.memory);
+    this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.CPUCore.IOCore.memory);
 	this.compileInstructionMap();
 }
 THUMBInstructionSet.prototype.executeIteration = function () {

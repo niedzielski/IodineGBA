@@ -20,14 +20,13 @@ function ARMInstructionSet(CPUCore) {
 	this.initialize();
 }
 ARMInstructionSet.prototype.initialize = function () {
-    this.memory = this.CPUCore.memory;
 	this.wait = this.CPUCore.wait;
 	this.registers = this.CPUCore.registers;
     this.registersUSR = this.CPUCore.registersUSR;
 	this.fetch = 0;
 	this.decode = 0;
 	this.execute = 0;
-    this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.memory);
+    this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.CPUCore.IOCore.memory);
 	this.compileInstructionMap();
     this.compileReducedInstructionMap();
 }
