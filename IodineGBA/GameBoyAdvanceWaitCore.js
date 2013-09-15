@@ -26,7 +26,7 @@ GameBoyAdvanceWait.prototype.GAMEPAKWaitStateTable = [
 GameBoyAdvanceWait.prototype.initialize = function () {
 	this.WRAMConfiguration = 0xD000020;     //WRAM configuration control register current data.
 	this.WRAMWaitState = 3;					//External WRAM wait state.
-	this.SRAMWaitState = 5;
+	this.SRAMWaitState = 4;
 	this.CARTWaitState0First = 4;
 	this.CARTWaitState0Second = 2;
 	this.CARTWaitState1First = 4;
@@ -272,13 +272,13 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
     if ((this.ROMPrebuffer | 0) == 0) {
         //Cache hit:
         if ((address | 0) < 0xA000000) {
-            clocks = (((this.nonSequential) ? (this.CARTWaitState0First | 0) : (this.CARTWaitState0Second | 0)) + (this.CARTWaitState0Second | 0)) | 0;
+            clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState0Second << 1);
         }
         else if ((address | 0) < 0xC000000) {
-            clocks = (((this.nonSequential) ? (this.CARTWaitState1First | 0) : (this.CARTWaitState1Second | 0)) + (this.CARTWaitState1Second | 0)) | 0;
+            clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState1Second << 1);
         }
         else {
-            clocks = (((this.nonSequential) ? (this.CARTWaitState2First | 0) : (this.CARTWaitState2Second | 0)) + (this.CARTWaitState2Second | 0)) | 0;
+            clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState2Second << 1);
         }
         this.IOCore.updateCore(clocks | 0);
         this.nonSequential = false;
@@ -295,13 +295,13 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
             //Cache miss if only 16 bits out of 32 bits stored:
             this.ROMPrebuffer = 0;
             if ((address | 0) < 0xA000000) {
-                clocks = (((this.nonSequential) ? (this.CARTWaitState0First | 0) : (this.CARTWaitState0Second | 0)) + (this.CARTWaitState0Second | 0)) | 0;
+                clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState0Second << 1);
             }
             else if ((address | 0) < 0xC000000) {
-                clocks = (((this.nonSequential) ? (this.CARTWaitState1First | 0) : (this.CARTWaitState1Second | 0)) + (this.CARTWaitState1Second | 0)) | 0;
+                clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState1Second << 1);
             }
             else {
-                clocks = (((this.nonSequential) ? (this.CARTWaitState2First | 0) : (this.CARTWaitState2Second | 0)) + (this.CARTWaitState2Second | 0)) | 0;
+                clocks = (this.nonSequential) ? (this.CARTWaitState0Combined | 0) : (this.CARTWaitState2Second << 1);
             }
             this.IOCore.updateCore(clocks | 0);
             this.nonSequential = false;
