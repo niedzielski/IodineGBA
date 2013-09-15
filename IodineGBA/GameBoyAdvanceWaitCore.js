@@ -21,22 +21,22 @@ function GameBoyAdvanceWait(IOCore) {
 	this.initialize();
 }
 GameBoyAdvanceWait.prototype.GAMEPAKWaitStateTable = [
-	5, 4, 3, 9
+	4, 3, 2, 8
 ];
 GameBoyAdvanceWait.prototype.initialize = function () {
 	this.WRAMConfiguration = 0xD000020;     //WRAM configuration control register current data.
 	this.WRAMWaitState = 3;					//External WRAM wait state.
 	this.SRAMWaitState = 5;
-	this.CARTWaitState0First = 5;
-	this.CARTWaitState0Second = 3;
-	this.CARTWaitState1First = 5;
-	this.CARTWaitState1Second = 5;
-	this.CARTWaitState2First = 5;
-	this.CARTWaitState2Second = 9;
+	this.CARTWaitState0First = 4;
+	this.CARTWaitState0Second = 2;
+	this.CARTWaitState1First = 4;
+	this.CARTWaitState1Second = 2;
+	this.CARTWaitState2First = 4;
+	this.CARTWaitState2Second = 2;
 	this.POSTBOOT = 0;
 	this.nonSequential = true;
 	this.ROMPrebuffer = 0;
-	this.prefetchEnabled = true;
+	this.prefetchEnabled = false;
 	this.WAITCNT0 = 0;
 	this.WAITCNT1 = 0;
     this.getROMRead16 = this.getROMRead16Prefetch;
@@ -44,11 +44,12 @@ GameBoyAdvanceWait.prototype.initialize = function () {
     this.opcodeCache = new GameBoyAdvanceMemoryCache(this.memory);
 }
 GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
-	this.SRAMWaitState = this.GAMEPAKWaitStateTable[data & 0x3] | 0;
+	data = data | 0;
+    this.SRAMWaitState = this.GAMEPAKWaitStateTable[data & 0x3] | 0;
 	this.CARTWaitState0First = this.GAMEPAKWaitStateTable[(data >> 2) & 0x3] | 0;
-	this.CARTWaitState0Second = ((data & 0x10) == 0x10) ? 0x2 : 0x3;
+	this.CARTWaitState0Second = ((data & 0x10) == 0x10) ? 0x1 : 0x2;
 	this.CARTWaitState1First = this.GAMEPAKWaitStateTable[(data >> 5) & 0x3] | 0;
-	this.CARTWaitState1Second = (data > 0x7F) ? 0x2 : 0x5;
+	this.CARTWaitState1Second = (data > 0x7F) ? 0x1 : 0x4;
 	this.WAITCNT0 = data | 0;
     //this.IOCore.cpu.dynarec.invalidateCaches();
 }
@@ -56,8 +57,9 @@ GameBoyAdvanceWait.prototype.readWAITCNT0 = function () {
 	return this.WAITCNT0 | 0;
 }
 GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
-	this.CARTWaitState2First = this.GAMEPAKWaitStateTable[data & 0x3] | 0;
-	this.CARTWaitState2Second = ((data & 0x8) == 0x8) ? 0x2 : 0x9;
+	data = data | 0;
+    this.CARTWaitState2First = this.GAMEPAKWaitStateTable[data & 0x3] | 0;
+	this.CARTWaitState2Second = ((data & 0x8) == 0x8) ? 0x1 : 0x8;
 	this.prefetchEnabled = ((data & 0x40) == 0x40);
 	if (!this.prefetchEnabled) {
 		this.ROMPrebuffer = 0;
