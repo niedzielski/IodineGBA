@@ -291,7 +291,7 @@ GameBoyAdvanceDMA.prototype.decrementWordCount = function (dmaChannel, source, d
 	destination = destination | 0;
 	transferred = transferred | 0;
 	//Decrement the word count:
-	var wordCountShadow = (this.wordCountShadow[dmaChannel | 0] - 1) & (((dmaChannel | 0) < 3) ? 0x3FFF : 0xFFFF);
+	var wordCountShadow = ((this.wordCountShadow[dmaChannel | 0] | 0) - 1) & (((dmaChannel | 0) < 3) ? 0x3FFF : 0xFFFF);
 	if ((wordCountShadow | 0) == 0) {
 		//DMA transfer ended, handle accordingly:
 		wordCountShadow = this.finalizeDMA(dmaChannel | 0, source | 0, destination | 0, transferred | 0) | 0;
