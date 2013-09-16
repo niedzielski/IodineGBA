@@ -441,9 +441,18 @@ GameBoyAdvanceGraphics.prototype.writeDISPSTAT0 = function (data) {
 	//HBlank flag read only.
 	//V-Counter flag read only.
 	//Only LCD IRQ generation enablers can be set here:
-	this.IRQVBlank = ((data & 0x08) == 0x08);
-	this.IRQHBlank = ((data & 0x10) == 0x10);
-	this.IRQVCounter = ((data & 0x20) == 0x20);
+	if (((data & 0x08) == 0x08) && this.IRQVBlank && this.inVBlank) {
+        this.IOCore.irq.requestIRQ(0x1);
+    }
+    this.IRQVBlank = ((data & 0x08) == 0x08);
+	if (((data & 0x10) == 0x10) && !this.IRQHBlank && this.inHBlank) {
+        this.IOCore.irq.requestIRQ(0x2);
+    }
+    this.IRQHBlank = ((data & 0x10) == 0x10);
+	if (((data & 0x20) == 0x20) && !this.IRQVCounter && this.VCounterMatch) {
+        this.IOCore.irq.requestIRQ(0x4);
+    }
+    this.IRQVCounter = ((data & 0x20) == 0x20);
 }
 GameBoyAdvanceGraphics.prototype.readDISPSTAT0 = function () {
 	return ((this.inVBlank ? 0x1 : 0) |
