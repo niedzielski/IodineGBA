@@ -29,14 +29,6 @@ function GameBoyAdvanceMemoryCache(memory) {
     //Make the memory core aware of us so it can invalidate us:
     this.memory.addMemoryCacheRoot(this);
 }
-/*GameBoyAdvanceMemoryCache.prototype.memoryReadFast8 = function (address) {
-    address = address >>> 0;
-    if ((address >>> 24) != (this.addressRead8 >>> 0)) {
-        this.addressRead8 = address >>> 24;
-        this.cacheRead8 = this.memory.memoryReader8[address >>> 24];
-    }
-    return this.cacheRead8(this.memory, address >>> 0) | 0;
-}*/
 GameBoyAdvanceMemoryCache.prototype.memoryReadFast16 = function (address) {
     address = address >>> 0;
     if ((address >>> 24) != (this.addressRead16 >>> 0)) {
@@ -53,15 +45,6 @@ GameBoyAdvanceMemoryCache.prototype.memoryReadFast32 = function (address) {
     }
     return this.cacheRead32(this.memory, address >>> 0) | 0;
 }
-/*GameBoyAdvanceMemoryCache.prototype.memoryWriteFast8 = function (address, data) {
-    address = address >>> 0;
-    data = data | 0;
-    if ((address >>> 24) != (this.addressWrite8 >>> 0)) {
-        this.addressWrite8 = address >>> 24;
-        this.cacheWrite8 = this.memory.memoryWriter8[address >>> 24];
-    }
-    this.cacheWrite8(this.memory, address >>> 0, data | 0);
-}*/
 GameBoyAdvanceMemoryCache.prototype.memoryWriteFast16 = function (address, data) {
     address = address >>> 0;
     data = data | 0;

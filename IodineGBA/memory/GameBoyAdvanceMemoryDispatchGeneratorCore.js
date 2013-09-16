@@ -200,7 +200,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryReadDispatch = func
                         /*
                          Unused (0E010000-FFFFFFFF)
                          */
-                        readUnused,
+                        readSRAM,
                         readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
                         readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
                         readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
@@ -323,7 +323,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = fun
                         /*
                          Unused (0E010000-FFFFFFFF)
                          */
-                        writeUnused,
+                        writeSRAM,
                         writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
                         writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
                         writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
