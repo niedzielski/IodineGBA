@@ -27,8 +27,7 @@ ARMInstructionSet.prototype.initialize = function () {
 	this.decode = 0;
 	this.execute = 0;
     this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.CPUCore.IOCore.memory);
-	this.compileInstructionMap();
-    this.compileReducedInstructionMap();
+    this.compileReducedInstructionMap(this.compileInstructionMap());
 }
 ARMInstructionSet.prototype.executeIteration = function () {
 	//Push the new fetch access:
@@ -44,7 +43,7 @@ ARMInstructionSet.prototype.executeARM = function () {
 	if ((this.CPUCore.pipelineInvalid | 0) == 0) {
         //Check the condition code:
 		if (this.conditionCodeTest()) {
-			this.instructionMapReduced[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]();
+			this.instructionMap[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]();
 		}
 	}
 }
@@ -1810,7 +1809,7 @@ ARMInstructionSet.prototype.NOP = function (parentObj, operand) {
 	//nothing...
 }
 ARMInstructionSet.prototype.compileInstructionMap = function () {
-	this.instructionMap = [
+	var instructionMap = [
 		//0
 		[
 			[
@@ -4085,10 +4084,10 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 		this.generateLowMap(this.LDRB, this.sprip),
 	];
 	//60-6F
-	this.generateStoreLoadInstructionSector1();
+	this.generateStoreLoadInstructionSector1(instructionMap);
 	//70-7F
-	this.generateStoreLoadInstructionSector2();
-	this.instructionMap = this.instructionMap.concat([
+	this.generateStoreLoadInstructionSector2(instructionMap);
+	instructionMap = instructionMap.concat([
 		//80
 		this.generateLowMap(this.STMDA, this.guardRegisterReadSTM),
 		//81
@@ -4346,6 +4345,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
 		//FF
 		this.generateLowMap(this.SWI, this.NOP)
 	]);
+    return instructionMap;
 }
 ARMInstructionSet.prototype.generateLowMap = function (instructionOpcode, dataOpcode) {
 	return [
@@ -4483,7 +4483,7 @@ ARMInstructionSet.prototype.generateLowMap2 = function (instructionOpcode, instr
 		]
 	];
 }
-ARMInstructionSet.prototype.generateStoreLoadInstructionSector1 = function () {
+ARMInstructionSet.prototype.generateStoreLoadInstructionSector1 = function (instructionMap) {
 	var instrMap = [
 		this.STR,
 		this.LDR,
@@ -4520,10 +4520,10 @@ ARMInstructionSet.prototype.generateStoreLoadInstructionSector1 = function () {
 				]);
 			}
 		}
-		this.instructionMap.push(lowMap);
+		instructionMap.push(lowMap);
 	}
 }
-ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function () {
+ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function (instructionMap) {
 	var instrMap = [
 		this.STR,
 		this.LDR,
@@ -4572,24 +4572,21 @@ ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function () {
 				]);
 			}
 		}
-		this.instructionMap.push(lowMap);
+		instructionMap.push(lowMap);
 	}
 }
-ARMInstructionSet.prototype.compileReducedInstructionMap = function () {
+ARMInstructionSet.prototype.compileReducedInstructionMap = function (instructionMap) {
     //Flatten the multi-dimensional decode array:
-    var indice = 0;
-    this.instructionMapReduced = [];
+    this.instructionMap = [];
     for (var range1 = 0; range1 < 0x100; ++range1) {
-        var instrDecoded = this.instructionMap[range1];
+        var instrDecoded = instructionMap[range1];
         for (var range2 = 0; range2 < 0x10; ++range2) {
             var instructionCombo = instrDecoded[range2];
-            this.instructionMapReduced.push(this.appendInstruction(this, instructionCombo[0], instructionCombo[1]));
+            this.instructionMap.push(this.appendInstruction(this, instructionCombo[0], instructionCombo[1]));
         }
     }
-	//Reduce memory usage by nulling the temporary multi array:
-	this.instructionMap = null;
     //Force length to be ready only:
-    Object.defineProperty(this.instructionMapReduced, "length", {writable: false});
+    Object.defineProperty(this.instructionMap, "length", {writable: false});
 }
 ARMInstructionSet.prototype.appendInstruction = function (parentObj, decodedInstr, decodedOperand) {
     return function () {
