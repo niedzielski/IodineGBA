@@ -182,7 +182,7 @@ function ImportSave() {
         }
     }
     else {
-        alert("No previous save found.");
+        //alert("No previous save found.");
     }
 }
 function SaveToStorage(name, save) {
