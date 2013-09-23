@@ -22,9 +22,7 @@ function GameBoyAdvanceSRAMChip() {
 }
 GameBoyAdvanceSRAMChip.prototype.load = function (save) {
     if ((save.length) == 0x8000) {
-        for (var index = 0; (index | 0) < 0x8000; index = ((index | 0) + 1) | 0) {
-            this.SRAM = save;
-        }
+        this.SRAM = save;
     }
 }
 GameBoyAdvanceSRAMChip.prototype.read = function (address) {

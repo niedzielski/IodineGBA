@@ -37,9 +37,15 @@ GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
 }
 GameBoyAdvanceCartridge.prototype.decodeName = function () {
     this.name = "GUID_";
-    var address = 0xAC;
-    if ((this.ROMLength | 0) >= 0xC0 && (this.ROM[address | 0] | 0) > 0) {
-        this.name += String.fromCharCode(this.ROM[address | 0] | 0);
+    if ((this.ROMLength | 0) >= 0xC0) {
+        for (var address = 0xAC; (address | 0) < 0xB3; address = ((address | 0) + 1) | 0) {
+            if ((this.ROM[address | 0] | 0) > 0) {
+                this.name += String.fromCharCode(this.ROM[address | 0] | 0);
+            }
+            else {
+                this.name += "_";
+            }
+        }
     }
 }
 GameBoyAdvanceCartridge.prototype.preprocessROMAccess = function () {

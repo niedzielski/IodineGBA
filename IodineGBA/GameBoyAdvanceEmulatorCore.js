@@ -147,7 +147,10 @@ GameBoyAdvanceEmulator.prototype.importSave = function (save) {
 }
 GameBoyAdvanceEmulator.prototype.exportSave = function () {
     if (this.saveHandler && !this.faultFound && this.romFound) {
-        this.saveHandler(this.IOCore.cartridge.name, this.IOCore.saves.exportSave());
+        var save = this.IOCore.saves.exportSave();
+        if (save != null) {
+            this.saveHandler(this.IOCore.cartridge.name, save);
+        }
     }
 }
 GameBoyAdvanceEmulator.prototype.setSpeed = function (speed) {

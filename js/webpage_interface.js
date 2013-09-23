@@ -34,6 +34,7 @@ window.onload = function () {
     //Initialize Iodine:
     Iodine = new GameBoyAdvanceEmulator();
     Iodine.attachCanvas(document.getElementById("emulator_target"));
+    Iodine.attachSAVEHandler(SaveToStorage);
     //Hook the GUI controls.
     registerGUIEvents();
 }
@@ -118,6 +119,7 @@ function registerGUIEvents() {
     });
     addEvent("click", document.getElementById("restart"), function (event) {
         Iodine.restart();
+        ImportSave();
         event.preventDefault();
     });
     document.getElementById("sound").checked = false;
@@ -163,6 +165,37 @@ function attachROM(ROM) {
     }
     catch (error) {
         Iodine.attachROM(ROM);
+    }
+    ImportSave();
+}
+function ImportSave() {
+    var name = Iodine.getGameName();
+    if (name != "") {
+        try {
+            var save = findValue("SAVE_" + name);
+            if (save != null) {
+                Iodine.importSave(base64ToArray(save));
+            }
+        }
+        catch (error) {
+            alert("Could not read save: " + error.message);
+        }
+    }
+    else {
+        alert("No previous save found.");
+    }
+}
+function SaveToStorage(name, save) {
+    if (name != "") {
+        try {
+            setValue("SAVE_" + name, arrayToBase64(save));
+        }
+        catch (error) {
+            alert("Could not store save: " + error.message);
+        }
+    }
+    else {
+        alert("No game ID was found, thus we cannot save...");
     }
 }
 function resetPlayButton() {
