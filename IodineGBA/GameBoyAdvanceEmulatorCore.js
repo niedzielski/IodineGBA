@@ -17,32 +17,33 @@
  */
 function GameBoyAdvanceEmulator() {
     this.SKIPBoot = false;                    //Skip the BIOS boot screen.
-    this.dynarecEnabled = false;            //Use the dynarec engine?
-    this.dynarecTHUMB = true;               //Enable THUMB compiling.
-    this.dynarecARM = false;                //Enable ARM compiling.
-    this.useWorkers = true;                //Enable Web Workers for compiling.
-    this.emulatorSpeed = 1;                    //Speed multiplier of the emulator.
-    this.timerIntervalRate = 16;            //How often the emulator core is called into (in milliseconds).
-    this.graphicsFound = false;                //Do we have graphics output sink found yet?
-    this.audioFound = false;                //Do we have audio output sink found yet?
+    this.dynarecEnabled = false;              //Use the dynarec engine?
+    this.dynarecTHUMB = true;                 //Enable THUMB compiling.
+    this.dynarecARM = false;                  //Enable ARM compiling.
+    this.useWorkers = true;                   //Enable Web Workers for compiling.
+    this.emulatorSpeed = 1;                   //Speed multiplier of the emulator.
+    this.timerIntervalRate = 16;              //How often the emulator core is called into (in milliseconds).
+    this.graphicsFound = false;               //Do we have graphics output sink found yet?
+    this.audioFound = false;                  //Do we have audio output sink found yet?
     this.romFound = false;                    //Do we have a ROM loaded in?
-    this.faultFound = false;                //Did we run into a fatal error?
-    this.paused = true;                        //Are we paused?
-    this.audioVolume = 1;                    //Starting audio volume.
+    this.faultFound = false;                  //Did we run into a fatal error?
+    this.paused = true;                       //Are we paused?
+    this.audioVolume = 1;                     //Starting audio volume.
     this.audioBufferUnderrunLimit = 4;        //Audio buffer minimum span amount over x interpreter iterations.
     this.audioBufferSize = 10;                //Audio buffer maximum span amount over x interpreter iterations.
     this.offscreenWidth = 240;                //Width of the GBA screen.
-    this.offscreenHeight = 160;                //Height of the GBA screen.
-    this.BIOS = [];                            //Initialize BIOS as not existing.
+    this.offscreenHeight = 160;               //Height of the GBA screen.
+    this.BIOS = [];                           //Initialize BIOS as not existing.
     //Cache some frame buffer lengths:
     this.offscreenRGBCount = this.offscreenWidth * this.offscreenHeight * 3;
     this.offscreenRGBACount = this.offscreenWidth * this.offscreenHeight * 4;
     //Graphics buffers to generate in advance:
     this.frameBuffer = getInt32Array(this.offscreenRGBCount);        //The internal buffer to composite to.
-    this.swizzledFrame = getUint8Array(this.offscreenRGBCount);        //The swizzled output buffer that syncs to the internal framebuffer on v-blank.
-    this.initializeGraphicsBuffer();                                //Pre-set the swizzled buffer for first frame.
-    this.drewFrame = false;                    //Did we draw the last iteration?
+    this.swizzledFrame = getUint8Array(this.offscreenRGBCount);      //The swizzled output buffer that syncs to the internal framebuffer on v-blank.
+    this.initializeGraphicsBuffer();                                 //Pre-set the swizzled buffer for first frame.
+    this.drewFrame = false;                   //Did we draw the last iteration?
     this.audioUpdateState = false;            //Do we need to update the sound core with new info?
+    this.saveHandler = null;                  //Save handler attached by GUI.
     //Calculate some multipliers against the core emulator timer:
     this.calculateTimings();
 }
@@ -55,13 +56,14 @@ GameBoyAdvanceEmulator.prototype.play = function () {
 GameBoyAdvanceEmulator.prototype.pause = function () {
     if (!this.paused) {
         this.clearTimer();
-        this.save();
+        this.exportSave();
         this.paused = true;
     }
 }
 GameBoyAdvanceEmulator.prototype.stop = function () {
     this.faultFound = false;
     this.romFound = false;
+    this.audioUpdateState = this.audioFound;
     this.pause();
 }
 GameBoyAdvanceEmulator.prototype.statusClear = function () {
@@ -70,7 +72,7 @@ GameBoyAdvanceEmulator.prototype.statusClear = function () {
 }
 GameBoyAdvanceEmulator.prototype.restart = function () {
     this.faultFound = false;
-    this.save();
+    this.exportSave();
     this.initializeCore();
     this.resetMetrics();
     this.reinitializeAudio();
@@ -118,8 +120,35 @@ GameBoyAdvanceEmulator.prototype.attachBIOS = function (BIOS) {
     this.statusClear();
     this.BIOS = BIOS;
 }
-GameBoyAdvanceEmulator.prototype.save = function () {
-    //Nothing yet...
+GameBoyAdvanceEmulator.prototype.getGameName = function () {
+    if (!this.faultFound && this.romFound) {
+        return this.IOCore.cartridge.name;
+    }
+    else {
+        return "";
+    }
+}
+GameBoyAdvanceEmulator.prototype.attachSAVEHandler = function (handler) {
+    if (typeof handler == "function") {
+        this.saveHandler = handler;
+    }
+}
+GameBoyAdvanceEmulator.prototype.importSave = function (save) {
+    if (!this.faultFound && this.romFound) {
+        var length = save.length | 0;
+        var convertedSave = getUint8Array(length | 0);
+        if ((length | 0) > 0) {
+            for (var index = 0; (index | 0) < (length | 0); index = ((index | 0) + 1) | 0) {
+                convertedSave[index | 0] = save[index | 0] & 0xFF;
+            }
+            this.IOCore.saves.importSave(convertedSave);
+        }
+    }
+}
+GameBoyAdvanceEmulator.prototype.exportSave = function () {
+    if (this.saveHandler && !this.faultFound && this.romFound) {
+        this.saveHandler(this.IOCore.cartridge.name, this.IOCore.saves.exportSave());
+    }
 }
 GameBoyAdvanceEmulator.prototype.setSpeed = function (speed) {
     this.emulatorSpeed = Math.min(Math.max(parseFloat(speed), 0.01), 10);

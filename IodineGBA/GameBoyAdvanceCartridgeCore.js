@@ -23,6 +23,7 @@ GameBoyAdvanceCartridge.prototype.initialize = function () {
     this.ROM = this.getROMArray(this.IOCore.emulatorCore.ROM);
     this.ROM16 = getUint16View(this.ROM);
     this.ROM32 = getInt32View(this.ROM);
+    this.decodeName();
     this.preprocessROMAccess();
 }
 GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
@@ -33,6 +34,13 @@ GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
         newArray[index | 0] = old_array[index | 0] | 0;
     }
     return newArray;
+}
+GameBoyAdvanceCartridge.prototype.decodeName = function () {
+    this.name = "GUID_";
+    var address = 0xAC;
+    if ((this.ROMLength | 0) >= 0xC0 && (this.ROM[address | 0] | 0) > 0) {
+        this.name += String.fromCharCode(this.ROM[address | 0] | 0);
+    }
 }
 GameBoyAdvanceCartridge.prototype.preprocessROMAccess = function () {
     this.readROMOnly16 = (this.ROM16) ? this.readROMOnly16Optimized : this.readROMOnly16Slow;

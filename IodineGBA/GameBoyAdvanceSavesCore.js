@@ -16,7 +16,7 @@
  *
  */
 function GameBoyAdvanceSaves(IOCore) {
-    this.IOCore = IOCore;
+    this.cartridge = IOCore.cartridge;
     this.initialize();
 }
 GameBoyAdvanceSaves.prototype.initialize = function () {
@@ -26,7 +26,16 @@ GameBoyAdvanceSaves.prototype.initialize = function () {
     this.SRAMChip = new GameBoyAdvanceSRAMChip();
     this.FLASHChip = null;
     this.EEPROMChip = null;
-    this.TILTChip = null;
+    this.saves = null;
+}
+GameBoyAdvanceSaves.prototype.importSave = function (saves) {
+    this.saves = saves;
+    this.SRAMChip.load(this.saves);
+    //this.FLASHChip.load(this.saves);
+    //this.EEPROMChip.load(this.saves);
+}
+GameBoyAdvanceSaves.prototype.exportSave = function (saves) {
+    return this.saves;
 }
 GameBoyAdvanceSaves.prototype.readGPIO8 = function (address) {
     address = address | 0;
@@ -37,7 +46,7 @@ GameBoyAdvanceSaves.prototype.readGPIO8 = function (address) {
     }
     else {
         //ROM:
-        data = this.IOCore.cartridge.readROMOnly8(address | 0) | 0;
+        data = this.cartridge.readROMOnly8(address | 0) | 0;
     }
     return data | 0;
 }
@@ -50,7 +59,7 @@ GameBoyAdvanceSaves.prototype.readEEPROM8 = function (address) {
     }
     else {
         //ROM:
-        data = this.IOCore.cartridge.readROMOnly8(address | 0) | 0;
+        data = this.cartridge.readROMOnly8(address | 0) | 0;
     }
     return data | 0;
 }
@@ -63,7 +72,7 @@ GameBoyAdvanceSaves.prototype.readGPIO16 = function (address) {
     }
     else {
         //ROM:
-        data = this.IOCore.cartridge.readROMOnly16(address | 0) | 0;
+        data = this.cartridge.readROMOnly16(address | 0) | 0;
     }
     return data | 0;
 }
@@ -76,7 +85,7 @@ GameBoyAdvanceSaves.prototype.readEEPROM16 = function (address) {
     }
     else {
         //ROM:
-        data = this.IOCore.cartridge.readROMOnly16(address | 0) | 0;
+        data = this.cartridge.readROMOnly16(address | 0) | 0;
     }
     return data | 0;
 }
@@ -89,7 +98,7 @@ GameBoyAdvanceSaves.prototype.readGPIO32 = function (address) {
     }
     else {
         //ROM:
-        data = this.IOCore.cartridge.readROMOnly32(address | 0) | 0;
+        data = this.cartridge.readROMOnly32(address | 0) | 0;
     }
     return data | 0;
 }
@@ -102,7 +111,7 @@ GameBoyAdvanceSaves.prototype.readEEPROM32 = function (address) {
     }
     else {
         //ROM:
-        data = this.IOCore.cartridge.readROMOnly32(address | 0) | 0;
+        data = this.cartridge.readROMOnly32(address | 0) | 0;
     }
     return data | 0;
 }
@@ -112,20 +121,7 @@ GameBoyAdvanceSaves.prototype.readSRAM = function (address) {
     switch (this.saveType | 0) {
         case 1:
             //SRAM:
-            /*if (this.TILTChip.isUnlocked()) {
-                if ((address | 0) < 0x8000) {
-                    //TILT:
-                    data = this.SRAMChip.read(address | 0) | 0;
-                }
-                else {
-                    //SRAM:
-                    data = this.TILTChip.read(address | 0) | 0;
-                }
-            }
-            else {*/
-                //SRAM:
-                data = this.SRAMChip.read(address | 0) | 0;
-            //}
+            data = this.SRAMChip.read(address | 0) | 0;
             break;
         case 2:
             //FLASH:
@@ -152,13 +148,13 @@ GameBoyAdvanceSaves.prototype.writeEEPROM8 = function (address, data) {
 GameBoyAdvanceSaves.prototype.writeSRAM = function (address, data) {
     address = address | 0;
     data = data | 0;
-    /*switch (this.saveType | 0) {
-        case 1:*/
+    switch (this.saveType | 0) {
+        case 1:
             //SRAM:
             this.SRAMChip.write(address | 0, data | 0);
-            /*break;
+            break;
         case 2:
             //FLASH:
             this.FLASHChip.write(address | 0, data | 0);
-    }*/
+    }
 }
