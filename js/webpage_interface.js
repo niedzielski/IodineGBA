@@ -134,11 +134,13 @@ function registerGUIEvents() {
     document.getElementById("skip_boot").checked = false;
     addEvent("click", document.getElementById("skip_boot"), function () {
              Iodine.toggleSkipBootROM(this.checked);
+             ImportSave();
     });
     document.getElementById("lle_jit").checked = false;
     addEvent("click", document.getElementById("lle_jit"), function () {
              Iodine.toggleDynarec(this.checked);
     });
+    addEvent("unload", document, ExportSave);
     setInterval(
             function () {
                 if (!Iodine.paused) {
@@ -182,8 +184,11 @@ function ImportSave() {
         }
     }
     else {
-        //alert("No previous save found.");
+        alert("No previous save found.");
     }
+}
+function ExportSave() {
+    Iodine.exportSave();
 }
 function SaveToStorage(name, save) {
     if (name != "") {

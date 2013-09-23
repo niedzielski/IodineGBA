@@ -39,7 +39,6 @@ GameBoyAdvanceSaves.prototype.initialize = function () {
         default:
             this.saves = null;
     }
-    this.saves = this.SRAMChip.SRAM;
 }
 GameBoyAdvanceSaves.prototype.importSave = function (saves) {
     this.saves = saves;
