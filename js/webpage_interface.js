@@ -183,9 +183,6 @@ function ImportSave() {
             alert("Could not read save: " + error.message);
         }
     }
-    else {
-        alert("No previous save found.");
-    }
 }
 function ExportSave() {
     Iodine.exportSave();
@@ -198,9 +195,6 @@ function SaveToStorage(name, save) {
         catch (error) {
             alert("Could not store save: " + error.message);
         }
-    }
-    else {
-        alert("No game ID was found, thus we cannot save...");
     }
 }
 function resetPlayButton() {
