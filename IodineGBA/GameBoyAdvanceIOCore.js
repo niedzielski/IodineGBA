@@ -16,12 +16,12 @@
  *
  */
 function GameBoyAdvanceIO(emulatorCore) {
-	//Reference to the emulator core:
-	this.emulatorCore = emulatorCore;
-	//State Machine Tracking:
-	this.systemStatus = 0;
-	this.cyclesToIterate = 0;
-	this.cyclesOveriteratedPreviously = 0;
+    //Reference to the emulator core:
+    this.emulatorCore = emulatorCore;
+    //State Machine Tracking:
+    this.systemStatus = 0;
+    this.cyclesToIterate = 0;
+    this.cyclesOveriteratedPreviously = 0;
     this.accumulatedClocks = 0;
     this.graphicsClocks = 0;
     this.timerClocks = 0;
@@ -31,24 +31,24 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.flaggedDynarec = 0;
     this.BIOSFound = false;
     //Initialize the various handler objects:
-	this.memory = new GameBoyAdvanceMemory(this);
+    this.memory = new GameBoyAdvanceMemory(this);
     this.dma = new GameBoyAdvanceDMA(this);
-	this.gfx = new GameBoyAdvanceGraphics(this);
-	this.sound = new GameBoyAdvanceSound(this);
-	this.timer = new GameBoyAdvanceTimer(this);
-	this.irq = new GameBoyAdvanceIRQ(this);
-	this.serial = new GameBoyAdvanceSerial(this);
-	this.joypad = new GameBoyAdvanceJoyPad(this);
-	this.cartridge = new GameBoyAdvanceCartridge(this);
-	this.saves = new GameBoyAdvanceSaves(this);
+    this.gfx = new GameBoyAdvanceGraphics(this);
+    this.sound = new GameBoyAdvanceSound(this);
+    this.timer = new GameBoyAdvanceTimer(this);
+    this.irq = new GameBoyAdvanceIRQ(this);
+    this.serial = new GameBoyAdvanceSerial(this);
+    this.joypad = new GameBoyAdvanceJoyPad(this);
+    this.cartridge = new GameBoyAdvanceCartridge(this);
+    this.saves = new GameBoyAdvanceSaves(this);
     this.wait = new GameBoyAdvanceWait(this);
-	this.cpu = new GameBoyAdvanceCPU(this);
+    this.cpu = new GameBoyAdvanceCPU(this);
     this.memory.loadReferences();
     this.preprocessCPUHandler(0);   //Start in interpreter.
 }
 GameBoyAdvanceIO.prototype.iterate = function () {
-	//Find out how many clocks to iterate through this run:
-	this.cyclesToIterate = ((this.emulatorCore.CPUCyclesTotal | 0) + (this.cyclesOveriteratedPreviously | 0)) | 0;
+    //Find out how many clocks to iterate through this run:
+    this.cyclesToIterate = ((this.emulatorCore.CPUCyclesTotal | 0) + (this.cyclesOveriteratedPreviously | 0)) | 0;
     //An extra check to make sure we don't do stuff if we did too much last run:
     if ((this.cyclesToIterate | 0) > 0) {
         //Update our core event prediction:
@@ -60,18 +60,18 @@ GameBoyAdvanceIO.prototype.iterate = function () {
         //Ensure audio buffers at least once per iteration:
         this.sound.audioJIT();
     }
-	//If we clocked just a little too much, subtract the extra from the next run:
-	this.cyclesOveriteratedPreviously = this.cyclesToIterate | 0;
+    //If we clocked just a little too much, subtract the extra from the next run:
+    this.cyclesOveriteratedPreviously = this.cyclesToIterate | 0;
 }
 GameBoyAdvanceIO.prototype.runIterator = function () {
-	//Clock through the state machine:
-	while ((this.cyclesToIterate | 0) > 0) {
-		//Handle the current system state selected:
+    //Clock through the state machine:
+    while ((this.cyclesToIterate | 0) > 0) {
+        //Handle the current system state selected:
         this.stepHandle();
-	}
+    }
 }
 GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
-	clocks = clocks | 0;
+    clocks = clocks | 0;
     //This is used during normal/dma modes of operation:
     this.accumulatedClocks = ((this.accumulatedClocks | 0) + (clocks | 0)) | 0;
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
@@ -134,29 +134,29 @@ GameBoyAdvanceIO.prototype.updateCoreEventTime = function () {
     this.nextEventClocks = this.cyclesUntilNextEvent() | 0;
 }
 GameBoyAdvanceIO.prototype.getRemainingCycles = function () {
-	//Return the number of cycles left until iteration end:
-	return Math.max(this.cyclesToIterate | 0, 0) | 0;
+    //Return the number of cycles left until iteration end:
+    return Math.max(this.cyclesToIterate | 0, 0) | 0;
 }
 GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
-	switch (this.systemStatus | 0) {
-		case 0: //CPU Handle State
+    switch (this.systemStatus | 0) {
+        case 0: //CPU Handle State
             this.stepHandle = this.handleCPU;
             break;
-        case 1:	//DMA Handle State
-			this.stepHandle = this.handleDMA;
+        case 1:    //DMA Handle State
+            this.stepHandle = this.handleDMA;
             break;
-		case 2: //Handle Halt State
-			this.stepHandle = this.handleHalt;
+        case 2: //Handle Halt State
+            this.stepHandle = this.handleHalt;
             break;
-		case 3: //DMA Inside Halt State
-			this.stepHandle = this.handleDMA;
+        case 3: //DMA Inside Halt State
+            this.stepHandle = this.handleDMA;
             break;
-		case 4: //Handle Stop State
-			this.stepHandle = this.handleStop;
+        case 4: //Handle Stop State
+            this.stepHandle = this.handleStop;
             break;
         default:
             throw(new Error("Invalid state selected."));
-	}
+    }
 }
 GameBoyAdvanceIO.prototype.handleCPUInterpreter = function () {
     //Execute next instruction:
@@ -180,27 +180,27 @@ GameBoyAdvanceIO.prototype.preprocessCPUHandler = function (useDynarec) {
     }
 }
 GameBoyAdvanceIO.prototype.handleDMA = function () {
-	if (this.dma.perform()) {
-		//If DMA is done, exit it:
+    if (this.dma.perform()) {
+        //If DMA is done, exit it:
         this.deflagStepper(0x1);
         this.updateCoreSpill();
-	}
+    }
 }
 GameBoyAdvanceIO.prototype.handleHalt = function () {
-	if (!this.irq.IRQMatch()) {
-		//Clock up to next IRQ match or DMA:
-		this.updateCore(this.cyclesUntilNextHALTEvent() | 0);
-	}
-	else {
-		//Exit HALT promptly:
+    if (!this.irq.IRQMatch()) {
+        //Clock up to next IRQ match or DMA:
+        this.updateCore(this.cyclesUntilNextHALTEvent() | 0);
+    }
+    else {
+        //Exit HALT promptly:
         this.deflagStepper(0x2);
-	}
+    }
 }
 GameBoyAdvanceIO.prototype.handleStop = function () {
-	//Update sound system to add silence to buffer:
-	this.sound.addClocks(this.getRemainingCycles() | 0);
-	this.cyclesToIterate = 0;
-	//Exits when user presses joypad or from an external irq outside of GBA internal.
+    //Update sound system to add silence to buffer:
+    this.sound.addClocks(this.getRemainingCycles() | 0);
+    this.cyclesToIterate = 0;
+    //Exits when user presses joypad or from an external irq outside of GBA internal.
 }
 GameBoyAdvanceIO.prototype.cyclesUntilNextHALTEvent = function () {
     //Find the clocks to the next HALT leave or DMA event:

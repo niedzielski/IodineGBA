@@ -16,45 +16,45 @@
  *
  */
 function GameBoyAdvanceWindowRenderer(gfx) {
-	this.gfx = gfx;
+    this.gfx = gfx;
     this.WINXCoordRight = 0;
-	this.WINXCoordLeft = 0;
+    this.WINXCoordLeft = 0;
     this.WINYCoordBottom = 0;
-	this.WINYCoordTop = 0;
+    this.WINYCoordTop = 0;
     this.WINBG0 = false;
-	this.WINBG1 = false;
-	this.WINBG2 = false;
-	this.WINBG3 = false;
-	this.WINOBJ = false;
-	this.WINEffects = false;
+    this.WINBG1 = false;
+    this.WINBG2 = false;
+    this.WINBG3 = false;
+    this.WINOBJ = false;
+    this.WINEffects = false;
     this.compositor = new GameBoyAdvanceCompositor(this.gfx);
-	this.preprocess();
+    this.preprocess();
 }
 GameBoyAdvanceWindowRenderer.prototype.renderScanLine = function (line, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
-	//Arrange our layer stack so we can remove disabled and order for correct edge case priority:
-	OBJBuffer = (this.WINOBJ) ? OBJBuffer : null;
-	BG0Buffer = (this.WINBG0) ? BG0Buffer : null;
-	BG1Buffer = (this.WINBG1) ? BG1Buffer : null;
-	BG2Buffer = (this.WINBG2) ? BG2Buffer : null;
-	BG3Buffer = (this.WINBG3) ? BG3Buffer : null;
-	if ((this.WINYCoordTop | 0) <= (line | 0) && (line | 0) < (this.WINYCoordBottom | 0)) {
-		this.compositor.renderScanLine(this.WINXCoordLeft | 0, Math.min(this.WINXCoordRight | 0, 240) | 0, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	}
+    //Arrange our layer stack so we can remove disabled and order for correct edge case priority:
+    OBJBuffer = (this.WINOBJ) ? OBJBuffer : null;
+    BG0Buffer = (this.WINBG0) ? BG0Buffer : null;
+    BG1Buffer = (this.WINBG1) ? BG1Buffer : null;
+    BG2Buffer = (this.WINBG2) ? BG2Buffer : null;
+    BG3Buffer = (this.WINBG3) ? BG3Buffer : null;
+    if ((this.WINYCoordTop | 0) <= (line | 0) && (line | 0) < (this.WINYCoordBottom | 0)) {
+        this.compositor.renderScanLine(this.WINXCoordLeft | 0, Math.min(this.WINXCoordRight | 0, 240) | 0, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    }
 }
 GameBoyAdvanceWindowRenderer.prototype.preprocess = function () {
-	this.compositor.preprocess(this.WINEffects);
+    this.compositor.preprocess(this.WINEffects);
 }
 GameBoyAdvanceWindowRenderer.prototype.writeWINH0 = function (data) {
-	this.WINXCoordRight = data | 0;		//Window x-coord goes up to this minus 1.
+    this.WINXCoordRight = data | 0;        //Window x-coord goes up to this minus 1.
 }
 GameBoyAdvanceWindowRenderer.prototype.writeWINH1 = function (data) {
-	this.WINXCoordLeft = data | 0;
+    this.WINXCoordLeft = data | 0;
 }
 GameBoyAdvanceWindowRenderer.prototype.writeWINV0 = function (data) {
-	this.WINYCoordBottom = data | 0;	//Window y-coord goes up to this minus 1.
+    this.WINYCoordBottom = data | 0;    //Window y-coord goes up to this minus 1.
 }
 GameBoyAdvanceWindowRenderer.prototype.writeWINV1 = function (data) {
-	this.WINYCoordTop = data | 0;
+    this.WINYCoordTop = data | 0;
 }
 GameBoyAdvanceWindowRenderer.prototype.writeWININ = function (data) {
     data = data | 0;

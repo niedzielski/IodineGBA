@@ -16,15 +16,15 @@
  *
  */
 function GameBoyAdvanceFIFO(IOCore) {
-	this.initializeFIFO();
+    this.initializeFIFO();
 }
 GameBoyAdvanceFIFO.prototype.initializeFIFO = function () {
-	this.buffer = getInt8Array(0x20);
-	this.count = 0;
-	this.position = 0;
+    this.buffer = getInt8Array(0x20);
+    this.count = 0;
+    this.position = 0;
 }
 GameBoyAdvanceFIFO.prototype.push = function (sample) {
-	sample = sample | 0;
+    sample = sample | 0;
     var writePosition = ((this.position | 0) + (this.count | 0)) | 0;
     this.buffer[writePosition & 0x1F] = (sample << 24) >> 24;
     if ((this.count | 0) < 0x20) {
@@ -33,17 +33,17 @@ GameBoyAdvanceFIFO.prototype.push = function (sample) {
     }
 }
 GameBoyAdvanceFIFO.prototype.shift = function () {
-	var output = 0;
-	if ((this.count | 0) > 0) {
-		this.count = ((this.count | 0) - 1) | 0;
-		output = this.buffer[this.position & 0x1F] << 3;
-		this.position = ((this.position | 0) + 1) & 0x1F;
-	}
-	return output | 0;
+    var output = 0;
+    if ((this.count | 0) > 0) {
+        this.count = ((this.count | 0) - 1) | 0;
+        output = this.buffer[this.position & 0x1F] << 3;
+        this.position = ((this.position | 0) + 1) & 0x1F;
+    }
+    return output | 0;
 }
 GameBoyAdvanceFIFO.prototype.requestingDMA = function () {
-	return (this.count <= 0x10);
+    return (this.count <= 0x10);
 }
 GameBoyAdvanceFIFO.prototype.samplesUntilDMATrigger = function () {
-	return ((this.count | 0) - 0x10) | 0;
+    return ((this.count | 0) - 0x10) | 0;
 }

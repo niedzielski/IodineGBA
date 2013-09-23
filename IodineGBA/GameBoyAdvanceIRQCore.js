@@ -16,22 +16,22 @@
  *
  */
 function GameBoyAdvanceIRQ(IOCore) {
-	//Build references:
-	this.IOCore = IOCore;
-	this.initializeIRQState();
+    //Build references:
+    this.IOCore = IOCore;
+    this.initializeIRQState();
 }
 GameBoyAdvanceIRQ.prototype.initializeIRQState = function () {
-	this.interruptsEnabled = 0;
-	this.interruptsRequested = 0;
-	this.IME = false;
+    this.interruptsEnabled = 0;
+    this.interruptsRequested = 0;
+    this.IME = false;
 }
 GameBoyAdvanceIRQ.prototype.IRQMatch = function () {
-	//Used to exit HALT:
-	return ((this.interruptsEnabled & this.interruptsRequested) != 0);
+    //Used to exit HALT:
+    return ((this.interruptsEnabled & this.interruptsRequested) != 0);
 }
 GameBoyAdvanceIRQ.prototype.checkForIRQFire = function () {
-	//Tell the CPU core when the emulated hardware is triggering an IRQ:
-	this.IOCore.cpu.triggerIRQ((this.interruptsEnabled & this.interruptsRequested) != 0 && this.IME);
+    //Tell the CPU core when the emulated hardware is triggering an IRQ:
+    this.IOCore.cpu.triggerIRQ((this.interruptsEnabled & this.interruptsRequested) != 0 && this.IME);
 }
 GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
     irqLineToSet = irqLineToSet | 0;
@@ -39,49 +39,49 @@ GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
     this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.writeIME = function (data) {
-	data = data | 0;
+    data = data | 0;
     this.IME = ((data & 0x1) == 0x1);
-	this.checkForIRQFire();
+    this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIME = function () {
-	return (this.IME ? 0xFF : 0xFE);
+    return (this.IME ? 0xFF : 0xFE);
 }
 GameBoyAdvanceIRQ.prototype.writeIE0 = function (data) {
-	data = data | 0;
+    data = data | 0;
     this.interruptsEnabled &= 0x3F00;
-	this.interruptsEnabled |= data | 0;
-	this.checkForIRQFire();
+    this.interruptsEnabled |= data | 0;
+    this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIE0 = function () {
-	return this.interruptsEnabled & 0xFF;
+    return this.interruptsEnabled & 0xFF;
 }
 GameBoyAdvanceIRQ.prototype.writeIE1 = function (data) {
-	data = data | 0;
+    data = data | 0;
     this.interruptsEnabled &= 0xFF;
-	this.interruptsEnabled |= (data << 8) & 0x3F00;
-	this.checkForIRQFire();
+    this.interruptsEnabled |= (data << 8) & 0x3F00;
+    this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIE1 = function () {
-	return this.interruptsEnabled >> 8;
+    return this.interruptsEnabled >> 8;
 }
 GameBoyAdvanceIRQ.prototype.writeIF0 = function (data) {
-	data = data | 0;
+    data = data | 0;
     this.interruptsRequested &= ~data;
-	this.checkForIRQFire();
+    this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF0 = function () {
-	return this.interruptsRequested & 0xFF;
+    return this.interruptsRequested & 0xFF;
 }
 GameBoyAdvanceIRQ.prototype.writeIF1 = function (data) {
-	data = data | 0;
+    data = data | 0;
     this.interruptsRequested &= ~(data << 8);
-	this.checkForIRQFire();
+    this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF1 = function () {
-	return this.interruptsRequested >> 8;
+    return this.interruptsRequested >> 8;
 }
 GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
-	var clocks = -1;
+    var clocks = -1;
     clocks = this.findClosestEvent(clocks | 0, this.IOCore.gfx.nextVBlankIRQEventTime() | 0, 0x1) | 0;
     clocks = this.findClosestEvent(clocks | 0, this.IOCore.gfx.nextHBlankIRQEventTime() | 0, 0x2) | 0;
     clocks = this.findClosestEvent(clocks | 0, this.IOCore.gfx.nextVCounterIRQEventTime() | 0, 0x4) | 0;
@@ -97,7 +97,7 @@ GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
     //JoyPad input state should never update while we're in halt:
     //clocks = this.findClosestEvent(clocks | 0, this.IOCore.joypad.nextIRQEventTime() | 0, 0x1000) | 0;
     //clocks = this.findClosestEvent(clocks | 0, this.IOCore.cartridge.nextIRQEventTime() | 0, 0x2000) | 0;
-	return clocks | 0;
+    return clocks | 0;
 }
 GameBoyAdvanceIRQ.prototype.nextIRQEventTime = function () {
     var clocks = -1;
@@ -108,7 +108,7 @@ GameBoyAdvanceIRQ.prototype.nextIRQEventTime = function () {
     return clocks | 0;
 }
 GameBoyAdvanceIRQ.prototype.findClosestEvent = function (oldClocks, newClocks, flagID) {
-	oldClocks = oldClocks | 0;
+    oldClocks = oldClocks | 0;
     newClocks = newClocks | 0;
     flagID = flagID | 0;
     if ((this.interruptsEnabled & flagID) != 0) {

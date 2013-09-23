@@ -16,181 +16,181 @@
  *
  */
 function GameBoyAdvanceSWI(CPUCore) {
-	this.CPUCore = CPUCore;
-	this.IOCore = this.CPUCore.IOCore;
+    this.CPUCore = CPUCore;
+    this.IOCore = this.CPUCore.IOCore;
 }
 GameBoyAdvanceSWI.prototype.execute = function (command) {
-	switch (command) {
-		//Soft Reset:
-		case 0:
-			this.SoftReset();
-			break;
-		//Register Ram Reset:
-		case 0x01:
-			this.RegisterRAMReset();
-			break;
-		//Halt:
-		case 0x02:
-			this.Halt();
-			break;
-		//Stop:
-		case 0x03:
-			this.Stop();
-			break;
-		//Interrupt Wait:
-		case 0x04:
-			this.IntrWait();
-			break;
-		//VBlank Interrupt Wait:
-		case 0x05:
-			this.VBlankIntrWait();
-			break;
-		//Division:
-		case 0x06:
-			this.Div();
-			break;
-		//Division (Reversed Parameters):
-		case 0x07:
-			this.DivArm();
-			break;
-		//Square Root:
-		case 0x08:
-			this.Sqrt();
-			break;
-		//Arc Tangent:
-		case 0x09:
-			this.ArcTan();
-			break;
-		//Arc Tangent Corrected:
-		case 0x0A:
-			this.ArcTan2();
-			break;
-		//CPU Set (Memory Copy + Fill):
-		case 0x0B:
-			this.CpuSet();
-			break;
-		//CPU Fast Set (Memory Copy + Fill):
-		case 0x0C:
-			this.CpuFastSet();
-			break;
-		//Calculate BIOS Checksum:
-		case 0x0D:
-			this.GetBiosChecksum();
-			break;
-		//Calculate BG Rotation/Scaling Parameters:
-		case 0x0E:
-			this.BgAffineSet();
-			break;
-		//Calculate OBJ Rotation/Scaling Parameters:
-		case 0x0F:
-			this.ObjAffineSet();
-			break;
-		//Bit Unpack Tile Data:
-		case 0x10:
-			this.BitUnPack();
-			break;
-		//Uncompress LZ77 Compressed Data (WRAM):
-		case 0x11:
-			this.LZ77UnCompWram();
-			break;
-		//Uncompress LZ77 Compressed Data (VRAM):
-		case 0x12:
-			this.LZ77UnCompVram();
-			break;
-		//Uncompress Huffman Compressed Data:
-		case 0x13:
-			this.HuffUnComp();
-			break;
-		//Uncompress Run-Length Compressed Data (WRAM):
-		case 0x14:
-			this.RLUnCompWram();
-			break;
-		//Uncompress Run-Length Compressed Data (VRAM):
-		case 0x15:
-			this.RLUnCompVram();
-			break;
-		//Filter Out Difference In Data (8-bit/WRAM):
-		case 0x16:
-			this.Diff8bitUnFilterWram();
-			break;
-		//Filter Out Difference In Data (8-bit/VRAM):
-		case 0x17:
-			this.Diff8bitUnFilterVram();
-			break;
-		//Filter Out Difference In Data (16-bit):
-		case 0x18:
-			this.Diff16bitUnFilter();
-			break;
-		//Update Sound Bias:
-		case 0x19:
-			this.SoundBias();
-			break;
-		//Sound Driver Initialization:
-		case 0x1A:
-			this.SoundDriverInit();
-			break;
-		//Set Sound Driver Mode:
-		case 0x1B:
-			this.SoundDriverMode();
-			break;
-		//Call Sound Driver Main:
-		case 0x1C:
-			this.SoundDriverMain();
-			break;
-		//Call Sound Driver VSync Iteration Handler:
-		case 0x1D:
-			this.SoundDriverVSync();
-			break;
-		//Clear Direct Sound And Stop Audio:
-		case 0x1E:
-			this.SoundChannelClear();
-			break;
-		//Convert MIDI To Frequency:
-		case 0x1F:
-			this.MidiKey2Freq();
-			break;
-		//Unknown Sound Driver Functions:
-		case 0x20:
-		case 0x21:
-		case 0x22:
-		case 0x23:
-		case 0x24:
-			this.SoundDriverUnknown();
-			break;
-		//Multi-Boot:
-		case 0x25:
-			this.MultiBoot();
-			break;
-		//Hard Reset:
-		case 0x26:
-			this.HardReset();
-			break;
-		//Custom Halt:
-		case 0x27:
-			this.CustomHalt();
-			break;
-		//Call Sound Driver VSync Stop Handler:
-		case 0x28:
-			this.SoundDriverVSyncOff();
-			break;
-		//Call Sound Driver VSync Start Handler:
-		case 0x29:
-			this.SoundDriverVSyncOn();
-			break;
-		//Obtain 36 Sound Driver Pointers:
-		case 0x2A:
-			this.SoundGetJumpList();
-			break;
-		//Undefined:
-		default:
-			//Don't do anything if we get here, although a real device errors.
-	}
+    switch (command) {
+        //Soft Reset:
+        case 0:
+            this.SoftReset();
+            break;
+        //Register Ram Reset:
+        case 0x01:
+            this.RegisterRAMReset();
+            break;
+        //Halt:
+        case 0x02:
+            this.Halt();
+            break;
+        //Stop:
+        case 0x03:
+            this.Stop();
+            break;
+        //Interrupt Wait:
+        case 0x04:
+            this.IntrWait();
+            break;
+        //VBlank Interrupt Wait:
+        case 0x05:
+            this.VBlankIntrWait();
+            break;
+        //Division:
+        case 0x06:
+            this.Div();
+            break;
+        //Division (Reversed Parameters):
+        case 0x07:
+            this.DivArm();
+            break;
+        //Square Root:
+        case 0x08:
+            this.Sqrt();
+            break;
+        //Arc Tangent:
+        case 0x09:
+            this.ArcTan();
+            break;
+        //Arc Tangent Corrected:
+        case 0x0A:
+            this.ArcTan2();
+            break;
+        //CPU Set (Memory Copy + Fill):
+        case 0x0B:
+            this.CpuSet();
+            break;
+        //CPU Fast Set (Memory Copy + Fill):
+        case 0x0C:
+            this.CpuFastSet();
+            break;
+        //Calculate BIOS Checksum:
+        case 0x0D:
+            this.GetBiosChecksum();
+            break;
+        //Calculate BG Rotation/Scaling Parameters:
+        case 0x0E:
+            this.BgAffineSet();
+            break;
+        //Calculate OBJ Rotation/Scaling Parameters:
+        case 0x0F:
+            this.ObjAffineSet();
+            break;
+        //Bit Unpack Tile Data:
+        case 0x10:
+            this.BitUnPack();
+            break;
+        //Uncompress LZ77 Compressed Data (WRAM):
+        case 0x11:
+            this.LZ77UnCompWram();
+            break;
+        //Uncompress LZ77 Compressed Data (VRAM):
+        case 0x12:
+            this.LZ77UnCompVram();
+            break;
+        //Uncompress Huffman Compressed Data:
+        case 0x13:
+            this.HuffUnComp();
+            break;
+        //Uncompress Run-Length Compressed Data (WRAM):
+        case 0x14:
+            this.RLUnCompWram();
+            break;
+        //Uncompress Run-Length Compressed Data (VRAM):
+        case 0x15:
+            this.RLUnCompVram();
+            break;
+        //Filter Out Difference In Data (8-bit/WRAM):
+        case 0x16:
+            this.Diff8bitUnFilterWram();
+            break;
+        //Filter Out Difference In Data (8-bit/VRAM):
+        case 0x17:
+            this.Diff8bitUnFilterVram();
+            break;
+        //Filter Out Difference In Data (16-bit):
+        case 0x18:
+            this.Diff16bitUnFilter();
+            break;
+        //Update Sound Bias:
+        case 0x19:
+            this.SoundBias();
+            break;
+        //Sound Driver Initialization:
+        case 0x1A:
+            this.SoundDriverInit();
+            break;
+        //Set Sound Driver Mode:
+        case 0x1B:
+            this.SoundDriverMode();
+            break;
+        //Call Sound Driver Main:
+        case 0x1C:
+            this.SoundDriverMain();
+            break;
+        //Call Sound Driver VSync Iteration Handler:
+        case 0x1D:
+            this.SoundDriverVSync();
+            break;
+        //Clear Direct Sound And Stop Audio:
+        case 0x1E:
+            this.SoundChannelClear();
+            break;
+        //Convert MIDI To Frequency:
+        case 0x1F:
+            this.MidiKey2Freq();
+            break;
+        //Unknown Sound Driver Functions:
+        case 0x20:
+        case 0x21:
+        case 0x22:
+        case 0x23:
+        case 0x24:
+            this.SoundDriverUnknown();
+            break;
+        //Multi-Boot:
+        case 0x25:
+            this.MultiBoot();
+            break;
+        //Hard Reset:
+        case 0x26:
+            this.HardReset();
+            break;
+        //Custom Halt:
+        case 0x27:
+            this.CustomHalt();
+            break;
+        //Call Sound Driver VSync Stop Handler:
+        case 0x28:
+            this.SoundDriverVSyncOff();
+            break;
+        //Call Sound Driver VSync Start Handler:
+        case 0x29:
+            this.SoundDriverVSyncOn();
+            break;
+        //Obtain 36 Sound Driver Pointers:
+        case 0x2A:
+            this.SoundGetJumpList();
+            break;
+        //Undefined:
+        default:
+            //Don't do anything if we get here, although a real device errors.
+    }
 }
 GameBoyAdvanceSWI.prototype.SoftReset = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.RegisterRAMReset = function () {
-	var control = this.CPUCore.registers[0];
+    var control = this.CPUCore.registers[0];
     if ((control & 0x1) == 0x1) {
         //Clear 256K on-board WRAM
         for (var address = 0x2000000; address < 0x2040000; address += 4) {
@@ -247,13 +247,13 @@ GameBoyAdvanceSWI.prototype.RegisterRAMReset = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.Halt = function () {
-	this.IOCore.flagStepper(2);
+    this.IOCore.flagStepper(2);
 }
 GameBoyAdvanceSWI.prototype.Stop = function () {
-	this.IOCore.flagStepper(4);
+    this.IOCore.flagStepper(4);
 }
 GameBoyAdvanceSWI.prototype.IntrWait = function () {
-	this.IOCore.irq.IME = true;
+    this.IOCore.irq.IME = true;
     if ((this.CPUCore.registers[0] & 0x1) == 0x1) {
         this.IOCore.irq.interruptsRequested = 0;
     }
@@ -261,13 +261,13 @@ GameBoyAdvanceSWI.prototype.IntrWait = function () {
     this.Halt();
 }
 GameBoyAdvanceSWI.prototype.VBlankIntrWait = function () {
-	this.IOCore.irq.IME = true;
+    this.IOCore.irq.IME = true;
     this.IOCore.irq.interruptsRequested = 0;
     this.IOCore.irq.interruptsEnabled = 0x1;
     this.Halt();
 }
 GameBoyAdvanceSWI.prototype.Div = function () {
-	var numerator = this.CPUCore.registers[0];
+    var numerator = this.CPUCore.registers[0];
     var denominator = this.CPUCore.registers[1];
     if (denominator == 0) {
         throw(new Error("Division by 0 called."));
@@ -278,7 +278,7 @@ GameBoyAdvanceSWI.prototype.Div = function () {
     this.CPUCore.registers[3] = Math.abs(result) | 0;
 }
 GameBoyAdvanceSWI.prototype.DivArm = function () {
-	var numerator = this.CPUCore.registers[1];
+    var numerator = this.CPUCore.registers[1];
     var denominator = this.CPUCore.registers[0];
     if (denominator == 0) {
         throw(new Error("Division by 0 called."));
@@ -289,7 +289,7 @@ GameBoyAdvanceSWI.prototype.DivArm = function () {
     this.CPUCore.registers[3] = Math.abs(result) | 0;
 }
 GameBoyAdvanceSWI.prototype.Sqrt = function () {
-	this.CPUCore.registers[0] = Math.sqrt(this.CPUCore.registers[0] >>> 0) | 0;
+    this.CPUCore.registers[0] = Math.sqrt(this.CPUCore.registers[0] >>> 0) | 0;
 }
 GameBoyAdvanceSWI.prototype.ArcTan = function () {
     var a = (-(this.CPUCore.performMUL32(this.CPUCore.registers[0], this.CPUCore.registers[0], 0) >> 14)) | 0;
@@ -304,7 +304,7 @@ GameBoyAdvanceSWI.prototype.ArcTan = function () {
     this.CPUCore.registers[0] = a;
 }
 GameBoyAdvanceSWI.prototype.ArcTan2 = function () {
-	var x = this.CPUCore.registers[0];
+    var x = this.CPUCore.registers[0];
     var y = this.CPUCore.registers[1];
     var result = 0;
     if (y == 0) {
@@ -338,7 +338,7 @@ GameBoyAdvanceSWI.prototype.ArcTan2 = function () {
     this.CPUCore.registers[0] = result | 0;
 }
 GameBoyAdvanceSWI.prototype.CpuSet = function () {
-	var source = this.CPUCore.registers[0];
+    var source = this.CPUCore.registers[0];
     var destination = this.CPUCore.registers[1];
     var control = this.CPUCore.registers[2];
     var count = control & 0x1FFFFF;
@@ -368,7 +368,7 @@ GameBoyAdvanceSWI.prototype.CpuSet = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.CpuFastSet = function () {
-	var source = this.CPUCore.registers[0];
+    var source = this.CPUCore.registers[0];
     var destination = this.CPUCore.registers[1];
     var control = this.CPUCore.registers[2];
     var count = control & 0x1FFFFF;
@@ -390,10 +390,10 @@ GameBoyAdvanceSWI.prototype.CpuFastSet = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.GetBiosChecksum = function () {
-	this.CPUCore.registers[0] = 0xBAAE187F;
+    this.CPUCore.registers[0] = 0xBAAE187F;
 }
 GameBoyAdvanceSWI.prototype.BgAffineSet = function () {
-	var source = this.CPUCore.registers[0];
+    var source = this.CPUCore.registers[0];
     var destination = this.CPUCore.registers[1];
     var numberCalculations = this.CPUCore.registers[2];
     while (numberCalculations-- > 0) {
@@ -432,7 +432,7 @@ GameBoyAdvanceSWI.prototype.BgAffineSet = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.ObjAffineSet = function () {
-	var source = this.CPUCore.registers[0];
+    var source = this.CPUCore.registers[0];
     var destination = this.CPUCore.registers[1];
     var numberCalculations = this.CPUCore.registers[2];
     var offset = this.CPUCore.registers[3];
@@ -460,7 +460,7 @@ GameBoyAdvanceSWI.prototype.ObjAffineSet = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.BitUnPack = function () {
-	var source = this.CPUCore.registers[0];
+    var source = this.CPUCore.registers[0];
     var destination = this.CPUCore.registers[1];
     var unpackSource = this.CPUCore.registers[2];
     var length = this.IOCore.memory.memoryRead16(unpackSource >>> 0);
@@ -500,31 +500,31 @@ GameBoyAdvanceSWI.prototype.BitUnPack = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.LZ77UnCompWram = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.LZ77UnCompVram = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.HuffUnComp = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.RLUnCompWram = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.RLUnCompVram = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.Diff8bitUnFilterWram = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.Diff8bitUnFilterVram = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.Diff16bitUnFilter = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.SoundBias = function () {
-	if (this.CPUCore.registers[0] == 0) {
+    if (this.CPUCore.registers[0] == 0) {
         this.IOCore.memory.memoryWrite16(0x4000088, 0);
     }
     else {
@@ -532,44 +532,44 @@ GameBoyAdvanceSWI.prototype.SoundBias = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.SoundDriverInit = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.SoundDriverMode = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.SoundDriverMain = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.SoundDriverVSync = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.SoundChannelClear = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.MidiKey2Freq = function () {
-	var frequency = this.CPUCore.memoryRead32((this.CPUCore.registers[0] + 4) >>> 0);
+    var frequency = this.CPUCore.memoryRead32((this.CPUCore.registers[0] + 4) >>> 0);
     var temp = (180 - this.CPUCore.registers[1]) - (this.CPUCore.registers[2] / 0x100);
     temp = Math.pow(2, temp / 12);
     this.CPUCore.registers[0] = (frequency / temp) | 0;
 }
 GameBoyAdvanceSWI.prototype.SoundDriverUnknown = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.MultiBoot = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.HardReset = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.CustomHalt = function () {
-	this.IOCore.wait.writeHALTCNT(this.CPUCore.registers[2]);
+    this.IOCore.wait.writeHALTCNT(this.CPUCore.registers[2]);
 }
 GameBoyAdvanceSWI.prototype.SoundDriverVSyncOff = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.SoundDriverVSyncOn = function () {
-	
+    
 }
 GameBoyAdvanceSWI.prototype.SoundGetJumpList = function () {
-	
+    
 }

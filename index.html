@@ -1,83 +1,84 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>IodineGBA</title>
-		<meta charset="UTF-8"> 
-		<script src="TypedArrayShim.js"></script>
-		<script src="XAudioJS/swfobject.js"></script>
-		<script src="XAudioJS/resampler.js"></script>
-		<script src="XAudioJS/XAudioServer.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceCartridgeCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceDMACore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceEmulatorCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceGraphicsCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceIOCore.js"></script>
+    <head>
+        <title>IodineGBA</title>
+        <meta charset="UTF-8"> 
+        <script src="TypedArrayShim.js"></script>
+        <script src="XAudioJS/swfobject.js"></script>
+        <script src="XAudioJS/resampler.js"></script>
+        <script src="XAudioJS/XAudioServer.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceCartridgeCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceDMACore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceEmulatorCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceGraphicsCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceIOCore.js"></script>
         <script src="IodineGBA/GameBoyAdvanceMemoryCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceIRQCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceJoyPadCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceSerialCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceSoundCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceTimerCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceWaitCore.js"></script>
-		<script src="IodineGBA/GameBoyAdvanceCPUCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceIRQCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceJoyPadCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceSerialCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceSoundCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceTimerCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceWaitCore.js"></script>
+        <script src="IodineGBA/GameBoyAdvanceCPUCore.js"></script>
         <script src="IodineGBA/GameBoyAdvanceSavesCore.js"></script>
-		<script src="IodineGBA/sound/GameBoyAdvanceFIFOCore.js"></script>
-		<script src="IodineGBA/CPU/ARMInstructionSetCore.js"></script>
-		<script src="IodineGBA/CPU/THUMBInstructionSetCore.js"></script>
-		<script src="IodineGBA/CPU/GameBoyAdvanceSWICore.js"></script>
+        <script src="IodineGBA/sound/GameBoyAdvanceFIFOCore.js"></script>
+        <script src="IodineGBA/CPU/ARMInstructionSetCore.js"></script>
+        <script src="IodineGBA/CPU/THUMBInstructionSetCore.js"></script>
+        <script src="IodineGBA/CPU/GameBoyAdvanceSWICore.js"></script>
         <script src="IodineGBA/CPU/dynarec/DynarecBranchListenerCore.js"></script>
-		<script src="IodineGBA/CPU/dynarec/DynarecCacheManagerCore.js"></script>
+        <script src="IodineGBA/CPU/dynarec/DynarecCacheManagerCore.js"></script>
         <script src="IodineGBA/CPU/dynarec/DynarecTHUMBAssemblerCore.js"></script>
         <!--<script src="IodineGBA/CPU/dynarec/DynarecARMAssemblerCore.js"></script>-->
         <script src="IodineGBA/graphics/GameBoyAdvanceBGTEXTRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceBG2FrameBufferRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceBGMatrixRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceAffineBGRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceColorEffectsRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceMode0RendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceMode1RendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceMode2RendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceModeFrameBufferRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceMosaicRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceOAMAttributeTable.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceBG2FrameBufferRendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceBGMatrixRendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceAffineBGRendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceColorEffectsRendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceMode0RendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceMode1RendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceMode2RendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceModeFrameBufferRendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceMosaicRendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceOAMAttributeTable.js"></script>
         <script src="IodineGBA/graphics/GameBoyAdvanceOBJRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceOBJWindowRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceWindowRendererCore.js"></script>
-		<script src="IodineGBA/graphics/GameBoyAdvanceCompositorCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceOBJWindowRendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceWindowRendererCore.js"></script>
+        <script src="IodineGBA/graphics/GameBoyAdvanceCompositorCore.js"></script>
         <script src="IodineGBA/memory/GameBoyAdvanceMemoryCacheCore.js"></script>
         <script src="IodineGBA/memory/GameBoyAdvanceMemoryDispatchGeneratorCore.js"></script>
+        <script src="IodineGBA/cartridge/GameBoyAdvanceSRAMChipCore.js"></script>
         <script src="js/webpage_interface.js"></script>
-		<link rel="stylesheet" href="css/main.css">
-	</head>
-	<body>
-		<div id="main">
-			<canvas id="emulator_target" width="240px" height="160px"></canvas>
-		</div>
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <div id="main">
+            <canvas id="emulator_target" width="240px" height="160px"></canvas>
+        </div>
         <div id="control_panel">
-			<div id="load_panel">
-				<form>
-					<fieldset>
-						<legend>Load ROM:</legend>
-						<label>BIOS: </label><input type="file" id="bios_load">
-						<label>Game:</label><input type="file" id="rom_load">
-					</fieldset>
-				</form>
-			</div>
-			<div id="play_controls">
-				<form>
-					<fieldset>
-						<legend>Controls: </legend>
-						<button id="play">Play</button>
-						<button id="pause">Pause</button>
-						<button id="restart">Restart</button>
-						<label class="dynarec">Enable Dynarec (LLE JIT): </label><input type="checkbox" id="lle_jit" class="dynarec">
+            <div id="load_panel">
+                <form>
+                    <fieldset>
+                        <legend>Load ROM:</legend>
+                        <label>BIOS: </label><input type="file" id="bios_load">
+                        <label>Game:</label><input type="file" id="rom_load">
+                    </fieldset>
+                </form>
+            </div>
+            <div id="play_controls">
+                <form>
+                    <fieldset>
+                        <legend>Controls: </legend>
+                        <button id="play">Play</button>
+                        <button id="pause">Pause</button>
+                        <button id="restart">Restart</button>
+                        <label class="dynarec">Enable Dynarec (LLE JIT): </label><input type="checkbox" id="lle_jit" class="dynarec">
                         <label>Skip Boot Intro: </label><input type="checkbox" id="skip_boot">
                         <label>Sound: </label><input type="checkbox" id="sound">
-					</fieldset>
-				</form>
-			</div>
+                    </fieldset>
+                </form>
+            </div>
             <div id="speed">
             </div>
-		</div>
-	</body>
+        </div>
+    </body>
 </html>

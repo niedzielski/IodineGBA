@@ -16,7 +16,7 @@
  *
  */
 function DynarecBranchListenerCore(CPUCore) {
-	this.CPUCore = CPUCore;
+    this.CPUCore = CPUCore;
     this.initialize();
 }
 DynarecBranchListenerCore.prototype.MAX_WORKERS = 3;

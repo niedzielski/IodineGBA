@@ -16,81 +16,81 @@
  *
  */
 function getInt8Array(size_t) {
-	try {
-		return new Int8Array(size_t);
-	}
-	catch (error) {
-		return getArray(size_t);
-	}
+    try {
+        return new Int8Array(size_t);
+    }
+    catch (error) {
+        return getArray(size_t);
+    }
 }
 function getUint8Array(size_t) {
-	try {
-		return new Uint8Array(size_t);
-	}
-	catch (error) {
-		return getArray(size_t);
-	}
+    try {
+        return new Uint8Array(size_t);
+    }
+    catch (error) {
+        return getArray(size_t);
+    }
 }
 function getInt16Array(size_t) {
-	try {
-		return new Int16Array(size_t);
-	}
-	catch (error) {
-		return getArray(size_t);
-	}
+    try {
+        return new Int16Array(size_t);
+    }
+    catch (error) {
+        return getArray(size_t);
+    }
 }
 function getUint16Array(size_t) {
-	try {
-		return new Uint16Array(size_t);
-	}
-	catch (error) {
-		return getArray(size_t);
-	}
+    try {
+        return new Uint16Array(size_t);
+    }
+    catch (error) {
+        return getArray(size_t);
+    }
 }
 function getUint16View(typed_array) {
-	try {
-		return new Uint16Array(typed_array.buffer);
-	}
-	catch (error) {
-		return null;
-	}
+    try {
+        return new Uint16Array(typed_array.buffer);
+    }
+    catch (error) {
+        return null;
+    }
 }
 function getInt32Array(size_t) {
-	try {
-		return new Int32Array(size_t);
-	}
-	catch (error) {
-		return getArray(size_t);
-	}
+    try {
+        return new Int32Array(size_t);
+    }
+    catch (error) {
+        return getArray(size_t);
+    }
 }
 function getInt32View(typed_array) {
-	try {
-		return new Int32Array(typed_array.buffer);
-	}
-	catch (error) {
-		return null;
-	}
+    try {
+        return new Int32Array(typed_array.buffer);
+    }
+    catch (error) {
+        return null;
+    }
 }
 function getUint32Array(size_t) {
-	try {
-		return new Uint32Array(size_t);
-	}
-	catch (error) {
-		return getArray(size_t);
-	}
+    try {
+        return new Uint32Array(size_t);
+    }
+    catch (error) {
+        return getArray(size_t);
+    }
 }
 function getFloat32Array(size_t) {
-	try {
-		return new Float32Array(size_t);
-	}
-	catch (error) {
-		return getArray(size_t);
-	}
+    try {
+        return new Float32Array(size_t);
+    }
+    catch (error) {
+        return getArray(size_t);
+    }
 }
 function getArray(size_t) {
-	var genericArray = [];
-	for (var size_index = 0; size_index < size_t; ++size_index) {
-		genericArray[size_index] = 0;
-	}
+    var genericArray = [];
+    for (var size_index = 0; size_index < size_t; ++size_index) {
+        genericArray[size_index] = 0;
+    }
     return genericArray;
 }

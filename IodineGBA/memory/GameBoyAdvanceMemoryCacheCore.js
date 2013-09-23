@@ -16,10 +16,10 @@
  *
  */
 function GameBoyAdvanceMemoryCache(memory) {
-	//Build references:
-	this.memory = memory;
+    //Build references:
+    this.memory = memory;
     this.addressRead16 = 0x100;
-	this.addressRead32 = 0x100;
+    this.addressRead32 = 0x100;
     this.addressWrite16 = 0x100;
     this.addressWrite32 = 0x100;
     this.cacheRead16 = this.memory.readUnused16;
@@ -64,7 +64,7 @@ GameBoyAdvanceMemoryCache.prototype.memoryWriteFast32 = function (address, data)
     this.cacheWrite32(this.memory, address >>> 0, data | 0);
 }
 GameBoyAdvanceMemoryCache.prototype.memoryRead16 = function (address) {
-	address = (address & -2) >>> 0;
+    address = (address & -2) >>> 0;
     //Half-Word Read:
     if ((address >>> 24) != (this.addressRead16 >>> 0)) {
         this.addressRead16 = address >>> 24;

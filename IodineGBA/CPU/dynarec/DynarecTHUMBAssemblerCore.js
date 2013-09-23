@@ -75,14 +75,14 @@ DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew1 = function () {
     "\t//Waiting for the pipeline bubble to clear... two stages left\n" +
     "\t//Push fetch to decode:\n" +
     "\tthumb.decode = thumb.fetch | 0;\n" +
-	this.incrementPC();
+    this.incrementPC();
 }
 DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew2 = function () {
     return this.insertRunnableCheck() +
     this.insertFetchPrefix() +
     "\t//Waiting for the pipeline bubble to clear... one stage left\n" +
     this.insertPipelineStartSuffix() +
-	this.incrementPC();
+    this.incrementPC();
 }
 DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (index, instruction) {
     instruction = instruction | 0;
@@ -91,7 +91,7 @@ DynarecTHUMBAssemblerCore.prototype.generateBodySpew = function (index, instruct
     ((index == 0) ? this.insertFetchPrefix() : this.insertFetching()) +
     this.generateInstructionSpew(instruction | 0) +
     this.insertPipelineSuffix(index | 0) +
-	this.checkPCStatus();
+    this.checkPCStatus();
 }
 DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruction) {
     instruction = instruction | 0;
@@ -122,7 +122,7 @@ DynarecTHUMBAssemblerCore.prototype.insertRunnableCheck = function () {
     "\tif (!!cpu.breakNormalExecution) {\n" +
         //"\t\tcpu.dynarec.findCache(" + this.startAddress + ").tickBad();\n" +
         "\t\treturn;\n" +
-	"\t}\n";
+    "\t}\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertFetchPrefix = function () {
     return this.insertPipelineTick() +
@@ -130,7 +130,7 @@ DynarecTHUMBAssemblerCore.prototype.insertFetchPrefix = function () {
 }
 DynarecTHUMBAssemblerCore.prototype.insertPipelineTick = function () {
     return "\t//Tick the CPU pipeline:\n" +
-	"\tcpu.pipelineInvalid >>= 1;\n";
+    "\tcpu.pipelineInvalid >>= 1;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertFetching = function () {
     return "\t//Update the fetch stage:\n" +
@@ -149,11 +149,11 @@ DynarecTHUMBAssemblerCore.prototype.insertPipelineSuffix = function (index) {
 DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
     return "\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
         "\t" + this.incrementPC() +
-	"\t}\n" +
+    "\t}\n" +
     "\telse {\n" +
         "\t\t//We branched, so exit normally:\n" +
         "\t\treturn;\n" +
-	"\t}\n";
+    "\t}\n";
 }
 DynarecTHUMBAssemblerCore.prototype.incrementPC = function () {
     return "\tcpu.registers[15] = " + this.toHex(this.nextInstructionPC()) + ";\n";
@@ -168,215 +168,215 @@ DynarecTHUMBAssemblerCore.prototype.conditionalInline = function (instructionVar
     }
 }
 DynarecTHUMBAssemblerCore.prototype.compileInstructionMap = function () {
-	this.instructionMap = [];
-	//0-7
-	this.generateLowMap("LSLimm");
-	//8-F
-	this.generateLowMap("LSRimm");
-	//10-17
-	this.generateLowMap("ASRimm");
-	//18-19
-	this.generateLowMap2("ADDreg");
-	//1A-1B
-	this.generateLowMap2("SUBreg");
-	//1C-1D
-	this.generateLowMap2("ADDimm3");
-	//1E-1F
-	this.generateLowMap2("SUBimm3");
-	//20-27
-	this.generateLowMap("MOVimm8");
-	//28-2F
-	this.generateLowMap("CMPimm8");
-	//30-37
-	this.generateLowMap("ADDimm8");
-	//38-3F
-	this.generateLowMap("SUBimm8");
-	//40
-	this.generateLowMap4("AND", "EOR", "LSL", "LSR");
-	//41
-	this.generateLowMap4("ASR", "ADC", "SBC", "ROR");
-	//42
-	this.generateLowMap4("TST", "NEG", "CMP", "CMN");
-	//43
-	this.generateLowMap4("ORR", "MUL", "BIC", "MVN");
-	//44
-	this.generateLowMap4("ADDH_LL", "ADDH_LH", "ADDH_HL", "ADDH_HH");
-	//45
-	this.generateLowMap4("CMPH_LL", "CMPH_LH", "CMPH_HL", "CMPH_HH");
-	//46
-	this.generateLowMap4("MOVH_LL", "MOVH_LH", "MOVH_HL", "MOVH_HH");
-	//47
-	this.generateLowMap4("BX_L", "BX_H", "BX_L", "BX_H");
-	//48-4F
-	this.generateLowMap("LDRPC");
-	//50-51
-	this.generateLowMap2("STRreg");
-	//52-53
-	this.generateLowMap2("STRHreg");
-	//54-55
-	this.generateLowMap2("STRBreg");
-	//56-57
-	this.generateLowMap2("LDRSBreg");
-	//58-59
-	this.generateLowMap2("LDRreg");
-	//5A-5B
-	this.generateLowMap2("LDRHreg");
-	//5C-5D
-	this.generateLowMap2("LDRBreg");
-	//5E-5F
-	this.generateLowMap2("LDRSHreg");
-	//60-67
-	this.generateLowMap("STRimm5");
-	//68-6F
-	this.generateLowMap("LDRimm5");
-	//70-77
-	this.generateLowMap("STRBimm5");
-	//78-7F
-	this.generateLowMap("LDRBimm5");
-	//80-87
-	this.generateLowMap("STRHimm5");
-	//88-8F
-	this.generateLowMap("LDRHimm5");
-	//90-97
-	this.generateLowMap("STRSP");
-	//98-9F
-	this.generateLowMap("LDRSP");
-	//A0-A7
-	this.generateLowMap("ADDPC");
-	//A8-AF
-	this.generateLowMap("ADDSP");
-	//B0
-	this.generateLowMap3("ADDSPimm7");
-	//B1
-	this.generateLowMap3("UNDEFINED");
-	//B2
-	this.generateLowMap3("UNDEFINED");
-	//B3
-	this.generateLowMap3("UNDEFINED");
-	//B4
-	this.generateLowMap3("PUSH");
-	//B5
-	this.generateLowMap3("PUSHlr");
-	//B6
-	this.generateLowMap3("UNDEFINED");
-	//B7
-	this.generateLowMap3("UNDEFINED");
-	//B8
-	this.generateLowMap3("UNDEFINED");
-	//B9
-	this.generateLowMap3("UNDEFINED");
-	//BA
-	this.generateLowMap3("UNDEFINED");
-	//BB
-	this.generateLowMap3("UNDEFINED");
-	//BC
-	this.generateLowMap3("POP");
-	//BD
-	this.generateLowMap3("POPpc");
-	//BE
-	this.generateLowMap3("UNDEFINED");
-	//BF
-	this.generateLowMap3("UNDEFINED");
-	//C0-C7
-	this.generateLowMap("STMIA");
-	//C8-CF
-	this.generateLowMap("LDMIA");
-	//D0
-	this.generateLowMap3("BEQ");
-	//D1
-	this.generateLowMap3("BNE");
-	//D2
-	this.generateLowMap3("BCS");
-	//D3
-	this.generateLowMap3("BCC");
-	//D4
-	this.generateLowMap3("BMI");
-	//D5
-	this.generateLowMap3("BPL");
-	//D6
-	this.generateLowMap3("BVS");
-	//D7
-	this.generateLowMap3("BVC");
-	//D8
-	this.generateLowMap3("BHI");
-	//D9
-	this.generateLowMap3("BLS");
-	//DA
-	this.generateLowMap3("BGE");
-	//DB
-	this.generateLowMap3("BLT");
-	//DC
-	this.generateLowMap3("BGT");
-	//DD
-	this.generateLowMap3("BLE");
-	//DE
-	this.generateLowMap3("UNDEFINED");
-	//DF
-	this.generateLowMap3("SWI");
-	//E0-E7
-	this.generateLowMap("B");
-	//E8-EF
-	this.generateLowMap("UNDEFINED");
-	//F0-F7
-	this.generateLowMap("BLsetup");
-	//F8-FF
-	this.generateLowMap("BLoff");
+    this.instructionMap = [];
+    //0-7
+    this.generateLowMap("LSLimm");
+    //8-F
+    this.generateLowMap("LSRimm");
+    //10-17
+    this.generateLowMap("ASRimm");
+    //18-19
+    this.generateLowMap2("ADDreg");
+    //1A-1B
+    this.generateLowMap2("SUBreg");
+    //1C-1D
+    this.generateLowMap2("ADDimm3");
+    //1E-1F
+    this.generateLowMap2("SUBimm3");
+    //20-27
+    this.generateLowMap("MOVimm8");
+    //28-2F
+    this.generateLowMap("CMPimm8");
+    //30-37
+    this.generateLowMap("ADDimm8");
+    //38-3F
+    this.generateLowMap("SUBimm8");
+    //40
+    this.generateLowMap4("AND", "EOR", "LSL", "LSR");
+    //41
+    this.generateLowMap4("ASR", "ADC", "SBC", "ROR");
+    //42
+    this.generateLowMap4("TST", "NEG", "CMP", "CMN");
+    //43
+    this.generateLowMap4("ORR", "MUL", "BIC", "MVN");
+    //44
+    this.generateLowMap4("ADDH_LL", "ADDH_LH", "ADDH_HL", "ADDH_HH");
+    //45
+    this.generateLowMap4("CMPH_LL", "CMPH_LH", "CMPH_HL", "CMPH_HH");
+    //46
+    this.generateLowMap4("MOVH_LL", "MOVH_LH", "MOVH_HL", "MOVH_HH");
+    //47
+    this.generateLowMap4("BX_L", "BX_H", "BX_L", "BX_H");
+    //48-4F
+    this.generateLowMap("LDRPC");
+    //50-51
+    this.generateLowMap2("STRreg");
+    //52-53
+    this.generateLowMap2("STRHreg");
+    //54-55
+    this.generateLowMap2("STRBreg");
+    //56-57
+    this.generateLowMap2("LDRSBreg");
+    //58-59
+    this.generateLowMap2("LDRreg");
+    //5A-5B
+    this.generateLowMap2("LDRHreg");
+    //5C-5D
+    this.generateLowMap2("LDRBreg");
+    //5E-5F
+    this.generateLowMap2("LDRSHreg");
+    //60-67
+    this.generateLowMap("STRimm5");
+    //68-6F
+    this.generateLowMap("LDRimm5");
+    //70-77
+    this.generateLowMap("STRBimm5");
+    //78-7F
+    this.generateLowMap("LDRBimm5");
+    //80-87
+    this.generateLowMap("STRHimm5");
+    //88-8F
+    this.generateLowMap("LDRHimm5");
+    //90-97
+    this.generateLowMap("STRSP");
+    //98-9F
+    this.generateLowMap("LDRSP");
+    //A0-A7
+    this.generateLowMap("ADDPC");
+    //A8-AF
+    this.generateLowMap("ADDSP");
+    //B0
+    this.generateLowMap3("ADDSPimm7");
+    //B1
+    this.generateLowMap3("UNDEFINED");
+    //B2
+    this.generateLowMap3("UNDEFINED");
+    //B3
+    this.generateLowMap3("UNDEFINED");
+    //B4
+    this.generateLowMap3("PUSH");
+    //B5
+    this.generateLowMap3("PUSHlr");
+    //B6
+    this.generateLowMap3("UNDEFINED");
+    //B7
+    this.generateLowMap3("UNDEFINED");
+    //B8
+    this.generateLowMap3("UNDEFINED");
+    //B9
+    this.generateLowMap3("UNDEFINED");
+    //BA
+    this.generateLowMap3("UNDEFINED");
+    //BB
+    this.generateLowMap3("UNDEFINED");
+    //BC
+    this.generateLowMap3("POP");
+    //BD
+    this.generateLowMap3("POPpc");
+    //BE
+    this.generateLowMap3("UNDEFINED");
+    //BF
+    this.generateLowMap3("UNDEFINED");
+    //C0-C7
+    this.generateLowMap("STMIA");
+    //C8-CF
+    this.generateLowMap("LDMIA");
+    //D0
+    this.generateLowMap3("BEQ");
+    //D1
+    this.generateLowMap3("BNE");
+    //D2
+    this.generateLowMap3("BCS");
+    //D3
+    this.generateLowMap3("BCC");
+    //D4
+    this.generateLowMap3("BMI");
+    //D5
+    this.generateLowMap3("BPL");
+    //D6
+    this.generateLowMap3("BVS");
+    //D7
+    this.generateLowMap3("BVC");
+    //D8
+    this.generateLowMap3("BHI");
+    //D9
+    this.generateLowMap3("BLS");
+    //DA
+    this.generateLowMap3("BGE");
+    //DB
+    this.generateLowMap3("BLT");
+    //DC
+    this.generateLowMap3("BGT");
+    //DD
+    this.generateLowMap3("BLE");
+    //DE
+    this.generateLowMap3("UNDEFINED");
+    //DF
+    this.generateLowMap3("SWI");
+    //E0-E7
+    this.generateLowMap("B");
+    //E8-EF
+    this.generateLowMap("UNDEFINED");
+    //F0-F7
+    this.generateLowMap("BLsetup");
+    //F8-FF
+    this.generateLowMap("BLoff");
     //Force length to be ready only:
     Object.defineProperty(this.instructionMap, "length", {writable: false});
 }
 DynarecTHUMBAssemblerCore.prototype.generateLowMap = function (instruction) {
-	for (var index = 0; index < 0x20; ++index) {
-		this.instructionMap.push(instruction);
-	}
+    for (var index = 0; index < 0x20; ++index) {
+        this.instructionMap.push(instruction);
+    }
 }
 DynarecTHUMBAssemblerCore.prototype.generateLowMap2 = function (instruction) {
-	for (var index = 0; index < 0x8; ++index) {
-		this.instructionMap.push(instruction);
-	}
+    for (var index = 0; index < 0x8; ++index) {
+        this.instructionMap.push(instruction);
+    }
 }
 DynarecTHUMBAssemblerCore.prototype.generateLowMap3 = function (instruction) {
-	for (var index = 0; index < 0x4; ++index) {
-		this.instructionMap.push(instruction);
-	}
+    for (var index = 0; index < 0x4; ++index) {
+        this.instructionMap.push(instruction);
+    }
 }
 DynarecTHUMBAssemblerCore.prototype.generateLowMap4 = function (instruction1, instruction2, instruction3, instruction4) {
-	this.instructionMap.push(instruction1);
-	this.instructionMap.push(instruction2);
-	this.instructionMap.push(instruction3);
-	this.instructionMap.push(instruction4);
+    this.instructionMap.push(instruction1);
+    this.instructionMap.push(instruction2);
+    this.instructionMap.push(instruction3);
+    this.instructionMap.push(instruction4);
 }
 DynarecTHUMBAssemblerCore.prototype.LSLimm = function (instructionValue) {
-	var spew = "\t//LSL imm:\n" +
+    var spew = "\t//LSL imm:\n" +
     "\tvar source = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
-	var offset = (instructionValue >> 6) & 0x1F;
-	if (offset > 0) {
-		spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-		"\tcpu.CPSRCarry = (" + this.conditionalInline(offset - 1, "(source << " + this.toHex(offset - 1) + ")", "source") + " < 0);\n" +
-		"\t//Perform shift:\n" + 
-		"\tsource <<= " + this.toHex(offset) + ";\n";
-	}
-	spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
-	"\tcpu.CPSRNegative = (source < 0);\n" +
-	"\tcpu.CPSRZero = (source == 0);\n" +
-	"\t//Update destination register:\n" +
-	"\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
+    var offset = (instructionValue >> 6) & 0x1F;
+    if (offset > 0) {
+        spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
+        "\tcpu.CPSRCarry = (" + this.conditionalInline(offset - 1, "(source << " + this.toHex(offset - 1) + ")", "source") + " < 0);\n" +
+        "\t//Perform shift:\n" + 
+        "\tsource <<= " + this.toHex(offset) + ";\n";
+    }
+    spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
+    "\tcpu.CPSRNegative = (source < 0);\n" +
+    "\tcpu.CPSRZero = (source == 0);\n" +
+    "\t//Update destination register:\n" +
+    "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.LSRimm = function (instructionValue) {
-	var spew = "\t//LSR imm:\n" +
+    var spew = "\t//LSR imm:\n" +
     "\tvar source = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
-	var offset = (instructionValue >> 6) & 0x1F;
-	if (offset > 0) {
-		spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-		"\tcpu.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
-		"\t//Perform shift:\n" +
-		"\tsource = (source >>> " + this.toHex(offset) + ") | 0;\n" +
+    var offset = (instructionValue >> 6) & 0x1F;
+    if (offset > 0) {
+        spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
+        "\tcpu.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
+        "\t//Perform shift:\n" +
+        "\tsource = (source >>> " + this.toHex(offset) + ") | 0;\n" +
         "//Perform CPSR updates for N and Z (But not V):\n" +
         "\tcpu.CPSRNegative = (source < 0);\n" +
         "\tcpu.CPSRZero = (source == 0);\n" +
         "\t//Update destination register:\n" +
         "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
-	}
+    }
     else {
         spew += "\tcpu.CPSRCarry = (source < 0);\n" +
         "\t//Perform CPSR updates for N and Z (But not V):\n" +
@@ -388,39 +388,39 @@ DynarecTHUMBAssemblerCore.prototype.LSRimm = function (instructionValue) {
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.ASRimm = function (instructionValue) {
-	var spew = "\t//ASR imm:\n" +
+    var spew = "\t//ASR imm:\n" +
     "\tvar source = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
-	var offset = (instructionValue >> 6) & 0x1F;
-	if (offset > 0) {
-		spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-		"\tcpu.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
-		"\t//Perform shift:\n" +
-		"\tsource >>= " + this.toHex(offset) + ";\n";
-	}
+    var offset = (instructionValue >> 6) & 0x1F;
+    if (offset > 0) {
+        spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
+        "\tcpu.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
+        "\t//Perform shift:\n" +
+        "\tsource >>= " + this.toHex(offset) + ";\n";
+    }
     else {
         spew += "\tcpu.CPSRCarry = (source < 0);\n" +
         "\tsource >>= 0x1F;\n";
     }
-	spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
-	"\tcpu.CPSRNegative = (source < 0);\n" +
-	"\tcpu.CPSRZero = (source == 0);\n" +
-	"\t//Update destination register:\n" +
-	"\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
+    spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
+    "\tcpu.CPSRNegative = (source < 0);\n" +
+    "\tcpu.CPSRZero = (source == 0);\n" +
+    "\t//Update destination register:\n" +
+    "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.ADDreg = function (instructionValue) {
-	var spew = "\t//ADD reg:\n" +
+    var spew = "\t//ADD reg:\n" +
     "\tvar operand1 = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
-	"\tvar operand2 = cpu.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
-	"\t//Update destination register:\n" +
-	"\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = cpu.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    "\tvar operand2 = cpu.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
+    "\t//Update destination register:\n" +
+    "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = cpu.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.SUBreg = function (instructionValue) {
-	var spew = "\t//SUB reg:\n" +
+    var spew = "\t//SUB reg:\n" +
     "\tvar operand1 = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
-	"\tvar operand2 = cpu.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
-	"\t//Update destination register:\n" +
-	"\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = cpu.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    "\tvar operand2 = cpu.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
+    "\t//Update destination register:\n" +
+    "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = cpu.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
     return spew;
 }

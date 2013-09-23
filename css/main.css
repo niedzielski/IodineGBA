@@ -1,54 +1,54 @@
 html, body {
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
 }
 body:hover div#control_panel {
-	opacity: 0;
+    opacity: 0;
 }
 label {
-	float: left;
-	clear: left;
+    float: left;
+    clear: left;
 }
 input {
-	float: right;
-	clear: right;
+    float: right;
+    clear: right;
 }
 #pause {
-	display: none;
+    display: none;
 }
 button, select {
-	float: left;
-	clear: both;
+    float: left;
+    clear: both;
 }
 div#log_control button {
-	clear: none;
+    clear: none;
 }
 div#control_panel {
     position: absolute;
-	left: 0px;
-	width: 350px;
-	bottom: 0px;
-	top: 0px;
-	background-color: rgb(220, 220, 220);
-	padding: 5px 3px;
+    left: 0px;
+    width: 350px;
+    bottom: 0px;
+    top: 0px;
+    background-color: rgb(220, 220, 220);
+    padding: 5px 3px;
 }
 div#control_panel:hover {
-	opacity: 1 !important;
+    opacity: 1 !important;
 }
 div#main {
-	top: 0px;
-	bottom: 0px;
-	position: absolute;
-	left: 0px;
-	right: 0px;
-	background-color: rgb(200, 200, 200);
+    top: 0px;
+    bottom: 0px;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    background-color: rgb(200, 200, 200);
 }
 div#main canvas {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 /*.dynarec {
     display: none;

@@ -16,17 +16,18 @@
  *
  */
 function GameBoyAdvanceCartridge(IOCore) {
-	this.IOCore = IOCore;
-	this.initialize();
+    this.IOCore = IOCore;
+    this.initialize();
 }
 GameBoyAdvanceCartridge.prototype.initialize = function () {
-	this.ROM = this.getROMArray(this.IOCore.emulatorCore.ROM);
+    this.ROM = this.getROMArray(this.IOCore.emulatorCore.ROM);
     this.ROM16 = getUint16View(this.ROM);
     this.ROM32 = getInt32View(this.ROM);
     this.preprocessROMAccess();
 }
 GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
     this.ROMLength = Math.min((old_array.length >> 2) << 2, 0x2000000);
+    this.EEPROMStart = (this.ROMLength > 0x1000000) ? 0x1FFFF00 : 0x1000000;
     var newArray = getUint8Array(this.ROMLength | 0);
     for (var index = 0; (index | 0) < (this.ROMLength | 0); index = ((index | 0) + 1) | 0) {
         newArray[index | 0] = old_array[index | 0] | 0;
@@ -78,70 +79,54 @@ GameBoyAdvanceCartridge.prototype.readROMOnly32Optimized = function (address) {
     return data | 0;
 }
 GameBoyAdvanceCartridge.prototype.readROM8 = function (address) {
-	address = address | 0;
+    address = address | 0;
     var data = 0;
-    if ((address | 0) >= 0x100 && (address | 0) < 0x1FE0000) {
+    if ((address | 0) >= 0x100) {
         //Definitely ROM:
         data = this.readROMOnly8(address | 0) | 0;
     }
-    else if ((address | 0) >= 0x1FE0000) {
-        //Possibly Flash:
-        data = this.IOCore.saves.readFLASH8(address & 0x1FFFF) | 0;
-    }
     else {
         //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO8(address & 0xFF) | 0;
+        data = this.IOCore.saves.readGPIO8(address | 0) | 0;
     }
     return data | 0;
 }
 GameBoyAdvanceCartridge.prototype.readROM16 = function (address) {
-	address = address | 0;
+    address = address | 0;
     var data = 0;
-    if ((address | 0) >= 0x100 && (address | 0) < 0x1FE0000) {
+    if ((address | 0) >= 0x100) {
         //Definitely ROM:
         data = this.readROMOnly16(address | 0) | 0;
     }
-    else if ((address | 0) >= 0x1FE0000) {
-        //Possibly Flash:
-        data = this.IOCore.saves.readFLASH16(address & 0x1FFFF) | 0;
-    }
     else {
         //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO16(address & 0xFF) | 0;
+        data = this.IOCore.saves.readGPIO16(address | 0) | 0;
     }
     return data | 0;
 }
 GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
-	address = address | 0;
+    address = address | 0;
     var data = 0;
-    if ((address | 0) >= 0x100 && (address | 0) < 0x1FE0000) {
+    if ((address | 0) >= 0x100) {
         //Definitely ROM:
         data = this.readROMOnly32(address | 0) | 0;
     }
-    else if ((address | 0) >= 0x1FE0000) {
-        //Possibly Flash:
-        data = this.IOCore.saves.readFLASH32(address & 0x1FFFF) | 0;
-    }
     else {
         //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO32(address & 0xFF) | 0;
+        data = this.IOCore.saves.readGPIO32(address | 0) | 0;
     }
     return data | 0;
 }
 GameBoyAdvanceCartridge.prototype.readROM8Space2 = function (address) {
-	address = address | 0;
+    address = address | 0;
     var data = 0;
     if ((address | 0) < 0x100) {
         //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO8(address & 0xFF) | 0;
+        data = this.IOCore.saves.readGPIO8(address | 0) | 0;
     }
-    else if ((address | 0) > 0x1FDFFFF) {
-        //Possibly Flash:
-        data = this.IOCore.saves.readFLASH8(address & 0x1FFFF) | 0;
-    }
-    else if ((address | 0) > 0xFFFFFF) {
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
         //Possibly EEPROM:
-        data = this.IOCore.saves.readEEPROM8(address & 0xFFFFFF) | 0;
+        data = this.IOCore.saves.readEEPROM8(address | 0) | 0;
     }
     else {
         //Definitely ROM:
@@ -150,19 +135,15 @@ GameBoyAdvanceCartridge.prototype.readROM8Space2 = function (address) {
     return data | 0;
 }
 GameBoyAdvanceCartridge.prototype.readROM16Space2 = function (address) {
-	address = address | 0;
+    address = address | 0;
     var data = 0;
     if ((address | 0) < 0x100) {
         //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO16(address & 0xFF) | 0;
+        data = this.IOCore.saves.readGPIO16(address | 0) | 0;
     }
-    else if ((address | 0) > 0x1FDFFFF) {
-        //Possibly Flash:
-        data = this.IOCore.saves.readFLASH16(address & 0x1FFFF) | 0;
-    }
-    else if ((address | 0) > 0xFFFFFF) {
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
         //Possibly EEPROM:
-        data = this.IOCore.saves.readEEPROM16(address & 0xFFFFFF) | 0;
+        data = this.IOCore.saves.readEEPROM16(address | 0) | 0;
     }
     else {
         //Definitely ROM:
@@ -171,19 +152,15 @@ GameBoyAdvanceCartridge.prototype.readROM16Space2 = function (address) {
     return data | 0;
 }
 GameBoyAdvanceCartridge.prototype.readROM32Space2 = function (address) {
-	address = address | 0;
+    address = address | 0;
     var data = 0;
     if ((address | 0) < 0x100) {
         //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO32(address & 0xFF) | 0;
+        data = this.IOCore.saves.readGPIO32(address | 0) | 0;
     }
-    else if ((address | 0) > 0x1FDFFFF) {
-        //Possibly Flash:
-        data = this.IOCore.saves.readFLASH32(address & 0x1FFFF) | 0;
-    }
-    else if ((address | 0) > 0xFFFFFF) {
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
         //Possibly EEPROM:
-        data = this.IOCore.saves.readEEPROM32(address & 0xFFFFFF) | 0;
+        data = this.IOCore.saves.readEEPROM32(address | 0) | 0;
     }
     else {
         //Definitely ROM:
@@ -192,38 +169,30 @@ GameBoyAdvanceCartridge.prototype.readROM32Space2 = function (address) {
     return data | 0;
 }
 GameBoyAdvanceCartridge.prototype.writeROM8 = function (address, data) {
-	address = address | 0;
+    address = address | 0;
     data = data | 0;
-    if ((address | 0) >= 0x1FE0000) {
-        //Flash Memory:
-        this.IOCore.saves.writeFLASH8(address & 0x1FFFF, data | 0);
+    if ((address | 0) < 0x100) {
+        //GPIO Chip (RTC):
+        this.IOCore.saves.writeGPIO8(address | 0, data | 0);
     }
-    else if ((address | 0) < 0x100) {
-		//GPIO Chip (RTC):
-		this.IOCore.saves.writeGPIO8(address & 0xFF, data | 0);
-	}
-    else {
-        //EEPROM/Other:
-		this.IOCore.saves.writeROM8(address & 0x1FFFFFF, data | 0);
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
+        //Possibly EEPROM:
+        this.IOCore.saves.writeEEPROM8(address | 0, data | 0);
     }
 }
 GameBoyAdvanceCartridge.prototype.writeROM8Space2 = function (address, data) {
-	address = address | 0;
+    address = address | 0;
     data = data | 0;
-    if ((address | 0) >= 0x1FE0000) {
-        //Flash Memory:
-        this.IOCore.saves.writeFLASH8(address & 0x1FFFF, data | 0);
+    if ((address | 0) < 0x100) {
+        //GPIO Chip (RTC):
+        this.IOCore.saves.writeGPIO8(address | 0, data | 0);
     }
-    else if ((address | 0) < 0x100) {
-		//GPIO Chip (RTC):
-		this.IOCore.saves.writeGPIO8(address & 0xFF, data | 0);
-	}
-    else {
-        //EEPROM/Other:
-		this.IOCore.saves.writeROM8(address & 0x1FFFFFF, data | 0);
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
+        //Possibly EEPROM:
+        this.IOCore.saves.writeEEPROM8(address | 0, data | 0);
     }
 }
 GameBoyAdvanceCartridge.prototype.nextIRQEventTime = function () {
-	//Nothing yet implement that would fire an IRQ:
-	return -1;
+    //Nothing yet implement that would fire an IRQ:
+    return -1;
 }

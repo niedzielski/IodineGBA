@@ -22,7 +22,7 @@ Screenshots
 
 * **ARMWrester:**
 
-	![ARMWrestler](http://i.imgur.com/CELGpEh.png "Passes")
+    ![ARMWrestler](http://i.imgur.com/CELGpEh.png "Passes")
     
 * **Fake Mode 2:**
     

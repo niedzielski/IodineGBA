@@ -16,37 +16,37 @@
  *
  */
 function GameBoyAdvanceCompositor(gfx) {
-	this.gfx = gfx;
-	this.preprocess(false);
+    this.gfx = gfx;
+    this.preprocess(false);
 }
 GameBoyAdvanceCompositor.prototype.preprocess = function (doEffects) {
     this.renderScanLine = (doEffects) ? this.renderScanLineWithEffects : this.renderNormalScanLine;
 }
 GameBoyAdvanceCompositor.prototype.cleanLayerStack = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
-	//Clear out disabled layers from our stack:
-	var layerStack = [];
-	if (BG3Buffer) {
-		layerStack.push(BG3Buffer);
-	}
-	if (BG2Buffer) {
-		layerStack.push(BG2Buffer);
-	}
-	if (BG1Buffer) {
-		layerStack.push(BG1Buffer);
-	}
-	if (BG0Buffer) {
-		layerStack.push(BG0Buffer);
-	}
-	if (OBJBuffer) {
-		layerStack.push(OBJBuffer);
-	}
-	return layerStack;
+    //Clear out disabled layers from our stack:
+    var layerStack = [];
+    if (BG3Buffer) {
+        layerStack.push(BG3Buffer);
+    }
+    if (BG2Buffer) {
+        layerStack.push(BG2Buffer);
+    }
+    if (BG1Buffer) {
+        layerStack.push(BG1Buffer);
+    }
+    if (BG0Buffer) {
+        layerStack.push(BG0Buffer);
+    }
+    if (OBJBuffer) {
+        layerStack.push(OBJBuffer);
+    }
+    return layerStack;
 }
 GameBoyAdvanceCompositor.prototype.renderNormalScanLine = function (xStart, xEnd, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     xStart = xStart | 0;
     xEnd = xEnd | 0;
-	var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	switch (layerStack.length) {
+    var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    switch (layerStack.length) {
         case 0:
             this.fillWithBackdrop(xStart | 0, xEnd | 0, lineBuffer);
             break;
@@ -69,8 +69,8 @@ GameBoyAdvanceCompositor.prototype.renderNormalScanLine = function (xStart, xEnd
 GameBoyAdvanceCompositor.prototype.renderScanLineWithEffects = function (xStart, xEnd, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     xStart = xStart | 0;
     xEnd = xEnd | 0;
-	var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
-	switch (layerStack.length) {
+    var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    switch (layerStack.length) {
         case 0:
             this.fillWithBackdropSpecial(xStart | 0, xEnd | 0, lineBuffer);
             break;
