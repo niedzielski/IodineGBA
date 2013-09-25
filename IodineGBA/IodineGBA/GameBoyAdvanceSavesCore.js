@@ -198,6 +198,9 @@ GameBoyAdvanceSaves.prototype.writeSRAMIfDefined = function (address, data) {
     address = address | 0;
     data = data | 0;
     switch (this.saveType | 0) {
+        case 0:
+            //UNKNOWN:
+            this.SRAMChip.initialize();
         case 1:
             //SRAM:
             this.SRAMChip.write(address | 0, data | 0);
