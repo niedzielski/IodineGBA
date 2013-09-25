@@ -20,12 +20,16 @@ function GameBoyAdvanceSaves(IOCore) {
     this.initialize();
 }
 GameBoyAdvanceSaves.prototype.initialize = function () {
-    this.saveType = 1; //Default to SRAM for now (Need to add in the others soon).
+    this.saveType = 1;
     this.gpioType = 0;
     this.GPIOChip = null;
+    this.UNDETERMINED = null;//new GameboyAdvanceSaveDeterminer();
     this.SRAMChip = new GameBoyAdvanceSRAMChip();
-    this.FLASHChip = null;
-    this.EEPROMChip = null;
+    this.FLASHChip = null;//new GameBoyAdvanceFLASHChip();
+    this.EEPROMChip = null;//new GameBoyAdvanceEEPROMChip();
+    this.referenceSave();
+}
+GameBoyAdvanceSaves.prototype.referenceSave = function () {
     switch (this.saveType | 0) {
         case 1:
             this.saves = this.SRAMChip.SRAM;
@@ -131,6 +135,10 @@ GameBoyAdvanceSaves.prototype.readSRAM = function (address) {
     address = address | 0;
     var data = 0;
     switch (this.saveType | 0) {
+        case 0:
+            //Unknown:
+            data = this.UNDETERMINED.readSRAM(address | 0) | 0;
+            break;
         case 1:
             //SRAM:
             data = this.SRAMChip.read(address | 0) | 0;
@@ -148,6 +156,10 @@ GameBoyAdvanceSaves.prototype.writeGPIO8 = function (address, data) {
         //GPIO:
         this.GPIOChip.write(address | 0, data | 0);
     }
+    else {
+        //Unknown:
+        //this.UNDETERMINED.writeGPIO(address | 0, data | 0);
+    }
 }
 GameBoyAdvanceSaves.prototype.writeEEPROM8 = function (address, data) {
     address = address | 0;
@@ -156,11 +168,19 @@ GameBoyAdvanceSaves.prototype.writeEEPROM8 = function (address, data) {
         //EEPROM:
         this.EEPROMChip.write(address | 0, data | 0);
     }
+    else {
+        //Unknown:
+        //this.UNDETERMINED.writeEEPROM(address | 0, data | 0);
+    }
 }
 GameBoyAdvanceSaves.prototype.writeSRAM = function (address, data) {
     address = address | 0;
     data = data | 0;
     switch (this.saveType | 0) {
+        case 0:
+            //Unknown:
+            this.UNDETERMINED.writeSRAM(address | 0, data | 0);
+            break;
         case 1:
             //SRAM:
             this.SRAMChip.write(address | 0, data | 0);
