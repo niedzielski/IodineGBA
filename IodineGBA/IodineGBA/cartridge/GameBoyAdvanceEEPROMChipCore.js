@@ -41,11 +41,23 @@ GameBoyAdvanceEEPROMChip.prototype.load = function (save) {
         this.saves = save;
     }
 }
-GameBoyAdvanceEEPROMChip.prototype.read = function (address) {
+GameBoyAdvanceEEPROMChip.prototype.read8 = function (address) {
     address = address | 0;
     var data = 0;
     //Fill in
-    return data;
+    return data | 0;
+}
+GameBoyAdvanceEEPROMChip.prototype.read16 = function (address) {
+    address = address | 0;
+    var data = 0;
+    //Fill in
+    return data | 0;
+}
+GameBoyAdvanceEEPROMChip.prototype.read32 = function (address) {
+    address = address | 0;
+    var data = 0;
+    //Fill in
+    return data | 0;
 }
 GameBoyAdvanceEEPROMChip.prototype.write = function (address, data) {
     address = address | 0;
