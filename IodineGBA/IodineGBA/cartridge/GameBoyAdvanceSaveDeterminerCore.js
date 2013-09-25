@@ -57,6 +57,19 @@ GameBoyAdvanceSaveDeterminer.prototype.checkDetermination = function () {
             this.saveCore.referenceSave(0x3);
     }
 }
+GameBoyAdvanceSaveDeterminer.prototype.readSRAM = function (address) {
+    address = address | 0;
+    var data = 0;
+    //Is not EEPROM:
+    this.possible &= ~this.flags.EEPROM;
+    if (this.saves != null) {
+        if ((this.possible & this.flags.FLASH) == (this.flags.FLASH | 0) || (this.possible & this.flags.SRAM) == (this.flags.SRAM | 0)) {
+            //Read is the same between SRAM and FLASH for the most part:
+            data = this.saves[(address | 0) % (this.saves.length | 0)] | 0;
+        }
+    }
+    return data | 0;
+}
 GameBoyAdvanceSaveDeterminer.prototype.writeGPIO8 = function (address, data) {
     address = address | 0;
     data = data | 0;
@@ -70,6 +83,36 @@ GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM8 = function (address, data) {
         this.possible = this.flags.EEPROM | 0;
         this.checkDetermination();
         this.saveCore.writeEEPROM8(address | 0, data | 0);
+    }
+}
+GameBoyAdvanceSaveDeterminer.prototype.readEEPROM8 = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
+        //EEPROM:
+        this.possible = this.flags.EEPROM | 0;
+        this.checkDetermination();
+        return this.saveCore.readEEPROM8(address | 0) | 0;
+    }
+}
+GameBoyAdvanceSaveDeterminer.prototype.readEEPROM16 = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
+        //EEPROM:
+        this.possible = this.flags.EEPROM | 0;
+        this.checkDetermination();
+        return this.saveCore.readEEPROM16(address | 0) | 0;
+    }
+}
+GameBoyAdvanceSaveDeterminer.prototype.readEEPROM32 = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
+        //EEPROM:
+        this.possible = this.flags.EEPROM | 0;
+        this.checkDetermination();
+        return this.saveCore.readEEPROM32(address | 0) | 0;
     }
 }
 GameBoyAdvanceSaveDeterminer.prototype.writeSRAM = function (address, data) {

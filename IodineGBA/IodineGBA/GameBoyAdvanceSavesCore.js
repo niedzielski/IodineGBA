@@ -78,8 +78,8 @@ GameBoyAdvanceSaves.prototype.readEEPROM8 = function (address) {
         data = this.EEPROMChip.read8(address | 0) | 0;
     }
     else {
-        //ROM:
-        data = this.cartridge.readROMOnly8(address | 0) | 0;
+        //UNKNOWN:
+        data = this.UNDETERMINED.readEEPROM8(address | 0) | 0;
     }
     return data | 0;
 }
@@ -104,8 +104,8 @@ GameBoyAdvanceSaves.prototype.readEEPROM16 = function (address) {
         data = this.EEPROMChip.read16(address | 0) | 0;
     }
     else {
-        //ROM:
-        data = this.cartridge.readROMOnly16(address | 0) | 0;
+        //UNKNOWN:
+        data = this.UNDETERMINED.readEEPROM16(address | 0) | 0;
     }
     return data | 0;
 }
@@ -130,8 +130,8 @@ GameBoyAdvanceSaves.prototype.readEEPROM32 = function (address) {
         data = this.EEPROMChip.read32(address | 0) | 0;
     }
     else {
-        //ROM:
-        data = this.cartridge.readROMOnly32(address | 0) | 0;
+        //UNKNOWN:
+        data = this.UNDETERMINED.readEEPROM32(address | 0) | 0;
     }
     return data | 0;
 }
@@ -139,6 +139,10 @@ GameBoyAdvanceSaves.prototype.readSRAM = function (address) {
     address = address | 0;
     var data = 0;
     switch (this.saveType | 0) {
+        case 0:
+            //UNKNOWN:
+            data = this.UNDETERMINED.readSRAM(address | 0) | 0;
+            break;
         case 1:
             //SRAM:
             data = this.SRAMChip.read(address | 0) | 0;

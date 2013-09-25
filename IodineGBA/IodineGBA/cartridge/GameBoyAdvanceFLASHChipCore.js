@@ -19,6 +19,9 @@ function GameBoyAdvanceFLASHChip() {
     this.saves = null;
     this.BANKOffset = 0;
     this.largestSizePossible = 0x10000;
+    this.flashCommandUnlockStage = 0;
+    this.notATMEL = false;
+    this.IDMode = false;
 }
 GameBoyAdvanceFLASHChip.prototype.initialize = function () {
     this.allocate();
@@ -27,6 +30,10 @@ GameBoyAdvanceFLASHChip.prototype.allocate = function () {
     if (this.saves == null || (this.saves.length | 0) < (this.largestSizePossible | 0)) {
         //Allocate the new array:
         var newSave = getUint8Array(this.largestSizePossible | 0);
+        //Init to default value:
+        for (var index = 0; (index | 0) < (this.largestSizePossible | 0); index = ((index | 0) + 1) | 0) {
+            newSave[index | 0] = 0;
+        }
         //Copy the old save data out:
         if (this.saves != null) {
             for (var index = 0; (index | 0) < (this.saves.length | 0); index = ((index | 0) + 1) | 0) {
@@ -44,13 +51,126 @@ GameBoyAdvanceFLASHChip.prototype.load = function (save) {
 }
 GameBoyAdvanceFLASHChip.prototype.read = function (address) {
     address = address | 0;
-    address = address | this.BANKOffset;
-    return this.saves[address & 0x1FFFF] | 0;
+    var data = 0;
+    switch (address | 0) {
+        case 0:
+            if (!this.IDMode) {
+                data = this.saves[0] | 0;
+            }
+            else if (this.notATMEL) {
+                data = 0xBF;
+            }
+            else {
+                data = 0x1F;
+            }
+            break;
+        case 1:
+            if (!this.IDMode) {
+                data = this.saves[1] | 0;
+            }
+            else if (this.notATMEL) {
+                data = 0xD4;
+            }
+            else {
+                data = 0x3D;
+            }
+            break;
+        default:
+            data = this.saves[address | this.BANKOffset] | 0;
+    }
+    return data | 0;
 }
 GameBoyAdvanceFLASHChip.prototype.write = function (address, data) {
     address = address | 0;
     data = data | 0;
-    //Fill in
+    switch (address | 0) {
+        case 0:
+        case 0x1000:
+        case 0x2000:
+        case 0x3000:
+        case 0x4000:
+        case 0x5000:
+        case 0x6000:
+        case 0x7000:
+        case 0x8000:
+        case 0x9000:
+        case 0xA000:
+        case 0xB000:
+        case 0xC000:
+        case 0xD000:
+        case 0xE000:
+        case 0xF000:
+            if ((this.flashCommandUnlockStage | 0) == 5 && ((data | 0) == 0x30)) {
+                var addressEnd = ((address | 0) + 0x1000) | 0;
+                for (var index = address | 0; (index | 0) < (addressEnd | 0); index = ((index | 0) + 1) | 0) {
+                    this.save[index | this.BANKOffset] = 0xFF;
+                }
+                this.notATMEL = true;
+            }
+            else if ((this.flashCommandUnlockStage | 0) == 3 && (address | 0) == 0) {
+                this.selectBank(data & 0x1);
+            }
+            this.flashCommandUnlockStage = 0;
+            break;
+        case 0x5555:
+            switch (data | 0) {
+                case 0x10:
+                    if ((this.flashCommandUnlockStage | 0) == 5 && ((data | 0) == 0x30)) {
+                        for (var index = 0; (index | 0) < (this.largestSizePossible | 0); index = ((index | 0) + 1) | 0) {
+                            this.save[index | 0] = 0xFF;
+                        }
+                        this.flashCommandUnlockStage = 0;
+                    }
+                    break;
+                case 0x80:
+                    if ((this.flashCommandUnlockStage | 0) == 2) {
+                        this.flashCommandUnlockStage = 3;
+                    }
+                    else {
+                        this.flashCommandUnlockStage = 0;
+                    }
+                    break;
+                case 0x90:
+                    if ((this.flashCommandUnlockStage | 0) == 2) {
+                        this.IDMode = true;
+                    }
+                    this.flashCommandUnlockStage = 0;
+                    break;
+                case 0xA0:
+                    //should we handle this?
+                    this.flashCommandUnlockStage = 0;
+                    break;
+                case 0xAA:
+                    this.flashCommandUnlockStage = ((this.flashCommandUnlockStage | 0) == 3) ? 4 : 1;
+                    break;
+                case 0xB0:
+                    if ((this.flashCommandUnlockStage | 0) == 2) {
+                        this.flashCommandUnlockStage = 3;
+                    }
+                    else {
+                        this.flashCommandUnlockStage = 0;
+                    }
+                    break;
+                case 0xF0:
+                    if ((this.flashCommandUnlockStage | 0) == 5) {
+                        this.IDMode = false;
+                    }
+                    this.flashCommandUnlockStage = 0;
+                    break;
+                default:
+                    this.flashCommandUnlockStage = 0;
+            }
+            break;
+        case 0x2AAA:
+            if ((data | 0) == 0x55 && ((this.flashCommandUnlockStage | 0) == 1 || (this.flashCommandUnlockStage | 0) == 4)) {
+                this.flashCommandUnlockStage = ((this.flashCommandUnlockStage | 0) + 1) | 0;
+            }
+            else {
+                this.flashCommandUnlockStage = 0;
+            }
+    }
+    address = address | this.BANKOffset;
+    this.saves[address | 0] = data | 0;
 }
 GameBoyAdvanceFLASHChip.prototype.selectBank = function (bankNumber) {
     bankNumber = bankNumber | 0;
