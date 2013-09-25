@@ -25,7 +25,7 @@ GameBoyAdvanceSaves.prototype.initialize = function () {
     this.GPIOChip = null;
     this.UNDETERMINED = null;//new GameboyAdvanceSaveDeterminer();
     this.SRAMChip = new GameBoyAdvanceSRAMChip();
-    this.FLASHChip = null;//new GameBoyAdvanceFLASHChip();
+    this.FLASHChip = new GameBoyAdvanceFLASHChip();
     this.EEPROMChip = null;//new GameBoyAdvanceEEPROMChip();
     this.referenceSave();
 }
@@ -47,7 +47,7 @@ GameBoyAdvanceSaves.prototype.referenceSave = function () {
 GameBoyAdvanceSaves.prototype.importSave = function (saves) {
     this.saves = saves;
     this.SRAMChip.load(this.saves);
-    //this.FLASHChip.load(this.saves);
+    this.FLASHChip.load(this.saves);
     //this.EEPROMChip.load(this.saves);
 }
 GameBoyAdvanceSaves.prototype.exportSave = function () {

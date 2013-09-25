@@ -21,7 +21,7 @@ function GameBoyAdvanceSRAMChip() {
     this.TILTChipUnlocked = 0;
 }
 GameBoyAdvanceSRAMChip.prototype.load = function (save) {
-    if ((save.length) == 0x8000) {
+    if ((save.length | 0) == 0x8000) {
         this.SRAM = save;
     }
 }
