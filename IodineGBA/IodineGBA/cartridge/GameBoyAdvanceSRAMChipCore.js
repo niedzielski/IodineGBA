@@ -16,20 +16,25 @@
  *
  */
 function GameBoyAdvanceSRAMChip() {
-    this.SRAM = getUint8Array(0x8000);
+    this.saves = null;
     this.TILTChip = null;
     this.TILTChipUnlocked = 0;
 }
+GameBoyAdvanceSRAMChip.prototype.initialize = function () {
+    if (this.saves == null || (this.saves.length | 0) != 0x8000) {
+        this.saves = getUint8Array(0x8000);
+    }
+}
 GameBoyAdvanceSRAMChip.prototype.load = function (save) {
     if ((save.length | 0) == 0x8000) {
-        this.SRAM = save;
+        this.saves = save;
     }
 }
 GameBoyAdvanceSRAMChip.prototype.read = function (address) {
     address = address | 0;
     var data = 0;
     if ((address | 0) < 0x8000 || (this.TILTChipUnlocked | 0) != 3) {
-        data = this.SRAM[address & 0x7FFF] | 0;
+        data = this.saves[address & 0x7FFF] | 0;
     }
     else {
         switch (address | 0) {
@@ -56,7 +61,7 @@ GameBoyAdvanceSRAMChip.prototype.write = function (address, data) {
     data = data | 0;
     if ((address | 0) < 0x8000 || (this.TILTChipUnlocked | 0) >= 4) {
         //Normal SRAM write:
-        this.SRAM[address & 0x7FFF] = data | 0;
+        this.saves[address & 0x7FFF] = data | 0;
     }
     else {
         switch (address | 0) {
@@ -79,7 +84,7 @@ GameBoyAdvanceSRAMChip.prototype.write = function (address, data) {
             default:
                 //Check for mirroring while not tilt chip:
                 if ((this.TILTChipUnlocked | 0) == 0) {
-                    this.SRAM[address & 0x7FFF] = data | 0;
+                    this.saves[address & 0x7FFF] = data | 0;
                     this.TILTChipUnlocked |= 0x4;   //Definitely not using a tilt sensor.
                 }
         }

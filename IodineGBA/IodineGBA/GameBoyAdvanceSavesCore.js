@@ -20,38 +20,42 @@ function GameBoyAdvanceSaves(IOCore) {
     this.initialize();
 }
 GameBoyAdvanceSaves.prototype.initialize = function () {
-    this.saveType = 1;
+    this.saveType = 0;
     this.gpioType = 0;
     this.GPIOChip = null;
-    this.UNDETERMINED = null;//new GameboyAdvanceSaveDeterminer();
+    this.UNDETERMINED = new GameBoyAdvanceSaveDeterminer(this);
     this.SRAMChip = new GameBoyAdvanceSRAMChip();
     this.FLASHChip = new GameBoyAdvanceFLASHChip();
-    this.EEPROMChip = null;//new GameBoyAdvanceEEPROMChip();
-    this.referenceSave();
+    this.EEPROMChip = new GameBoyAdvanceEEPROMChip();
+    this.currentChip = this.UNDETERMINED;
+    this.referenceSave(this.saveType);
 }
-GameBoyAdvanceSaves.prototype.referenceSave = function () {
-    switch (this.saveType | 0) {
+GameBoyAdvanceSaves.prototype.referenceSave = function (saveType) {
+    saveType = saveType | 0;
+    switch (saveType | 0) {
+        case 0:
+            this.currentChip = this.UNDETERMINED;
+            break;
         case 1:
-            this.saves = this.SRAMChip.SRAM;
+            this.currentChip = this.SRAMChip;
             break;
         case 2:
-            this.saves = this.FLASHChip.FLASH;
+            this.currentChip = this.FLASHChip;
             break;
         case 3:
-            this.saves = this.EEPROMChip.EEPROM;
-            break;
-        default:
-            this.saves = null;
+            this.currentChip = this.EEPROMChip;
     }
+    this.currentChip.initialize();
+    this.saveType = saveType | 0;
 }
 GameBoyAdvanceSaves.prototype.importSave = function (saves) {
-    this.saves = saves;
-    this.SRAMChip.load(this.saves);
-    this.FLASHChip.load(this.saves);
-    //this.EEPROMChip.load(this.saves);
+    this.UNDETERMINED.load(saves);
+    this.SRAMChip.load(saves);
+    this.FLASHChip.load(saves);
+    this.EEPROMChip.load(saves);
 }
 GameBoyAdvanceSaves.prototype.exportSave = function () {
-    return this.saves;
+    return this.currentChip.saves;
 }
 GameBoyAdvanceSaves.prototype.readGPIO8 = function (address) {
     address = address | 0;
@@ -135,10 +139,6 @@ GameBoyAdvanceSaves.prototype.readSRAM = function (address) {
     address = address | 0;
     var data = 0;
     switch (this.saveType | 0) {
-        case 0:
-            //Unknown:
-            data = this.UNDETERMINED.readSRAM(address | 0) | 0;
-            break;
         case 1:
             //SRAM:
             data = this.SRAMChip.read(address | 0) | 0;
@@ -158,7 +158,7 @@ GameBoyAdvanceSaves.prototype.writeGPIO8 = function (address, data) {
     }
     else {
         //Unknown:
-        //this.UNDETERMINED.writeGPIO(address | 0, data | 0);
+        this.UNDETERMINED.writeGPIO8(address | 0, data | 0);
     }
 }
 GameBoyAdvanceSaves.prototype.writeEEPROM8 = function (address, data) {
@@ -170,7 +170,7 @@ GameBoyAdvanceSaves.prototype.writeEEPROM8 = function (address, data) {
     }
     else {
         //Unknown:
-        //this.UNDETERMINED.writeEEPROM(address | 0, data | 0);
+        this.UNDETERMINED.writeEEPROM8(address | 0, data | 0);
     }
 }
 GameBoyAdvanceSaves.prototype.writeSRAM = function (address, data) {
@@ -181,6 +181,19 @@ GameBoyAdvanceSaves.prototype.writeSRAM = function (address, data) {
             //Unknown:
             this.UNDETERMINED.writeSRAM(address | 0, data | 0);
             break;
+        case 1:
+            //SRAM:
+            this.SRAMChip.write(address | 0, data | 0);
+            break;
+        case 2:
+            //FLASH:
+            this.FLASHChip.write(address | 0, data | 0);
+    }
+}
+GameBoyAdvanceSaves.prototype.writeSRAMIfDefined = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    switch (this.saveType | 0) {
         case 1:
             //SRAM:
             this.SRAMChip.write(address | 0, data | 0);

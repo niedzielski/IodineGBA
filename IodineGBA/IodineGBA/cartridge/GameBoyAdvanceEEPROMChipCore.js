@@ -15,15 +15,14 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceFLASHChip() {
+function GameBoyAdvanceEEPROMChip() {
     this.saves = null;
-    this.BANKOffset = 0;
-    this.largestSizePossible = 0x10000;
+    this.largestSizePossible = 0x200;
 }
-GameBoyAdvanceFLASHChip.prototype.initialize = function () {
+GameBoyAdvanceEEPROMChip.prototype.initialize = function () {
     this.allocate();
 }
-GameBoyAdvanceFLASHChip.prototype.allocate = function () {
+GameBoyAdvanceEEPROMChip.prototype.allocate = function () {
     if (this.saves == null || (this.saves.length | 0) < (this.largestSizePossible | 0)) {
         //Allocate the new array:
         var newSave = getUint8Array(this.largestSizePossible | 0);
@@ -37,24 +36,19 @@ GameBoyAdvanceFLASHChip.prototype.allocate = function () {
         this.saves = newSave;
     }
 }
-GameBoyAdvanceFLASHChip.prototype.load = function (save) {
-    if ((save.length | 0) == 0x10000 || (save.length | 0) == 0x20000) {
+GameBoyAdvanceEEPROMChip.prototype.load = function (save) {
+    if ((save.length | 0) == 0x200 || (save.length | 0) == 0x2000) {
         this.saves = save;
     }
 }
-GameBoyAdvanceFLASHChip.prototype.read = function (address) {
+GameBoyAdvanceEEPROMChip.prototype.read = function (address) {
     address = address | 0;
-    address = address | this.BANKOffset;
-    return this.saves[address & 0x1FFFF] | 0;
+    var data = 0;
+    //Fill in
+    return data;
 }
-GameBoyAdvanceFLASHChip.prototype.write = function (address, data) {
+GameBoyAdvanceEEPROMChip.prototype.write = function (address, data) {
     address = address | 0;
     data = data | 0;
     //Fill in
-}
-GameBoyAdvanceFLASHChip.prototype.selectBank = function (bankNumber) {
-    bankNumber = bankNumber | 0;
-    this.BANKOffset = (bankNumber & 0x1) << 16;
-    this.largestSizePossible = Math.max((0x10000 + (this.BANKOffset | 0)) | 0, this.largestSizePossible | 0) | 0;
-    this.allocate();
 }
