@@ -65,27 +65,45 @@ GameBoyAdvanceSaveDeterminer.prototype.writeGPIO8 = function (address, data) {
 GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM8 = function (address, data) {
     address = address | 0;
     data = data | 0;
-    //EEPROM:
-    this.possible = this.flags.EEPROM | 0;
-    this.checkDetermination();
-    this.saveCore.writeEEPROM8(address | 0, data | 0);
+    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
+        //EEPROM:
+        this.possible = this.flags.EEPROM | 0;
+        this.checkDetermination();
+        this.saveCore.writeEEPROM8(address | 0, data | 0);
+    }
 }
 GameBoyAdvanceSaveDeterminer.prototype.writeSRAM = function (address, data) {
     address = address | 0;
     data = data | 0;
     //Is not EEPROM:
     this.possible &= ~this.flags.EEPROM;
-    if ((address | 0) == 0x5555) {
-        if ((data | 0) == 0xAA) {
-            //FLASH
-            this.possible = this.flags.FLASH | 0;
+    if ((this.possible & this.flags.FLASH) == (this.flags.FLASH | 0)) {
+        if ((this.possible & this.flags.SRAM) == (this.flags.SRAM | 0)) {
+            if ((address | 0) == 0x5555) {
+                if ((data | 0) == 0xAA) {
+                    //FLASH
+                    this.possible = this.flags.FLASH | 0;
+                }
+                else {
+                    //SRAM
+                    this.possible = this.flags.SRAM | 0;
+                }
+            }
         }
         else {
-            //SRAM
-            this.possible = this.flags.SRAM | 0;
+            if ((address | 0) == 0x5555) {
+                if ((data | 0) == 0xAA) {
+                    //FLASH
+                    this.possible = this.flags.FLASH | 0;
+                }
+                else {
+                    //Is not Flash:
+                    this.possible &= ~this.flags.FLASH;
+                }
+            }
         }
     }
-    else {
+    else if ((this.possible & this.flags.SRAM) == (this.flags.SRAM | 0)) {
         //SRAM
         this.possible = this.flags.SRAM | 0;
     }
