@@ -18,6 +18,8 @@
 function DynarecCacheManagerCore(dynarec, start, end, InTHUMB) {
     this.dynarec = dynarec;
     this.CPUCore = dynarec.CPUCore;
+    this.thumb = this.CPUCore.THUMB;
+    this.arm = this.CPUCore.ARM;
     this.memory = this.CPUCore.IOCore.memory;
     this.start = start >>> 0;
     end = ((end >>> 0) - ((!!InTHUMB) ? 0x4 : 0x8)) >>> 0;
@@ -30,6 +32,7 @@ function DynarecCacheManagerCore(dynarec, start, end, InTHUMB) {
     this.compiled = false;
     this.read = (this.InTHUMB) ? this.read16 : this.read32;
     this.sizeOfBlock = (this.end >>> 0) - (this.start >>> 0);
+    this.execute = null;
 }
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 1000;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.001;
@@ -51,12 +54,11 @@ DynarecCacheManagerCore.prototype.tickHotness = function () {
 DynarecCacheManagerCore.prototype.bailout = function () {
     ++this.badCount;
     this.compiled = false;
-    this.CPUCore.dynarec.deleteReadyCaches(this.start >>> 0);
 }
 DynarecCacheManagerCore.prototype.tickBad = function () {
     ++this.badCount;
     if ((this.badCount / this.hotCount) >= this.MAGIC_BAD_COUNT_CLEAR_RATIO) {
-        this.CPUCore.dynarec.deleteReadyCaches(this.start >>> 0);
+        this.compiled = false;
     }
 }
 DynarecCacheManagerCore.prototype.read16 = function (address) {
@@ -111,7 +113,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
         else {
             //var assembler = new DynarecARMAssemblerCore(this.start >>> 0, this.record);
         }
-        this.dynarec.cacheAppendReady(this.start >>> 0, !!this.InTHUMB, new Function("cpu", assembler.getStubCode()));
+        this.attachCompiled(new Function(assembler.getStubCode()));
     }
     else if (!this.compiling && this.dynarec.hasFreeWorker()) {
         //Make sure there isn't another worker compiling:
@@ -124,7 +126,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
                 switch (code | 0) {
                         //Got the code block back:
                     case 0:
-                        parentObj.dynarec.cacheAppendReady(parentObj.start >>> 0, !!parentObj.InTHUMB, new Function("cpu", message[1]));
+                        parentObj.attachCompiled(new Function(message[1]));
                         break;
                         //Compiler returned an error:
                     case 1:
@@ -146,4 +148,10 @@ DynarecCacheManagerCore.prototype.compile = function () {
             this.CPUCore.emulatorCore.useWorkers = false;
         }
     }
+}
+DynarecCacheManagerCore.prototype.ready = function () {
+    return !!this.compiled;
+}
+DynarecCacheManagerCore.prototype.attachCompiled = function (JITStub) {
+    this.execute = JITStub;
 }

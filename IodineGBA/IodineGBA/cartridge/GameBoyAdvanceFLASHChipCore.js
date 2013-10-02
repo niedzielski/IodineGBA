@@ -58,7 +58,7 @@ GameBoyAdvanceFLASHChip.prototype.read = function (address) {
                 data = this.saves[0] | 0;
             }
             else if (this.notATMEL) {
-                data = 0xBF;
+                data = ((this.largestSizePossible | 0) == 0x20000) ? 0x62 : 0xBF;
             }
             else {
                 data = 0x1F;
@@ -69,7 +69,7 @@ GameBoyAdvanceFLASHChip.prototype.read = function (address) {
                 data = this.saves[1] | 0;
             }
             else if (this.notATMEL) {
-                data = 0xD4;
+                data = ((this.largestSizePossible | 0) == 0x20000) ? 0x13 : 0xD4;
             }
             else {
                 data = 0x3D;

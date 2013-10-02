@@ -59,7 +59,6 @@ GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
     this.CARTWaitState0Combined = ((this.CARTWaitState0First | 0) + (this.CARTWaitState0Second | 0)) | 0;
     this.CARTWaitState1Combined = ((this.CARTWaitState1First | 0) + (this.CARTWaitState1Second | 0)) | 0;
     this.WAITCNT0 = data | 0;
-    //this.IOCore.cpu.dynarec.invalidateCaches();
 }
 GameBoyAdvanceWait.prototype.readWAITCNT0 = function () {
     return this.WAITCNT0 | 0;
@@ -84,7 +83,6 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
         this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleDoPrefetch;
     }
     this.WAITCNT1 = data | 0;
-    //this.IOCore.cpu.dynarec.invalidateCaches();
 }
 GameBoyAdvanceWait.prototype.readWAITCNT1 = function () {
     return this.WAITCNT1 | 0x20;

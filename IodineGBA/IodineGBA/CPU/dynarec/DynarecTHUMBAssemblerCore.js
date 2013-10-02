@@ -25,8 +25,7 @@ function DynarecTHUMBAssemblerCore(pc, records) {
     this.generateSpew();
 }
 DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
-    var batched = "\t//Stub Code For Address " + this.startAddress + ":\n" +
-    "\tvar thumb = cpu.THUMB;\n";
+    var batched = "\t//Stub Code For Address " + this.startAddress + ":\n";
     batched += this.generatePipelineSpew1();
     this.incrementInternalPC();
     batched += this.generatePipelineSpew2();
@@ -74,7 +73,7 @@ DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew1 = function () {
     this.insertFetchPrefix() +
     "\t//Waiting for the pipeline bubble to clear... two stages left\n" +
     "\t//Push fetch to decode:\n" +
-    "\tthumb.decode = thumb.fetch | 0;\n" +
+    "\tthis.thumb.decode = this.thumb.fetch | 0;\n" +
     this.incrementPC();
 }
 DynarecTHUMBAssemblerCore.prototype.generatePipelineSpew2 = function () {
@@ -102,7 +101,7 @@ DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruct
     }
     else {
         //Call out to the interpreter's stub:
-        return "\tthumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
+        return "\tthis.thumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
     }
 }
 DynarecTHUMBAssemblerCore.prototype.insertMemoryInstabilityCheck = function (instruction) {
@@ -111,16 +110,16 @@ DynarecTHUMBAssemblerCore.prototype.insertMemoryInstabilityCheck = function (ins
     }
     else {
         return "\t//Verify the cached instruction should be called:\n" +
-        "\tif ((thumb.execute | 0) != " + this.toHex(instruction) + ") {\n" +
-            "\t\tcpu.dynarec.findCache(" + this.startAddress + ").bailout();\n" +
+        "\tif ((this.thumb.execute | 0) != " + this.toHex(instruction) + ") {\n" +
+            "\t\tthis.bailout();\n" +
             "\t\treturn;\n" +
         "\t}\n";
     }
 }
 DynarecTHUMBAssemblerCore.prototype.insertRunnableCheck = function () {
     return "\t//Ensure we do not run when an IRQ is flagged or not in cpu mode:\n" +
-    "\tif (!!cpu.breakNormalExecution) {\n" +
-        //"\t\tcpu.dynarec.findCache(" + this.startAddress + ").tickBad();\n" +
+    "\tif (!!this.CPUCore.breakNormalExecution) {\n" +
+        "\t\tthis.tickBad();\n" +
         "\t\treturn;\n" +
     "\t}\n";
 }
@@ -130,24 +129,24 @@ DynarecTHUMBAssemblerCore.prototype.insertFetchPrefix = function () {
 }
 DynarecTHUMBAssemblerCore.prototype.insertPipelineTick = function () {
     return "\t//Tick the CPU pipeline:\n" +
-    "\tcpu.pipelineInvalid >>= 1;\n";
+    "\tthis.CPUCore.pipelineInvalid >>= 1;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertFetching = function () {
     return "\t//Update the fetch stage:\n" +
-    "\tthumb.fetch = cpu.wait.CPUGetOpcode16(" + this.currentInstructionPC() + ") | 0;\n";
+    "\tthis.thumb.fetch = this.CPUCore.wait.CPUGetOpcode16(" + this.currentInstructionPC() + ") | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertPipelineStartSuffix = function () {
     return "\t//Push decode to execute and fetch to decode:\n" +
-    "\tthumb.execute = thumb.decode | 0;\n" +
-    "\tthumb.decode = thumb.fetch | 0;\n";
+    "\tthis.thumb.execute = this.thumb.decode | 0;\n" +
+    "\tthis.thumb.decode = this.thumb.fetch | 0;\n";
 }
 DynarecTHUMBAssemblerCore.prototype.insertPipelineSuffix = function (index) {
     return "\t//Push decode to execute and fetch to decode:\n" +
-    "\tthumb.execute = " + ((this.isInROM(((this.currentPC >>> 0) - 2) >>> 0)) ? this.toHex(this.records[index + 1]) : "thumb.decode | 0") + ";\n" +
-    "\tthumb.decode = " + ((this.isInROM(this.currentPC >>> 0)) ? this.toHex(this.records[index + 2]) : "thumb.fetch | 0") + ";\n";
+    "\tthis.thumb.execute = " + ((this.isInROM(((this.currentPC >>> 0) - 2) >>> 0)) ? this.toHex(this.records[index + 1]) : "this.thumb.decode | 0") + ";\n" +
+    "\tthis.thumb.decode = " + ((this.isInROM(this.currentPC >>> 0)) ? this.toHex(this.records[index + 2]) : "this.thumb.fetch | 0") + ";\n";
 }
 DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
-    return "\tif ((cpu.pipelineInvalid | 0) == 0) {\n" +
+    return "\tif ((this.CPUCore.pipelineInvalid | 0) == 0) {\n" +
         "\t" + this.incrementPC() +
     "\t}\n" +
     "\telse {\n" +
@@ -156,7 +155,7 @@ DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
     "\t}\n";
 }
 DynarecTHUMBAssemblerCore.prototype.incrementPC = function () {
-    return "\tcpu.registers[15] = " + this.toHex(this.nextInstructionPC()) + ";\n";
+    return "\tthis.CPUCore.registers[15] = " + this.toHex(this.nextInstructionPC()) + ";\n";
 }
 DynarecTHUMBAssemblerCore.prototype.conditionalInline = function (instructionVariable, instructionSnippet, altSnippet) {
     //Factor out some zero math:
@@ -347,80 +346,94 @@ DynarecTHUMBAssemblerCore.prototype.generateLowMap4 = function (instruction1, in
 }
 DynarecTHUMBAssemblerCore.prototype.LSLimm = function (instructionValue) {
     var spew = "\t//LSL imm:\n" +
-    "\tvar source = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
+    "\tvar source = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
     var offset = (instructionValue >> 6) & 0x1F;
     if (offset > 0) {
         spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-        "\tcpu.CPSRCarry = (" + this.conditionalInline(offset - 1, "(source << " + this.toHex(offset - 1) + ")", "source") + " < 0);\n" +
+        "\tthis.CPUCore.CPSRCarry = (" + this.conditionalInline(offset - 1, "(source << " + this.toHex(offset - 1) + ")", "source") + " < 0);\n" +
         "\t//Perform shift:\n" + 
         "\tsource <<= " + this.toHex(offset) + ";\n";
     }
     spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tcpu.CPSRNegative = (source < 0);\n" +
-    "\tcpu.CPSRZero = (source == 0);\n" +
+    "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
     "\t//Update destination register:\n" +
-    "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
+    "\tthis.CPUCore.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.LSRimm = function (instructionValue) {
     var spew = "\t//LSR imm:\n" +
-    "\tvar source = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
+    "\tvar source = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
     var offset = (instructionValue >> 6) & 0x1F;
     if (offset > 0) {
         spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-        "\tcpu.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
+        "\tthis.CPUCore.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
         "\t//Perform shift:\n" +
         "\tsource = (source >>> " + this.toHex(offset) + ") | 0;\n" +
         "//Perform CPSR updates for N and Z (But not V):\n" +
-        "\tcpu.CPSRNegative = (source < 0);\n" +
-        "\tcpu.CPSRZero = (source == 0);\n" +
+        "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
+        "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
         "\t//Update destination register:\n" +
-        "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
+        "\tthis.CPUCore.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     }
     else {
-        spew += "\tcpu.CPSRCarry = (source < 0);\n" +
+        spew += "\tthis.CPUCore.CPSRCarry = (source < 0);\n" +
         "\t//Perform CPSR updates for N and Z (But not V):\n" +
-        "\tcpu.CPSRNegative = false;\n" +
-        "\tcpu.CPSRZero = true;\n" +
+        "\tthis.CPUCore.CPSRNegative = false;\n" +
+        "\tthis.CPUCore.CPSRZero = true;\n" +
         "\t//Update destination register:\n" +
-        "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = 0;\n";
+        "\tthis.CPUCore.registers[" + this.toHex(instructionValue & 0x7) + "] = 0;\n";
     }
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.ASRimm = function (instructionValue) {
     var spew = "\t//ASR imm:\n" +
-    "\tvar source = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
+    "\tvar source = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
     var offset = (instructionValue >> 6) & 0x1F;
     if (offset > 0) {
         spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-        "\tcpu.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
+        "\tthis.CPUCore.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
         "\t//Perform shift:\n" +
         "\tsource >>= " + this.toHex(offset) + ";\n";
     }
     else {
-        spew += "\tcpu.CPSRCarry = (source < 0);\n" +
+        spew += "\tthis.CPUCore.CPSRCarry = (source < 0);\n" +
         "\tsource >>= 0x1F;\n";
     }
     spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tcpu.CPSRNegative = (source < 0);\n" +
-    "\tcpu.CPSRZero = (source == 0);\n" +
+    "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
     "\t//Update destination register:\n" +
-    "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
+    "\tthis.CPUCore.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.ADDreg = function (instructionValue) {
     var spew = "\t//ADD reg:\n" +
-    "\tvar operand1 = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
-    "\tvar operand2 = cpu.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
+    "\tvar operand1 = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "\tvar operand2 = this.CPUCore.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
     "\t//Update destination register:\n" +
-    "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = cpu.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    "\tthis.CPUCore.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.SUBreg = function (instructionValue) {
     var spew = "\t//SUB reg:\n" +
-    "\tvar operand1 = cpu.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
-    "\tvar operand2 = cpu.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
+    "\tvar operand1 = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "\tvar operand2 = this.CPUCore.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
     "\t//Update destination register:\n" +
-    "\tcpu.registers[" + this.toHex(instructionValue & 0x7) + "] = cpu.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    "\tthis.CPUCore.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ADDimm3 = function (instructionValue) {
+    var spew = "\t//ADDimm3:\n" +
+    "var operand1 = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;" +
+    "//Update destination register:" +
+    "this.thumb.writeLowRegister(" + this.toHex(instructionValue) + ", this.CPUCore.setADDFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0);";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.SUBimm3 = function (instructionValue) {
+    var spew = "\t//SUBimm3:\n" +
+    "var operand1 = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;" +
+    "//Update destination register:" +
+    "this.thumb.writeLowRegister(" + this.toHex(instructionValue) + ", this.CPUCore.setSUBFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0);";
     return spew;
 }

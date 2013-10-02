@@ -403,7 +403,7 @@ GameBoyAdvanceSound.prototype.audioJIT = function () {
 }
 GameBoyAdvanceSound.prototype.computeNextPWMInterval = function () {
     //Clock down the PSG system:
-    for (var numSamples = this.PWMWidthOld | 0, clockUpTo = 0; numSamples > 0; numSamples = ((numSamples | 0) - 1) | 0) {
+    for (var numSamples = this.PWMWidthOld | 0, clockUpTo = 0; (numSamples | 0) > 0; numSamples = ((numSamples | 0) - 1) | 0) {
         clockUpTo = Math.min(this.audioClocksUntilNextEventCounter | 0, this.sequencerClocks | 0, numSamples | 0) | 0;
         this.audioClocksUntilNextEventCounter = ((this.audioClocksUntilNextEventCounter | 0) - (clockUpTo | 0)) | 0;
         this.sequencerClocks = ((this.sequencerClocks | 0) - (clockUpTo | 0)) | 0;
@@ -803,9 +803,12 @@ GameBoyAdvanceSound.prototype.channel4UpdateCache = function () {
 GameBoyAdvanceSound.prototype.writeFIFOA = function (data) {
     data = data | 0;
     this.FIFOABuffer.push(data | 0);
-    if (this.FIFOABuffer.requestingDMA()) {
-        this.IOCore.dma.soundFIFOARequest();
-    }
+    this.checkFIFOAPendingSignal();
+}
+GameBoyAdvanceSound.prototype.writeFIFOB = function (data) {
+    data = data | 0;
+    this.FIFOBBuffer.push(data | 0);
+    this.checkFIFOBPendingSignal();
 }
 GameBoyAdvanceSound.prototype.checkFIFOAPendingSignal = function () {
     if (this.FIFOABuffer.requestingDMA()) {
@@ -813,13 +816,6 @@ GameBoyAdvanceSound.prototype.checkFIFOAPendingSignal = function () {
     }
 }
 GameBoyAdvanceSound.prototype.checkFIFOBPendingSignal = function () {
-    if (this.FIFOBBuffer.requestingDMA()) {
-        this.IOCore.dma.soundFIFOBRequest();
-    }
-}
-GameBoyAdvanceSound.prototype.writeFIFOB = function (data) {
-    data = data | 0;
-    this.FIFOBBuffer.push(data | 0);
     if (this.FIFOBBuffer.requestingDMA()) {
         this.IOCore.dma.soundFIFOBRequest();
     }

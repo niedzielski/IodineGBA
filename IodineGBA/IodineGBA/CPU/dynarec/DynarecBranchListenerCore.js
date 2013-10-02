@@ -24,7 +24,6 @@ DynarecBranchListenerCore.prototype.initialize = function () {
     this.lastBranch = 0;
     this.lastTHUMB = false;
     this.caches = {};
-    this.readyCaches = {};
     this.currentCache = null;
     this.backEdge = false;
     this.workers = [];
@@ -63,7 +62,7 @@ DynarecBranchListenerCore.prototype.analyzePast = function (endPC, instructionmo
     endPC = endPC >>> 0;
     instructionmode = !!instructionmode;
     if (this.backEdge) {
-        var cache = this.findCache(this.lastBranch >>> 0);
+        var cache = this.findCache(this.lastBranch >>> 0, !!instructionmode);
         if (!cache) {
             cache = new DynarecCacheManagerCore(this, this.lastBranch >>> 0, endPC >>> 0, !!this.lastTHUMB);
             this.cacheAppend(cache);
@@ -76,8 +75,8 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
     this.lastBranch = newPC >>> 0;
     this.lastTHUMB = !!instructionmode;
     if (this.isAddressSafe(newPC >>> 0)) {
-        var cache = this.findCacheReady(newPC >>> 0, !!instructionmode);
-        if (cache) {
+        var cache = this.findCache(newPC >>> 0, !!instructionmode);
+        if (cache && cache.ready()) {
             this.CPUCore.IOCore.preprocessCPUHandler(1);
             this.currentCache = cache;
         }
@@ -89,7 +88,7 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
 DynarecBranchListenerCore.prototype.enter = function () {
    if (this.CPUCore.emulatorCore.dynarecEnabled) {
        //Execute our compiled code:
-       this.currentCache(this.CPUCore);
+       this.currentCache.execute();
    }
 }
 DynarecBranchListenerCore.prototype.isAddressSafe = function (address) {
@@ -110,27 +109,10 @@ DynarecBranchListenerCore.prototype.isAddressSafe = function (address) {
     return false;
 }
 DynarecBranchListenerCore.prototype.cacheAppend = function (cache) {
-    this.caches["c_" + (cache.start >>> 0)] = cache;
+    this.caches[((cache.InTHUMB) ? "thumb_" : "arm_") + (cache.start >>> 0)] = cache;
 }
-DynarecBranchListenerCore.prototype.cacheAppendReady = function (address, InTHUMB, cache) {
+DynarecBranchListenerCore.prototype.findCache = function (address, InTHUMB) {
     address = address >>> 0;
     InTHUMB = !!InTHUMB;
-    this.readyCaches[((InTHUMB) ? "thumb_" : "arm_") + (address >>> 0)] = cache;
-}
-DynarecBranchListenerCore.prototype.findCache = function (address) {
-    address = address >>> 0;
-    return this.caches["c_" + (address >>> 0)];
-}
-DynarecBranchListenerCore.prototype.findCacheReady = function (address, InTHUMB) {
-    address = address >>> 0;
-    InTHUMB = !!InTHUMB;
-    return this.readyCaches[((InTHUMB) ? "thumb_" : "arm_") + (address >>> 0)];
-}
-DynarecBranchListenerCore.prototype.deleteReadyCaches = function (address) {
-    address = address >>> 0;
-    this.readyCaches["thumb_"+ (address >>> 0)] = null;
-    this.readyCaches["arm_"+ (address >>> 0)] = null;
-}
-DynarecBranchListenerCore.prototype.invalidateCaches = function () {
-    this.readyCaches = {};
+    return this.caches[((InTHUMB) ? "thumb_" : "arm_") + (address >>> 0)];
 }
