@@ -36,3 +36,6 @@ GameBoyAdvanceMode0Renderer.prototype.renderScanLine = function (line) {
     }
     this.gfx.copyLineToFrameBuffer(line);
 }
+GameBoyAdvanceMode0Renderer.prototype.skipScanLine = function () {
+    
+}

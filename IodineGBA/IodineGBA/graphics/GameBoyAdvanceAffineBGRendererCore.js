@@ -59,6 +59,9 @@ GameBoyAdvanceAffineBGRenderer.prototype.renderScanLine = function (line, BGObje
     this.incrementReferenceCounters();
     return this.scratchBuffer;
 }
+GameBoyAdvanceAffineBGRenderer.prototype.skipScanLine = function () {
+    this.incrementReferenceCounters();
+}
 GameBoyAdvanceAffineBGRenderer.prototype.incrementReferenceCounters = function () {
     this.pb = ((this.pb | 0) + (this.actualBGdmx | 0)) | 0;
     this.pd = ((this.pd | 0) + (this.actualBGdmy | 0)) | 0;

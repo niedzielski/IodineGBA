@@ -33,6 +33,9 @@ GameBoyAdvanceModeFrameBufferRenderer.prototype.renderScanLine = function (line)
     }
     this.gfx.copyLineToFrameBuffer(line);
 }
+GameBoyAdvanceModeFrameBufferRenderer.prototype.skipScanLine = function () {
+    this.gfx.bg2FrameBufferRenderer.skipScanLine()
+}
 GameBoyAdvanceModeFrameBufferRenderer.prototype.preprocess = function (BGMode) {
     //Set up pixel fetcher ahead of time:
     this.gfx.bg2FrameBufferRenderer.selectMode(BGMode | 0);

@@ -308,6 +308,9 @@ GameBoyAdvanceGraphics.prototype.renderScanLine = function () {
         if (!this.oddLine) {
             this.renderer.renderScanLine(this.lastUnrenderedLine | 0);
         }
+        else {
+            this.renderer.skipScanLine();
+        }
         if (this.lastUnrenderedLine == 159) {
             this.oddLine = !this.oddLine;
         }

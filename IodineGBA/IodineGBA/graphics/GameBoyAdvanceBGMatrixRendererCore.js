@@ -32,6 +32,9 @@ GameBoyAdvanceBGMatrixRenderer.prototype.renderScanLine = function (line) {
     line = line | 0;
     return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
+GameBoyAdvanceBGMatrixRenderer.prototype.skipScanLine = function () {
+    return this.bgAffineRenderer.skipScanLine();
+}
 GameBoyAdvanceBGMatrixRenderer.prototype.fetchTileSlow = function (x, y, mapSize) {
     //Compute address for tile VRAM to address:
     var tileNumber = x + (y * mapSize);
