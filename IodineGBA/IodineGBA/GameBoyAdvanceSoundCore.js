@@ -285,42 +285,41 @@ GameBoyAdvanceSound.prototype.addClocks = function (clocks) {
     this.audioTicks = ((this.audioTicks | 0) + (clocks | 0)) | 0;
 }
 GameBoyAdvanceSound.prototype.generateAudioSlow = function (numSamples) {
-    numSamples = numSamples | 0;
     var multiplier = 0;
     if (this.soundMasterEnabled && this.IOCore.systemStatus < 4) {
-        for (var clockUpTo = 0; (numSamples | 0) > 0;) {
-            clockUpTo = Math.min(this.PWMWidth | 0, numSamples | 0) | 0;
-            this.PWMWidth = ((this.PWMWidth | 0) - (clockUpTo | 0)) | 0;
-            numSamples = ((numSamples | 0) - (clockUpTo | 0)) | 0;
-            while ((clockUpTo | 0) > 0) {
-                multiplier = Math.min(clockUpTo | 0, ((this.audioResamplerFirstPassFactor | 0) - (this.audioIndex | 0)) | 0) | 0;
-                clockUpTo = ((clockUpTo | 0) - (multiplier | 0)) | 0;
-                this.audioIndex = ((this.audioIndex | 0) + (multiplier | 0)) | 0;
-                this.downsampleInputLeft = ((this.downsampleInputLeft | 0) + (((this.mixerOutputCacheLeft | 0) * (multiplier | 0)) | 0)) | 0;
-                this.downsampleInputRight = ((this.downsampleInputRight | 0) + (((this.mixerOutputCacheRight | 0) * (multiplier | 0)) | 0)) | 0;
-                if ((this.audioIndex | 0) == (this.audioResamplerFirstPassFactor | 0)) {
+        for (var clockUpTo = 0; numSamples > 0;) {
+            clockUpTo = Math.min(this.PWMWidth, numSamples);
+            this.PWMWidth = this.PWMWidth - clockUpTo;
+            numSamples -= clockUpTo;
+            while (clockUpTo > 0) {
+                multiplier = Math.min(clockUpTo, this.audioResamplerFirstPassFactor - this.audioIndex);
+                clockUpTo -= multiplier;
+                this.audioIndex += multiplier;
+                this.downsampleInputLeft += this.mixerOutputCacheLeft * multiplier;
+                this.downsampleInputRight += this.mixerOutputCacheRight * multiplier;
+                if (this.audioIndex == this.audioResamplerFirstPassFactor) {
                     this.audioIndex = 0;
-                    this.emulatorCore.outputAudio(this.downsampleInputLeft | 0, this.downsampleInputRight | 0);
+                    this.emulatorCore.outputAudio(this.downsampleInputLeft, this.downsampleInputRight);
                     this.downsampleInputLeft = 0;
                     this.downsampleInputRight = 0;
                 }
             }
-            if ((this.PWMWidth | 0) == 0) {
+            if (this.PWMWidth == 0) {
                 this.computeNextPWMInterval();
-                this.PWMWidthOld = this.PWMWidthShadow | 0;
-                this.PWMWidth = this.PWMWidthShadow | 0;
+                this.PWMWidthOld = this.PWMWidthShadow;
+                this.PWMWidth = this.PWMWidthShadow;
             }
         }
     }
     else {
         //SILENT OUTPUT:
-        while ((numSamples | 0) > 0) {
-            multiplier = Math.min(numSamples | 0, ((this.audioResamplerFirstPassFactor | 0) - (this.audioIndex | 0)) | 0) | 0;
-            numSamples = ((numSamples | 0) - (multiplier | 0)) | 0;
-            this.audioIndex = ((this.audioIndex | 0) + (multiplier | 0)) | 0;
-            if ((this.audioIndex | 0) == (this.audioResamplerFirstPassFactor | 0)) {
+        while (numSamples > 0) {
+            multiplier = Math.min(numSamples, this.audioResamplerFirstPassFactor - this.audioIndex);
+            numSamples -= multiplier;
+            this.audioIndex += multiplier;
+            if (this.audioIndex == this.audioResamplerFirstPassFactor) {
                 this.audioIndex = 0;
-                this.emulatorCore.outputAudio(this.downsampleInputLeft | 0, this.downsampleInputRight | 0);
+                this.emulatorCore.outputAudio(this.downsampleInputLeft, this.downsampleInputRight);
                 this.downsampleInputLeft = 0;
                 this.downsampleInputRight = 0;
             }
@@ -330,7 +329,7 @@ GameBoyAdvanceSound.prototype.generateAudioSlow = function (numSamples) {
 GameBoyAdvanceSound.prototype.generateAudioOptimized = function (numSamples) {
     numSamples = numSamples | 0;
     var multiplier = 0;
-    if (this.soundMasterEnabled && this.IOCore.systemStatus < 4) {
+    if (this.soundMasterEnabled && (this.IOCore.systemStatus | 0) < 4) {
         for (var clockUpTo = 0; (numSamples | 0) > 0;) {
             clockUpTo = Math.min(this.PWMWidth | 0, numSamples | 0) | 0;
             this.PWMWidth = ((this.PWMWidth | 0) - (clockUpTo | 0)) | 0;
