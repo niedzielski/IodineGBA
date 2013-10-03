@@ -37,7 +37,7 @@ function DynarecCacheManagerCore(dynarec, start, end, InTHUMB) {
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 1000;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.001;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_CLEAR_RATIO = 0.1;
-DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE = 30;
+DynarecCacheManagerCore.prototype.MIN_BLOCK_SIZE = 1;
 DynarecCacheManagerCore.prototype.tickHotness = function () {
     if (this.sizeOfBlock >= this.MIN_BLOCK_SIZE) {
         //Don't let sub-routines too small through:

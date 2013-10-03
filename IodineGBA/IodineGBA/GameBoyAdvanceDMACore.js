@@ -163,7 +163,9 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
         //Don't allow DMA reconfigures while one is running:
         if ((this.enabled[dmaChannel | 0] | 0) == 0) {
             this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel | 0][this.dmaType[dmaChannel | 0] | 0] | 0;
-            this.enableDMAChannel(dmaChannel | 0);
+            if ((this.enabled[dmaChannel | 0] | 0) > 0) {
+                this.enableDMAChannel(dmaChannel | 0);
+            }
         }
     }
     else {

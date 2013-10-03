@@ -204,7 +204,32 @@ GameBoyAdvanceWait.prototype.CPUInternalCycleNoPrefetch = function (clocks) {
 GameBoyAdvanceWait.prototype.CPUInternalSingleCycleDoPrefetch = function () {
     //Clock for idle CPU time:
     this.IOCore.updateCoreSingle();
-    //Not enough time for prebuffer buffering, so skip it.
+    //Check for ROM prefetching:
+    //We were already in ROM, so if prefetch do so as sequential:
+    //Only case for non-sequential ROM prefetch is invalid anyways:
+    switch ((this.IOCore.cpu.registers[15] >> 24) & 0xFF) {
+        case 0x8:
+        case 0x9:
+            if (1 >= (this.CARTWaitState0Second | 0)) {
+                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+            }
+            break;
+        case 0xA:
+        case 0xB:
+            if (1 >= (this.CARTWaitState1Second | 0)) {
+                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+            }
+            break;
+        case 0xC:
+        case 0xD:
+            if (1 >= (this.CARTWaitState2Second | 0)) {
+                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+            }
+    }
+    //ROM buffer caps out at 8 x 16 bit:
+    if ((this.ROMPrebuffer | 0) > 8) {
+        this.ROMPrebuffer = 8;
+    }
 }
 GameBoyAdvanceWait.prototype.CPUInternalSingleCycleNoPrefetch = function () {
     //Clock for idle CPU time:
@@ -218,6 +243,40 @@ GameBoyAdvanceWait.prototype.checkPrebufferBug = function () {
     var address = this.IOCore.cpu.registers[15] | 0;
     if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
         this.nonSequentialROM = true;
+    }
+}
+GameBoyAdvanceWait.prototype.doPrefetchBuffering = function (clocks) {
+    clocks = clocks | 0;
+    //Clock for fetch time:
+    this.IOCore.updateCore(clocks | 0);
+    //Check for ROM prefetching:
+    //We were already in ROM, so if prefetch do so as sequential:
+    //Only case for non-sequential ROM prefetch is invalid anyways:
+    switch ((this.IOCore.cpu.registers[15] >> 24) & 0xFF) {
+        case 0x8:
+        case 0x9:
+            while ((clocks | 0) >= (this.CARTWaitState0Second | 0)) {
+                clocks = ((clocks | 0) - (this.CARTWaitState0Second | 0)) | 0;
+                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+            }
+            break;
+        case 0xA:
+        case 0xB:
+            while ((clocks | 0) >= (this.CARTWaitState1Second | 0)) {
+                clocks = ((clocks | 0) - (this.CARTWaitState1Second | 0)) | 0;
+                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+            }
+            break;
+        case 0xC:
+        case 0xD:
+            while ((clocks | 0) >= (this.CARTWaitState2Second | 0)) {
+                clocks = ((clocks | 0) - (this.CARTWaitState2Second | 0)) | 0;
+                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+            }
+    }
+    //ROM buffer caps out at 8 x 16 bit:
+    if ((this.ROMPrebuffer | 0) > 8) {
+        this.ROMPrebuffer = 8;
     }
 }
 GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
@@ -234,7 +293,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
 GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     //Caching enabled:
     address = address | 0;
-    var clocks = 0;
+    var clocks = 1;
     if ((this.ROMPrebuffer | 0) == 0) {
         //Cache is empty:
         if ((address | 0) < 0xA000000) {
@@ -246,14 +305,13 @@ GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
         else {
             clocks = ((this.nonSequential) ? (this.CARTWaitState2First | 0) : (this.CARTWaitState2Second | 0)) | 0;
         }
-        this.IOCore.updateCore(clocks | 0);
         this.nonSequential = false;
     }
     else {
         //Cache hit:
         this.ROMPrebuffer = ((this.ROMPrebuffer | 0) - 1) | 0;
-        this.FASTAccess2();
     }
+    this.doPrefetchBuffering(clocks | 0);
     return this.IOCore.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceWait.prototype.getROMRead16NoPrefetch = function (address) {
@@ -287,7 +345,7 @@ GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
 GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
     //Caching enabled:
     address = address | 0;
-    var clocks = 0;
+    var clocks = 1;
     if ((this.ROMPrebuffer | 0) == 0) {
         //Cache hit:
         if ((address | 0) < 0xA000000) {
@@ -299,14 +357,12 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
         else {
             clocks = (this.nonSequential) ? (this.CARTWaitState2Combined | 0) : (this.CARTWaitState2Second << 1);
         }
-        this.IOCore.updateCore(clocks | 0);
         this.nonSequential = false;
     }
     else {
         if ((this.ROMPrebuffer | 0) > 1) {
             //Cache hit:
             this.ROMPrebuffer = ((this.ROMPrebuffer | 0) - 2) | 0;
-            this.FASTAccess2();
         }
         else {
             //Cache miss if only 16 bits out of 32 bits stored:
@@ -320,10 +376,10 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
             else {
                 clocks = (this.nonSequential) ? (this.CARTWaitState2Combined | 0) : (this.CARTWaitState2Second << 1);
             }
-            this.IOCore.updateCore(clocks | 0);
             this.nonSequential = false;
         }
     }
+    this.doPrefetchBuffering(clocks | 0);
     return this.IOCore.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceWait.prototype.getROMRead32NoPrefetch = function (address) {
