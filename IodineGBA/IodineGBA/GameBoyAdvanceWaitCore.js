@@ -245,31 +245,28 @@ GameBoyAdvanceWait.prototype.checkPrebufferBug = function () {
         this.nonSequentialROM = true;
     }
 }
-GameBoyAdvanceWait.prototype.doPrefetchBuffering16 = function () {
+GameBoyAdvanceWait.prototype.doPrefetchBuffering16 = function (address) {
+    address = address | 0;
     //Clock for fetch time:
     this.ROMPrebuffer = ((this.ROMPrebuffer | 0) - 1) | 0;
     this.IOCore.updateCoreSingle();
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    switch ((this.IOCore.cpu.registers[15] >> 24) & 0xFF) {
-        case 0x8:
-        case 0x9:
-            if (1 >= (this.CARTWaitState0Second | 0)) {
-                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
-            }
-            break;
-        case 0xA:
-        case 0xB:
-            if (1 >= (this.CARTWaitState1Second | 0)) {
-                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
-            }
-            break;
-        case 0xC:
-        case 0xD:
-            if (1 >= (this.CARTWaitState2Second | 0)) {
-                this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
-            }
+    if ((address | 0) < 0xA000000) {
+        if (1 >= (this.CARTWaitState0Second | 0)) {
+            this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+        }
+    }
+    else if ((address | 0) < 0xC000000) {
+        if (1 >= (this.CARTWaitState1Second | 0)) {
+            this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+        }
+    }
+    else {
+        if (1 >= (this.CARTWaitState2Second | 0)) {
+            this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+        }
     }
     //ROM buffer caps out at 8 x 16 bit:
     if ((this.ROMPrebuffer | 0) > 8) {
@@ -297,7 +294,7 @@ GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     address = address | 0;
     if ((this.ROMPrebuffer | 0) > 0) {
         //Cache hit:
-        this.doPrefetchBuffering16();
+        this.doPrefetchBuffering16(address | 0);
     }
     else {
         //Cache is empty:
