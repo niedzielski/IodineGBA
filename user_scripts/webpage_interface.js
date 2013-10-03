@@ -140,6 +140,10 @@ function registerGUIEvents() {
     addEvent("click", document.getElementById("lle_jit"), function () {
              Iodine.toggleDynarec(this.checked);
     });
+    document.getElementById("lineskip").checked = false;
+    addEvent("click", document.getElementById("lineskip"), function () {
+             Iodine.toggleLineSkip(this.checked);
+    });
     addEvent("unload", document, ExportSave);
     setInterval(
             function () {

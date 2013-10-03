@@ -92,6 +92,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
     this.backdrop = this.transparency | 0x200000;
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
+    this.oddLine = false;
     this.initializePaletteStorage();
     this.compositor = new GameBoyAdvanceCompositor(this);
     this.bg0Renderer = new GameBoyAdvanceBGTEXTRenderer(this, 0);
@@ -301,10 +302,24 @@ GameBoyAdvanceGraphics.prototype.graphicsJITVBlank = function () {
     this.totalLinesPassed = ((this.totalLinesPassed | 0) + (this.queuedScanLines | 0)) | 0;
     this.graphicsJITScanlineGroup();
 }
+GameBoyAdvanceGraphics.prototype.renderScanLine = function () {
+    if (this.emulatorCore.lineSkip) {
+        this.oddLine = !this.oddLine;
+        if (!this.oddLine) {
+            this.renderer.renderScanLine(this.lastUnrenderedLine | 0);
+        }
+        if (this.lastUnrenderedLine == 159) {
+            this.oddLine = !this.oddLine;
+        }
+    }
+    else {
+        this.renderer.renderScanLine(this.lastUnrenderedLine | 0);
+    }
+}
 GameBoyAdvanceGraphics.prototype.graphicsJITScanlineGroup = function () {
     //Normal rendering JIT, where we try to do groups of scanlines at once:
     while ((this.queuedScanLines | 0) > 0) {
-        this.renderer.renderScanLine(this.lastUnrenderedLine | 0);
+        this.renderScanLine();
         if ((this.lastUnrenderedLine | 0) < 159) {
             this.lastUnrenderedLine = ((this.lastUnrenderedLine | 0) + 1) | 0;
         }

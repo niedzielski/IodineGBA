@@ -18,6 +18,7 @@
 function GameBoyAdvanceEmulator() {
     this.SKIPBoot = false;                    //Skip the BIOS boot screen.
     this.dynarecEnabled = false;              //Use the dynarec engine?
+    this.lineSkip = false;                    //Skip every other line draw.
     this.dynarecTHUMB = true;                 //Enable THUMB compiling.
     this.dynarecARM = false;                  //Enable ARM compiling.
     this.useWorkers = true;                   //Enable Web Workers for compiling.
@@ -379,4 +380,7 @@ GameBoyAdvanceEmulator.prototype.toggleSkipBootROM = function (skipBoot) {
 }
 GameBoyAdvanceEmulator.prototype.toggleDynarec = function (dynarecEnabled) {
     this.dynarecEnabled = !!dynarecEnabled;
+}
+GameBoyAdvanceEmulator.prototype.toggleLineSkip = function (lineSkip) {
+    this.lineSkip = !!lineSkip;
 }
