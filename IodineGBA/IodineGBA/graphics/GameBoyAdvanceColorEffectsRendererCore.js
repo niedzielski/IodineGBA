@@ -25,6 +25,8 @@ function GameBoyAdvanceColorEffectsRenderer() {
     this.alphaBlendFunc = (!!Math.imul) ? this.alphaBlendFast : this.alphaBlendSlow;
     this.alphaBlendTopFunc = (!!Math.imul) ? this.alphaBlendTopFast : this.alphaBlendTopSlow;
     this.alphaBlendLowFunc = (!!Math.imul) ? this.alphaBlendLowFast : this.alphaBlendLowSlow;
+    this.alphaBlendAddTopFunc = (!!Math.imul) ? this.alphaBlendAddTopFast : this.alphaBlendAddTopSlow;
+    this.alphaBlendAddLowFunc = (!!Math.imul) ? this.alphaBlendAddLowFast : this.alphaBlendAddLowSlow;
     this.brightnessIncrease = (!!Math.imul) ? this.brightnessIncreaseFast : this.brightnessIncreaseSlow;
     this.brightnessDecrease = (!!Math.imul) ? this.brightnessDecreaseFast : this.brightnessDecreaseSlow;
     this.alphaBlendOptimizationChecks();
@@ -154,6 +156,91 @@ GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendBottomPass = function (to
 GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendZero = function (topPixel, lowerPixel) {
     return 0;
 }
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendAddLowSlow = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b1 = (topPixel >> 10) & 0x1F;
+    var g1 = (topPixel >> 5) & 0x1F;
+    var r1 = (topPixel & 0x1F);
+    var b2 = (lowerPixel >> 10) & 0x1F;
+    var g2 = (lowerPixel >> 5) & 0x1F;
+    var r2 = lowerPixel & 0x1F;
+    b1 = b1 * this.alphaBlendAmountTarget1;
+    g1 = g1 * this.alphaBlendAmountTarget1;
+    r1 = r1 * this.alphaBlendAmountTarget1;
+    b2 = b2 << 4;
+    g2 = g2 << 4;
+    r2 = r2 << 4;
+    return (Math.min((b1 + b2) >> 4, 0x1F) << 10) | (Math.min((g1 + g2) >> 4, 0x1F) << 5) | Math.min((r1 + r2) >> 4, 0x1F);
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendAddLowFast = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b1 = (topPixel >> 10) & 0x1F;
+    var g1 = (topPixel >> 5) & 0x1F;
+    var r1 = topPixel & 0x1F;
+    var b2 = (lowerPixel >> 10) & 0x1F;
+    var g2 = (lowerPixel >> 5) & 0x1F;
+    var r2 = lowerPixel & 0x1F;
+    b1 = Math.imul(b1 | 0, this.alphaBlendAmountTarget1 | 0) | 0;
+    g1 = Math.imul(g1 | 0, this.alphaBlendAmountTarget1 | 0) | 0;
+    r1 = Math.imul(r1 | 0, this.alphaBlendAmountTarget1 | 0) | 0;
+    //Keep this not inlined in the return, firefox 22 grinds on it:
+    var b = Math.min(((b1 | 0) + (b2 << 4)) >> 4, 0x1F) | 0;
+    var g = Math.min(((g1 | 0) + (g2 << 4)) >> 4, 0x1F) | 0;
+    var r = Math.min(((r1 | 0) + (r2 << 4)) >> 4, 0x1F) | 0;
+    return (b << 10) | (g << 5) | r;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendAddTopSlow = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b1 = (topPixel >> 10) & 0x1F;
+    var g1 = (topPixel >> 5) & 0x1F;
+    var r1 = (topPixel & 0x1F);
+    var b2 = (lowerPixel >> 10) & 0x1F;
+    var g2 = (lowerPixel >> 5) & 0x1F;
+    var r2 = lowerPixel & 0x1F;
+    b1 = b1 << 4;
+    g1 = g1 << 4;
+    r1 = r1 << 4;
+    b2 = b2 * this.alphaBlendAmountTarget2;
+    g2 = g2 * this.alphaBlendAmountTarget2;
+    r2 = r2 * this.alphaBlendAmountTarget2;
+    return (Math.min((b1 + b2) >> 4, 0x1F) << 10) | (Math.min((g1 + g2) >> 4, 0x1F) << 5) | Math.min((r1 + r2) >> 4, 0x1F);
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendAddTopFast = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b1 = (topPixel >> 10) & 0x1F;
+    var g1 = (topPixel >> 5) & 0x1F;
+    var r1 = topPixel & 0x1F;
+    var b2 = (lowerPixel >> 10) & 0x1F;
+    var g2 = (lowerPixel >> 5) & 0x1F;
+    var r2 = lowerPixel & 0x1F;
+    b2 = Math.imul(b2 | 0, this.alphaBlendAmountTarget2 | 0) | 0;
+    g2 = Math.imul(g2 | 0, this.alphaBlendAmountTarget2 | 0) | 0;
+    r2 = Math.imul(r2 | 0, this.alphaBlendAmountTarget2 | 0) | 0;
+    //Keep this not inlined in the return, firefox 22 grinds on it:
+    var b = Math.min(((b1 << 4) + (b2 | 0)) >> 4, 0x1F) | 0;
+    var g = Math.min(((g1 << 4) + (g2 | 0)) >> 4, 0x1F) | 0;
+    var r = Math.min(((r1 << 4) + (r2 | 0)) >> 4, 0x1F) | 0;
+    return (b << 10) | (g << 5) | r;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendAddBoth = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b1 = (topPixel >> 10) & 0x1F;
+    var g1 = (topPixel >> 5) & 0x1F;
+    var r1 = topPixel & 0x1F;
+    var b2 = (lowerPixel >> 10) & 0x1F;
+    var g2 = (lowerPixel >> 5) & 0x1F;
+    var r2 = lowerPixel & 0x1F;
+    //Keep this not inlined in the return, firefox 22 grinds on it:
+    var b = Math.min(((b1 << 4) + (b2 << 4)) >> 4, 0x1F) | 0;
+    var g = Math.min(((g1 << 4) + (g2 << 4)) >> 4, 0x1F) | 0;
+    var r = Math.min(((r1 << 4) + (r2 << 4)) >> 4, 0x1F) | 0;
+    return (b << 10) | (g << 5) | r;
+}
 GameBoyAdvanceColorEffectsRenderer.prototype.brightnessIncreaseSlow = function (topPixel) {
     topPixel = topPixel | 0;
     var b1 = (topPixel >> 10) & 0x1F;
@@ -244,16 +331,22 @@ GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendOptimizationChecks = func
         if ((this.alphaBlendAmountTarget2 | 0) == 0) {
             this.alphaBlend = this.alphaBlendTopFunc;
         }
-        else {
+        else if ((this.alphaBlendAmountTarget2 | 0) < 0x10) {
             this.alphaBlend = this.alphaBlendFunc;
+        }
+        else {
+            this.alphaBlend = this.alphaBlendAddLowFunc;
         }
     }
     else {
         if ((this.alphaBlendAmountTarget2 | 0) == 0) {
             this.alphaBlend = this.alphaBlendTopPass;
         }
+        else if ((this.alphaBlendAmountTarget2 | 0) < 0x10) {
+            this.alphaBlend = this.alphaBlendAddTopFunc;
+        }
         else {
-            this.alphaBlend = this.alphaBlendFunc;
+            this.alphaBlend = this.alphaBlendAddBoth;
         }
     }
 }
