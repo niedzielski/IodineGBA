@@ -22,9 +22,12 @@ function GameBoyAdvanceColorEffectsRenderer() {
     this.colorEffectsType = 0;
     this.effectsTarget2 = 0;
     this.brightnessEffectAmount = 0;
-    this.alphaBlend = (!!Math.imul) ? this.alphaBlendFast : this.alphaBlendSlow;
+    this.alphaBlendFunc = (!!Math.imul) ? this.alphaBlendFast : this.alphaBlendSlow;
+    this.alphaBlendTopFunc = (!!Math.imul) ? this.alphaBlendTopFast : this.alphaBlendTopSlow;
+    this.alphaBlendLowFunc = (!!Math.imul) ? this.alphaBlendLowFast : this.alphaBlendLowSlow;
     this.brightnessIncrease = (!!Math.imul) ? this.brightnessIncreaseFast : this.brightnessIncreaseSlow;
     this.brightnessDecrease = (!!Math.imul) ? this.brightnessDecreaseFast : this.brightnessDecreaseSlow;
+    this.alphaBlendOptimizationChecks();
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.processOAMSemiTransparent = function (lowerPixel, topPixel) {
     lowerPixel = lowerPixel | 0;
@@ -98,6 +101,59 @@ GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendFast = function (topPixel
     var r = Math.min(((r1 | 0) + (r2 | 0)) >> 4, 0x1F) | 0;
     return (b << 10) | (g << 5) | r;
 }
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendTopSlow = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b = (topPixel >> 10) & 0x1F;
+    var g = (topPixel >> 5) & 0x1F;
+    var r = (topPixel & 0x1F);
+    b = b * this.alphaBlendAmountTarget1;
+    g = g * this.alphaBlendAmountTarget1;
+    r = r * this.alphaBlendAmountTarget1;
+    return ((b >> 4) << 10) | ((g >> 4) << 5) | (r >> 4);
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendTopFast = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b = (topPixel >> 10) & 0x1F;
+    var g = (topPixel >> 5) & 0x1F;
+    var r = topPixel & 0x1F;
+    b = Math.imul(b | 0, this.alphaBlendAmountTarget1 | 0) | 0;
+    g = Math.imul(g | 0, this.alphaBlendAmountTarget1 | 0) | 0;
+    r = Math.imul(r | 0, this.alphaBlendAmountTarget1 | 0) | 0;
+    return ((b >> 4) << 10) | ((g >> 4) << 5) | (r >> 4);
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendLowSlow = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b = (lowerPixel >> 10) & 0x1F;
+    var g = (lowerPixel >> 5) & 0x1F;
+    var r = (lowerPixel & 0x1F);
+    b = b * this.alphaBlendAmountTarget2;
+    g = g * this.alphaBlendAmountTarget2;
+    r = r * this.alphaBlendAmountTarget2;
+    return ((b >> 4) << 10) | ((g >> 4) << 5) | (r >> 4);
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendLowFast = function (topPixel, lowerPixel) {
+    topPixel = topPixel | 0;
+    lowerPixel = lowerPixel | 0;
+    var b = (lowerPixel >> 10) & 0x1F;
+    var g = (lowerPixel >> 5) & 0x1F;
+    var r = lowerPixel & 0x1F;
+    b = Math.imul(b | 0, this.alphaBlendAmountTarget2 | 0) | 0;
+    g = Math.imul(g | 0, this.alphaBlendAmountTarget2 | 0) | 0;
+    r = Math.imul(r | 0, this.alphaBlendAmountTarget2 | 0) | 0;
+    return ((b >> 4) << 10) | ((g >> 4) << 5) | (r >> 4);
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendTopPass = function (topPixel, lowerPixel) {
+    return topPixel | 0;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendBottomPass = function (topPixel, lowerPixel) {
+    return lowerPixel | 0;
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendZero = function (topPixel, lowerPixel) {
+    return 0;
+}
 GameBoyAdvanceColorEffectsRenderer.prototype.brightnessIncreaseSlow = function (topPixel) {
     topPixel = topPixel | 0;
     var b1 = (topPixel >> 10) & 0x1F;
@@ -164,10 +220,42 @@ GameBoyAdvanceColorEffectsRenderer.prototype.readBLDALPHA1 = function () {
 GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDALPHA0 = function (data) {
     this.alphaBlendAmountTarget1Scratch = data & 0x1F;
     this.alphaBlendAmountTarget1 = Math.min(this.alphaBlendAmountTarget1Scratch | 0, 0x10) | 0;
+    this.alphaBlendOptimizationChecks();
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDALPHA1 = function (data) {
     this.alphaBlendAmountTarget2Scratch = data & 0x1F;
     this.alphaBlendAmountTarget2 = Math.min(this.alphaBlendAmountTarget2Scratch | 0, 0x10) | 0;
+    this.alphaBlendOptimizationChecks();
+}
+GameBoyAdvanceColorEffectsRenderer.prototype.alphaBlendOptimizationChecks = function () {
+    //Check for ways to speed up blending:
+    if ((this.alphaBlendAmountTarget1 | 0) == 0) {
+        if ((this.alphaBlendAmountTarget2 | 0) == 0) {
+            this.alphaBlend = this.alphaBlendZero;
+        }
+        else if ((this.alphaBlendAmountTarget2 | 0) < 0x10) {
+            this.alphaBlend = this.alphaBlendLowFunc;
+        }
+        else {
+            this.alphaBlend = this.alphaBlendBottomPass;
+        }
+    }
+    else if ((this.alphaBlendAmountTarget1 | 0) < 0x10) {
+        if ((this.alphaBlendAmountTarget2 | 0) == 0) {
+            this.alphaBlend = this.alphaBlendTopFunc;
+        }
+        else {
+            this.alphaBlend = this.alphaBlendFunc;
+        }
+    }
+    else {
+        if ((this.alphaBlendAmountTarget2 | 0) == 0) {
+            this.alphaBlend = this.alphaBlendTopPass;
+        }
+        else {
+            this.alphaBlend = this.alphaBlendFunc;
+        }
+    }
 }
 GameBoyAdvanceColorEffectsRenderer.prototype.writeBLDY = function (data) {
     this.brightnessEffectAmount = Math.min(data & 0x1F, 0x10) | 0;
