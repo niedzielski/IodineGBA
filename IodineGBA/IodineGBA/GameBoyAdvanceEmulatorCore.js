@@ -348,7 +348,7 @@ GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
         if (typeof underrunAmount == "number") {
             underrunAmount = this.audioBufferContainAmount - Math.max(underrunAmount, 0);
             if (underrunAmount > 0) {
-                this.CPUCyclesTotal = Math.min((this.CPUCyclesTotal | 0) + (Math.min((underrunAmount >> 1) * this.audioResamplerFirstPassFactor, 0x7FFFFFFF) | 0), 0x7FFFFFFF) | 0;
+                this.CPUCyclesTotal = Math.min(Math.min((this.CPUCyclesTotal | 0) + (Math.min((underrunAmount >> 1) * this.audioResamplerFirstPassFactor, 0x7FFFFFFF) | 0), 0x7FFFFFFF) | 0, this.CPUCyclesTotal << 1) | 0;
             }
         }
     }
