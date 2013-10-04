@@ -144,6 +144,10 @@ function registerGUIEvents() {
     addEvent("click", document.getElementById("lineskip"), function () {
              Iodine.toggleLineSkip(this.checked);
     });
+    document.getElementById("toggleCircumventBusyWaitsHack").checked = false;
+    addEvent("click", document.getElementById("toggleCircumventBusyWaitsHack"), function () {
+             Iodine.toggleCircumventBusyWaitsHack(this.checked);
+    });
     addEvent("unload", document, ExportSave);
     setInterval(
             function () {

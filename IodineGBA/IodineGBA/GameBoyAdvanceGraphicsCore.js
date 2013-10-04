@@ -177,6 +177,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
             }
             this.checkVCounter();                                           //We're on a new scan line, so check the VCounter for match.
             this.isRenderingCheckPreprocess();                              //Update a check value.
+            this.IOCore.resetBusyWaitCounter();
             //Recursive clocking of the LCD state:
             this.clockLCDState();
         }

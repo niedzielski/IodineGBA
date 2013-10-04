@@ -29,6 +29,7 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.nextEventClocks = 0;
     this.lastDynarecUsage = 1;
     this.flaggedDynarec = 0;
+    this.busyWaitCheck = 0;
     this.BIOSFound = false;
     //Initialize the various handler objects:
     this.memory = new GameBoyAdvanceMemory(this);
@@ -245,4 +246,23 @@ GameBoyAdvanceIO.prototype.flagStepper = function (statusFlag) {
     this.systemStatus = ((this.systemStatus | 0) | (statusFlag | 0)) | 0;
     this.cpu.checkCPUExecutionStatus();
     this.preprocessSystemStepper();
+}
+GameBoyAdvanceIO.prototype.didPossibleBusyWait = function () {
+    if (this.emulatorCore.circumventBusyWaitsHack) {
+        if ((this.systemStatus | 0) == 0) {
+            this.busyWaitCheck = ((this.busyWaitCheck | 0) + 1) | 0;
+            if ((this.busyWaitCheck | 0) > 0x10) {
+                this.updateCoreSpillRetain();
+                var clocks = Math.min(this.nextEventClocks | 0, this.gfx.nextHBlankEventTime() | 0) | 0;
+                this.updateCore(clocks | 0);
+                this.resetBusyWaitCounter();
+            }
+        }
+    }
+    else {
+        this.resetBusyWaitCounter();
+    }
+}
+GameBoyAdvanceIO.prototype.resetBusyWaitCounter = function () {
+    this.busyWaitCheck = 0;
 }
