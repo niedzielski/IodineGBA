@@ -251,9 +251,9 @@ GameBoyAdvanceIO.prototype.didPossibleBusyWait = function () {
     if (this.emulatorCore.circumventBusyWaitsHack) {
         if ((this.systemStatus | 0) == 0) {
             this.busyWaitCheck = ((this.busyWaitCheck | 0) + 1) | 0;
-            if ((this.busyWaitCheck | 0) > 0x10) {
+            if ((this.busyWaitCheck | 0) > (this.emulatorCore.busyWaitSkipMagicValue | 0)) {
                 this.updateCoreSpillRetain();
-                var clocks = Math.min(this.nextEventClocks | 0, this.gfx.nextHBlankEventTime() | 0) | 0;
+                var clocks = this.nextEventClocks | 0;
                 this.updateCore(clocks | 0);
                 this.resetBusyWaitCounter();
             }

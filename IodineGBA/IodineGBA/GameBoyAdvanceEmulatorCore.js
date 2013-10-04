@@ -17,6 +17,7 @@
  */
 function GameBoyAdvanceEmulator() {
     this.circumventBusyWaitsHack = false;     //Enable a trick to work-around games that busy wait.
+    this.busyWaitSkipMagicValue = 0x10;       //Trigger value for the hack to come into effect.
     this.SKIPBoot = false;                    //Skip the BIOS boot screen.
     this.dynarecEnabled = false;              //Use the dynarec engine?
     this.lineSkip = false;                    //Skip every other line draw.
@@ -387,4 +388,7 @@ GameBoyAdvanceEmulator.prototype.toggleLineSkip = function (lineSkip) {
 }
 GameBoyAdvanceEmulator.prototype.toggleCircumventBusyWaitsHack = function (circumventBusyWaitsHack) {
     this.circumventBusyWaitsHack = !!circumventBusyWaitsHack;
+}
+GameBoyAdvanceEmulator.prototype.changeBusyWaitSkipMagicValue = function (busyWaitSkipMagicValue) {
+    this.busyWaitSkipMagicValue = Math.max(busyWaitSkipMagicValue | 0, 1);
 }
