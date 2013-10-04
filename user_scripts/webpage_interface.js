@@ -144,6 +144,10 @@ function registerGUIEvents() {
     addEvent("click", document.getElementById("lineskip"), function () {
              Iodine.toggleLineSkip(this.checked);
     });
+    document.getElementById("toggleSlowDownBusHack").checked = false;
+    addEvent("click", document.getElementById("toggleSlowDownBusHack"), function () {
+             Iodine.toggleSlowDownBusHack(this.checked);
+    });
     document.getElementById("toggleCircumventBusyWaitsHack").checked = false;
     addEvent("click", document.getElementById("toggleCircumventBusyWaitsHack"), function () {
              Iodine.toggleCircumventBusyWaitsHack(this.checked);

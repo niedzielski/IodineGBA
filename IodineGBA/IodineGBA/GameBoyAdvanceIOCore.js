@@ -73,6 +73,9 @@ GameBoyAdvanceIO.prototype.runIterator = function () {
 }
 GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
     clocks = clocks | 0;
+    if (this.emulatorCore.slowDownBusHack) {
+        clocks <<= 1;
+    }
     //This is used during normal/dma modes of operation:
     this.accumulatedClocks = ((this.accumulatedClocks | 0) + (clocks | 0)) | 0;
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
