@@ -84,14 +84,24 @@ GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
 }
 GameBoyAdvanceIO.prototype.updateCoreSingle = function () {
     //This is used during normal/dma modes of operation:
-    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 1) | 0;
+    if (this.emulatorCore.slowDownBusHack) {
+        this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
+    }
+    else {
+        this.accumulatedClocks = ((this.accumulatedClocks | 0) + 1) | 0;
+    }
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
         this.updateCoreSpill();
     }
 }
 GameBoyAdvanceIO.prototype.updateCoreTwice = function () {
     //This is used during normal/dma modes of operation:
-    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
+    if (this.emulatorCore.slowDownBusHack) {
+        this.accumulatedClocks = ((this.accumulatedClocks | 0) + 4) | 0;
+    }
+    else {
+        this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
+    }
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
         this.updateCoreSpill();
     }
