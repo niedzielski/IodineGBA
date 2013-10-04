@@ -469,6 +469,7 @@ GameBoyAdvanceGraphics.prototype.writeDISPSTAT0 = function (data) {
     this.IRQVCounter = ((data & 0x20) == 0x20);
 }
 GameBoyAdvanceGraphics.prototype.readDISPSTAT0 = function () {
+    this.IOCore.didPossibleBusyWait();
     return ((this.inVBlank ? 0x1 : 0) |
     (this.inHBlank ? 0x2 : 0) |
     (this.VCounterMatch ? 0x4 : 0) |
@@ -486,6 +487,7 @@ GameBoyAdvanceGraphics.prototype.readDISPSTAT1 = function () {
     return this.VCounter | 0;
 }
 GameBoyAdvanceGraphics.prototype.readVCOUNT = function () {
+    this.IOCore.didPossibleBusyWait();
     return this.currentScanLine | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeBG0CNT0 = function (data) {

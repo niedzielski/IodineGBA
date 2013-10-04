@@ -31,6 +31,7 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.flaggedDynarec = 0;
     this.busyWaitCheck = 0;
     this.BIOSFound = false;
+    this.preprocessBusSpeedHack();
     //Initialize the various handler objects:
     this.memory = new GameBoyAdvanceMemory(this);
     this.dma = new GameBoyAdvanceDMA(this);
@@ -71,37 +72,58 @@ GameBoyAdvanceIO.prototype.runIterator = function () {
         this.stepHandle();
     }
 }
-GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
-    clocks = clocks | 0;
-    if (this.emulatorCore.slowDownBusHack) {
-        clocks <<= 1;
+GameBoyAdvanceIO.prototype.preprocessBusSpeedHack = function () {
+    if (!this.emulatorCore.slowDownBusHack) {
+        this.updateCore = this.updateCoreNormal;
+        this.updateCoreSingle = this.updateCoreSingleNormal;
+        this.updateCoreTwice = this.updateCoreTwiceNormal;
     }
+    else {
+        this.updateCore = this.updateCoreSlowedDown;
+        this.updateCoreSingle = this.updateCoreSingleSlowedDown;
+        this.updateCoreTwice = this.updateCoreTwiceSlowedDown;
+    }
+}
+GameBoyAdvanceIO.prototype.updateCoreNormal = function (clocks) {
+    clocks = clocks | 0;
     //This is used during normal/dma modes of operation:
     this.accumulatedClocks = ((this.accumulatedClocks | 0) + (clocks | 0)) | 0;
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
         this.updateCoreSpill();
     }
 }
-GameBoyAdvanceIO.prototype.updateCoreSingle = function () {
+GameBoyAdvanceIO.prototype.updateCoreSingleNormal = function () {
     //This is used during normal/dma modes of operation:
-    if (this.emulatorCore.slowDownBusHack) {
-        this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
-    }
-    else {
-        this.accumulatedClocks = ((this.accumulatedClocks | 0) + 1) | 0;
-    }
+    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 1) | 0;
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
         this.updateCoreSpill();
     }
 }
-GameBoyAdvanceIO.prototype.updateCoreTwice = function () {
+GameBoyAdvanceIO.prototype.updateCoreTwiceNormal = function () {
     //This is used during normal/dma modes of operation:
-    if (this.emulatorCore.slowDownBusHack) {
-        this.accumulatedClocks = ((this.accumulatedClocks | 0) + 4) | 0;
+    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
+    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
+        this.updateCoreSpill();
     }
-    else {
-        this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
+}
+GameBoyAdvanceIO.prototype.updateCoreSlowedDown = function (clocks) {
+    clocks = clocks << 1;
+    //This is used during normal/dma modes of operation:
+    this.accumulatedClocks = ((this.accumulatedClocks | 0) + (clocks | 0)) | 0;
+    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
+        this.updateCoreSpill();
     }
+}
+GameBoyAdvanceIO.prototype.updateCoreSingleSlowedDown = function () {
+    //This is used during normal/dma modes of operation:
+    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
+    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
+        this.updateCoreSpill();
+    }
+}
+GameBoyAdvanceIO.prototype.updateCoreTwiceSlowedDown = function () {
+    //This is used during normal/dma modes of operation:
+    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 4) | 0;
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
         this.updateCoreSpill();
     }

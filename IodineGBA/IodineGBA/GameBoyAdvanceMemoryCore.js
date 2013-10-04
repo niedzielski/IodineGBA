@@ -626,7 +626,6 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (parentObj, address) {
     if ((address | 0) < 0x4000304) {
         //IO Read:
         parentObj.wait.FASTAccess2();
-        parentObj.IOCore.didPossibleBusyWait();
         data = parentObj.readIO8[address & 0x3FF](parentObj) | 0;
     }
     else if ((address & 0x4000800) == 0x4000800) {
@@ -646,7 +645,6 @@ GameBoyAdvanceMemory.prototype.readIODispatch16 = function (parentObj, address) 
         //IO Read:
         parentObj.wait.FASTAccess2();
         address >>= 1;
-        parentObj.IOCore.didPossibleBusyWait();
         data = parentObj.readIO16[address & 0x1FF](parentObj) | 0;
     }
     else if ((address & 0x4000800) == 0x4000800) {
@@ -666,7 +664,6 @@ GameBoyAdvanceMemory.prototype.readIODispatch32 = function (parentObj, address) 
         //IO Read:
         parentObj.wait.FASTAccess2();
         address >>= 2;
-        parentObj.IOCore.didPossibleBusyWait();
         data = parentObj.readIO32[address & 0xFF](parentObj) | 0;
     }
     else if ((address & 0x4000800) == 0x4000800) {
@@ -817,19 +814,16 @@ GameBoyAdvanceMemory.prototype.readROM232 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readSRAM8 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.SRAMAccess();
-    parentObj.IOCore.didPossibleBusyWait();
     return parentObj.saves.readSRAM(address & 0xFFFF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readSRAM16 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.SRAMAccess();
-    parentObj.IOCore.didPossibleBusyWait();
     return ((parentObj.saves.readSRAM(address & 0xFFFF) | 0) * 0x101) | 0;
 }
 GameBoyAdvanceMemory.prototype.readSRAM32 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.SRAMAccess();
-    parentObj.IOCore.didPossibleBusyWait();
     return ((parentObj.saves.readSRAM(address & 0xFFFF) | 0) * 0x1010101) | 0;
 }
 GameBoyAdvanceMemory.prototype.readZero = function (parentObj) {

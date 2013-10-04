@@ -71,6 +71,7 @@ GameBoyAdvanceIRQ.prototype.writeIF0 = function (data) {
     this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF0 = function () {
+    this.IOCore.didPossibleBusyWait();
     return this.interruptsRequested & 0xFF;
 }
 GameBoyAdvanceIRQ.prototype.writeIF1 = function (data) {
@@ -79,6 +80,7 @@ GameBoyAdvanceIRQ.prototype.writeIF1 = function (data) {
     this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIF1 = function () {
+    this.IOCore.didPossibleBusyWait();
     return this.interruptsRequested >> 8;
 }
 GameBoyAdvanceIRQ.prototype.nextEventTime = function () {

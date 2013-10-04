@@ -389,6 +389,9 @@ GameBoyAdvanceEmulator.prototype.toggleLineSkip = function (lineSkip) {
 }
 GameBoyAdvanceEmulator.prototype.toggleSlowDownBusHack = function (slowDownBusHack) {
     this.slowDownBusHack = !!slowDownBusHack;
+    if (!this.faultFound && this.romFound) {
+        this.IOCore.preprocessBusSpeedHack();
+    }
 }
 GameBoyAdvanceEmulator.prototype.toggleCircumventBusyWaitsHack = function (circumventBusyWaitsHack) {
     this.circumventBusyWaitsHack = !!circumventBusyWaitsHack;

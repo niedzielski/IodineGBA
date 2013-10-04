@@ -119,9 +119,11 @@ GameBoyAdvanceJoyPad.prototype.checkForIRQ = function () {
     return -1;
 }*/
 GameBoyAdvanceJoyPad.prototype.readKeyStatus0 = function () {
+    this.IOCore.didPossibleBusyWait();
     return this.keyInput & 0xFF;
 }
 GameBoyAdvanceJoyPad.prototype.readKeyStatus1 = function () {
+    this.IOCore.didPossibleBusyWait();
     return ((this.keyInput >> 8) & 0x3) | 0xFC;
 }
 GameBoyAdvanceJoyPad.prototype.writeKeyControl0 = function (data) {
