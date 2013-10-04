@@ -148,14 +148,6 @@ function registerGUIEvents() {
     addEvent("click", document.getElementById("toggleSlowDownBusHack"), function () {
              Iodine.toggleSlowDownBusHack(this.checked);
     });
-    document.getElementById("toggleCircumventBusyWaitsHack").checked = false;
-    addEvent("click", document.getElementById("toggleCircumventBusyWaitsHack"), function () {
-             Iodine.toggleCircumventBusyWaitsHack(this.checked);
-    });
-    document.getElementById("changeBusyWaitSkipMagicValue").value = "16";
-    addEvent("change", document.getElementById("changeBusyWaitSkipMagicValue"), function () {
-             Iodine.changeBusyWaitSkipMagicValue(parseInt(this.value));
-    });
     addEvent("unload", document, ExportSave);
     setInterval(
             function () {

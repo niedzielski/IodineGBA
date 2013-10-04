@@ -16,8 +16,6 @@
  *
  */
 function GameBoyAdvanceEmulator() {
-    this.circumventBusyWaitsHack = false;     //Enable a trick to work-around games that busy wait.
-    this.busyWaitSkipMagicValue = 0x10;       //Trigger value for the hack to come into effect.
     this.slowDownBusHack = false;             //Double up wait states hack.
     this.SKIPBoot = false;                    //Skip the BIOS boot screen.
     this.dynarecEnabled = false;              //Use the dynarec engine?
@@ -390,12 +388,6 @@ GameBoyAdvanceEmulator.prototype.toggleLineSkip = function (lineSkip) {
 GameBoyAdvanceEmulator.prototype.toggleSlowDownBusHack = function (slowDownBusHack) {
     this.slowDownBusHack = !!slowDownBusHack;
     if (!this.faultFound && this.romFound) {
-        this.IOCore.preprocessBusSpeedHack();
+        this.IOCore.wait.preprocessBusSpeedHack(this.slowDownBusHack);
     }
-}
-GameBoyAdvanceEmulator.prototype.toggleCircumventBusyWaitsHack = function (circumventBusyWaitsHack) {
-    this.circumventBusyWaitsHack = !!circumventBusyWaitsHack;
-}
-GameBoyAdvanceEmulator.prototype.changeBusyWaitSkipMagicValue = function (busyWaitSkipMagicValue) {
-    this.busyWaitSkipMagicValue = Math.max(busyWaitSkipMagicValue | 0, 1);
 }

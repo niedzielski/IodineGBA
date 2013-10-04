@@ -29,9 +29,7 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.nextEventClocks = 0;
     this.lastDynarecUsage = 1;
     this.flaggedDynarec = 0;
-    this.busyWaitCheck = 0;
     this.BIOSFound = false;
-    this.preprocessBusSpeedHack();
     //Initialize the various handler objects:
     this.memory = new GameBoyAdvanceMemory(this);
     this.dma = new GameBoyAdvanceDMA(this);
@@ -72,19 +70,7 @@ GameBoyAdvanceIO.prototype.runIterator = function () {
         this.stepHandle();
     }
 }
-GameBoyAdvanceIO.prototype.preprocessBusSpeedHack = function () {
-    if (!this.emulatorCore.slowDownBusHack) {
-        this.updateCore = this.updateCoreNormal;
-        this.updateCoreSingle = this.updateCoreSingleNormal;
-        this.updateCoreTwice = this.updateCoreTwiceNormal;
-    }
-    else {
-        this.updateCore = this.updateCoreSlowedDown;
-        this.updateCoreSingle = this.updateCoreSingleSlowedDown;
-        this.updateCoreTwice = this.updateCoreTwiceSlowedDown;
-    }
-}
-GameBoyAdvanceIO.prototype.updateCoreNormal = function (clocks) {
+GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
     clocks = clocks | 0;
     //This is used during normal/dma modes of operation:
     this.accumulatedClocks = ((this.accumulatedClocks | 0) + (clocks | 0)) | 0;
@@ -92,38 +78,16 @@ GameBoyAdvanceIO.prototype.updateCoreNormal = function (clocks) {
         this.updateCoreSpill();
     }
 }
-GameBoyAdvanceIO.prototype.updateCoreSingleNormal = function () {
+GameBoyAdvanceIO.prototype.updateCoreSingle = function () {
     //This is used during normal/dma modes of operation:
     this.accumulatedClocks = ((this.accumulatedClocks | 0) + 1) | 0;
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
         this.updateCoreSpill();
     }
 }
-GameBoyAdvanceIO.prototype.updateCoreTwiceNormal = function () {
+GameBoyAdvanceIO.prototype.updateCoreTwice = function () {
     //This is used during normal/dma modes of operation:
     this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
-    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
-        this.updateCoreSpill();
-    }
-}
-GameBoyAdvanceIO.prototype.updateCoreSlowedDown = function (clocks) {
-    clocks = clocks << 1;
-    //This is used during normal/dma modes of operation:
-    this.accumulatedClocks = ((this.accumulatedClocks | 0) + (clocks | 0)) | 0;
-    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
-        this.updateCoreSpill();
-    }
-}
-GameBoyAdvanceIO.prototype.updateCoreSingleSlowedDown = function () {
-    //This is used during normal/dma modes of operation:
-    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
-    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
-        this.updateCoreSpill();
-    }
-}
-GameBoyAdvanceIO.prototype.updateCoreTwiceSlowedDown = function () {
-    //This is used during normal/dma modes of operation:
-    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 4) | 0;
     if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
         this.updateCoreSpill();
     }
@@ -281,23 +245,4 @@ GameBoyAdvanceIO.prototype.flagStepper = function (statusFlag) {
     this.systemStatus = ((this.systemStatus | 0) | (statusFlag | 0)) | 0;
     this.cpu.checkCPUExecutionStatus();
     this.preprocessSystemStepper();
-}
-GameBoyAdvanceIO.prototype.didPossibleBusyWait = function () {
-    if (this.emulatorCore.circumventBusyWaitsHack) {
-        if ((this.systemStatus | 0) == 0) {
-            this.busyWaitCheck = ((this.busyWaitCheck | 0) + 1) | 0;
-            if ((this.busyWaitCheck | 0) > (this.emulatorCore.busyWaitSkipMagicValue | 0)) {
-                this.updateCoreSpillRetain();
-                var clocks = Math.min(this.nextEventClocks | 0, this.gfx.nextHBlankEventTime() | 0) | 0;
-                this.updateCore(clocks | 0);
-                this.resetBusyWaitCounter();
-            }
-        }
-    }
-    else {
-        this.resetBusyWaitCounter();
-    }
-}
-GameBoyAdvanceIO.prototype.resetBusyWaitCounter = function () {
-    this.busyWaitCheck = 0;
 }
