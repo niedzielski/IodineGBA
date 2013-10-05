@@ -64,6 +64,11 @@ GameBoyAdvanceWait.prototype.preprocessBusSpeedHack = function (doSlowness) {
             this.CARTWaitState0Combined <<= 1;
             this.CARTWaitState1Combined <<= 1;
             this.CARTWaitState2Combined <<= 1;
+            this.ROMPrebuffer = 0;
+            this.getROMRead16 = this.getROMRead16NoPrefetch;
+            this.getROMRead32 = this.getROMRead32NoPrefetch;
+            this.CPUInternalCyclePrefetch = this.CPUInternalCycleNoPrefetch;
+            this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleNoPrefetch;
             this.slowedDownBus = true;
         }
     }
@@ -80,6 +85,12 @@ GameBoyAdvanceWait.prototype.preprocessBusSpeedHack = function (doSlowness) {
             this.CARTWaitState0Combined >>= 1;
             this.CARTWaitState1Combined >>= 1;
             this.CARTWaitState2Combined >>= 1;
+            if (this.prefetchEnabled) {
+                this.getROMRead16 = this.getROMRead16Prefetch;
+                this.getROMRead32 = this.getROMRead32Prefetch;
+                this.CPUInternalCyclePrefetch = this.CPUInternalCycleDoPrefetch;
+                this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleDoPrefetch;
+            }
             this.slowedDownBus = false;
         }
     }
@@ -118,7 +129,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
         this.CARTWaitState2Combined <<= 1;
     }
     this.prefetchEnabled = ((data & 0x40) == 0x40);
-    if (!this.prefetchEnabled) {
+    if (!this.prefetchEnabled || this.slowedDownBus) {
         this.ROMPrebuffer = 0;
         this.getROMRead16 = this.getROMRead16NoPrefetch;
         this.getROMRead32 = this.getROMRead32NoPrefetch;
