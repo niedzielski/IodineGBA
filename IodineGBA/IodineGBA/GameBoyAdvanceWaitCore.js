@@ -49,6 +49,7 @@ GameBoyAdvanceWait.prototype.initialize = function () {
     this.CPUInternalCyclePrefetch = this.CPUInternalCycleNoPrefetch;
     this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleNoPrefetch;
     this.opcodeCache = new GameBoyAdvanceMemoryCache(this.memory);
+    this.preprocessBusSpeedHack(!!this.IOCore.emulatorCore.slowDownBusHack);
 }
 GameBoyAdvanceWait.prototype.preprocessBusSpeedHack = function (doSlowness) {
     if (doSlowness) {
