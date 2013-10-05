@@ -86,7 +86,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
     if (!this.IOCore.BIOSFound || this.IOCore.emulatorCore.SKIPBoot) {
         //BIOS entered the ROM at line 0x7C:
         this.currentScanLine = 0x7C;
-        this.queuedScanLines = 0x7C;
+        this.lastUnrenderedLine = 0x7C;
     }
     this.transparency = 0x3800000;
     this.backdrop = this.transparency | 0x200000;
@@ -289,8 +289,6 @@ GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
         //Draw the frame:
         this.emulatorCore.prepareFrame();
     }
-    this.bgAffineRenderer[0].resetReferenceCounters();
-    this.bgAffineRenderer[1].resetReferenceCounters();
     this.IOCore.dma.gfxVBlankRequest();
 }
 GameBoyAdvanceGraphics.prototype.graphicsJIT = function () {
@@ -303,13 +301,11 @@ GameBoyAdvanceGraphics.prototype.graphicsJITVBlank = function () {
     this.graphicsJITScanlineGroup();
 }
 GameBoyAdvanceGraphics.prototype.renderScanLine = function () {
+    //Line Skip Check:
     if (this.emulatorCore.lineSkip) {
         this.oddLine = !this.oddLine;
         if (!this.oddLine) {
             this.renderer.renderScanLine(this.lastUnrenderedLine | 0);
-        }
-        else {
-            this.renderer.skipScanLine();
         }
         if (this.lastUnrenderedLine == 159) {
             this.oddLine = !this.oddLine;
@@ -317,6 +313,20 @@ GameBoyAdvanceGraphics.prototype.renderScanLine = function () {
     }
     else {
         this.renderer.renderScanLine(this.lastUnrenderedLine | 0);
+    }
+    //Update the affine bg counters:
+    this.updateReferenceCounters();
+}
+GameBoyAdvanceGraphics.prototype.updateReferenceCounters = function () {
+    if ((this.lastUnrenderedLine | 0) == 159) {
+        //Reset some affine bg counters on roll-over to line 0:
+        this.bgAffineRenderer[0].resetReferenceCounters();
+        this.bgAffineRenderer[1].resetReferenceCounters();
+    }
+    else {
+        //Increment the affine bg counters:
+        this.bgAffineRenderer[0].incrementReferenceCounters();
+        this.bgAffineRenderer[1].incrementReferenceCounters();
     }
 }
 GameBoyAdvanceGraphics.prototype.graphicsJITScanlineGroup = function () {

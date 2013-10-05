@@ -42,9 +42,6 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) 
     line = line | 0;
     return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
-GameBoyAdvanceBG2FrameBufferRenderer.prototype.skipScanLine = function () {
-    return this.bgAffineRenderer.skipScanLine();
-}
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
     //Output pixel:
     if (x > -1 && y > -1 && x < 240 && y < 160) {

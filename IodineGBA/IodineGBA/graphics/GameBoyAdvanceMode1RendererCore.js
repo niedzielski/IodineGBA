@@ -35,6 +35,3 @@ GameBoyAdvanceMode1Renderer.prototype.renderScanLine = function (line) {
     }
     this.gfx.copyLineToFrameBuffer(line);
 }
-GameBoyAdvanceMode1Renderer.prototype.skipScanLine = function () {
-    this.gfx.bg2MatrixRenderer.skipScanLine();
-}

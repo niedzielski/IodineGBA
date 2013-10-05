@@ -37,6 +37,7 @@ GameBoyAdvanceAffineBGRenderer.prototype.initialize = function () {
     this.pb = 0;
     this.pd = 0;
     this.priorityPreprocess();
+    this.offsetReferenceCounters();
 }
 GameBoyAdvanceAffineBGRenderer.prototype.renderScanLine = function (line, BGObject) {
     line = line | 0;
@@ -56,11 +57,12 @@ GameBoyAdvanceAffineBGRenderer.prototype.renderScanLine = function (line, BGObje
         //Pixelize the line horizontally:
         this.gfx.mosaicRenderer.renderMosaicHorizontal(this.scratchBuffer);
     }
-    this.incrementReferenceCounters();
     return this.scratchBuffer;
 }
-GameBoyAdvanceAffineBGRenderer.prototype.skipScanLine = function () {
-    this.incrementReferenceCounters();
+GameBoyAdvanceAffineBGRenderer.prototype.offsetReferenceCounters = function () {
+    var end = this.gfx.lastUnrenderedLine | 0;
+    this.pb = (((this.pb | 0) + (this.actualBGdmx | 0)) * (end | 0)) | 0;
+    this.pd = (((this.pd | 0) + (this.actualBGdmy | 0)) * (end | 0)) | 0;
 }
 GameBoyAdvanceAffineBGRenderer.prototype.incrementReferenceCounters = function () {
     this.pb = ((this.pb | 0) + (this.actualBGdmx | 0)) | 0;
