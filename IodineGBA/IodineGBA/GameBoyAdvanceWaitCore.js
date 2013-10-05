@@ -52,6 +52,7 @@ GameBoyAdvanceWait.prototype.initialize = function () {
 }
 GameBoyAdvanceWait.prototype.preprocessBusSpeedHack = function (doSlowness) {
     if (doSlowness) {
+        //Enable the speed hack:
         if (!this.slowedDownBus) {
             this.WRAMWaitState <<= 1;
             this.SRAMWaitState <<= 1;
@@ -64,15 +65,18 @@ GameBoyAdvanceWait.prototype.preprocessBusSpeedHack = function (doSlowness) {
             this.CARTWaitState0Combined <<= 1;
             this.CARTWaitState1Combined <<= 1;
             this.CARTWaitState2Combined <<= 1;
-            this.ROMPrebuffer = 0;
-            this.getROMRead16 = this.getROMRead16NoPrefetch;
-            this.getROMRead32 = this.getROMRead32NoPrefetch;
-            this.CPUInternalCyclePrefetch = this.CPUInternalCycleNoPrefetch;
-            this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleNoPrefetch;
+            if (this.prefetchEnabled) {
+                this.ROMPrebuffer = 0;
+                this.getROMRead16 = this.getROMRead16NoPrefetch;
+                this.getROMRead32 = this.getROMRead32NoPrefetch;
+                this.CPUInternalCyclePrefetch = this.CPUInternalCycleNoPrefetch;
+                this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleNoPrefetch;
+            }
             this.slowedDownBus = true;
         }
     }
     else {
+        //Disable the speed hack:
         if (this.slowedDownBus) {
             this.WRAMWaitState >>= 1;
             this.SRAMWaitState >>= 1;
