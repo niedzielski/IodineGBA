@@ -142,7 +142,7 @@ GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {
     this.clockLCDState();
 }
 GameBoyAdvanceGraphics.prototype.clockLCDState = function () {
-    if ((this.LCDTicks | 0) >= 960) {
+    if ((this.LCDTicks | 0) >= 1006) {
         //HBlank Event Occurred:
         this.updateHBlank();
         if ((this.LCDTicks | 0) >= 1232) {
@@ -223,7 +223,7 @@ GameBoyAdvanceGraphics.prototype.nextVBlankIRQEventTime = function () {
     return nextEventTime | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankEventTime = function () {
-    return ((2192 - (this.LCDTicks | 0)) % 1232) | 0;
+    return ((2238 - (this.LCDTicks | 0)) % 1232) | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankIRQEventTime = function () {
     var nextEventTime = -1;
@@ -241,7 +241,7 @@ GameBoyAdvanceGraphics.prototype.nextHBlankDMAEventTime = function () {
     }
     else {
         //No HBlank DMA in VBlank:
-        nextEventTime = ((((228 - (this.currentScanLine | 0)) * 1232) | 0) + 960 - (this.LCDTicks | 0)) | 0;
+        nextEventTime = ((((228 - (this.currentScanLine | 0)) * 1232) | 0) + 1006 - (this.LCDTicks | 0)) | 0;
     }
     return nextEventTime | 0;
 }
@@ -470,7 +470,7 @@ GameBoyAdvanceGraphics.prototype.writeDISPSTAT0 = function (data) {
 }
 GameBoyAdvanceGraphics.prototype.readDISPSTAT0 = function () {
     return ((this.inVBlank ? 0x1 : 0) |
-    (((this.LCDTicks | 0) >= 1006) ? 0x2 : 0) |
+    (this.inHBlank ? 0x2 : 0) |
     (this.VCounterMatch ? 0x4 : 0) |
     (this.IRQVBlank ? 0x8 : 0) |
     (this.IRQHBlank ? 0x10 : 0) |
