@@ -32,7 +32,7 @@ DynarecBranchListenerCore.prototype.initialize = function () {
 DynarecBranchListenerCore.prototype.generateWorkerCache = function () {
     try {
         for (var index = 0; index < this.MAX_WORKERS; index++) {
-            var newWorker = new Worker("IodineGBA/CPU/dynarec/DynarecCompilerWorkerCore.js");
+            var newWorker = new Worker("IodineGBA/IodineGBA/CPU/dynarec/DynarecCompilerWorkerCore.js");
             this.workers.push(newWorker);
         }
     }
