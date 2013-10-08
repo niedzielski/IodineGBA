@@ -232,7 +232,12 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryReadDispatch = func
                         readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
                         readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused
                         ];
-    Object.defineProperty(memoryReader, "length", {writable: false});
+    try {
+        Object.defineProperty(memoryReader, "length", {writable: false});
+    }
+    catch (error) {
+        //Some browsers throw here....
+    }
     return memoryReader;
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = function (writeCalls) {
@@ -355,7 +360,12 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = fun
                         writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
                         writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused
                         ];
-    Object.defineProperty(memoryWriter, "length", {writable: false});
+    try {
+        Object.defineProperty(memoryWriter, "length", {writable: false});
+    }
+    catch (error) {
+        //Some browsers throw here....
+    }
     return memoryWriter;
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO8 = function () {

@@ -321,7 +321,12 @@ DynarecTHUMBAssemblerCore.prototype.compileInstructionMap = function () {
     //F8-FF
     this.generateLowMap("BLoff");
     //Force length to be ready only:
-    Object.defineProperty(this.instructionMap, "length", {writable: false});
+    try {
+        Object.defineProperty(this.instructionMap, "length", {writable: false});
+    }
+    catch (error) {
+        //Some browsers throw here....
+    }
 }
 DynarecTHUMBAssemblerCore.prototype.generateLowMap = function (instruction) {
     for (var index = 0; index < 0x20; ++index) {

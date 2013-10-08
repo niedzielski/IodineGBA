@@ -4586,7 +4586,12 @@ ARMInstructionSet.prototype.compileReducedInstructionMap = function (instruction
         }
     }
     //Force length to be ready only:
-    Object.defineProperty(this.instructionMap, "length", {writable: false});
+    try {
+        Object.defineProperty(this.instructionMap, "length", {writable: false});
+    }
+    catch (error) {
+        //Some browsers throw here....
+    }
 }
 ARMInstructionSet.prototype.appendInstruction = function (parentObj, decodedInstr, decodedOperand) {
     return function () {
