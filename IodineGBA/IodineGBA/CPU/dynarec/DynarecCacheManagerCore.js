@@ -18,6 +18,7 @@
 function DynarecCacheManagerCore(dynarec, start, end, InTHUMB) {
     this.dynarec = dynarec;
     this.CPUCore = dynarec.CPUCore;
+    this.registers = this.CPUCore.registers;
     this.thumb = this.CPUCore.THUMB;
     this.arm = this.CPUCore.ARM;
     this.memory = this.CPUCore.IOCore.memory;
