@@ -101,7 +101,7 @@ DynarecTHUMBAssemblerCore.prototype.generateInstructionSpew = function (instruct
     }
     else {
         //Call out to the interpreter's stub:
-        return "\tthis.thumb." + this.instructionMap[instruction >> 6] + "(thumb);\n";
+        return "\tthis.thumb." + this.instructionMap[instruction >> 6] + "(this.thumb);\n";
     }
 }
 DynarecTHUMBAssemblerCore.prototype.insertMemoryInstabilityCheck = function (instruction) {
