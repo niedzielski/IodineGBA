@@ -430,15 +430,15 @@ DynarecTHUMBAssemblerCore.prototype.SUBreg = function (instructionValue) {
 }
 DynarecTHUMBAssemblerCore.prototype.ADDimm3 = function (instructionValue) {
     var spew = "\t//ADDimm3:\n" +
-    "var operand1 = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;" +
-    "//Update destination register:" +
-    "this.thumb.writeLowRegister(" + this.toHex(instructionValue) + ", this.CPUCore.setADDFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0);";
+    "var operand1 = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "//Update destination register:\n" +
+    "this.thumb.writeLowRegister(" + this.toHex(instructionValue & 0x7) + ", this.CPUCore.setADDFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.SUBimm3 = function (instructionValue) {
     var spew = "\t//SUBimm3:\n" +
-    "var operand1 = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;" +
-    "//Update destination register:" +
-    "this.thumb.writeLowRegister(" + this.toHex(instructionValue) + ", this.CPUCore.setSUBFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0);";
+    "var operand1 = this.CPUCore.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "//Update destination register:\n" +
+    "this.thumb.writeLowRegister(" + this.toHex(instructionValue & 0x7) + ", this.CPUCore.setSUBFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0);\n";
     return spew;
 }
