@@ -160,13 +160,18 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
     this.dmaType[dmaChannel | 0] = (data >> 4) & 0x3;
     this.irqFlagging[dmaChannel | 0] = data & 0x40;
     if ((data | 0) > 0x7F) {
-        //Don't allow DMA reconfigures while one is running:
         if ((this.enabled[dmaChannel | 0] | 0) == 0) {
             this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel | 0][this.dmaType[dmaChannel | 0] | 0] | 0;
             if ((this.enabled[dmaChannel | 0] | 0) > 0) {
                 this.enableDMAChannel(dmaChannel | 0);
             }
         }
+        /*else {
+            this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel | 0][this.dmaType[dmaChannel | 0] | 0] | 0;
+            if ((this.enabled[dmaChannel | 0] | 0) > 0) {
+                this.reconfigureDMAChannel(dmaChannel | 0);
+            }
+        }*/
     }
     else {
         this.enabled[dmaChannel | 0] = 0;
@@ -229,6 +234,42 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
     this.sourceShadow[dmaChannel | 0] = this.source[dmaChannel | 0] | 0;
     //Shadow copy the destination address:
     this.destinationShadow[dmaChannel | 0] = this.destination[dmaChannel | 0] | 0;
+}
+GameBoyAdvanceDMA.prototype.reconfigureDMAChannel = function (dmaChannel) {
+    dmaChannel = dmaChannel | 0;
+    if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_A | 0)) {
+        //Assert the FIFO A DMA request signal:
+        this.IOCore.sound.checkFIFOAPendingSignal();
+        //Direct Sound DMA Hardwired To Wordcount Of 4:
+        this.wordCountShadow[1] = 0x4;
+        //Destination Hardwired to 0x40000A0:
+        this.destinationShadow[1] = 0x40000A0;
+        //Bit-mode Hardwired to 32-bit:
+        this.is32Bit[1] = 0x4;
+    }
+    else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
+        //Assert the FIFO B DMA request signal:
+        this.IOCore.sound.checkFIFOBPendingSignal();
+        //Direct Sound DMA Hardwired To Wordcount Of 4:
+        this.wordCountShadow[2] = 0x4;
+        //Destination Hardwired to 0x40000A4:
+        this.destinationShadow[2] = 0x40000A4;
+        //Bit-mode Hardwired to 32-bit:
+        this.is32Bit[2] = 0x4;
+    }
+    else {
+        if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
+            //Flag immediate DMA transfers for processing now:
+            this.pending[dmaChannel | 0] = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
+            this.IOCore.flagStepper(0x1);
+        }
+        else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0)) {
+            //Only enable display sync if set on line 162:
+            if ((this.IOCore.gfx.currentScanLine | 0) != 162) {
+                this.enabled[dmaChannel | 0] = 0;
+            }
+        }
+    }
 }
 GameBoyAdvanceDMA.prototype.soundFIFOARequest = function () {
     this.requestDMA(this.DMA_REQUEST_TYPE.FIFO_A | 0);
