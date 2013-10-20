@@ -49,7 +49,7 @@ function registerGUIEvents() {
                 raiseVolume();
                 break;
             case 51:
-                emuSpeed = Math.min(emuSpeed + 0.25, 4);
+                emuSpeed = Math.min(emuSpeed + 0.10, 4);
                 Iodine.setSpeed(emuSpeed);
                 break;
             case 52:
