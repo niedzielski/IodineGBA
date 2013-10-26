@@ -446,7 +446,7 @@ DynarecTHUMBAssemblerCore.prototype.MOVimm8 = function (instructionValue) {
     var spew = "\t//MOVimm8:\n" +
     "\t//Get the 8-bit value to move into the register:\n" +
     "\tthis.CPUCore.CPSRNegative = false;\n" +
-    "\tthis.CPUCore.CPSRZero = " + ((instructionValue & 0xFF) ? "true" : "false") + ";\n" +
+    "\tthis.CPUCore.CPSRZero = " + ((instructionValue & 0xFF) ? "false" : "true") + ";\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = " + this.toHex(instructionValue & 0xFF) + ";\n";
     return spew;
@@ -587,5 +587,109 @@ DynarecTHUMBAssemblerCore.prototype.SBC = function (instructionValue) {
     "\tvar operand1 = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\tvar operand2 = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setSBCFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ROR = function (instructionValue) {
+    var spew = "\t//ROR:\n" +
+    "\tvar source = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] & 0xFF;\n" +
+    "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
+    "\tif (source > 0) {\n" +
+        "\t\tsource &= 0x1F;\n" +
+        "\t\tif (source > 0) {\n" +
+            "\t\t\t//CPSR Carry is set by the last bit shifted out:\n" +
+            "\t\t\tthis.CPUCore.CPSRCarry = (((destination >>> ((source - 1) | 0)) & 0x1) != 0);\n" +
+            "\t\t\t//Perform rotate:\n" +
+            "\t\t\tdestination = (destination << ((0x20 - source) | 0)) | (destination >>> (source | 0));\n" +
+        "\t\t}\n" +
+        "\t\telse {\n" +
+            "\t\t\tthis.CPUCore.CPSRCarry = (destination < 0);\n" +
+        "\t\t}\n" +
+    "\t}\n" +
+    "\t//Perform CPSR updates for N and Z (But not V):\n" +
+    "\tthis.CPUCore.CPSRNegative = (destination < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (destination == 0);\n" +
+    "\t//Update destination register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.TST = function (instructionValue) {
+    var spew = "\t//TST:\n" +
+    "\tvar source = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
+    "\t//Perform bitwise AND:\n" +
+    "\tvar result = source & destination;\n" +
+    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (result == 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.NEG = function (instructionValue) {
+    var spew = "\t//NEG:\n" +
+    "\tvar source = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "\tthis.CPUCore.CPSROverflow = ((source ^ (-(source | 0))) == 0);\n" +
+    "\t//Perform Subtraction:\n" +
+    "\tsource = (-(source | 0)) | 0;\n" +
+    "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
+    "\t//Update destination register:\n" +
+     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.CMP = function (instructionValue) {
+    var spew = "\t//CMP:\n" +
+    "\t//Compare two registers:\n" +
+    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.CMN = function (instructionValue) {
+    var spew = "\t//CMN:\n" +
+    "\t//Compare two registers:\n" +
+    "\tthis.CPUCore.setCMNFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ORR = function (instructionValue) {
+    var spew = "\t//ORR:\n" +
+    "\tvar source = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
+    "\t//Perform bitwise OR:\n" +
+    "\tvar result = source | destination;\n" +
+    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (result == 0);\n" +
+    "\t//Update destination register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.MUL = function (instructionValue) {
+    var spew = "\t//MUL:\n" +
+    "\tvar source = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
+    "\t//Perform MUL32:\n" +
+    "\tvar result = this.CPUCore.performMUL32(source | 0, destination | 0, 0) | 0;\n" +
+    "\tthis.CPUCore.CPSRCarry = false;\n" +
+    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (result == 0);\n" +
+    "\t//Update destination register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.BIC = function (instructionValue) {
+    var spew = "\t//BIC:\n" +
+    "\tvar source = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
+    "\t//Perform bitwise AND with a bitwise NOT on source:\n" +
+    "\tvar result = (~source) & destination;\n" +
+    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (result == 0);\n" +
+    "\t//Update destination register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.MVN = function (instructionValue) {
+    var spew = "\t//MVN:\n" +
+    "\t//Perform bitwise NOT on source:\n" +
+    "\tvar source = ~this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "];\n" +
+    "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
+    "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
+    "\t//Update destination register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
 }

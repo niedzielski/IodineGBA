@@ -392,7 +392,7 @@ THUMBInstructionSet.prototype.CMN = function (parentObj) {
 THUMBInstructionSet.prototype.ORR = function (parentObj) {
     var source = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
     var destination = parentObj.readLowRegister(parentObj.execute | 0) | 0;
-    //Perform bitwise ORR:
+    //Perform bitwise OR:
     var result = source | destination;
     parentObj.CPUCore.CPSRNegative = (result < 0);
     parentObj.CPUCore.CPSRZero = (result == 0);
