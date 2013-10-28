@@ -533,7 +533,7 @@ THUMBInstructionSet.prototype.STRreg = function (parentObj) {
     parentObj.CPUCore.write32(address | 0, parentObj.readLowRegister(parentObj.execute | 0) | 0);
 }
 THUMBInstructionSet.prototype.STRHreg = function (parentObj) {
-    //Store Hald-Word From Register
+    //Store Half-Word From Register
     var address = ((parentObj.readLowRegister(parentObj.execute >> 6) | 0) + (parentObj.readLowRegister(parentObj.execute >> 3) | 0)) | 0;
     parentObj.CPUCore.write16(address | 0, parentObj.readLowRegister(parentObj.execute | 0) | 0);
 }

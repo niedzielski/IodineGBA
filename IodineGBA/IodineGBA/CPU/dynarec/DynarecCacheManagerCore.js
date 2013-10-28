@@ -158,7 +158,7 @@ DynarecCacheManagerCore.prototype.ready = function () {
 DynarecCacheManagerCore.prototype.attachCompiled = function (JITStub) {
     this.execute = JITStub;
 }
-DynarecCacheManagerCore.prototype.branch = function (branchTo) {
+DynarecCacheManagerCore.prototype.branchTHUMB = function (branchTo) {
     branchTo = branchTo | 0;
     if ((branchTo | 0) > 0x3FFF || this.CPUCore.IOCore.BIOSFound) {
         if ((this.lastBranch | 0) == (branchTo | 0) && this.lastStubCall) {
@@ -167,7 +167,39 @@ DynarecCacheManagerCore.prototype.branch = function (branchTo) {
         }
         else {
             //Go out and find the stub:
-            this.lastStubCall = (this.dynarec.handleNextWithStatus(branchTo | 0, this.thumb)) ? this.dynarec.currentCache : null;
+            this.lastStubCall = (this.dynarec.handleNextWithStatus(branchTo | 0, true)) ? this.dynarec.currentCache : null;
+            this.lastBranch = branchTo | 0;
+        }
+        //Branch to new address:
+        this.registers[15] = branchTo | 0;
+        //Mark pipeline as invalid:
+        this.CPUCore.pipelineInvalid = 0x4;
+        //Next PC fetch has to update the address bus:
+        this.CPUCore.wait.NonSequentialBroadcast();
+    }
+    else {
+        //We're branching into BIOS, handle specially:
+        if ((branchTo | 0) == 0x130) {
+            //IRQ mode exit handling:
+            //ROM IRQ handling returns back from its own subroutine back to BIOS at this address.
+            this.CPUCore.HLEIRQExit();
+        }
+        else {
+            //Illegal to branch directly into BIOS (Except for return from IRQ), only SWIs can:
+            throw(new Error("Could not handle branch to: " + branchTo.toString(16)));
+        }
+    }
+}
+DynarecCacheManagerCore.prototype.branchARM = function (branchTo) {
+    branchTo = branchTo | 0;
+    if ((branchTo | 0) > 0x3FFF || this.CPUCore.IOCore.BIOSFound) {
+        if ((this.lastBranch | 0) == (branchTo | 0) && this.lastStubCall) {
+            //Use our cached stub:
+            this.dynarec.attachNextCache(this.lastStubCall)
+        }
+        else {
+            //Go out and find the stub:
+            this.lastStubCall = (this.dynarec.handleNextWithStatus(branchTo | 0, false)) ? this.dynarec.currentCache : null;
             this.lastBranch = branchTo | 0;
         }
         //Branch to new address:

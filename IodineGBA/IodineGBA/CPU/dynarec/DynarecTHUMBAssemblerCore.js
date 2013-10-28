@@ -162,7 +162,7 @@ DynarecTHUMBAssemblerCore.prototype.guardHighRegisterWrite = function (register,
     var spew = "";
     if ((register | 0) == 0xF) {
         spew += "\t//We performed a branch:\n" +
-        "\tthis.branch((" + data + ") & -2);\n";
+        "\tthis.branchTHUMB((" + data + ") & -2);\n";
         //Mark as branch point:
         this.branched = true;
     }
@@ -736,7 +736,6 @@ DynarecTHUMBAssemblerCore.prototype.ADDH_HH = function (instructionValue) {
     this.guardHighRegisterWrite(instructionValue & 0x7, "((this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0) + (this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0)) | 0");
     return spew;
 }
-
 DynarecTHUMBAssemblerCore.prototype.CMPH_LL = function (instructionValue) {
     var spew = "\t//CMPH_LL:\n" +
     "\t//Compare two registers:\n" +
@@ -759,5 +758,69 @@ DynarecTHUMBAssemblerCore.prototype.CMPH_HH = function (instructionValue) {
     var spew = "\t//CMPH_HH:\n" +
     "\t//Compare two registers:\n" +
     "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0, this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.MOVH_LL = function (instructionValue) {
+    var spew = "\t//MOVH_LL:\n" +
+    "\t//Move a register to another register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.MOVH_LH = function (instructionValue) {
+    var spew = "\t//MOVH_LH:\n" +
+    "\t//Move a register to another register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.MOVH_HL = function (instructionValue) {
+    var spew = "\t//MOVH_HL:\n" +
+    "\t//Move a register to another register:\n" +
+    this.guardHighRegisterWrite(instructionValue & 0x7, "this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0");
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.MOVH_HH = function (instructionValue) {
+    var spew = "\t//MOVH_HH:\n" +
+    "\t//Move a register to another register:\n" +
+    this.guardHighRegisterWrite(instructionValue & 0x7, "this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0");
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.BX_L = function (instructionValue) {
+    var spew = "\t//BX_L:\n" +
+    "\t//Branch & eXchange:\n" +
+    "\tvar address = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
+    "\tif ((address & 0x1) == 0) {\n" +
+        "\t\t//Enter ARM mode:\n" +
+        "\t\tthis.CPUCore.enterARM();\n" +
+        "\t\tthis.branchARM(address & -0x4);\n" +
+    "\t}\n" +
+    "\telse {\n" +
+        "\t\t//Stay in THUMB mode:\n" +
+        "\t\tthis.branchTHUMB(address & -0x2);\n" +
+    "\t}\n";
+    //Mark as branch point:
+    this.branched = true;
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.BX_H = function (instructionValue) {
+    var spew = "\t//BX_H:\n" +
+    "\t//Branch & eXchange:\n" +
+    "\tvar address = this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0;\n" +
+    "\tif ((address & 0x1) == 0) {\n" +
+        "\t\t//Enter ARM mode:\n" +
+        "\t\tthis.CPUCore.enterARM();\n" +
+        "\t\tthis.branchARM(address & -0x4);\n" +
+    "\t}\n" +
+    "\telse {\n" +
+        "\t\t//Stay in THUMB mode:\n" +
+        "\t\tthis.branchTHUMB(address & -0x2);\n" +
+    "\t}\n";
+    //Mark as branch point:
+    this.branched = true;
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRPC = function (instructionValue) {
+    var spew = "\t//LDRPC:\n" +
+    "\t//PC-Relative Load:\n" +
+    "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = this.CPUCore.read32(" + this.toHex((this.currentInstructionPC() & -3) + ((instructionValue & 0xFF) << 2)) + ") | 0;\n";
     return spew;
 }
