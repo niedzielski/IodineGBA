@@ -31,7 +31,7 @@ function GameBoyAdvanceEmulator() {
     this.faultFound = false;                  //Did we run into a fatal error?
     this.paused = true;                       //Are we paused?
     this.audioVolume = 1;                     //Starting audio volume.
-    this.audioBufferUnderrunLimit = 8;        //Audio buffer minimum span amount over x interpreter iterations.
+    this.audioBufferUnderrunLimit = 6;        //Audio buffer minimum span amount over x interpreter iterations.
     this.audioBufferSize = 20;                //Audio buffer maximum span amount over x interpreter iterations.
     this.offscreenWidth = 240;                //Width of the GBA screen.
     this.offscreenHeight = 160;               //Height of the GBA screen.
@@ -350,7 +350,7 @@ GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
         if (typeof underrunAmount == "number") {
             underrunAmount = this.audioBufferContainAmount - Math.max(underrunAmount, 0);
             if (underrunAmount > 0) {
-                this.CPUCyclesTotal = Math.min(((this.CPUCyclesTotal | 0) + ((underrunAmount >> 1) * this.audioResamplerFirstPassFactor)) | 0, this.CPUCyclesTotal << 2, 0x7FFFFFFF) | 0;
+                this.CPUCyclesTotal = Math.min(((this.CPUCyclesTotal | 0) + ((underrunAmount >> 1) * this.audioResamplerFirstPassFactor)) | 0, this.CPUCyclesTotal << 1, 0x7FFFFFFF) | 0;
             }
         }
     }
