@@ -157,6 +157,21 @@ DynarecTHUMBAssemblerCore.prototype.checkPCStatus = function () {
 DynarecTHUMBAssemblerCore.prototype.incrementPC = function () {
     return "\tthis.registers[15] = " + this.toHex(this.nextInstructionPC()) + ";\n";
 }
+DynarecTHUMBAssemblerCore.prototype.guardHighRegisterWrite = function (register, data) {
+    register = (register & 0x7) | 0x8;
+    var spew = "";
+    if ((register | 0) == 0xF) {
+        spew += "\t//We performed a branch:\n" +
+        "\tthis.branch((" + data + ") & -2);\n";
+        //Mark as branch point:
+        this.branched = true;
+    }
+    else {
+        spew += "\t//Regular Data Write:\n" +
+        "\tthis.registers[" + this.toHex(register | 0) + "] = " + data + ";\n";
+    }
+    return spew;
+}
 DynarecTHUMBAssemblerCore.prototype.conditionalInline = function (instructionVariable, instructionSnippet, altSnippet) {
     //Factor out some zero math:
     if (instructionVariable > 0) {
@@ -691,5 +706,58 @@ DynarecTHUMBAssemblerCore.prototype.MVN = function (instructionValue) {
     "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ADDH_LL = function (instructionValue) {
+    var spew = "\t//ADDH_LL:\n" +
+    "\t//Perform Addition:\n" +
+    "\t//Update destination register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = ((this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ADDH_LH = function (instructionValue) {
+    var spew = "\t//ADDH_LH:\n" +
+    "\t//Perform Addition:\n" +
+    "\t//Update destination register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = ((this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0) + (this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0)) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ADDH_HL = function (instructionValue) {
+    var spew = "\t//ADDH_HL:\n" +
+    "\t//Perform Addition:\n" +
+    "\t//Update destination register:\n" +
+    this.guardHighRegisterWrite(instructionValue & 0x7, "((this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0");
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ADDH_HH = function (instructionValue) {
+    var spew = "\t//ADDH_HH:\n" +
+    "\t//Perform Addition:\n" +
+    "\t//Update destination register:\n" +
+    this.guardHighRegisterWrite(instructionValue & 0x7, "((this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0) + (this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0)) | 0");
+    return spew;
+}
+
+DynarecTHUMBAssemblerCore.prototype.CMPH_LL = function (instructionValue) {
+    var spew = "\t//CMPH_LL:\n" +
+    "\t//Compare two registers:\n" +
+    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.CMPH_LH = function (instructionValue) {
+    var spew = "\t//CMPH_LH:\n" +
+    "\t//Compare two registers:\n" +
+    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.CMPH_HL = function (instructionValue) {
+    var spew = "\t//CMPH_HL:\n" +
+    "\t//Compare two registers:\n" +
+    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.CMPH_HH = function (instructionValue) {
+    var spew = "\t//CMPH_HH:\n" +
+    "\t//Compare two registers:\n" +
+    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0, this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0);\n";
     return spew;
 }

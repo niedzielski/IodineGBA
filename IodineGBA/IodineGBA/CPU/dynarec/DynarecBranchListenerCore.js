@@ -85,6 +85,26 @@ DynarecBranchListenerCore.prototype.handleNext = function (newPC, instructionmod
         this.backEdge = false;
     }
 }
+DynarecBranchListenerCore.prototype.handleNextWithStatus = function (newPC, instructionmode) {
+    this.lastBranch = newPC >>> 0;
+    this.lastTHUMB = !!instructionmode;
+    if (this.isAddressSafe(newPC >>> 0)) {
+        var cache = this.findCache(newPC >>> 0, !!instructionmode);
+        if (cache && cache.ready()) {
+            this.CPUCore.IOCore.preprocessCPUHandler(1);
+            this.currentCache = cache;
+            return true;
+        }
+    }
+    else {
+        this.backEdge = false;
+    }
+    return false;
+}
+DynarecBranchListenerCore.prototype.attachNextCache = function (cache) {
+    this.CPUCore.IOCore.preprocessCPUHandler(1);
+    this.currentCache = cache;
+}
 DynarecBranchListenerCore.prototype.enter = function () {
    if (this.CPUCore.emulatorCore.dynarecEnabled) {
        //Execute our compiled code:
