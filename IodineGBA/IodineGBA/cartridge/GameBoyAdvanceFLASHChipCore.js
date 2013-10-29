@@ -32,7 +32,7 @@ GameBoyAdvanceFLASHChip.prototype.allocate = function () {
         var newSave = getUint8Array(this.largestSizePossible | 0);
         //Init to default value:
         for (var index = 0; (index | 0) < (this.largestSizePossible | 0); index = ((index | 0) + 1) | 0) {
-            newSave[index | 0] = 0;
+            newSave[index | 0] = 0xFF;
         }
         //Copy the old save data out:
         if (this.saves != null) {
@@ -103,7 +103,7 @@ GameBoyAdvanceFLASHChip.prototype.write = function (address, data) {
             if ((this.flashCommandUnlockStage | 0) == 5 && ((data | 0) == 0x30)) {
                 var addressEnd = ((address | 0) + 0x1000) | 0;
                 for (var index = address | 0; (index | 0) < (addressEnd | 0); index = ((index | 0) + 1) | 0) {
-                    this.save[index | this.BANKOffset] = 0xFF;
+                    this.saves[index | this.BANKOffset] = 0xFF;
                 }
                 this.notATMEL = true;
             }
@@ -117,7 +117,7 @@ GameBoyAdvanceFLASHChip.prototype.write = function (address, data) {
                 case 0x10:
                     if ((this.flashCommandUnlockStage | 0) == 5 && ((data | 0) == 0x30)) {
                         for (var index = 0; (index | 0) < (this.largestSizePossible | 0); index = ((index | 0) + 1) | 0) {
-                            this.save[index | 0] = 0xFF;
+                            this.saves[index | 0] = 0xFF;
                         }
                         this.flashCommandUnlockStage = 0;
                     }
