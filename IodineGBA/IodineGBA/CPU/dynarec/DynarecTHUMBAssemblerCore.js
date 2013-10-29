@@ -824,3 +824,30 @@ DynarecTHUMBAssemblerCore.prototype.LDRPC = function (instructionValue) {
     "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = this.CPUCore.read32(" + this.toHex((this.currentInstructionPC() & -3) + ((instructionValue & 0xFF) << 2)) + ") | 0;\n";
     return spew;
 }
+DynarecTHUMBAssemblerCore.prototype.STRreg = function (instructionValue) {
+    var spew = "\t//STRreg:\n" +
+    "\t//Store Word From Register:\n" +
+    "\tthis.CPUCore.write32(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0, this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.STRHreg = function (instructionValue) {
+    var spew = "\t//STRHreg:\n" +
+    "\t//Store Half-Word From Register:\n" +
+    "\tthis.CPUCore.write16(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0, this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.STRBreg = function (instructionValue) {
+    var spew = "\t//STRBreg:\n" +
+    "\t//Store Byte From Register:\n" +
+    "\tthis.CPUCore.write8(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0, this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.B = function (instructionValue) {
+    var spew = "\t//B:\n" +
+    "\t//Unconditional Branch:\n" +
+    "\t//Update the program counter to branch address:\n" +
+    "\tthis.branchTHUMB(" + this.toHex(((this.currentInstructionPC() | 0) + ((instructionValue << 21) >> 20)) | 0) + ");\n";
+    //Mark as branch point:
+    this.branched = true;
+    return spew;
+}
