@@ -17,6 +17,7 @@
  */
 var Iodine = null;
 var Blitter = null;
+var timerID = null;
 window.onload = function () {
     //Initialize Iodine:
     Iodine = new GameBoyAdvanceEmulator();
@@ -100,6 +101,17 @@ function lowerVolume() {
 function raiseVolume() {
     var emuVolume = Math.min(Iodine.getVolume() + 0.04, 1);
     Iodine.changeVolume(emuVolume);
+}
+function writeRedTemporaryText(textString) {
+    if (timerID) {
+        clearTimeout(timerID);
+    }
+    document.getElementById("tempMessage").style.display = "block";
+    document.getElementById("tempMessage").textContent = textString;
+    timerID = setTimeout(clearTempString, 5000);
+}
+function clearTempString() {
+    document.getElementById("tempMessage").style.display = "none";
 }
 //Some wrappers and extensions for non-DOM3 browsers:
 function addEvent(sEvent, oElement, fListener) {

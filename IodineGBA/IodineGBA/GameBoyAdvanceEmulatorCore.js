@@ -75,6 +75,7 @@ GameBoyAdvanceEmulator.prototype.restart = function () {
     this.faultFound = false;
     this.exportSave();
     this.initializeCore();
+    this.importSave();
     this.resetMetrics();
     this.reinitializeAudio();
 }
@@ -116,6 +117,7 @@ GameBoyAdvanceEmulator.prototype.attachROM = function (ROM) {
     this.ROM = ROM;
     this.initializeCore();
     this.romFound = true;
+    this.importSave();
 }
 GameBoyAdvanceEmulator.prototype.attachBIOS = function (BIOS) {
     this.statusClear();
@@ -197,8 +199,6 @@ GameBoyAdvanceEmulator.prototype.getSpeedPercentage = function () {
 GameBoyAdvanceEmulator.prototype.initializeCore = function () {
     //Setup a new instance of the i/o core:
     this.IOCore = new GameBoyAdvanceIO(this);
-    //(Re)import the save data:
-    this.importSave();
 }
 GameBoyAdvanceEmulator.prototype.keyDown = function (keyPressed) {
     if (!this.paused) {
@@ -319,6 +319,7 @@ GameBoyAdvanceEmulator.prototype.toggleSkipBootROM = function (skipBoot) {
     this.SKIPBoot = !!skipBoot;
     if (this.romFound && this.paused) {
         this.initializeCore();
+        this.importSave();
     }
 }
 GameBoyAdvanceEmulator.prototype.toggleDynarec = function (dynarecEnabled) {

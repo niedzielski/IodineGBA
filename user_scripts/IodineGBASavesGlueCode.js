@@ -19,6 +19,7 @@ function ImportSaveCallback(name) {
     try {
         var save = findValue("SAVE_" + name);
         if (save != null) {
+            writeRedTemporaryText("Loaded save.");
             return base64ToArray(save);
         }
     }

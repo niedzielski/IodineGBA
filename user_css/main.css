@@ -1,6 +1,7 @@
 html, body {
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 body:hover div#control_panel {
     opacity: 0;
@@ -55,4 +56,16 @@ div#main canvas {
 }*/
 canvas {
     cursor: none;
+}
+span#tempMessage {
+    color: red;
+    bottom: 0px;
+    position: absolute;
+    right: 0px;
+    display: none;
+    font-size: 40pt;
+    font-weight: bold;
+    text-align: right;
+    vertical-align: bottom;
+    font-family: monospace;
 }
