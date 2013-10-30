@@ -40,7 +40,6 @@ function GameBoyAdvanceEmulator() {
     //Graphics buffers to generate in advance:
     this.frameBuffer = getInt32Array(this.offscreenRGBCount);        //The internal buffer to composite to.
     this.swizzledFrame = getUint8Array(this.offscreenRGBCount);      //The swizzled output buffer that syncs to the internal framebuffer on v-blank.
-    this.drewFrame = false;                   //Did we draw the last iteration?
     this.audioUpdateState = false;            //Do we need to update the sound core with new info?
     this.saveExportHandler = null;            //Save export handler attached by GUI.
     this.saveImportHandler = null;            //Save import handler attached by GUI.
@@ -103,12 +102,10 @@ GameBoyAdvanceEmulator.prototype.timerCallback = function () {
 }
 GameBoyAdvanceEmulator.prototype.iterationStartSequence = function () {
     this.faultFound = true;                                             //If the end routine doesn't unset this, then we are marked as having crashed.
-    this.drewFrame = false;                                             //Graphics has not drawn yet for this iteration block.
     this.audioUnderrunAdjustment();                                     //If audio is enabled, look to see how much we should overclock by to maintain the audio buffer.
     this.audioPushNewState();                                           //Check to see if we need to update the audio core for any output changes.
 }
 GameBoyAdvanceEmulator.prototype.iterationEndSequence = function () {
-    this.requestDraw();                                                 //If drewFrame is true, blit buffered frame out.
     this.faultFound = false;                                            //If core did not throw while running, unset the fatal error flag.
     this.clockCyclesSinceStart += this.CPUCyclesTotal;                  //Accumulate tracking.
 }
@@ -227,10 +224,10 @@ GameBoyAdvanceEmulator.prototype.swizzleFrameBuffer = function () {
 GameBoyAdvanceEmulator.prototype.prepareFrame = function () {
     //Copy the internal frame buffer to the output buffer:
     this.swizzleFrameBuffer();
-    this.drewFrame = true;
+    this.requestDraw();
 }
 GameBoyAdvanceEmulator.prototype.requestDraw = function () {
-    if (this.drewFrame && this.graphicsFrameCallback) {
+    if (this.graphicsFrameCallback) {
         //We actually updated the graphics internally, so copy out:
         this.graphicsFrameCallback(this.swizzledFrame);
     }

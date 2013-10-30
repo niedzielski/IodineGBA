@@ -69,7 +69,6 @@ GlueCodeGfx.prototype.initializeCanvasTarget = function () {
             canvasData[indexGFXIterate] = 0xFF;
         }
         //Draw swizzled buffer out as a test:
-        this.drewFrame = true;
         this.requestDraw();
         this.checkRAF();
         //Success:
