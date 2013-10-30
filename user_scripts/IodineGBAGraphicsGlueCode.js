@@ -16,6 +16,7 @@
  *
  */
 function GlueCodeGfx() {
+    this.didRAF = false;                      //Set when rAF has been used.
     this.graphicsFound = 0;                   //Do we have graphics output sink found yet?
     this.offscreenWidth = 240;                //Width of the GBA screen.
     this.offscreenHeight = 160;               //Height of the GBA screen.
@@ -82,9 +83,9 @@ GlueCodeGfx.prototype.initializeCanvasTarget = function () {
 GlueCodeGfx.prototype.copyBuffer = function (buffer) {
     if (this.graphicsFound) {
         if (this.swizzledFrameFree.length == 0) {
-           this.swizzledFrameFree.push(this.swizzledFrameReady.pop());
+           this.swizzledFrameFree.push(this.swizzledFrameReady.shift());
         }
-        var swizzledFrame = this.swizzledFrameFree.pop();
+        var swizzledFrame = this.swizzledFrameFree.shift();
         var length = swizzledFrame.length;
         if (buffer.buffer) {
             swizzledFrame.set(buffer);
@@ -98,17 +99,26 @@ GlueCodeGfx.prototype.copyBuffer = function (buffer) {
         if (!window.requestAnimationFrame) {
             this.requestDraw();
         }
-        else {
+        else if (!this.didRAF) {
+            //Prime RAF draw:
             var parentObj = this;
-            window.requestAnimationFrame(function () {parentObj.requestDraw(); });
+            window.requestAnimationFrame(function () {
+                if (parentObj) {
+                    parentObj.requestRAFDraw();
+                }
+            });
         }
     }
+}
+GlueCodeGfx.prototype.requestRAFDraw = function () {
+    this.didRAF = true;
+    this.requestDraw();
 }
 GlueCodeGfx.prototype.requestDraw = function () {
     if (this.swizzledFrameReady.length > 0) {
         var canvasData = this.canvasBuffer.data;
         var bufferIndex = 0;
-        var swizzledFrame = this.swizzledFrameReady.pop();
+        var swizzledFrame = this.swizzledFrameReady.shift();
         var length = canvasData.length;
         for (var canvasIndex = 0; canvasIndex < length; ++canvasIndex) {
             canvasData[canvasIndex++] = swizzledFrame[bufferIndex++];
@@ -117,6 +127,14 @@ GlueCodeGfx.prototype.requestDraw = function () {
         }
         this.swizzledFrameFree.push(swizzledFrame);
         this.graphicsBlit();
+    }
+    if (this.didRAF) {
+        var parentObj = this;
+        window.requestAnimationFrame(function () {
+            if (parentObj) {
+                parentObj.requestDraw();
+            }
+        });
     }
 }
 GlueCodeGfx.prototype.graphicsBlit = function () {
@@ -136,7 +154,7 @@ GlueCodeGfx.prototype.graphicsBlit = function () {
 }
 GlueCodeGfx.prototype.initializeGraphicsBuffer = function () {
     //Initialize the first frame to a white screen:
-    var swizzledFrame = this.swizzledFrameFree.pop();
+    var swizzledFrame = this.swizzledFrameFree.shift();
     var length = swizzledFrame.length;
     for (var bufferIndex = 0; bufferIndex < length; ++bufferIndex) {
         swizzledFrame[bufferIndex] = 0xF8;
