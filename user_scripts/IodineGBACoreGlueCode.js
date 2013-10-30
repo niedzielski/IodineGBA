@@ -16,14 +16,21 @@
  *
  */
 var Iodine = null;
+var Blitter = null;
 window.onload = function () {
     //Initialize Iodine:
     Iodine = new GameBoyAdvanceEmulator();
-    Iodine.attachCanvas(document.getElementById("emulator_target"));
+    //Initialize the graphics:
+    registerBlitterHandler();
     //Register the save handler callbacks:
     registerSaveHandlers();
     //Hook the GUI controls.
     registerGUIEvents();
+}
+function registerBlitterHandler() {
+    Blitter = new GlueCodeGfx();
+    Blitter.attachCanvas(document.getElementById("emulator_target"));
+    Iodine.attachGraphicsFrameHandler(function (buffer) {Blitter.copyBuffer(buffer);});
 }
 function registerGUIEvents() {
     addEvent("keydown", document, keyDown);

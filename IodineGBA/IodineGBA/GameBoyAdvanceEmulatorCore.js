@@ -25,7 +25,6 @@ function GameBoyAdvanceEmulator() {
     this.useWorkers = true;                   //Enable Web Workers for compiling.
     this.emulatorSpeed = 1;                   //Speed multiplier of the emulator.
     this.timerIntervalRate = 16;              //How often the emulator core is called into (in milliseconds).
-    this.graphicsFound = false;               //Do we have graphics output sink found yet?
     this.audioFound = false;                  //Do we have audio output sink found yet?
     this.romFound = false;                    //Do we have a ROM loaded in?
     this.faultFound = false;                  //Did we run into a fatal error?
@@ -38,15 +37,14 @@ function GameBoyAdvanceEmulator() {
     this.BIOS = [];                           //Initialize BIOS as not existing.
     //Cache some frame buffer lengths:
     this.offscreenRGBCount = this.offscreenWidth * this.offscreenHeight * 3;
-    this.offscreenRGBACount = this.offscreenWidth * this.offscreenHeight * 4;
     //Graphics buffers to generate in advance:
     this.frameBuffer = getInt32Array(this.offscreenRGBCount);        //The internal buffer to composite to.
     this.swizzledFrame = getUint8Array(this.offscreenRGBCount);      //The swizzled output buffer that syncs to the internal framebuffer on v-blank.
-    this.initializeGraphicsBuffer();                                 //Pre-set the swizzled buffer for first frame.
     this.drewFrame = false;                   //Did we draw the last iteration?
     this.audioUpdateState = false;            //Do we need to update the sound core with new info?
     this.saveExportHandler = null;            //Save export handler attached by GUI.
     this.saveImportHandler = null;            //Save import handler attached by GUI.
+    this.graphicsFrameCallback = null;        //Graphics blitter handler attached by GUI.
     //Calculate some multipliers against the core emulator timer:
     this.calculateTimings();
 }
@@ -212,63 +210,9 @@ GameBoyAdvanceEmulator.prototype.keyUp = function (keyReleased) {
         this.IOCore.joypad.keyRelease(keyReleased);
     }
 }
-GameBoyAdvanceEmulator.prototype.attachCanvas = function (canvas) {
-    this.canvas = canvas;
-    this.graphicsFound = true;
-    this.graphicsFound = this.initializeCanvasTarget();
-}
-GameBoyAdvanceEmulator.prototype.recomputeDimension = function () {
-    //Cache some dimension info:
-    this.canvasLastWidth = this.canvas.clientWidth;
-    this.canvasLastHeight = this.canvas.clientHeight;
-    if (window.mozRequestAnimationFrame) {    //Sniff out firefox for selecting this path.
-        //Set target as unscaled:
-        this.onscreenWidth = this.canvas.width = this.offscreenWidth;
-        this.onscreenHeight = this.canvas.height = this.offscreenHeight;
-    }
-    else {
-        //Set target canvas as scaled:
-        this.onscreenWidth = this.canvas.width = this.canvas.clientWidth;
-        this.onscreenHeight = this.canvas.height = this.canvas.clientHeight;
-    }
-}
-GameBoyAdvanceEmulator.prototype.initializeCanvasTarget = function () {
-    try {
-        //Obtain dimensional information:
-        this.recomputeDimension();
-        //Get handles on the canvases:
-        this.canvasOffscreen = document.createElement("canvas");
-        this.canvasOffscreen.width = this.offscreenWidth;
-        this.canvasOffscreen.height = this.offscreenHeight;
-        this.drawContextOffscreen = this.canvasOffscreen.getContext("2d");
-        this.drawContextOnscreen = this.canvas.getContext("2d");
-        //Get a CanvasPixelArray buffer:
-        try {
-            this.canvasBuffer = this.drawContextOffscreen.createImageData(this.offscreenWidth, this.offscreenHeight);
-        }
-        catch (error) {
-            this.canvasBuffer = this.drawContextOffscreen.getImageData(0, 0, this.offscreenWidth, this.offscreenHeight);
-        }
-        //Initialize Alpha Channel:
-        for (var indexGFXIterate = 3; indexGFXIterate < this.offscreenRGBACount; indexGFXIterate += 4) {
-            this.canvasBuffer.data[indexGFXIterate] = 0xFF;
-        }
-        //Draw swizzled buffer out as a test:
-        this.drewFrame = true;
-        this.requestDraw();
-        //Success:
-        return true;
-    }
-    catch (error) {
-        //Failure:
-        return false;
-    }
-}
-GameBoyAdvanceEmulator.prototype.initializeGraphicsBuffer = function () {
-    //Initialize the first frame to a white screen:
-    var bufferIndex = 0;
-    while (bufferIndex < this.offscreenRGBCount) {
-        this.swizzledFrame[bufferIndex++] = 0xF8;
+GameBoyAdvanceEmulator.prototype.attachGraphicsFrameHandler = function (handler) {
+    if (typeof handler == "function") {
+        this.graphicsFrameCallback = handler;
     }
 }
 GameBoyAdvanceEmulator.prototype.swizzleFrameBuffer = function () {
@@ -286,31 +230,9 @@ GameBoyAdvanceEmulator.prototype.prepareFrame = function () {
     this.drewFrame = true;
 }
 GameBoyAdvanceEmulator.prototype.requestDraw = function () {
-    if (this.drewFrame && this.graphicsFound) {
+    if (this.drewFrame && this.graphicsFrameCallback) {
         //We actually updated the graphics internally, so copy out:
-        var canvasData = this.canvasBuffer.data;
-        var bufferIndex = 0;
-        for (var canvasIndex = 0; canvasIndex < this.offscreenRGBACount; ++canvasIndex) {
-            canvasData[canvasIndex++] = this.swizzledFrame[bufferIndex++];
-            canvasData[canvasIndex++] = this.swizzledFrame[bufferIndex++];
-            canvasData[canvasIndex++] = this.swizzledFrame[bufferIndex++];
-        }
-        this.graphicsBlit();
-    }
-}
-GameBoyAdvanceEmulator.prototype.graphicsBlit = function () {
-    if (this.canvasLastWidth != this.canvas.clientWidth || this.canvasLastHeight != this.canvas.clientHeight) {
-        this.recomputeDimension();
-    }
-    if (this.offscreenWidth == this.onscreenWidth && this.offscreenHeight == this.onscreenHeight) {
-        //Canvas does not need to scale, draw directly to final:
-        this.drawContextOnscreen.putImageData(this.canvasBuffer, 0, 0);
-    }
-    else {
-        //Canvas needs to scale, draw to offscreen first:
-        this.drawContextOffscreen.putImageData(this.canvasBuffer, 0, 0);
-        //Scale offscreen canvas image onto the final:
-        this.drawContextOnscreen.drawImage(this.canvasOffscreen, 0, 0, this.onscreenWidth, this.onscreenHeight);
+        this.graphicsFrameCallback(this.swizzledFrame);
     }
 }
 GameBoyAdvanceEmulator.prototype.enableAudio = function () {
