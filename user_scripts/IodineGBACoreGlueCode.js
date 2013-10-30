@@ -15,8 +15,6 @@
  * GNU General Public License for more details.
  *
  */
-var emuSpeed = 1;
-var emuVolume = 1;
 var Iodine = null;
 window.onload = function () {
     //Initialize Iodine:
@@ -89,11 +87,11 @@ function resetPlayButton() {
     document.getElementById("play").style.display = "inline";
 }
 function lowerVolume() {
-    emuVolume = Math.max(emuVolume - 0.04, 0);
+    var emuVolume = Math.max(Iodine.getVolume() - 0.04, 0);
     Iodine.changeVolume(emuVolume);
 }
 function raiseVolume() {
-    emuVolume = Math.min(emuVolume + 0.04, 1);
+    var emuVolume = Math.min(Iodine.getVolume() + 0.04, 1);
     Iodine.changeVolume(emuVolume);
 }
 //Some wrappers and extensions for non-DOM3 browsers:

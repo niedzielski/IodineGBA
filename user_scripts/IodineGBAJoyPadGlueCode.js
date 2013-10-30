@@ -73,11 +73,11 @@ function keyUpPreprocess(event) {
             raiseVolume();
             break;
         case 51:
-            emuSpeed = Math.min(emuSpeed + 0.10, 4);
+            var emuSpeed = Math.min(Iodine.getSpeed() + 0.10, 4);
             Iodine.setSpeed(emuSpeed);
             break;
         case 52:
-            emuSpeed = Math.max(emuSpeed - 0.10, 0.10);
+            var emuSpeed = Math.max(Iodine.getSpeed() - 0.10, 0.10);
             Iodine.setSpeed(emuSpeed);
             break;
         default:

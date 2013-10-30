@@ -172,6 +172,9 @@ GameBoyAdvanceEmulator.prototype.setSpeed = function (speed) {
     this.calculateTimings();
     this.reinitializeAudio();
 }
+GameBoyAdvanceEmulator.prototype.getSpeed = function (speed) {
+    return this.emulatorSpeed;
+}
 GameBoyAdvanceEmulator.prototype.changeCoreTimer = function (newTimerIntervalRate) {
     this.timerIntervalRate = Math.max(parseInt(newTimerIntervalRate), 1);
     if (!this.paused) {                        //Set up the timer again if running.
@@ -346,6 +349,9 @@ GameBoyAdvanceEmulator.prototype.changeVolume = function (newVolume) {
     if (this.audioFound) {
         this.audio.changeVolume(this.audioVolume);
     }
+}
+GameBoyAdvanceEmulator.prototype.getVolume = function (newVolume) {
+    return this.audioVolume;
 }
 GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInputLeft, downsampleInputRight) {
     downsampleInputLeft = downsampleInputLeft | 0;
