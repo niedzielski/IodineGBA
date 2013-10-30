@@ -15,24 +15,22 @@
  * GNU General Public License for more details.
  *
  */
-function ImportSave() {
-    var name = Iodine.getGameName();
-    if (name != "") {
-        try {
-            var save = findValue("SAVE_" + name);
-            if (save != null) {
-                Iodine.importSave(base64ToArray(save));
-            }
-        }
-        catch (error) {
-            alert("Could not read save: " + error.message);
+function ImportSaveCallback(name) {
+    try {
+        var save = findValue("SAVE_" + name);
+        if (save != null) {
+            return base64ToArray(save);
         }
     }
+    catch (error) {
+        alert("Could not read save: " + error.message);
+    }
+    return null;
 }
 function ExportSave() {
     Iodine.exportSave();
 }
-function SaveToStorage(name, save) {
+function ExportSaveCallback(name, save) {
     if (name != "") {
         try {
             setValue("SAVE_" + name, arrayToBase64(save));
@@ -41,6 +39,10 @@ function SaveToStorage(name, save) {
             alert("Could not store save: " + error.message);
         }
     }
+}
+function registerSaveHandlers() {
+    Iodine.attachSaveExportHandler(ExportSaveCallback);
+    Iodine.attachSaveImportHandler(ImportSaveCallback);
 }
 //Wrapper for localStorage getItem, so that data can be retrieved in various types.
 function findValue(key) {

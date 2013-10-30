@@ -32,7 +32,6 @@ function attachROM(ROM) {
     catch (error) {
         Iodine.attachROM(ROM);
     }
-    ImportSave();
 }
 function fileLoadShimCode(files, ROMHandler) {
     if (typeof files != "undefined") {

@@ -45,7 +45,8 @@ function GameBoyAdvanceEmulator() {
     this.initializeGraphicsBuffer();                                 //Pre-set the swizzled buffer for first frame.
     this.drewFrame = false;                   //Did we draw the last iteration?
     this.audioUpdateState = false;            //Do we need to update the sound core with new info?
-    this.saveHandler = null;                  //Save handler attached by GUI.
+    this.saveExportHandler = null;            //Save export handler attached by GUI.
+    this.saveImportHandler = null;            //Save import handler attached by GUI.
     //Calculate some multipliers against the core emulator timer:
     this.calculateTimings();
 }
@@ -130,28 +131,39 @@ GameBoyAdvanceEmulator.prototype.getGameName = function () {
         return "";
     }
 }
-GameBoyAdvanceEmulator.prototype.attachSAVEHandler = function (handler) {
+GameBoyAdvanceEmulator.prototype.attachSaveExportHandler = function (handler) {
     if (typeof handler == "function") {
-        this.saveHandler = handler;
+        this.saveExportHandler = handler;
     }
 }
-GameBoyAdvanceEmulator.prototype.importSave = function (save) {
-    if (!this.faultFound && this.romFound) {
-        var length = save.length | 0;
-        var convertedSave = getUint8Array(length | 0);
-        if ((length | 0) > 0) {
-            for (var index = 0; (index | 0) < (length | 0); index = ((index | 0) + 1) | 0) {
-                convertedSave[index | 0] = save[index | 0] & 0xFF;
+GameBoyAdvanceEmulator.prototype.attachSaveImportHandler = function (handler) {
+    if (typeof handler == "function") {
+        this.saveImportHandler = handler;
+    }
+}
+GameBoyAdvanceEmulator.prototype.importSave = function () {
+    if (this.saveImportHandler) {
+        var name = this.getGameName();
+        if (name != "") {
+            var save = this.saveImportHandler(name);
+            if (save && !this.faultFound && this.romFound) {
+                var length = save.length | 0;
+                var convertedSave = getUint8Array(length | 0);
+                if ((length | 0) > 0) {
+                    for (var index = 0; (index | 0) < (length | 0); index = ((index | 0) + 1) | 0) {
+                        convertedSave[index | 0] = save[index | 0] & 0xFF;
+                    }
+                    this.IOCore.saves.importSave(convertedSave);
+                }
             }
-            this.IOCore.saves.importSave(convertedSave);
         }
     }
 }
 GameBoyAdvanceEmulator.prototype.exportSave = function () {
-    if (this.saveHandler && !this.faultFound && this.romFound) {
+    if (this.saveExportHandler && !this.faultFound && this.romFound) {
         var save = this.IOCore.saves.exportSave();
         if (save != null) {
-            this.saveHandler(this.IOCore.cartridge.name, save);
+            this.saveExportHandler(this.IOCore.cartridge.name, save);
         }
     }
 }
@@ -184,6 +196,8 @@ GameBoyAdvanceEmulator.prototype.getSpeedPercentage = function () {
 GameBoyAdvanceEmulator.prototype.initializeCore = function () {
     //Setup a new instance of the i/o core:
     this.IOCore = new GameBoyAdvanceIO(this);
+    //(Re)import the save data:
+    this.importSave();
 }
 GameBoyAdvanceEmulator.prototype.keyDown = function (keyPressed) {
     if (!this.paused) {

@@ -22,7 +22,8 @@ window.onload = function () {
     //Initialize Iodine:
     Iodine = new GameBoyAdvanceEmulator();
     Iodine.attachCanvas(document.getElementById("emulator_target"));
-    Iodine.attachSAVEHandler(SaveToStorage);
+    //Register the save handler callbacks:
+    registerSaveHandlers();
     //Hook the GUI controls.
     registerGUIEvents();
 }
@@ -45,7 +46,6 @@ function registerGUIEvents() {
     });
     addEvent("click", document.getElementById("restart"), function (event) {
         Iodine.restart();
-        ImportSave();
         event.preventDefault();
     });
     document.getElementById("sound").checked = false;
@@ -60,7 +60,6 @@ function registerGUIEvents() {
     document.getElementById("skip_boot").checked = false;
     addEvent("click", document.getElementById("skip_boot"), function () {
              Iodine.toggleSkipBootROM(this.checked);
-             ImportSave();
     });
     document.getElementById("lle_jit").checked = false;
     addEvent("click", document.getElementById("lle_jit"), function () {
