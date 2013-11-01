@@ -119,7 +119,7 @@ GlueCodeMixerInput.prototype.push = function (buffer) {
     this.mixer.checkAudio();
 }
 GlueCodeMixerInput.prototype.remainingBuffer = function () {
-    return this.mixer.audio.remainingBuffer();
+    return this.buffer.remainingBuffer() + (Math.floor((this.mixer.audio.remainingBuffer() * this.sampleRate / this.mixer.sampleRate) / this.mixer.channelCount) * this.mixer.channelCount);
 }
 GlueCodeMixerInput.prototype.registerStackPosition = function (stackPosition) {
     this.stackPosition = stackPosition;
