@@ -4,3 +4,6 @@
 [submodule "IodineGBA/includes/XAudioJS"]
 	path = IodineGBA/includes/XAudioJS
 	url = git://github.com/grantgalitz/XAudioJS.git
+[submodule "user_scripts/XAudioJS"]
+	path = user_scripts/XAudioJS
+	url = git://github.com/grantgalitz/XAudioJS.git

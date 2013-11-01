@@ -212,6 +212,11 @@ GameBoyAdvanceEmulator.prototype.attachGraphicsFrameHandler = function (handler)
         this.graphicsFrameCallback = handler;
     }
 }
+GameBoyAdvanceEmulator.prototype.attachAudioHandler = function (mixerInputHandler) {
+    if (mixerInputHandler) {
+        this.audio = mixerInputHandler;
+    }
+}
 GameBoyAdvanceEmulator.prototype.swizzleFrameBuffer = function () {
     //Convert our dirty 15-bit (15-bit, with internal render flags above it) framebuffer to an 8-bit buffer with separate indices for the RGB channels:
     var bufferIndex = 0;
@@ -233,17 +238,18 @@ GameBoyAdvanceEmulator.prototype.requestDraw = function () {
     }
 }
 GameBoyAdvanceEmulator.prototype.enableAudio = function () {
-    if (!this.audioFound) {
+    if (!this.audioFound && this.audio) {
         //Calculate the variables for the preliminary downsampler first:
         this.audioResamplerFirstPassFactor = Math.max(Math.min(Math.floor(this.clocksPerSecond / 44100), Math.floor(0x7FFFFFFF / 0x3FF)), 1);
         this.audioDownSampleInputDivider = (2 / 0x3FF) / this.audioResamplerFirstPassFactor;
         this.audioSetState(true);    //Set audio to 'found' by default.
         //Attempt to enable audio:
         var parentObj = this;
-        this.audio = new XAudioServer(2, this.clocksPerSecond / this.audioResamplerFirstPassFactor, 0, Math.max(this.CPUCyclesPerIteration * this.audioBufferSize / this.audioResamplerFirstPassFactor, 8192) << 1, null, this.audioVolume, function () {
-            //Disable audio in the callback here:
-            parentObj.disableAudio();
+        this.audio.initialize(2, this.clocksPerSecond / this.audioResamplerFirstPassFactor, Math.max(this.CPUCyclesPerIteration * this.audioBufferSize / this.audioResamplerFirstPassFactor, 8192) << 1, this.audioVolume, function () {
+                                     //Disable audio in the callback here:
+                                     parentObj.disableAudio();
         });
+        this.audio.register();
         if (this.audioFound) {
             //Only run this if audio was found to save memory on disabled output:
             this.initializeAudioBuffering();
@@ -252,7 +258,7 @@ GameBoyAdvanceEmulator.prototype.enableAudio = function () {
 }
 GameBoyAdvanceEmulator.prototype.disableAudio = function () {
     if (this.audioFound) {
-        this.audio.changeVolume(0);
+        this.audio.unregister();
         this.audioSetState(false);
         this.calculateTimings();    //Re-Fix timing if it was adjusted by our audio code.
     }
@@ -278,7 +284,7 @@ GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInputLeft, do
     this.audioBuffer[this.audioDestinationPosition++] = (downsampleInputLeft * this.audioDownSampleInputDivider) - 1;
     this.audioBuffer[this.audioDestinationPosition++] = (downsampleInputRight * this.audioDownSampleInputDivider) - 1;
     if (this.audioDestinationPosition == this.audioNumSamplesTotal) {
-        this.audio.writeAudioNoCallback(this.audioBuffer);
+        this.audio.push(this.audioBuffer);
         this.audioDestinationPosition = 0;
     }
 }

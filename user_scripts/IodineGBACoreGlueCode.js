@@ -17,12 +17,16 @@
  */
 var Iodine = null;
 var Blitter = null;
+var Mixer = null;
+var MixerInput = null;
 var timerID = null;
 window.onload = function () {
     //Initialize Iodine:
     Iodine = new GameBoyAdvanceEmulator();
     //Initialize the graphics:
     registerBlitterHandler();
+    //Initialize the audio:
+    registerAudioHandler();
     //Register the save handler callbacks:
     registerSaveHandlers();
     //Hook the GUI controls.
@@ -32,6 +36,11 @@ function registerBlitterHandler() {
     Blitter = new GlueCodeGfx();
     Blitter.attachCanvas(document.getElementById("emulator_target"));
     Iodine.attachGraphicsFrameHandler(function (buffer) {Blitter.copyBuffer(buffer);});
+}
+function registerAudioHandler() {
+    Mixer = new GlueCodeMixer();
+    MixerInput = new GlueCodeMixerInput(Mixer);
+    Iodine.attachAudioHandler(MixerInput);
 }
 function registerGUIEvents() {
     addEvent("keydown", document, keyDown);
