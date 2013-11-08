@@ -20,6 +20,7 @@ function GlueCodeGfx() {
     this.graphicsFound = 0;                   //Do we have graphics output sink found yet?
     this.offscreenWidth = 240;                //Width of the GBA screen.
     this.offscreenHeight = 160;               //Height of the GBA screen.
+    this.doSmoothing = true;
     //Cache some frame buffer lengths:
     var offscreenRGBCount = this.offscreenWidth * this.offscreenHeight * 3;
     this.swizzledFrameFree = [getUint8Array(offscreenRGBCount), getUint8Array(offscreenRGBCount)];
@@ -29,6 +30,10 @@ function GlueCodeGfx() {
 GlueCodeGfx.prototype.attachCanvas = function (canvas) {
     this.canvas = canvas;
     this.graphicsFound = this.initializeCanvasTarget();
+    this.setSmoothScaling(this.doSmoothing);
+}
+GlueCodeGfx.prototype.detachCanvas = function () {
+    this.canvas = null;
 }
 GlueCodeGfx.prototype.recomputeDimension = function () {
     //Cache some dimension info:
@@ -56,18 +61,9 @@ GlueCodeGfx.prototype.initializeCanvasTarget = function () {
         this.drawContextOffscreen = this.canvasOffscreen.getContext("2d");
         this.drawContextOnscreen = this.canvas.getContext("2d");
         //Get a CanvasPixelArray buffer:
-        try {
-            this.canvasBuffer = this.drawContextOffscreen.createImageData(this.offscreenWidth, this.offscreenHeight);
-        }
-        catch (error) {
-            this.canvasBuffer = this.drawContextOffscreen.getImageData(0, 0, this.offscreenWidth, this.offscreenHeight);
-        }
+        this.canvasBuffer = this.getBuffer(this.drawContextOffscreen, this.offscreenWidth, this.offscreenHeight);
         //Initialize Alpha Channel:
-        var canvasData = this.canvasBuffer.data;
-        var length = canvasData.length;
-        for (var indexGFXIterate = 3; indexGFXIterate < length; indexGFXIterate += 4) {
-            canvasData[indexGFXIterate] = 0xFF;
-        }
+        this.initializeAlpha(this.canvasBuffer.data);
         //Draw swizzled buffer out as a test:
         this.requestDraw();
         this.checkRAF();
@@ -78,6 +74,35 @@ GlueCodeGfx.prototype.initializeCanvasTarget = function () {
         //Failure:
         return false;
     }
+}
+GlueCodeGfx.prototype.setSmoothScaling = function (doSmoothing) {
+    this.doSmoothing = doSmoothing;
+    if (this.graphicsFound) {
+        this.canvas.setAttribute("style", (this.canvas.getAttribute("style") || "") + "; image-rendering: " + ((doSmoothing) ? "auto" : "-webkit-optimize-contrast") + ";" +
+            "image-rendering: " + ((doSmoothing) ? "optimizeQuality" : "-o-crisp-edges") + ";" +
+            "image-rendering: " + ((doSmoothing) ? "optimizeQuality" : "-moz-crisp-edges") + ";" +
+            "-ms-interpolation-mode: " + ((doSmoothing) ? "bicubic" : "nearest-neighbor") + ";");
+        this.drawContextOnscreen.mozImageSmoothingEnabled = doSmoothing;
+        this.drawContextOnscreen.webkitImageSmoothingEnabled = doSmoothing;
+        this.drawContextOnscreen.imageSmoothingEnabled = doSmoothing;
+    }
+}
+GlueCodeGfx.prototype.initializeAlpha = function (canvasData) {
+    var length = canvasData.length;
+    for (var indexGFXIterate = 3; indexGFXIterate < length; indexGFXIterate += 4) {
+        canvasData[indexGFXIterate] = 0xFF;
+    }
+}
+GlueCodeGfx.prototype.getBuffer = function (canvasContext, width, height) {
+    //Get a CanvasPixelArray buffer:
+    var buffer = null;
+    try {
+        buffer = this.drawContextOffscreen.createImageData(width, height);
+    }
+    catch (error) {
+        buffer = this.drawContextOffscreen.getImageData(0, 0, width, height);
+    }
+    return buffer;
 }
 GlueCodeGfx.prototype.copyBuffer = function (buffer) {
     if (this.graphicsFound) {
@@ -102,7 +127,7 @@ GlueCodeGfx.prototype.copyBuffer = function (buffer) {
             //Prime RAF draw:
             var parentObj = this;
             window.requestAnimationFrame(function () {
-                if (parentObj) {
+                if (parentObj.canvas) {
                     parentObj.requestRAFDraw();
                 }
             });
@@ -130,7 +155,7 @@ GlueCodeGfx.prototype.requestDraw = function () {
     if (this.didRAF) {
         var parentObj = this;
         window.requestAnimationFrame(function () {
-            if (parentObj) {
+            if (parentObj.canvas) {
                 parentObj.requestDraw();
             }
         });

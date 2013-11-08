@@ -88,6 +88,12 @@ function registerGUIEvents() {
     addEvent("click", document.getElementById("toggleSlowDownBusHack"), function () {
              Iodine.toggleSlowDownBusHack(this.checked);
     });
+    document.getElementById("toggleSmoothScaling").checked = true;
+    addEvent("click", document.getElementById("toggleSmoothScaling"), function () {
+             if (Blitter) {
+                Blitter.setSmoothScaling(this.checked);
+             }
+    });
     addEvent("unload", document, ExportSave);
     setInterval(
             function () {

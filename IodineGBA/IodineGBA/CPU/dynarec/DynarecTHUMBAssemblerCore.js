@@ -842,6 +842,84 @@ DynarecTHUMBAssemblerCore.prototype.STRBreg = function (instructionValue) {
     "\tthis.CPUCore.write8(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0, this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0);\n";
     return spew;
 }
+DynarecTHUMBAssemblerCore.prototype.LDRSBreg = function (instructionValue) {
+    var spew = "\t//LDRSBreg:\n" +
+    "\t//Load Signed Byte Into Register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = (this.CPUCore.read8(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0) << 24) >> 24;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRreg = function (instructionValue) {
+    var spew = "\t//LDRreg:\n" +
+    "\t//Load Word Into Register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.read32(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRHreg = function (instructionValue) {
+    var spew = "\t//LDRHreg:\n" +
+    "\t//Load Half-Word Into Register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.read16(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRBreg = function (instructionValue) {
+    var spew = "\t//LDRBreg:\n" +
+    "\t//Load Byte Into Register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.read8(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRSHreg = function (instructionValue) {
+    var spew = "\t//LDRSHreg:\n" +
+    "\t//Load Signed Half-Word Into Register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = (this.CPUCore.read16(((this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0) + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0) << 16) >> 16;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.STRimm5 = function (instructionValue) {
+    var spew = "\t//STRimm5:\n" +
+    "\t//Store Word From Register:\n" +
+    "\tthis.CPUCore.write32((" + this.toHex(((instructionValue >> 6) & 0x1F) << 2) + " + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0, this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRimm5 = function (instructionValue) {
+    var spew = "\t//LDRimm5:\n" +
+    "\t//Load Word Into Register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.read32((" + this.toHex(((instructionValue >> 6) & 0x1F) << 2) + " + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.STRBimm5 = function (instructionValue) {
+    var spew = "\t//STRBimm5:\n" +
+    "\t//Store Byte From Register:\n" +
+    "\tthis.CPUCore.write8((" + this.toHex((instructionValue >> 6) & 0x1F) + " + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0, this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRBimm5 = function (instructionValue) {
+    var spew = "\t//LDRBimm5:\n" +
+    "\t//Load Byte Into Register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.read8((" + this.toHex((instructionValue >> 6) & 0x1F) + " + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.STRHimm5 = function (instructionValue) {
+    var spew = "\t//STRHimm5:\n" +
+    "\t//Store Half-Word From Register:\n" +
+    "\tthis.CPUCore.write16((" + this.toHex(((instructionValue >> 6) & 0x1F) << 1) + " + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0, this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRHimm5 = function (instructionValue) {
+    var spew = "\t//LDRHimm5:\n" +
+    "\t//Load Half-Word Into Register:\n" +
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.read16((" + this.toHex(((instructionValue >> 6) & 0x1F) << 1) + " + (this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0)) | 0) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.STRSP = function (instructionValue) {
+    var spew = "\t//STRSP:\n" +
+    "\t//Store Word From Register:\n" +
+    "\tthis.CPUCore.write32((" + this.toHex((instructionValue & 0xFF) << 2) + " + (this.registers[0xD] | 0)) | 0, this.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] | 0);\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.LDRSP = function (instructionValue) {
+    var spew = "\t//LDRSP:\n" +
+    "\t//Load Word From Register:\n" +
+    "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = this.CPUCore.read32((" + this.toHex((instructionValue & 0xFF) << 2) + " + (this.registers[0xD] | 0)) | 0) | 0;\n";
+    return spew;
+}
 DynarecTHUMBAssemblerCore.prototype.B = function (instructionValue) {
     var spew = "\t//B:\n" +
     "\t//Unconditional Branch:\n" +
