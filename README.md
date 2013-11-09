@@ -20,26 +20,30 @@ GNU General Public License for more details.*
 Screenshots
 --------------------------------------------------------------------
 
-* **ARMWrester:**
+* **GBA BIOS:**
 
-    ![ARMWrestler](http://i.imgur.com/CELGpEh.png "Passes")
+    ![GBA BIOS](http://i.imgur.com/kzxGoAHh.png “GBA BIOS”)
     
-* **Fake Mode 2:**
+* **Mario & Luigi Superstar Saga:**
     
-    ![Fake Mode 2](http://i.imgur.com/jtMfzHA.png "Fake Mode 2")
+    ![Mario & Luigi Superstar Saga](http://i.imgur.com/Do8TbsMh.png "Mario & Luigi Superstar Saga")
     
-* **Raycast:**
+* **Mario Kart Advance:**
     
-    ![Raycast](http://i.imgur.com/fn83llx.png "Raycast")
+    ![Mario Kart Advance](http://i.imgur.com/37xx3yPh.png “Super Circuit”)
     
-* **Particles:**
+* **Earthworm Jim:**
     
-    ![Particles](http://i.imgur.com/XkrsUXf.png "Particles")
+    ![Earthworm Jim](http://i.imgur.com/Ip3MHzmh.png “Earthworm Jim”)
     
-* **3D Balls by Dark Fader:**
+* **Advance Wars:**
     
-    ![Particles](http://i.imgur.com/cCcdcah.png "3D Balls")
+    ![Advance Wars](http://i.imgur.com/akKzA97h.png “Advance Wars”)
     
-* **GCC Test:**
+* **Wario Land 4:**
     
-    ![GCC Test](http://i.imgur.com/aVRxVGH.png "GCC Test")
+    ![Wario Land 4](http://i.imgur.com/eaDqCxuh.png “Wario Land 4”)
+
+* **Game & Watch Gallery 4:**
+    
+    ![Game & Watch Gallery 4](http://i.imgur.com/awLMWsIh.png “Game & Watch Gallery 4”)
