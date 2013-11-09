@@ -66,3 +66,28 @@ function fileLoadBIOS() {
 function fileLoadROM() {
     fileLoadShimCode(this.files, attachROM);
 }
+function downloadFile(fileName, registrationHandler) {
+    var ajax = new XMLHttpRequest();
+    ajax.onload = registrationHandler;
+    ajax.open("GET", "./" + fileName, true);
+    ajax.responseType = "arraybuffer";
+    ajax.overrideMimeType("text/plain; charset=x-user-defined");
+    ajax.send(null);
+}
+function processDownload(parentObj, attachHandler) {
+    try {
+        var data = parentObj.response;
+        if (data) {
+            attachHandler(new Uint8Array(data));
+        }
+    }
+    catch (error) {
+        var data = parentObj.responseText;
+        var length = data.length;
+        var dataArray = [];
+        for (var index = 0; index < length; index++) {
+            dataArray[index] = data.charCodeAt(index) & 0xFF;
+        }
+        attachHandler(dataArray);
+    }
+}
