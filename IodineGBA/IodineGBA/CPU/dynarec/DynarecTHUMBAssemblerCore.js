@@ -920,6 +920,67 @@ DynarecTHUMBAssemblerCore.prototype.LDRSP = function (instructionValue) {
     "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = this.CPUCore.read32((" + this.toHex((instructionValue & 0xFF) << 2) + " + (this.registers[0xD] | 0)) | 0) | 0;\n";
     return spew;
 }
+DynarecTHUMBAssemblerCore.prototype.ADDPC = function (instructionValue) {
+    var spew = "\t//ADDPC:\n" +
+    "\t//Add PC With Offset Into Register:\n" +
+    "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = (" + this.toHex((instructionValue & 0xFF) << 2) + " + (this.registers[0xF] & -3)) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ADDSP = function (instructionValue) {
+    var spew = "\t//ADDSP:\n" +
+    "\t//Add SP With Offset Into Register:\n" +
+    "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = (" + this.toHex((instructionValue & 0xFF) << 2) + " + (this.registers[0xD] | 0)) | 0;\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.ADDSPimm7 = function (instructionValue) {
+    var spew = "\t//ADDSPimm7:\n" +
+    "\t//Add Signed Offset Into SP:\n";
+    if ((instructionValue & 0x80) != 0) {
+        spew += "\tthis.registers[0xD] = ((this.registers[0xD] | 0) - " + this.toHex((instructionValue & 0x7F) << 2) + ") | 0;\n";
+    }
+    else {
+        spew += "\tthis.registers[0xD] = ((this.registers[0xD] | 0) + " + this.toHex((instructionValue & 0x7F) << 2) + ") | 0;\n";
+    }
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.PUSH = function (instructionValue) {
+    var spew = "\t//PUSH:\n";
+    //Only initialize the PUSH sequence if the register list is non-empty:
+    if ((instructionValue & 0xFF) > 0) {
+        spew += "\t//Updating the address bus away from PC fetch:\n" +
+        "\tthis.wait.NonSequentialBroadcast();\n" +
+        "\t//Push register(s) onto the stack:\n";
+        for (var rListPosition = 7; (rListPosition | 0) > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((instructionValue & (1 << rListPosition)) != 0) {
+                spew += "\t//Push register " + this.toHex(rListPosition & 0x7) + " onto the stack:\n" +
+                "\tthis.registers[0xD] = ((this.registers[0xD] | 0) - 4) | 0;\n" +
+                "\tthis.stackMemoryCache.memoryWrite32(this.registers[0xD] >>> 0, this.registers[" + this.toHex(rListPosition & 0x7) + "] | 0);\n";
+            }
+        }
+        spew += "\t//Updating the address bus back to PC fetch:\n" +
+        "\tthis.wait.NonSequentialBroadcast();\n";
+    }
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.PUSHlr = function (instructionValue) {
+    var spew = "\t//PUSHlr:\n";
+    spew += "\t//Updating the address bus away from PC fetch:\n" +
+    "\tthis.wait.NonSequentialBroadcast();\n" +
+    "\t//Push link register onto the stack:\n" +
+    "\tthis.registers[0xD] = ((this.registers[0xD] | 0) - 4) | 0;\n" +
+    "\tthis.stackMemoryCache.memoryWrite32(this.registers[0xD] >>> 0, this.registers[0xE] | 0);\n" +
+    "\t//Push register(s) onto the stack:\n";
+    for (var rListPosition = 7; (rListPosition | 0) > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+        if ((instructionValue & (1 << rListPosition)) != 0) {
+            spew += "\t//Push register " + this.toHex(rListPosition & 0x7) + " onto the stack:\n" +
+            "\tthis.registers[0xD] = ((this.registers[0xD] | 0) - 4) | 0;\n" +
+            "\tthis.stackMemoryCache.memoryWrite32(this.registers[0xD] >>> 0, this.registers[" + this.toHex(rListPosition & 0x7) + "] | 0);\n";
+        }
+    }
+    spew += "\t//Updating the address bus back to PC fetch:\n" +
+    "\tthis.wait.NonSequentialBroadcast();\n";
+    return spew;
+}
 DynarecTHUMBAssemblerCore.prototype.B = function (instructionValue) {
     var spew = "\t//B:\n" +
     "\t//Unconditional Branch:\n" +

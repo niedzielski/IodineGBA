@@ -20,9 +20,9 @@ GNU General Public License for more details.*
 Screenshots
 --------------------------------------------------------------------
 
-* **GBA BIOS:**
+* **Pokemon Ruby:**
 
-    ![GBA BIOS](http://i.imgur.com/kzxGoAHh.png “GBA BIOS”)
+    ![Pokemon Ruby](http://i.imgur.com/grgr5IH.png "Pokemon Ruby")
     
 * **Mario & Luigi Superstar Saga:**
     
@@ -47,3 +47,7 @@ Screenshots
 * **Game & Watch Gallery 4:**
     
     ![Game & Watch Gallery 4](http://i.imgur.com/awLMWsIh.png “Game & Watch Gallery 4”)
+    
+* **GBA BIOS:**
+
+    ![GBA BIOS](http://i.imgur.com/kzxGoAHh.png “GBA BIOS”)

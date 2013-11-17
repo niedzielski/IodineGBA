@@ -22,6 +22,8 @@ function DynarecCacheManagerCore(dynarec, start, end, InTHUMB) {
     this.thumb = this.CPUCore.THUMB;
     this.arm = this.CPUCore.ARM;
     this.memory = this.CPUCore.IOCore.memory;
+    this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.memory);
+    this.wait = this.CPUCore.wait;
     this.start = start >>> 0;
     end = ((end >>> 0) - ((!!InTHUMB) ? 0x4 : 0x8)) >>> 0;
     this.end = end >>> 0;

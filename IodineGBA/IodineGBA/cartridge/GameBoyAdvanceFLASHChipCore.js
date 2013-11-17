@@ -16,12 +16,13 @@
  *
  */
 function GameBoyAdvanceFLASHChip() {
+    this.largestSizePossible = 0x20000; //Figure out auto-detect of this too.
+    this.notATMEL = true;   //TODO: Figure out ATMEL detection. (Sonic Advance requires ATMEL, Pokemon requires not-ATMEL)
     this.saves = null;
     this.BANKOffset = 0;
-    this.largestSizePossible = 0x10000;
     this.flashCommandUnlockStage = 0;
-    this.notATMEL = false;
     this.IDMode = false;
+    this.writeBytesLeft = 0;
 }
 GameBoyAdvanceFLASHChip.prototype.initialize = function () {
     this.allocate();
@@ -47,6 +48,9 @@ GameBoyAdvanceFLASHChip.prototype.allocate = function () {
 GameBoyAdvanceFLASHChip.prototype.load = function (save) {
     if ((save.length | 0) == 0x10000 || (save.length | 0) == 0x20000) {
         this.saves = save;
+        if ((save.length | 0) == 0x20000) {
+            this.notATMEL = true;
+        }
     }
 }
 GameBoyAdvanceFLASHChip.prototype.read = function (address) {
@@ -81,6 +85,16 @@ GameBoyAdvanceFLASHChip.prototype.read = function (address) {
     return data | 0;
 }
 GameBoyAdvanceFLASHChip.prototype.write = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    if ((this.writeBytesLeft | 0) == 0) {
+        this.writeControlBits(address | 0, data | 0);
+    }
+    else {
+        this.writeByte(address | 0, data | 0);
+    }
+}
+GameBoyAdvanceFLASHChip.prototype.writeControlBits = function (address, data) {
     address = address | 0;
     data = data | 0;
     switch (address | 0) {
@@ -137,8 +151,15 @@ GameBoyAdvanceFLASHChip.prototype.write = function (address, data) {
                     this.flashCommandUnlockStage = 0;
                     break;
                 case 0xA0:
-                    //should we handle this?
-                    this.flashCommandUnlockStage = 0;
+                    if ((this.flashCommandUnlockStage | 0) == 3) {
+                        if (this.notATMEL) {
+                            this.writeBytesLeft = 1;
+                        }
+                        else {
+                            this.writeBytesLeft = 128;
+                        }
+                        this.flashCommandUnlockStage = 0;
+                    }
                     break;
                 case 0xAA:
                     this.flashCommandUnlockStage = ((this.flashCommandUnlockStage | 0) == 3) ? 4 : 1;
@@ -169,12 +190,17 @@ GameBoyAdvanceFLASHChip.prototype.write = function (address, data) {
                 this.flashCommandUnlockStage = 0;
             }
     }
+}
+GameBoyAdvanceFLASHChip.prototype.writeByte = function (address, data) {
     address = address | this.BANKOffset;
+    data = data | 0;
     this.saves[address | 0] = data | 0;
+    this.writeBytesLeft = ((this.writeBytesLeft | 0) - 1) | 0;
 }
 GameBoyAdvanceFLASHChip.prototype.selectBank = function (bankNumber) {
     bankNumber = bankNumber | 0;
     this.BANKOffset = (bankNumber & 0x1) << 16;
     this.largestSizePossible = Math.max((0x10000 + (this.BANKOffset | 0)) | 0, this.largestSizePossible | 0) | 0;
+    this.notATMEL = true;
     this.allocate();
 }
