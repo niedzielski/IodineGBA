@@ -15,13 +15,10 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceFIFO(IOCore) {
-    this.initializeFIFO();
-}
-GameBoyAdvanceFIFO.prototype.initializeFIFO = function () {
-    this.buffer = getInt8Array(0x20);
+function GameBoyAdvanceFIFO() {
     this.count = 0;
     this.position = 0;
+    this.buffer = getInt8Array(0x20);
 }
 GameBoyAdvanceFIFO.prototype.push = function (sample) {
     sample = sample | 0;

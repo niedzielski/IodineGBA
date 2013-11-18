@@ -80,9 +80,9 @@ GameBoyAdvanceTimer.prototype.addClocks = function (clocks) {
 }
 GameBoyAdvanceTimer.prototype.clockSoundTimers = function (clocks) {
     clocks = clocks | 0;
-    for (var audioClocks = clocks | 0; (audioClocks | 0) > 0; audioClocks = ((audioClocks | 0) - (predictedClocks | 0)) | 0) {
-        var overflowClocks = this.nextAudioTimerOverflow() | 0;
-        var predictedClocks = Math.min(audioClocks | 0, overflowClocks | 0) | 0;
+    for (var audioClocks = clocks | 0, predictedClocks = 0, overflowClocks = 0; (audioClocks | 0) > 0; audioClocks = ((audioClocks | 0) - (predictedClocks | 0)) | 0) {
+        overflowClocks = this.nextAudioTimerOverflow() | 0;
+        predictedClocks = Math.min(audioClocks | 0, overflowClocks | 0) | 0;
         //See if timer channel 0 is enabled:
         this.clockTimer0(predictedClocks | 0);
         //See if timer channel 1 is enabled:

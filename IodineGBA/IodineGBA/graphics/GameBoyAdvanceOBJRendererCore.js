@@ -36,7 +36,7 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
     //Horizontal Rectangle:
     16, 32, 32, 64
 ];
-GameBoyAdvanceOBJRenderer.prototype.initialize = function (line) {
+GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
     this.OAMRAM = getUint8Array(0x400);
     this.OAMRAM16 = getUint16View(this.OAMRAM);
     this.readOAM16 = (this.OAMRAM16) ? this.readOAM16Optimized : this.readOAM16Slow;
@@ -177,8 +177,8 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNum
     }
 }
 GameBoyAdvanceOBJRenderer.prototype.tileRelativeAddressOffset = function (x, y) {
-    var x = x | 0;
-    var y = y | 0;
+    x = x | 0;
+    y = y | 0;
     return ((((y & 7) + (x & -8)) << 3) + (x & 0x7)) | 0;
 }
 GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize, ySize, yOffset) {
