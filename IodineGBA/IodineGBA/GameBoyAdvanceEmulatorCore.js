@@ -173,7 +173,7 @@ GameBoyAdvanceEmulator.prototype.getSpeed = function (speed) {
     return this.emulatorSpeed;
 }
 GameBoyAdvanceEmulator.prototype.changeCoreTimer = function (newTimerIntervalRate) {
-    this.timerIntervalRate = Math.max(parseInt(newTimerIntervalRate), 1);
+    this.timerIntervalRate = Math.max(parseInt(newTimerIntervalRate, 10), 1);
     if (!this.paused) {                        //Set up the timer again if running.
         this.clearTimer();
         this.startTimer();

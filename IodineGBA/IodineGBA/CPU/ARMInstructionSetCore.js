@@ -90,7 +90,7 @@ ARMInstructionSet.prototype.conditionCodeTest = function () {
     }
 }
 ARMInstructionSet.prototype.getLR = function () {
-    return ((this.readPC(15) | 0) - 4) | 0;
+    return ((this.readPC() | 0) - 4) | 0;
 }
 ARMInstructionSet.prototype.getIRQLR = function () {
     return this.getLR() | 0;

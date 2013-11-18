@@ -51,7 +51,7 @@ GameBoyAdvanceSRAMChip.prototype.read = function (address) {
                 data = this.TILTChip.readYHigh() | 0;
                 break;
             default:
-                data = this.SRAM[address & 0x7FFF] | 0;
+                data = this.saves[address & 0x7FFF] | 0;
         }
     }
     return data | 0;
