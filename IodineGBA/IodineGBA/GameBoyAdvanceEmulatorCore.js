@@ -195,12 +195,13 @@ GameBoyAdvanceEmulator.prototype.getSpeedPercentage = function () {
         var metricEnd = new Date();
         var timeDiff = Math.max(metricEnd.getTime() - this.metricStart.getTime(), 1);
         var result = ((this.timerIntervalRate * this.clockCyclesSinceStart / timeDiff) / this.CPUCyclesPerIteration) * 100;
+        this.resetMetrics();
         return result.toFixed(2) + "%";
     }
     else {
+        this.resetMetrics();
         return "Paused";
     }
-    this.resetMetrics();
 }
 GameBoyAdvanceEmulator.prototype.initializeCore = function () {
     //Setup a new instance of the i/o core:
