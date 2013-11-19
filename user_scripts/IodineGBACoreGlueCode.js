@@ -97,11 +97,8 @@ function registerGUIEvents() {
     addEvent("unload", document, ExportSave);
     setInterval(
             function () {
-                if (!Iodine.paused) {
-                    var speed = document.getElementById("speed");
-                    speed.textContent = "Speed: " + Iodine.getSpeedPercentage();
-                }
-                Iodine.resetMetrics();
+                var speed = document.getElementById("speed");
+                speed.textContent = "Speed: " + Iodine.getSpeedPercentage();
             }
     ,500);
 }
