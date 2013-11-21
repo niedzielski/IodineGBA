@@ -20,10 +20,13 @@ function GameBoyAdvanceCartridge(IOCore) {
     this.initialize();
 }
 GameBoyAdvanceCartridge.prototype.initialize = function () {
+    this.flash_is128 = false;
+    this.flash_isAtmel = false;
     this.ROM = this.getROMArray(this.IOCore.emulatorCore.ROM);
     this.ROM16 = getUint16View(this.ROM);
     this.ROM32 = getInt32View(this.ROM);
     this.decodeName();
+    this.decodeFlashType();
     this.preprocessROMAccess();
 }
 GameBoyAdvanceCartridge.prototype.getROMArray = function (old_array) {
@@ -47,6 +50,65 @@ GameBoyAdvanceCartridge.prototype.decodeName = function () {
             }
         }
     }
+}
+GameBoyAdvanceCartridge.prototype.decodeFlashType = function () {
+    this.flash_is128 = false;
+    this.flash_isAtmel = false;
+    var flash_types = 0;
+    var F = ("F").charCodeAt(0) & 0xFF;
+    var L = ("L").charCodeAt(0) & 0xFF;
+    var A = ("A").charCodeAt(0) & 0xFF;
+    var S = ("S").charCodeAt(0) & 0xFF;
+    var H = ("H").charCodeAt(0) & 0xFF;
+    var underScore = ("_").charCodeAt(0) & 0xFF;
+    var five = ("5").charCodeAt(0) & 0xFF;
+    var one = ("1").charCodeAt(0) & 0xFF;
+    var two = ("2").charCodeAt(0) & 0xFF;
+    var M = ("M").charCodeAt(0) & 0xFF;
+    var V = ("V").charCodeAt(0) & 0xFF;
+    var length = ((this.ROM.length | 0) - 12) | 0;
+    for (var index = 0; (index | 0) < (length | 0); index = ((index | 0) + 4) | 0) {
+        if ((this.ROM[index | 0] | 0) == (F | 0)) {
+            if ((this.ROM[index | 1] | 0) == (L | 0)) {
+                if ((this.ROM[index | 2] | 0) == (A | 0)) {
+                    if ((this.ROM[index | 3] | 0) == (S | 0)) {
+                        var tempIndex = ((index | 0) + 4) | 0;
+                        if ((this.ROM[tempIndex | 0] | 0) == (H | 0)) {
+                            if ((this.ROM[tempIndex | 1] | 0) == (underScore | 0)) {
+                                if ((this.ROM[tempIndex | 2] | 0) == (V | 0)) {
+                                    flash_types |= 1;
+                                }
+                            }
+                            else if ((this.ROM[tempIndex | 1] | 0) == (five | 0)) {
+                                if ((this.ROM[tempIndex | 2] | 0) == (one | 0)) {
+                                    if ((this.ROM[tempIndex | 3] | 0) == (two | 0)) {
+                                        tempIndex = ((tempIndex | 0) + 4) | 0;
+                                        if ((this.ROM[tempIndex | 0] | 0) == (underScore | 0)) {
+                                            if ((this.ROM[tempIndex | 1] | 0) == (V | 0)) {
+                                                flash_types |= 2;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else if ((this.ROM[tempIndex | 1] | 0) == (one | 0)) {
+                                if ((this.ROM[tempIndex | 2] | 0) == (M | 0)) {
+                                    if ((this.ROM[tempIndex | 3] | 0) == (underScore | 0)) {
+                                        tempIndex = ((tempIndex | 0) + 4) | 0;
+                                        if ((this.ROM[tempIndex | 0] | 0) == (V | 0)) {
+                                            flash_types |= 4;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    this.flash_is128 = ((flash_types | 0) >= 4);
+    this.flash_isAtmel = ((flash_types | 0) <= 1);
 }
 GameBoyAdvanceCartridge.prototype.preprocessROMAccess = function () {
     this.readROMOnly16 = (this.ROM16) ? this.readROMOnly16Optimized : this.readROMOnly16Slow;

@@ -15,9 +15,9 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceFLASHChip() {
-    this.largestSizePossible = 0x20000; //Figure out auto-detect of this too.
-    this.notATMEL = true;   //TODO: Figure out ATMEL detection. (Sonic Advance requires ATMEL, Pokemon requires not-ATMEL)
+function GameBoyAdvanceFLASHChip(is128, isAteml) {
+    this.largestSizePossible = (!!is128) ? 0x20000 : 0x10000;
+    this.notATMEL = !isAteml;
     this.saves = null;
     this.BANKOffset = 0;
     this.flashCommandUnlockStage = 0;
