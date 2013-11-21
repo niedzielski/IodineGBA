@@ -97,6 +97,7 @@ GameBoyAdvanceCartridge.prototype.decodeFlashType = function () {
                                         tempIndex = ((tempIndex | 0) + 4) | 0;
                                         if ((this.ROM[tempIndex | 0] | 0) == (V | 0)) {
                                             flash_types |= 4;
+                                            break;
                                         }
                                     }
                                 }
