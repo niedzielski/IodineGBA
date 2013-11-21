@@ -82,11 +82,18 @@ GameBoyAdvanceFLASHChip.prototype.read = function (address) {
 GameBoyAdvanceFLASHChip.prototype.write = function (address, data) {
     address = address | 0;
     data = data | 0;
-    if ((this.writeBytesLeft | 0) == 0) {
-        this.writeControlBits(address | 0, data | 0);
-    }
-    else {
-        this.writeByte(address | 0, data | 0);
+    switch (this.writeBytesLeft | 0) {
+        case 0:
+            this.writeControlBits(address | 0, data | 0);
+            break;
+        case 0x80:
+            var addressToErase = (address & 0xFF80) | this.BANKOffset;
+            for (var index = 0; (index | 0) < 0x80; index = ((index | 0) + 1) | 0) {
+                this.saves[addressToErase | index] = 0xFF;
+            }
+        default:
+            this.writeByte(address | 0, data | 0);
+            
     }
 }
 GameBoyAdvanceFLASHChip.prototype.writeControlBits = function (address, data) {
@@ -122,66 +129,7 @@ GameBoyAdvanceFLASHChip.prototype.writeControlBits = function (address, data) {
             this.flashCommandUnlockStage = 0;
             break;
         case 0x5555:
-            switch (data | 0) {
-                case 0x10:
-                    if ((this.flashCommandUnlockStage | 0) == 5 && ((data | 0) == 0x30)) {
-                        for (var index = 0; (index | 0) < (this.largestSizePossible | 0); index = ((index | 0) + 1) | 0) {
-                            this.saves[index | 0] = 0xFF;
-                        }
-                        this.flashCommandUnlockStage = 0;
-                    }
-                    break;
-                case 0x80:
-                    if ((this.flashCommandUnlockStage | 0) == 2) {
-                        this.flashCommandUnlockStage = 3;
-                    }
-                    else {
-                        this.flashCommandUnlockStage = 0;
-                    }
-                    break;
-                case 0x90:
-                    if ((this.flashCommandUnlockStage | 0) == 2) {
-                        this.IDMode = true;
-                    }
-                    this.flashCommandUnlockStage = 0;
-                    break;
-                case 0xA0:
-                    if ((this.flashCommandUnlockStage | 0) == 3) {
-                        if (this.notATMEL) {
-                            this.writeBytesLeft = 1;
-                        }
-                        else {
-                            this.writeBytesLeft = 0x80;
-                            if ((this.writeBytesLeft | 0) == 0x80) {
-                                for (var index = 0; (index | 0) < 0x80; index = ((index | 0) + 1) | 0) {
-                                    this.saves[address | this.BANKOffset] = 0xFF;
-                                    address = ((address | 0) + 1) | 0;
-                                }
-                            }
-                        }
-                        this.flashCommandUnlockStage = 0;
-                    }
-                    break;
-                case 0xAA:
-                    this.flashCommandUnlockStage = ((this.flashCommandUnlockStage | 0) == 3) ? 4 : 1;
-                    break;
-                case 0xB0:
-                    if ((this.flashCommandUnlockStage | 0) == 2) {
-                        this.flashCommandUnlockStage = 3;
-                    }
-                    else {
-                        this.flashCommandUnlockStage = 0;
-                    }
-                    break;
-                case 0xF0:
-                    if ((this.flashCommandUnlockStage | 0) == 5) {
-                        this.IDMode = false;
-                    }
-                    this.flashCommandUnlockStage = 0;
-                    break;
-                default:
-                    this.flashCommandUnlockStage = 0;
-            }
+            this.controlWriteStage2(data | 0);
             break;
         case 0x2AAA:
             if ((data | 0) == 0x55 && ((this.flashCommandUnlockStage | 0) == 1 || (this.flashCommandUnlockStage | 0) == 4)) {
@@ -204,4 +152,64 @@ GameBoyAdvanceFLASHChip.prototype.selectBank = function (bankNumber) {
     this.largestSizePossible = Math.max((0x10000 + (this.BANKOffset | 0)) | 0, this.largestSizePossible | 0) | 0;
     this.notATMEL = true;
     this.allocate();
+}
+GameBoyAdvanceFLASHChip.prototype.controlWriteStage2 = function (data) {
+    data = data | 0;
+    switch (data | 0) {
+        case 0x10:
+            if ((this.flashCommandUnlockStage | 0) == 5 && ((data | 0) == 0x30)) {
+                for (var index = 0; (index | 0) < (this.largestSizePossible | 0); index = ((index | 0) + 1) | 0) {
+                    this.saves[index | 0] = 0xFF;
+                }
+                this.flashCommandUnlockStage = 0;
+            }
+            break;
+        case 0x80:
+            if ((this.flashCommandUnlockStage | 0) == 2) {
+                this.flashCommandUnlockStage = 3;
+            }
+            else {
+                this.flashCommandUnlockStage = 0;
+            }
+            break;
+        case 0x90:
+            if ((this.flashCommandUnlockStage | 0) == 2) {
+                this.IDMode = true;
+            }
+            this.flashCommandUnlockStage = 0;
+            break;
+        case 0xA0:
+            this.writeCommandTrigger();
+            break;
+        case 0xAA:
+            this.flashCommandUnlockStage = ((this.flashCommandUnlockStage | 0) == 3) ? 4 : 1;
+            break;
+        case 0xB0:
+            if ((this.flashCommandUnlockStage | 0) == 2) {
+                this.flashCommandUnlockStage = 3;
+            }
+            else {
+                this.flashCommandUnlockStage = 0;
+            }
+            break;
+        case 0xF0:
+            if ((this.flashCommandUnlockStage | 0) == 5) {
+                this.IDMode = false;
+            }
+            this.flashCommandUnlockStage = 0;
+            break;
+        default:
+            this.flashCommandUnlockStage = 0;
+    }
+}
+GameBoyAdvanceFLASHChip.prototype.writeCommandTrigger = function () {
+    if ((this.flashCommandUnlockStage | 0) == 3) {
+        if (this.notATMEL) {
+            this.writeBytesLeft = 1;
+        }
+        else {
+            this.writeBytesLeft = 0x80;
+        }
+        this.flashCommandUnlockStage = 0;
+    }
 }
