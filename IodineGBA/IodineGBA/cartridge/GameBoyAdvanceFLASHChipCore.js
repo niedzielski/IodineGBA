@@ -56,31 +56,26 @@ GameBoyAdvanceFLASHChip.prototype.load = function (save) {
 GameBoyAdvanceFLASHChip.prototype.read = function (address) {
     address = address | 0;
     var data = 0;
-    switch (address | 0) {
-        case 0:
-            if (!this.IDMode) {
-                data = this.saves[0] | 0;
-            }
-            else if (this.notATMEL) {
+    if (!this.IDMode || (address | 0) > 1) {
+        data = this.saves[address | this.BANKOffset] | 0;
+    }
+    else {
+        if ((address | 0) == 0) {
+            if (this.notATMEL) {
                 data = ((this.largestSizePossible | 0) == 0x20000) ? 0x62 : 0xBF;
             }
             else {
                 data = 0x1F;
             }
-            break;
-        case 1:
-            if (!this.IDMode) {
-                data = this.saves[1] | 0;
-            }
-            else if (this.notATMEL) {
+        }
+        else {
+            if (this.notATMEL) {
                 data = ((this.largestSizePossible | 0) == 0x20000) ? 0x13 : 0xD4;
             }
             else {
                 data = 0x3D;
             }
-            break;
-        default:
-            data = this.saves[address | this.BANKOffset] | 0;
+        }
     }
     return data | 0;
 }
@@ -156,7 +151,13 @@ GameBoyAdvanceFLASHChip.prototype.writeControlBits = function (address, data) {
                             this.writeBytesLeft = 1;
                         }
                         else {
-                            this.writeBytesLeft = 128;
+                            this.writeBytesLeft = 0x80;
+                            if ((this.writeBytesLeft | 0) == 0x80) {
+                                for (var index = 0; (index | 0) < 0x80; index = ((index | 0) + 1) | 0) {
+                                    this.saves[address | this.BANKOffset] = 0xFF;
+                                    address = ((address | 0) + 1) | 0;
+                                }
+                            }
                         }
                         this.flashCommandUnlockStage = 0;
                     }
