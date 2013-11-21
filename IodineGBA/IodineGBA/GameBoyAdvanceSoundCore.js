@@ -1382,7 +1382,7 @@ GameBoyAdvanceSound.prototype.writeSOUNDBIAS1 = function (data) {
     this.mixerSoundBIAS &= 0xFF;
     this.mixerSoundBIAS |= (data & 0x3) << 8;
     this.PWMWidthShadow = 0x200 >> ((data & 0xC0) >> 6);
-    this.PWMBitDepthMask = (this.PWMWidthShadow - 1) << (1 + ((data & 0xC0) >> 6)); 
+    this.PWMBitDepthMaskShadow = (this.PWMWidthShadow - 1) << (1 + ((data & 0xC0) >> 6)); 
     this.nr63 = data | 0;
 }
 GameBoyAdvanceSound.prototype.readSOUNDBIAS1 = function () {
