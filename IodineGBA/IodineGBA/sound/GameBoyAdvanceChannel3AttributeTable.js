@@ -45,7 +45,9 @@ GameBoyAdvanceChannel3AttributeTable.prototype.updateCache = function () {
     if ((this.patternType | 0) != 3) {
         this.cachedSample = this.PCM[this.lastSampleLookup | 0] >> (this.patternType | 0);
     }
-    this.cachedSample = (this.PCM[this.lastSampleLookup | 0] * 0.75) | 0;
+    else {
+        this.cachedSample = (this.PCM[this.lastSampleLookup | 0] * 0.75) | 0;
+    }
     this.outputLevelCache();
 }
 GameBoyAdvanceChannel3AttributeTable.prototype.outputLevelCache = function () {
