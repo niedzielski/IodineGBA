@@ -23,7 +23,7 @@ function GameBoyAdvanceChannel2Synth(sound) {
     this.currentSampleRight = 0;
     this.currentSampleRightSecondary = 0;
     this.currentSampleRightTrimary = 0;
-    this.CachedDuty = sound.dutyLookup[0];
+    this.CachedDuty = this.dutyLookup[0];
     this.totalLength = 0x40;
     this.envelopeVolume = 0;
     this.frequency = 0;
@@ -41,6 +41,34 @@ function GameBoyAdvanceChannel2Synth(sound) {
     this.nr23 = 0;
     this.nr24 = 0;
 }
+GameBoyAdvanceChannel2Synth.prototype.dutyLookup = [
+    [false, false, false, false, false, false, false, true],
+    [true, false, false, false, false, false, false, true],
+    [true, false, false, false, false, true, true, true],
+    [false, true, true, true, true, true, true, false]
+];
+GameBoyAdvanceChannel2Synth.prototype.disabled = function () {
+    //Clear NR21:
+    this.nr21 = 0;
+    this.CachedDuty = this.dutyLookup[0];
+    this.totalLength = 0x40;
+    //Clear NR22:
+    this.nr22 = 0;
+    this.envelopeVolume = 0;
+    //Clear NR23:
+    this.nr23 = 0;
+    this.frequency = 0;
+    this.FrequencyTracker = 0x8000;
+    //Clear NR24:
+    this.nr24 = 0;
+    this.consecutive = true;
+    this.canPlay = false;
+    this.Enabled = false;
+    this.envelopeSweeps = 0;
+    this.envelopeSweepsLast = -1;
+    this.FrequencyCounter = 0;
+    this.DutyTracker = 0;
+}
 GameBoyAdvanceChannel2Synth.prototype.clockAudioLength = function () {
     if ((this.totalLength | 0) > 1) {
         this.totalLength = ((this.totalLength | 0) - 1) | 0;
@@ -48,7 +76,7 @@ GameBoyAdvanceChannel2Synth.prototype.clockAudioLength = function () {
     else if ((this.totalLength | 0) == 1) {
         this.totalLength = 0;
         this.enableCheck();
-        this.sound.nr52 &= 0xFD;    //Channel #2 On Flag Off
+        this.sound.unsetNR52(0xFD);    //Channel #2 On Flag Off
     }
 }
 GameBoyAdvanceChannel2Synth.prototype.clockAudioEnvelope = function () {
@@ -114,4 +142,74 @@ GameBoyAdvanceChannel2Synth.prototype.outputLevelTrimaryCache = function () {
         this.currentSampleLeftTrimary = 0;
         this.currentSampleRightTrimary = 0;
     }
+}
+GameBoyAdvanceChannel2Synth.prototype.readSOUND2CNT_L0 = function () {
+    //NR21:
+    return 0x3F | this.nr21;
+}
+GameBoyAdvanceChannel2Synth.prototype.writeSOUND2CNT_L0 = function (data) {
+    data = data | 0;
+    //NR21:
+    this.CachedDuty = this.dutyLookup[data >> 6];
+    this.totalLength = (0x40 - (data & 0x3F)) | 0;
+    this.nr21 = data | 0;
+    this.enableCheck();
+}
+GameBoyAdvanceChannel2Synth.prototype.readSOUND2CNT_L1 = function () {
+    //NR22:
+    return this.nr22 | 0;
+}
+GameBoyAdvanceChannel2Synth.prototype.writeSOUND2CNT_L1 = function (data) {
+    data = data | 0;
+    //NR22:
+    if (this.Enabled && (this.envelopeSweeps | 0) == 0) {
+        //Zombie Volume PAPU Bug:
+        if (((this.nr22 ^ data) & 0x8) == 0x8) {
+            if ((this.nr22 & 0x8) == 0) {
+                if ((this.nr22 & 0x7) == 0x7) {
+                    this.envelopeVolume = ((this.envelopeVolume | 0) + 2) | 0;
+                }
+                else {
+                    this.envelopeVolume = ((this.envelopeVolume | 0) + 1) | 0;
+                }
+            }
+            this.envelopeVolume = (16 - (this.envelopeVolume | 0)) & 0xF;
+        }
+        else if ((this.nr22 & 0xF) == 0x8) {
+            this.envelopeVolume = (1 + (this.envelopeVolume | 0)) & 0xF;
+        }
+    }
+    this.envelopeType = ((data & 0x08) == 0x08);
+    this.nr22 = data | 0;
+    this.volumeEnableCheck();
+}
+GameBoyAdvanceChannel2Synth.prototype.writeSOUND2CNT_H0 = function (data) {
+    data = data | 0;
+    //NR23:
+    this.frequency = (this.frequency & 0x700) | data;
+    this.FrequencyTracker = (0x800 - (this.frequency | 0)) << 4;
+}
+GameBoyAdvanceChannel2Synth.prototype.readSOUND2CNT_H = function () {
+    //NR24:
+    return 0xBF | this.nr24;
+}
+GameBoyAdvanceChannel2Synth.prototype.writeSOUND2CNT_H1 = function (data) {
+    data = data | 0;
+    //NR24:
+    if (data > 0x7F) {
+        //Reload nr22:
+        this.envelopeVolume = this.nr22 >> 4;
+        this.envelopeSweepsLast = ((this.nr22 & 0x7) - 1) | 0;
+        if ((this.totalLength | 0) == 0) {
+            this.totalLength = 0x40;
+        }
+        if ((data & 0x40) == 0x40) {
+            this.sound.setNR52(0x2);    //Channel #1 On Flag Off
+        }
+    }
+    this.consecutive = ((data & 0x40) == 0x0);
+    this.frequency = ((data & 0x7) << 8) | (this.frequency & 0xFF);
+    this.FrequencyTracker = (0x800 - (this.frequency | 0)) << 4;
+    this.nr24 = data | 0;
+    this.enableCheck();
 }

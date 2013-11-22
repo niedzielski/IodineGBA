@@ -98,6 +98,29 @@ GameBoyAdvanceChannel4Synth.prototype.intializeWhiteNoise = function () {
         LSFR = LSFRShifted | (((LSFRShifted ^ LSFR) & 0x1) << 6);
     }
 }
+GameBoyAdvanceChannel4Synth.prototype.disabled = function () {
+    //Clear NR41:
+    this.totalLength = 0x40;
+    //Clear NR42:
+    this.nr42 = 0;
+    this.envelopeVolume = 0;
+    //Clear NR43:
+    this.nr43 = 0;
+    this.FrequencyPeriod = 32;
+    this.lastSampleLookup = 0;
+    this.BitRange =  0x7FFF;
+    this.VolumeShifter = 15;
+    this.currentVolume = 0;
+    this.noiseSampleTable = this.LSFR15Table;
+    //Clear NR44:
+    this.nr44 = 0;
+    this.consecutive = true;
+    this.envelopeSweeps = 0;
+    this.envelopeSweepsLast = -1;
+    this.canPlay = false;
+    this.Enabled = false;
+    this.counter = 0;
+}
 GameBoyAdvanceChannel4Synth.prototype.clockAudioLength = function () {
     if ((this.totalLength | 0) > 1) {
         this.totalLength = ((this.totalLength | 0) - 1) | 0;
@@ -105,7 +128,7 @@ GameBoyAdvanceChannel4Synth.prototype.clockAudioLength = function () {
     else if ((this.totalLength | 0) == 1) {
         this.totalLength = 0;
         this.enableCheck();
-        this.sound.nr52 &= 0xF7;    //Channel #4 On Flag Off
+        this.sound.unsetNR52(0xF7);    //Channel #4 On Flag Off
     }
 }
 GameBoyAdvanceChannel4Synth.prototype.clockAudioEnvelope = function () {
@@ -166,4 +189,79 @@ GameBoyAdvanceChannel4Synth.prototype.outputLevelSecondaryCache = function () {
 GameBoyAdvanceChannel4Synth.prototype.updateCache = function () {
     this.cachedSample = this.noiseSampleTable[this.currentVolume | this.lastSampleLookup] | 0;
     this.outputLevelCache();
+}
+GameBoyAdvanceChannel4Synth.prototype.writeSOUND4CNT_L0 = function (data) {
+    data = data | 0;
+    //NR41:
+    this.totalLength = (0x40 - (data & 0x3F)) | 0;
+    this.enableCheck();
+}
+GameBoyAdvanceChannel4Synth.prototype.writeSOUND4CNT_L1 = function (data) {
+    data = data | 0;
+    //NR42:
+    if (this.Enabled && (this.envelopeSweeps | 0) == 0) {
+        //Zombie Volume PAPU Bug:
+        if (((this.nr42 ^ data) & 0x8) == 0x8) {
+            if ((this.nr42 & 0x8) == 0) {
+                if ((this.nr42 & 0x7) == 0x7) {
+                    this.envelopeVolume = ((this.envelopeVolume | 0) + 2) | 0;
+                }
+                else {
+                    this.envelopeVolume = ((this.envelopeVolume | 0) + 1) | 0;
+                }
+            }
+            this.envelopeVolume = (16 - (this.envelopeVolume | 0)) & 0xF;
+        }
+        else if ((this.nr42 & 0xF) == 0x8) {
+            this.envelopeVolume = (1 + (this.envelopeVolume | 0)) & 0xF;
+        }
+        this.currentVolume = this.envelopeVolume << (this.VolumeShifter | 0);
+    }
+    this.envelopeType = ((data & 0x08) == 0x08);
+    this.nr42 = data | 0;
+    this.volumeEnableCheck();
+}
+GameBoyAdvanceChannel4Synth.prototype.readSOUND4CNT_L = function () {
+    //NR42:
+    return this.nr42 | 0;
+}
+GameBoyAdvanceChannel4Synth.prototype.writeSOUND4CNT_H0 = function (data) {
+    data = data | 0;
+    //NR43:
+    this.FrequencyPeriod = Math.max((data & 0x7) << 4, 8) << (((data >> 4) + 2) | 0);
+    var bitWidth = data & 0x8;
+    if (((bitWidth | 0) == 0x8 && (this.BitRange | 0) == 0x7FFF) || ((bitWidth | 0) == 0 && (this.BitRange | 0) == 0x7F)) {
+        this.lastSampleLookup = 0;
+        this.BitRange = ((bitWidth | 0) == 0x8) ? 0x7F : 0x7FFF;
+        this.VolumeShifter = ((bitWidth | 0) == 0x8) ? 7 : 15;
+        this.currentVolume = this.envelopeVolume << (this.VolumeShifter | 0);
+        this.noiseSampleTable = ((bitWidth | 0) == 0x8) ? this.LSFR7Table : this.LSFR15Table;
+    }
+    this.nr43 = data | 0;
+}
+GameBoyAdvanceChannel4Synth.prototype.readSOUND4CNT_H0 = function () {
+    //NR43:
+    return this.nr43 | 0;
+}
+GameBoyAdvanceChannel4Synth.prototype.writeSOUND4CNT_H1 = function (data) {
+    data = data | 0;
+    //NR44:
+    this.nr44 = data | 0;
+    this.consecutive = ((data & 0x40) == 0x0);
+    if ((data | 0) > 0x7F) {
+        this.envelopeVolume = this.nr42 >> 4;
+        this.currentVolume = this.envelopeVolume << (this.VolumeShifter | 0);
+        this.envelopeSweepsLast = ((this.nr42 & 0x7) - 1) | 0;
+        if ((this.totalLength | 0) == 0) {
+            this.totalLength = 0x40;
+        }
+        if ((data & 0x40) == 0x40) {
+            this.sound.setNR52(0x8);
+        }
+    }
+    this.enableCheck();
+}
+GameBoyAdvanceChannel4Synth.prototype.readSOUND4CNT_H1 = function () {
+    //NR44:
+    return 0xBF | this.nr44;
 }
