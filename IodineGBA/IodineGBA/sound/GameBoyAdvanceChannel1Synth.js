@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceChannel1AttributeTable(sound) {
+function GameBoyAdvanceChannel1Synth(sound) {
     this.sound = sound;
     this.currentSampleLeft = 0;
     this.currentSampleLeftSecondary = 0;
