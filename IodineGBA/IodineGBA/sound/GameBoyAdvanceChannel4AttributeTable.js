@@ -1,0 +1,102 @@
+"use strict";
+/*
+ * This file is part of IodineGBA
+ *
+ * Copyright (C) 2012-2013 Grant Galitz
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ * The full license is available at http://www.gnu.org/licenses/gpl.html
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ */
+function GameBoyAdvanceChannel4AttributeTable(sound) {
+    this.currentSampleLeft = 0;
+    this.currentSampleLeftSecondary = 0;
+    this.currentSampleRight = 0;
+    this.currentSampleRightSecondary = 0;
+    this.totalLength = 0x40;
+    this.envelopeVolume = 0;
+    this.FrequencyPeriod = 32;
+    this.lastSampleLookup = 0;
+    this.BitRange =  0x7FFF;
+    this.VolumeShifter = 15;
+    this.currentVolume = 0;
+    this.consecutive = true;
+    this.envelopeSweeps = 0;
+    this.envelopeSweepsLast = -1;
+    this.canPlay = false;
+    this.Enabled = false;
+    this.counter = 0;
+    this.nr42 = 0;
+    this.nr43 = 0;
+    this.nr44 = 0;
+    this.cachedSample = 0;
+    this.intializeWhiteNoise();
+    this.noiseSampleTable = this.LSFR15Table;
+}
+GameBoyAdvanceChannel4AttributeTable.prototype.intializeWhiteNoise = function () {
+    //Noise Sample Tables:
+    var randomFactor = 1;
+    //15-bit LSFR Cache Generation:
+    this.LSFR15Table = getInt8Array(0x80000);
+    var LSFR = 0x7FFF;    //Seed value has all its bits set.
+    var LSFRShifted = 0x3FFF;
+    for (var index = 0; index < 0x8000; ++index) {
+        //Normalize the last LSFR value for usage:
+        randomFactor = 1 - (LSFR & 1);    //Docs say it's the inverse.
+        //Cache the different volume level results:
+        this.LSFR15Table[0x08000 | index] = randomFactor;
+        this.LSFR15Table[0x10000 | index] = randomFactor * 0x2;
+        this.LSFR15Table[0x18000 | index] = randomFactor * 0x3;
+        this.LSFR15Table[0x20000 | index] = randomFactor * 0x4;
+        this.LSFR15Table[0x28000 | index] = randomFactor * 0x5;
+        this.LSFR15Table[0x30000 | index] = randomFactor * 0x6;
+        this.LSFR15Table[0x38000 | index] = randomFactor * 0x7;
+        this.LSFR15Table[0x40000 | index] = randomFactor * 0x8;
+        this.LSFR15Table[0x48000 | index] = randomFactor * 0x9;
+        this.LSFR15Table[0x50000 | index] = randomFactor * 0xA;
+        this.LSFR15Table[0x58000 | index] = randomFactor * 0xB;
+        this.LSFR15Table[0x60000 | index] = randomFactor * 0xC;
+        this.LSFR15Table[0x68000 | index] = randomFactor * 0xD;
+        this.LSFR15Table[0x70000 | index] = randomFactor * 0xE;
+        this.LSFR15Table[0x78000 | index] = randomFactor * 0xF;
+        //Recompute the LSFR algorithm:
+        LSFRShifted = LSFR >> 1;
+        LSFR = LSFRShifted | (((LSFRShifted ^ LSFR) & 0x1) << 14);
+    }
+    //7-bit LSFR Cache Generation:
+    this.LSFR7Table = getInt8Array(0x800);
+    LSFR = 0x7F;    //Seed value has all its bits set.
+    for (index = 0; index < 0x80; ++index) {
+        //Normalize the last LSFR value for usage:
+        randomFactor = 1 - (LSFR & 1);    //Docs say it's the inverse.
+        //Cache the different volume level results:
+        this.LSFR7Table[0x080 | index] = randomFactor;
+        this.LSFR7Table[0x100 | index] = randomFactor * 0x2;
+        this.LSFR7Table[0x180 | index] = randomFactor * 0x3;
+        this.LSFR7Table[0x200 | index] = randomFactor * 0x4;
+        this.LSFR7Table[0x280 | index] = randomFactor * 0x5;
+        this.LSFR7Table[0x300 | index] = randomFactor * 0x6;
+        this.LSFR7Table[0x380 | index] = randomFactor * 0x7;
+        this.LSFR7Table[0x400 | index] = randomFactor * 0x8;
+        this.LSFR7Table[0x480 | index] = randomFactor * 0x9;
+        this.LSFR7Table[0x500 | index] = randomFactor * 0xA;
+        this.LSFR7Table[0x580 | index] = randomFactor * 0xB;
+        this.LSFR7Table[0x600 | index] = randomFactor * 0xC;
+        this.LSFR7Table[0x680 | index] = randomFactor * 0xD;
+        this.LSFR7Table[0x700 | index] = randomFactor * 0xE;
+        this.LSFR7Table[0x780 | index] = randomFactor * 0xF;
+        //Recompute the LSFR algorithm:
+        LSFRShifted = LSFR >> 1;
+        LSFR = LSFRShifted | (((LSFRShifted ^ LSFR) & 0x1) << 6);
+    }
+}
+GameBoyAdvanceChannel4AttributeTable.prototype.output = function () {
+    this.cachedSample = this.noiseSampleTable[this.currentVolume | this.lastSampleLookup] | 0;
+}
