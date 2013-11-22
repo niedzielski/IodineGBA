@@ -84,3 +84,115 @@ GameBoyAdvanceChannel3AttributeTable.prototype.readWAVE = function (address) {
 GameBoyAdvanceChannel3AttributeTable.prototype.enableCheck = function () {
     this.Enabled = (/*this.canPlay && */(this.consecutive || (this.totalLength | 0) > 0));
 }
+GameBoyAdvanceChannel3AttributeTable.prototype.clockAudioLength = function () {
+    if ((this.totalLength | 0) > 1) {
+        this.totalLength = ((this.totalLength | 0) - 1) | 0;
+    }
+    else if ((this.totalLength | 0) == 1) {
+        this.totalLength = 0;
+        this.enableCheck();
+        this.sound.nr52 &= 0xFB;    //Channel #3 On Flag Off
+    }
+}
+GameBoyAdvanceChannel3AttributeTable.prototype.computeAudioChannel = function () {
+    if ((this.counter | 0) == 0) {
+        if (this.canPlay) {
+            this.lastSampleLookup = (((this.lastSampleLookup | 0) + 1) & this.WaveRAMBankSize) | this.WAVERAMBankSpecified;
+        }
+        this.counter = this.FrequencyPeriod | 0;
+    }
+}
+
+GameBoyAdvanceChannel3AttributeTable.prototype.readSOUND3CNT_L = function () {
+    //NR30:
+    return 0x1F | this.nr30;
+}
+GameBoyAdvanceChannel3AttributeTable.prototype.writeSOUND3CNT_L = function (data) {
+    data = data | 0;
+    //NR30:
+    if (this.sound.soundMasterEnabled) {
+        this.sound.audioJIT();
+        if (!this.canPlay && (data | 0) >= 0x80) {
+            this.lastSampleLookup = 0;
+        }
+        this.canPlay = (data > 0x7F);
+        this.WaveRAMBankSize = (data & 0x20) | 0x1F;
+        this.WAVERAMBankSpecified = ((data & 0x40) >> 1) ^ (data & 0x20);
+        this.WAVERAMBankAccessed = ((data & 0x40) >> 1) ^ 0x20;
+        if (this.canPlay && (this.nr30 | 0) > 0x7F && !this.consecutive) {
+            this.sound.nr52 |= 0x4;
+        }
+        this.nr30 = data | 0;
+    }
+}
+GameBoyAdvanceChannel3AttributeTable.prototype.writeSOUND3CNT_H0 = function (data) {
+    data = data | 0;
+    //NR31:
+    if (this.sound.soundMasterEnabled) {
+        this.sound.audioJIT();
+        this.totalLength = (0x100 - (data | 0)) | 0;
+        this.enableCheck();
+    }
+}
+GameBoyAdvanceChannel3AttributeTable.prototype.readSOUND3CNT_H = function () {
+    //NR32:
+    return 0x1F | this.nr32;
+}
+GameBoyAdvanceChannel3AttributeTable.prototype.writeSOUND3CNT_H1 = function (data) {
+    data = data | 0;
+    //NR32:
+    if (this.sound.soundMasterEnabled) {
+        this.sound.audioJIT();
+        switch (data >> 5) {
+            case 0:
+                this.patternType = 4;
+                break;
+            case 1:
+                this.patternType = 0;
+                break;
+            case 2:
+                this.patternType = 1;
+                break;
+            case 3:
+                this.patternType = 2;
+                break;
+            default:
+                this.patternType = 3;
+        }
+        this.nr32 = data | 0;
+    }
+}
+GameBoyAdvanceChannel3AttributeTable.prototype.writeSOUND3CNT_X0 = function (data) {
+    data = data | 0;
+    //NR33:
+    if (this.sound.soundMasterEnabled) {
+        this.sound.audioJIT();
+        this.frequency = (this.frequency & 0x700) | data;
+        this.FrequencyPeriod = (0x800 - (this.frequency | 0)) << 3;
+    }
+}
+GameBoyAdvanceChannel3AttributeTable.prototype.readSOUND3CNT_X = function () {
+    //NR34:
+    return 0xBF | this.nr34;
+}
+GameBoyAdvanceChannel3AttributeTable.prototype.writeSOUND3CNT_X1 = function (data) {
+    data = data | 0;
+    //NR34:
+    if (this.sound.soundMasterEnabled) {
+        this.sound.audioJIT();
+        if ((data | 0) > 0x7F) {
+            if ((this.totalLength | 0) == 0) {
+                this.totalLength = 0x100;
+            }
+            this.lastSampleLookup = 0;
+            if ((data & 0x40) == 0x40) {
+                this.sound.nr52 |= 0x4;
+            }
+        }
+        this.consecutive = ((data & 0x40) == 0x0);
+        this.frequency = ((data & 0x7) << 8) | (this.frequency & 0xFF);
+        this.FrequencyPeriod = (0x800 - (this.frequency | 0)) << 3;
+        this.enableCheck();
+        this.nr34 = data | 0;
+    }
+}
