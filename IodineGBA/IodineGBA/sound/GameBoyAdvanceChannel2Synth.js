@@ -66,7 +66,7 @@ GameBoyAdvanceChannel2Synth.prototype.clockAudioEnvelope = function () {
                     this.envelopeSweepsLast = -1;
                 }
             }
-            else if ((this.channel2.envelopeVolume | 0) < 0xF) {
+            else if ((this.envelopeVolume | 0) < 0xF) {
                 this.envelopeVolume = ((this.envelopeVolume | 0) + 1) | 0;
                 this.envelopeSweeps = this.envelopeSweepsLast | 0;
             }
