@@ -159,14 +159,15 @@ GameBoyAdvanceEmulator.prototype.importSave = function () {
         var name = this.getGameName();
         if (name != "") {
             var save = this.saveImportHandler(name);
-            if (save && !this.faultFound && this.romFound) {
+            var saveType = this.saveImportHandler("TYPE_" + name);
+            if (save && saveType && !this.faultFound && this.romFound) {
                 var length = save.length | 0;
                 var convertedSave = getUint8Array(length | 0);
                 if ((length | 0) > 0) {
                     for (var index = 0; (index | 0) < (length | 0); index = ((index | 0) + 1) | 0) {
                         convertedSave[index | 0] = save[index | 0] & 0xFF;
                     }
-                    this.IOCore.saves.importSave(convertedSave);
+                    this.IOCore.saves.importSave(convertedSave, saveType | 0);
                 }
             }
         }
@@ -175,8 +176,10 @@ GameBoyAdvanceEmulator.prototype.importSave = function () {
 GameBoyAdvanceEmulator.prototype.exportSave = function () {
     if (this.saveExportHandler && !this.faultFound && this.romFound) {
         var save = this.IOCore.saves.exportSave();
-        if (save != null) {
+        var saveType = this.IOCore.saves.exportSaveType();
+        if (save != null && saveType != null) {
             this.saveExportHandler(this.IOCore.cartridge.name, save);
+            this.saveExportHandler("TYPE_" + this.IOCore.cartridge.name, saveType | 0);
         }
     }
 }

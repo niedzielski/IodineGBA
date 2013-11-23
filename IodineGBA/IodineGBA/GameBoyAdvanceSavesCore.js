@@ -48,14 +48,18 @@ GameBoyAdvanceSaves.prototype.referenceSave = function (saveType) {
     this.currentChip.initialize();
     this.saveType = saveType | 0;
 }
-GameBoyAdvanceSaves.prototype.importSave = function (saves) {
+GameBoyAdvanceSaves.prototype.importSave = function (saves, saveType) {
     this.UNDETERMINED.load(saves);
     this.SRAMChip.load(saves);
     this.FLASHChip.load(saves);
     this.EEPROMChip.load(saves);
+    this.referenceSave(saveType | 0);
 }
 GameBoyAdvanceSaves.prototype.exportSave = function () {
     return this.currentChip.saves;
+}
+GameBoyAdvanceSaves.prototype.exportSaveType = function () {
+    return this.saveType | 0;
 }
 GameBoyAdvanceSaves.prototype.readGPIO8 = function (address) {
     address = address | 0;
