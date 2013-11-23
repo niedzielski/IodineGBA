@@ -17,7 +17,8 @@
  */
 function GameBoyAdvanceGraphics(IOCore) {
     this.IOCore = IOCore;
-    this.emulatorCore = IOCore.emulatorCore;
+    this.settings = IOCore.settings;
+    this.coreExposed = IOCore.coreExposed;
     this.initializeIO();
     this.initializeRenderer();
 }
@@ -79,12 +80,12 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
     this.paletteRAM32 = getInt32View(this.paletteRAM);
     this.readPalette32 = (this.paletteRAM32) ? this.readPalette32Optimized : this.readPalette32Slow;
     this.lineBuffer = getInt32Array(240);
-    this.frameBuffer = this.emulatorCore.frameBuffer;
+    this.frameBuffer = this.coreExposed.frameBuffer;
     this.LCDTicks = 0;
     this.totalLinesPassed = 0;
     this.queuedScanLines = 0;
     this.lastUnrenderedLine = 0;
-    if (!this.IOCore.BIOSFound || this.IOCore.emulatorCore.SKIPBoot) {
+    if (!this.IOCore.BIOSFound || this.IOCore.settings.SKIPBoot) {
         //BIOS entered the ROM at line 0x7C:
         this.currentScanLine = 0x7C;
         this.lastUnrenderedLine = 0x7C;
@@ -301,11 +302,11 @@ GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
         this.IOCore.irq.requestIRQ(0x1);
     }
     //Ensure JIT framing alignment:
-    if ((this.totalLinesPassed | 0) < 160 || ((this.totalLinesPassed | 0) < 320 && this.emulatorCore.lineSkip)) {
+    if ((this.totalLinesPassed | 0) < 160 || ((this.totalLinesPassed | 0) < 320 && this.settings.lineSkip)) {
         //Make sure our gfx are up-to-date:
         this.graphicsJITVBlank();
         //Draw the frame:
-        this.emulatorCore.prepareFrame();
+        this.coreExposed.prepareFrame();
     }
     this.IOCore.dma.gfxVBlankRequest();
 }
@@ -320,7 +321,7 @@ GameBoyAdvanceGraphics.prototype.graphicsJITVBlank = function () {
 }
 GameBoyAdvanceGraphics.prototype.renderScanLine = function () {
     //Line Skip Check:
-    if (this.emulatorCore.lineSkip) {
+    if (this.settings.lineSkip) {
         this.oddLine = !this.oddLine;
         if (!this.oddLine) {
             this.renderer.renderScanLine(this.lastUnrenderedLine | 0);

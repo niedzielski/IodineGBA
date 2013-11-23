@@ -110,7 +110,7 @@ DynarecCacheManagerCore.prototype.getRecords = function () {
 DynarecCacheManagerCore.prototype.compile = function () {
     //Get the instruction data to JIT:
     this.getRecords();
-    if (!this.CPUCore.emulatorCore.useWorkers) {
+    if (!this.CPUCore.settings.useWorkers) {
         //Don't use workers to JIT:
         if (this.InTHUMB) {
             var assembler = new DynarecTHUMBAssemblerCore(this.start >>> 0, this.record);
@@ -150,7 +150,7 @@ DynarecCacheManagerCore.prototype.compile = function () {
         }
         catch (error) {
             //Browser doesn't support webworkers, so disable web worker usage:
-            this.CPUCore.emulatorCore.useWorkers = false;
+            this.CPUCore.settings.useWorkers = false;
         }
     }
 }

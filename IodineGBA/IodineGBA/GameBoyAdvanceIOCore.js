@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceIO(emulatorCore) {
-    //Reference to the emulator core:
-    this.emulatorCore = emulatorCore;
+function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     //State Machine Tracking:
     this.systemStatus = 0;
     this.cyclesToIterate = 0;
@@ -30,6 +28,11 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.lastDynarecUsage = 1;
     this.flaggedDynarec = 0;
     this.BIOSFound = false;
+    //References passed to us:
+    this.settings = settings;
+    this.coreExposed = coreExposed;
+    this.BIOS = BIOS;
+    this.ROM = ROM;
     //Initialize the various handler objects:
     this.memory = new GameBoyAdvanceMemory(this);
     this.dma = new GameBoyAdvanceDMA(this);
@@ -46,9 +49,9 @@ function GameBoyAdvanceIO(emulatorCore) {
     this.memory.loadReferences();
     this.preprocessCPUHandler(0);   //Start in interpreter.
 }
-GameBoyAdvanceIO.prototype.iterate = function () {
+GameBoyAdvanceIO.prototype.iterate = function (CPUCyclesTotal) {
     //Find out how many clocks to iterate through this run:
-    this.cyclesToIterate = ((this.emulatorCore.CPUCyclesTotal | 0) + (this.cyclesOveriteratedPreviously | 0)) | 0;
+    this.cyclesToIterate = ((CPUCyclesTotal | 0) + (this.cyclesOveriteratedPreviously | 0)) | 0;
     //An extra check to make sure we don't do stuff if we did too much last run:
     if ((this.cyclesToIterate | 0) > 0) {
         //Update our core event prediction:

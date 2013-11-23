@@ -18,7 +18,7 @@
 function GameBoyAdvanceCPU(IOCore) {
     this.IOCore = IOCore;
     this.memory = this.IOCore.memory;
-    this.emulatorCore = this.IOCore.emulatorCore;
+    this.settings = this.IOCore.settings;
     this.wait = this.IOCore.wait;
     this.mul64ResultHigh = 0;    //Scratch MUL64.
     this.mul64ResultLow = 0;    //Scratch MUL64.
@@ -77,7 +77,7 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     this.processIRQ = false;        //Interrupt program flow for IRQ.
     this.pipelineInvalid = 0x4;        //Mark pipeline as invalid.
     //Pre-initialize stack pointers if no BIOS loaded:
-    if (!this.IOCore.BIOSFound || this.IOCore.emulatorCore.SKIPBoot) {
+    if (!this.IOCore.BIOSFound || this.IOCore.settings.SKIPBoot) {
         this.registersSVC[0] = 0x3007FE0;
         this.registersIRQ[0] = 0x3007FA0;
         this.registers[13] = 0x3007F00;
@@ -110,7 +110,7 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
     branchTo = branchTo | 0;
     if ((branchTo | 0) > 0x3FFF || this.IOCore.BIOSFound) {
         //Tell the JIT information on the state before branch:
-         if (this.emulatorCore.dynarecEnabled) {
+         if (this.settings.dynarecEnabled) {
             this.dynarec.listen(this.registers[15] | 0, branchTo | 0, !!this.InTHUMB);
         }
         //Branch to new address:

@@ -18,7 +18,6 @@
 function GameBoyAdvanceMemory(IOCore) {
     //Reference to the emulator core:
     this.IOCore = IOCore;
-    this.emulatorCore = this.IOCore.emulatorCore;
     //WRAM Map Control Stuff:
     this.memoryCaches = [];
     this.WRAMControlFlags = 0x20;
@@ -864,10 +863,10 @@ GameBoyAdvanceMemory.prototype.readUnused3 = function (parentObj) {
 }
 GameBoyAdvanceMemory.prototype.loadBIOS = function () {
     //Ensure BIOS is of correct length:
-    if ((this.emulatorCore.BIOS.length | 0) == 0x4000) {
+    if ((this.IOCore.BIOS.length | 0) == 0x4000) {
         this.IOCore.BIOSFound = true;
         for (var index = 0; (index | 0) < 0x4000; index = ((index | 0) + 1) | 0) {
-            this.BIOS[index & 0x3FFF] = this.emulatorCore.BIOS[index & 0x3FFF] & 0xFF;
+            this.BIOS[index & 0x3FFF] = this.IOCore.BIOS[index & 0x3FFF] & 0xFF;
         }
     }
     else {

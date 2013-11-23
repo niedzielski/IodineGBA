@@ -37,7 +37,7 @@ DynarecBranchListenerCore.prototype.generateWorkerCache = function () {
         }
     }
     catch (error) {
-        this.CPUCore.emulatorCore.useWorkers = false;
+        this.CPUCore.settings.useWorkers = false;
     }
 }
 DynarecBranchListenerCore.prototype.getFreeWorker = function () {
@@ -50,7 +50,7 @@ DynarecBranchListenerCore.prototype.hasFreeWorker = function () {
     return (this.workers.length > 0);
 }
 DynarecBranchListenerCore.prototype.listen = function (oldPC, newPC, instructionmode) {
-    if ((this.CPUCore.emulatorCore.dynarecTHUMB && instructionmode) || (this.CPUCore.emulatorCore.dynarecARM && !instructionmode)) {
+    if ((this.CPUCore.settings.dynarecTHUMB && instructionmode) || (this.CPUCore.settings.dynarecARM && !instructionmode)) {
         this.analyzePast(oldPC >>> 0, instructionmode);
         this.handleNext(newPC >>> 0, instructionmode);
     }
@@ -106,7 +106,7 @@ DynarecBranchListenerCore.prototype.attachNextCache = function (cache) {
     this.currentCache = cache;
 }
 DynarecBranchListenerCore.prototype.enter = function () {
-   if (this.CPUCore.emulatorCore.dynarecEnabled) {
+   if (this.CPUCore.settings.dynarecEnabled) {
        //Execute our compiled code:
        this.currentCache.execute();
    }
