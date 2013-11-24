@@ -94,13 +94,14 @@ function registerGUIEvents() {
                 Blitter.setSmoothScaling(this.checked);
              }
     });
-    addEvent("unload", document, ExportSave);
+    addEvent("unload", window, ExportSave);
     setInterval(
             function () {
                 var speed = document.getElementById("speed");
                 speed.textContent = "Speed: " + Iodine.getSpeedPercentage();
             }
     ,500);
+    setInterval(ExportSave, 60000); //Do periodic saves.
 }
 function resetPlayButton() {
     document.getElementById("pause").style.display = "none";
