@@ -94,6 +94,55 @@ function registerGUIEvents() {
                 Blitter.setSmoothScaling(this.checked);
              }
     });
+    addEvent("change", document.getElementById("import"), function () {
+             if (typeof this.files != "undefined") {
+                try {
+                    if (this.files.length >= 1) {
+                        writeRedTemporaryText("Reading the local file \"" + this.files[0].name + "\" for importing.");
+                        try {
+                            //Gecko 1.9.2+ (Standard Method)
+                            var binaryHandle = new FileReader();
+                            binaryHandle.onload = function () {
+                                if (this.readyState == 2) {
+                                    writeRedTemporaryText("file imported.");
+                                    try {
+                                        import_save(this.result);
+                                    }
+                                    catch (error) {
+                                        writeRedTemporaryText(error.message + " file: " + error.fileName + " line: " + error.lineNumber);
+                                    }
+                                }
+                                else {
+                                    writeRedTemporaryText("importing file, please wait...");
+                                }
+                            }
+                            binaryHandle.readAsBinaryString(this.files[this.files.length - 1]);
+                        }
+                        catch (error) {
+                            //Gecko 1.9.0, 1.9.1 (Non-Standard Method)
+                            var romImageString = this.files[this.files.length - 1].getAsBinary();
+                            try {
+                                import_save(romImageString);
+                            }
+                            catch (error) {
+                                writeRedTemporaryText(error.message + " file: " + error.fileName + " line: " + error.lineNumber);
+                            }
+                        }
+                    }
+                    else {
+                        writeRedTemporaryText("Incorrect number of files selected for local loading.");
+                    }
+                }
+                catch (error) {
+                    writeRedTemporaryText("Could not load in a locally stored ROM file.");
+                }
+             }
+             else {
+                writeRedTemporaryText("could not find the handle on the file to open.");
+             }
+             event.preventDefault();
+    });
+    addEvent("click", document.getElementById("export"), refreshStorageListing);
     addEvent("unload", window, ExportSave);
     setInterval(
             function () {
