@@ -74,8 +74,12 @@
                 <form>
                     <fieldset>
                         <legend>Load ROM:</legend>
-                        <label>BIOS: </label><input type="file" id="bios_load">
-                        <label>Game:</label><input type="file" id="rom_load">
+                        <div class="fileLoad">
+                            <label>BIOS:</label><input type="file" id="bios_load" class="files">
+                        </div>
+                        <div class="fileLoad">
+                            <label>Game:</label><input type="file" id="rom_load" class="files">
+                        </div>
                     </fieldset>
                 </form>
             </div>
@@ -83,18 +87,37 @@
                 <form>
                     <fieldset>
                         <legend>Controls: </legend>
-                        <button id="play">Play</button>
-                        <button id="pause">Pause</button>
-                        <button id="restart">Restart</button>
-                        <label class="dynarec">Enable Dynarec (LLE JIT): </label><input type="checkbox" id="lle_jit" class="dynarec">
-                        <label>Line Skip: </label><input type="checkbox" id="lineskip">
-                        <label>Slow Down Bus Speed Hack: </label><input type="checkbox" id="toggleSlowDownBusHack">
-                        <label>Skip Boot Intro: </label><input type="checkbox" id="skip_boot">
-                        <label>Smooth Scaling: </label><input type="checkbox" id="toggleSmoothScaling" checked="checked">
-                        <label>Sound: </label><input type="checkbox" id="sound">
+                        <div id="playControls">
+                            <button id="play">Play</button>
+                            <button id="pause">Pause</button>
+                            <button id="restart">Restart</button>
+                        </div>
+                        <label class="dynarec">Enable Dynarec (LLE JIT): </label><input type="checkbox" id="lle_jit" class="dynarec checkbox">
+                        <label>Line Skip: </label><input type="checkbox" id="lineskip" class="checkbox">
+                        <label>Slow Down Bus Speed Hack: </label><input type="checkbox" id="toggleSlowDownBusHack" class="checkbox">
+                        <label>Skip Boot Intro: </label><input type="checkbox" id="skip_boot" class="checkbox">
+                        <label>Smooth Scaling: </label><input type="checkbox" id="toggleSmoothScaling" checked="checked" class="checkbox">
+                        <label>Sound: </label><input type="checkbox" id="sound" class="checkbox">
                     </fieldset>
                 </form>
             </div>
+            <!--<div id="saves_controls">
+                <form>
+                    <fieldset>
+                        <legend>Saves: </legend>
+                        <div id="savesWheel">
+                            <select id="saves"></select>
+                            <div id="savesControls">
+                                <button id="export_current">Export</button>
+                                <button id="delete_current">Delete</button>
+                            </div>
+                        </div>
+                        <div id="savesControls">
+                            <button id="import">Import Any</button>
+                            <button id="export_all">Export All</button>
+                        </div>
+                </form>
+            </div>-->
             <div id="speed">
             </div>
         </div>
