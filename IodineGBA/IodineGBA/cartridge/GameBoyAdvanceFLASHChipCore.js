@@ -21,7 +21,7 @@ function GameBoyAdvanceFLASHChip(is128, isAteml) {
     this.saves = null;
     this.BANKOffset = 0;
     this.flashCommandUnlockStage = 0;
-    this.IDMode = false;
+    this.flashCommand = 0;
     this.writeBytesLeft = 0;
 }
 GameBoyAdvanceFLASHChip.prototype.initialize = function () {
@@ -56,7 +56,7 @@ GameBoyAdvanceFLASHChip.prototype.load = function (save) {
 GameBoyAdvanceFLASHChip.prototype.read = function (address) {
     address = address | 0;
     var data = 0;
-    if (!this.IDMode || (address | 0) > 1) {
+    if ((this.flashCommand | 0) != 2 || (address | 0) > 1) {
         data = this.saves[address | this.BANKOffset] | 0;
     }
     else {
@@ -101,49 +101,22 @@ GameBoyAdvanceFLASHChip.prototype.writeControlBits = function (address, data) {
     data = data | 0;
     switch (address | 0) {
         case 0:
-        case 0x1000:
-        case 0x2000:
-        case 0x3000:
-        case 0x4000:
-        case 0x5000:
-        case 0x6000:
-        case 0x7000:
-        case 0x8000:
-        case 0x9000:
-        case 0xA000:
-        case 0xB000:
-        case 0xC000:
-        case 0xD000:
-        case 0xE000:
-        case 0xF000:
-            if ((this.flashCommandUnlockStage | 0) == 5 && ((data | 0) == 0x30)) {
-                var addressEnd = ((address | 0) + 0x1000) | 0;
-                for (var index = address | 0; (index | 0) < (addressEnd | 0); index = ((index | 0) + 1) | 0) {
-                    this.saves[index | this.BANKOffset] = 0xFF;
-                }
-                this.notATMEL = true;
-            }
-            else if ((this.flashCommandUnlockStage | 0) == 3 && (address | 0) == 0) {
-                this.selectBank(data & 0x1);
-            }
-            this.flashCommandUnlockStage = 0;
+            this.sectorEraseOrBankSwitch(address | 0, data | 0);
             break;
         case 0x5555:
             this.controlWriteStage2(data | 0);
             break;
         case 0x2AAA:
-            if ((data | 0) == 0x55 && ((this.flashCommandUnlockStage | 0) == 1 || (this.flashCommandUnlockStage | 0) == 4)) {
-                this.flashCommandUnlockStage = ((this.flashCommandUnlockStage | 0) + 1) | 0;
-            }
-            else {
-                this.flashCommandUnlockStage = 0;
-            }
+            this.controlWriteStageIncrement(data | 0);
+            break;
+        default:
+            this.sectorErase(address | 0, data | 0);
     }
 }
 GameBoyAdvanceFLASHChip.prototype.writeByte = function (address, data) {
-    address = address | this.BANKOffset;
+    address = address | 0;
     data = data | 0;
-    this.saves[address | 0] = data | 0;
+    this.saves[address | this.BANKOffset] = data | 0;
     this.writeBytesLeft = ((this.writeBytesLeft | 0) - 1) | 0;
 }
 GameBoyAdvanceFLASHChip.prototype.selectBank = function (bankNumber) {
@@ -155,61 +128,90 @@ GameBoyAdvanceFLASHChip.prototype.selectBank = function (bankNumber) {
 }
 GameBoyAdvanceFLASHChip.prototype.controlWriteStage2 = function (data) {
     data = data | 0;
-    switch (data | 0) {
-        case 0x10:
-            if ((this.flashCommandUnlockStage | 0) == 5 && ((data | 0) == 0x30)) {
-                for (var index = 0; (index | 0) < (this.largestSizePossible | 0); index = ((index | 0) + 1) | 0) {
-                    this.saves[index | 0] = 0xFF;
+    if ((data | 0) == 0xAA) {
+        //Initial Command:
+        this.flashCommandUnlockStage = 1;
+    }
+    else if ((this.flashCommandUnlockStage | 0) == 2) {
+        switch (data | 0) {
+            case 0x10:
+                //Command Erase Chip:
+                if ((this.flashCommand | 0) == 1) {
+                    for (var index = 0; (index | 0) < (this.largestSizePossible | 0); index = ((index | 0) + 1) | 0) {
+                        this.saves[index | 0] = 0xFF;
+                    }
                 }
-                this.flashCommandUnlockStage = 0;
-            }
-            break;
-        case 0x80:
-            if ((this.flashCommandUnlockStage | 0) == 2) {
-                this.flashCommandUnlockStage = 3;
-            }
-            else {
-                this.flashCommandUnlockStage = 0;
-            }
-            break;
-        case 0x90:
-            if ((this.flashCommandUnlockStage | 0) == 2) {
-                this.IDMode = true;
-            }
-            this.flashCommandUnlockStage = 0;
-            break;
-        case 0xA0:
-            this.writeCommandTrigger();
-            break;
-        case 0xAA:
-            this.flashCommandUnlockStage = ((this.flashCommandUnlockStage | 0) == 3) ? 4 : 1;
-            break;
-        case 0xB0:
-            if ((this.flashCommandUnlockStage | 0) == 2) {
-                this.flashCommandUnlockStage = 3;
-            }
-            else {
-                this.flashCommandUnlockStage = 0;
-            }
-            break;
-        case 0xF0:
-            if ((this.flashCommandUnlockStage | 0) == 5) {
-                this.IDMode = false;
-            }
-            this.flashCommandUnlockStage = 0;
-            break;
-        default:
-            this.flashCommandUnlockStage = 0;
+                this.flashCommand = 0;
+                break;
+            case 0x80:
+                //Command Erase:
+                this.flashCommand = 1;
+                break;
+            case 0x90:
+                //Command ID:
+                this.flashCommand = 2;
+                break;
+            case 0xA0:
+                //Command Write:
+                this.writeCommandTrigger();
+                break;
+            case 0xB0:
+                //Command Bank Switch:
+                this.flashCommand = 3;
+                break;
+            default:
+                this.flashCommand = 0;
+        }
+        //Reset the command state:
+        this.flashCommandUnlockStage = 0;
+    }
+    else if ((data | 0) == 0xF0) {
+        //Command Clear:
+        this.flashCommand = 0;
+        this.flashCommandUnlockStage = 0;
+        this.notATMEL = true;
     }
 }
 GameBoyAdvanceFLASHChip.prototype.writeCommandTrigger = function () {
-    if ((this.flashCommandUnlockStage | 0) == 3) {
+    if ((this.flashCommandUnlockStage | 0) == 2) {
         if (this.notATMEL) {
             this.writeBytesLeft = 1;
         }
         else {
             this.writeBytesLeft = 0x80;
         }
+    }
+}
+GameBoyAdvanceFLASHChip.prototype.sectorErase = function (address, data) {
+    address = (address << 12) >> 12;
+    data = data | 0;
+    if ((this.flashCommand | 0) == 1 && (this.flashCommandUnlockStage | 0) == 2 && ((data | 0) == 0x30)) {
+        var addressEnd = ((address | this.BANKOffset) + 0x1000) | 0;
+        for (var index = address | this.BANKOffset; (index | 0) < (addressEnd | 0); index = ((index | 0) + 1) | 0) {
+            this.saves[index | 0] = 0xFF;
+        }
+        this.notATMEL = true;
+    }
+    this.flashCommand = 0;
+    this.flashCommandUnlockStage = 0;
+}
+GameBoyAdvanceFLASHChip.prototype.sectorEraseOrBankSwitch = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    if ((this.flashCommandUnlockStage | 0) == 2) {
+        this.sectorErase(address | 0, data | 0);
+    }
+    else if ((this.flashCommand | 0) == 3 && (this.flashCommandUnlockStage | 0) == 0) {
+        this.selectBank(data & 0x1);
+    }
+    this.flashCommand = 0;
+    this.flashCommandUnlockStage = 0;
+}
+GameBoyAdvanceFLASHChip.prototype.controlWriteStageIncrement = function (data) {
+    if ((data | 0) == 0x55 && (this.flashCommandUnlockStage | 0) == 1) {
+        this.flashCommandUnlockStage = ((this.flashCommandUnlockStage | 0) + 1) | 0;
+    }
+    else {
         this.flashCommandUnlockStage = 0;
     }
 }
