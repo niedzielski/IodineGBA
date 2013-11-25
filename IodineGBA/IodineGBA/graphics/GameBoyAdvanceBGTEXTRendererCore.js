@@ -107,10 +107,12 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffse
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
     address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 2));
     address = ((address | 0) + ((((chrData & 0x400) == 0x400) ? (0x7 - (xOffset | 0)) : (xOffset | 0)) >> 1));
-    if ((xOffset & 0x1) == ((chrData & 0x400) >> 10)) {
-        return this.palette16[chrData >>> 12][this.VRAM[address & 0xFFFF] & 0xF] | 0;
+    address = this.VRAM[address & 0xFFFF] | 0;
+    if ((xOffset & 0x1) != ((chrData & 0x400) >> 10)) {
+        address = address >> 4;
     }
-    return this.palette16[chrData >>> 12][this.VRAM[address & 0xFFFF] >> 4] | 0;
+    address = ((chrData >> 8) & 0xF0) | (address & 0xF);
+    return this.palette16[address & 0xFF] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetch8BitVRAM = function (chrData, xOffset, yOffset) {
     //256 color tile mode:

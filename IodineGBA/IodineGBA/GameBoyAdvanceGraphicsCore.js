@@ -128,11 +128,10 @@ GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
     this.palette256[0] |= this.transparency;
     this.paletteOBJ256 = getInt32Array(0x100);
     this.paletteOBJ256[0] |= this.transparency;
-    this.palette16 = [];
+    this.palette16 = getInt32Array(0x100);
     this.paletteOBJ16 = [];
     for (var index = 0; index < 0x10; ++index) {
-        this.palette16[index] = getInt32Array(0x10);
-        this.palette16[index][0] = this.transparency;
+        this.palette16[index << 4] = this.transparency;
         this.paletteOBJ16[index] = getInt32Array(0x10);
         this.paletteOBJ16[index][0] = this.transparency;
     }
@@ -1107,6 +1106,12 @@ GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
     this.paletteRAM[address | 0] = data | 0;
     var palette = ((this.paletteRAM[address | 1] << 8) | this.paletteRAM[address & 0x3FE]) & 0x7FFF;
     address >>= 1;
+    this.writePalette256(address | 0, palette | 0);
+    this.writePalette16(address | 0, palette | 0);
+}
+GameBoyAdvanceGraphics.prototype.writePalette256 = function (address, palette) {
+    address = address | 0;
+    palette = palette | 0;
     if ((address & 0xFF) == 0) {
         palette = this.transparency | palette;
         if (address == 0) {
@@ -1119,11 +1124,15 @@ GameBoyAdvanceGraphics.prototype.writePalette = function (address, data) {
     else {
         this.paletteOBJ256[address & 0xFF] = palette | 0;
     }
+}
+GameBoyAdvanceGraphics.prototype.writePalette16 = function (address, palette) {
+    address = address | 0;
+    palette = palette | 0;
     if ((address & 0xF) == 0) {
         palette = this.transparency | palette;
     }
     if (address < 0x100) {
-        this.palette16[address >> 4][address & 0xF] = palette | 0;
+        this.palette16[address | 0] = palette | 0;
     }
     else {
         this.paletteOBJ16[(address >> 4) & 0xF][address & 0xF] = palette | 0;
