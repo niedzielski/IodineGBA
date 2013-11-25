@@ -20,6 +20,8 @@ function GameBoyAdvanceBGTEXTRenderer(gfx, BGLayer) {
     this.VRAM = this.gfx.VRAM;
     this.VRAM16 = this.gfx.VRAM16;
     this.fetchTile = (this.VRAM16) ? this.fetchTileOptimized : this.fetchTileNormal;
+    this.palette16 = this.gfx.palette16;
+    this.palette256 = this.gfx.palette256;
     this.BGLayer = BGLayer | 0;
     this.initialize();
 }
@@ -106,9 +108,9 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffse
     address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 2));
     address = ((address | 0) + ((((chrData & 0x400) == 0x400) ? (0x7 - (xOffset | 0)) : (xOffset | 0)) >> 1));
     if ((xOffset & 0x1) == ((chrData & 0x400) >> 10)) {
-        return this.palette[chrData >>> 12][this.VRAM[address & 0xFFFF] & 0xF] | 0;
+        return this.palette16[chrData >>> 12][this.VRAM[address & 0xFFFF] & 0xF] | 0;
     }
-    return this.palette[chrData >>> 12][this.VRAM[address & 0xFFFF] >> 4] | 0;
+    return this.palette16[chrData >>> 12][this.VRAM[address & 0xFFFF] >> 4] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetch8BitVRAM = function (chrData, xOffset, yOffset) {
     //256 color tile mode:
@@ -120,16 +122,14 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetch8BitVRAM = function (chrData, xOffse
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
     address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 3)) | 0;
     address = ((address | 0) + ((((chrData & 0x400) == 0x400) ? (0x7 - (xOffset | 0)) : (xOffset | 0)) | 0)) | 0;
-    return this.palette[this.VRAM[address & 0xFFFF] & 0xFF] | 0;
+    return this.palette256[this.VRAM[address & 0xFFFF] & 0xFF] | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.palettePreprocess = function () {
     //Make references:
     if (this.gfx.BGPalette256[this.BGLayer & 3]) {
-        this.palette = this.gfx.palette256;
         this.fetchVRAM = this.fetch8BitVRAM;
     }
     else {
-        this.palette = this.gfx.palette16;
         this.fetchVRAM = this.fetch4BitVRAM;
     }
 }
