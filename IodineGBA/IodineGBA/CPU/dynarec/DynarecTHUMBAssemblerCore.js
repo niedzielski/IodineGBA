@@ -370,13 +370,13 @@ DynarecTHUMBAssemblerCore.prototype.LSLimm = function (instructionValue) {
     var offset = (instructionValue >> 6) & 0x1F;
     if (offset > 0) {
         spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-        "\tthis.CPUCore.CPSRCarry = (" + this.conditionalInline(offset - 1, "(source << " + this.toHex(offset - 1) + ")", "source") + " < 0);\n" +
+        "\tthis.CPSR.carry = (" + this.conditionalInline(offset - 1, "(source << " + this.toHex(offset - 1) + ")", "source") + " < 0);\n" +
         "\t//Perform shift:\n" + 
         "\tsource <<= " + this.toHex(offset) + ";\n";
     }
     spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
+    "\tthis.CPSR.negative = (source < 0);\n" +
+    "\tthis.CPSR.zero = (source == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
@@ -387,20 +387,20 @@ DynarecTHUMBAssemblerCore.prototype.LSRimm = function (instructionValue) {
     var offset = (instructionValue >> 6) & 0x1F;
     if (offset > 0) {
         spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-        "\tthis.CPUCore.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
+        "\tthis.CPSR.carry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
         "\t//Perform shift:\n" +
         "\tsource = (source >>> " + this.toHex(offset) + ") | 0;\n" +
         "//Perform CPSR updates for N and Z (But not V):\n" +
-        "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
-        "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
+        "\tthis.CPSR.negative = (source < 0);\n" +
+        "\tthis.CPSR.zero = (source == 0);\n" +
         "\t//Update destination register:\n" +
         "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     }
     else {
-        spew += "\tthis.CPUCore.CPSRCarry = (source < 0);\n" +
+        spew += "\tthis.CPSR.carry = (source < 0);\n" +
         "\t//Perform CPSR updates for N and Z (But not V):\n" +
-        "\tthis.CPUCore.CPSRNegative = false;\n" +
-        "\tthis.CPUCore.CPSRZero = true;\n" +
+        "\tthis.CPSR.negative = false;\n" +
+        "\tthis.CPSR.zero = true;\n" +
         "\t//Update destination register:\n" +
         "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = 0;\n";
     }
@@ -412,17 +412,17 @@ DynarecTHUMBAssemblerCore.prototype.ASRimm = function (instructionValue) {
     var offset = (instructionValue >> 6) & 0x1F;
     if (offset > 0) {
         spew += "\t//CPSR Carry is set by the last bit shifted out:\n" +
-        "\tthis.CPUCore.CPSRCarry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
+        "\tthis.CPSR.carry = ((" + this.conditionalInline(offset - 1, "(source >> " + this.toHex(offset - 1) + ")", "source") + " & 0x1) != 0);\n" +
         "\t//Perform shift:\n" +
         "\tsource >>= " + this.toHex(offset) + ";\n";
     }
     else {
-        spew += "\tthis.CPUCore.CPSRCarry = (source < 0);\n" +
+        spew += "\tthis.CPSR.carry = (source < 0);\n" +
         "\tsource >>= 0x1F;\n";
     }
     spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
+    "\tthis.CPSR.negative = (source < 0);\n" +
+    "\tthis.CPSR.zero = (source == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
@@ -460,8 +460,8 @@ DynarecTHUMBAssemblerCore.prototype.SUBimm3 = function (instructionValue) {
 DynarecTHUMBAssemblerCore.prototype.MOVimm8 = function (instructionValue) {
     var spew = "\t//MOVimm8:\n" +
     "\t//Get the 8-bit value to move into the register:\n" +
-    "\tthis.CPUCore.CPSRNegative = false;\n" +
-    "\tthis.CPUCore.CPSRZero = " + ((instructionValue & 0xFF) ? "false" : "true") + ";\n" +
+    "\tthis.CPSR.negative = false;\n" +
+    "\tthis.CPSR.zero = " + ((instructionValue & 0xFF) ? "false" : "true") + ";\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = " + this.toHex(instructionValue & 0xFF) + ";\n";
     return spew;
@@ -493,8 +493,8 @@ DynarecTHUMBAssemblerCore.prototype.AND = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise AND:\n" +
     "\tvar result = source & destination;\n" +
-    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (result == 0);\n" +
+    "\tthis.CPSR.negative = (result < 0);\n" +
+    "\tthis.CPSR.zero = (result == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -505,8 +505,8 @@ DynarecTHUMBAssemblerCore.prototype.EOR = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise EOR:\n" +
     "\tvar result = source ^ destination;\n" +
-    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (result == 0);\n" +
+    "\tthis.CPSR.negative = (result < 0);\n" +
+    "\tthis.CPSR.zero = (result == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -518,23 +518,23 @@ DynarecTHUMBAssemblerCore.prototype.LSL = function (instructionValue) {
     "\tif (source > 0) {\n" +
         "\t\tif (source < 0x20) {\n" +
             "\t\t\t//Shift the register data left:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = ((destination << ((source - 1) | 0)) < 0);\n" +
+            "\t\t\tthis.CPSR.carry = ((destination << ((source - 1) | 0)) < 0);\n" +
             "\t\t\tdestination <<= source;\n" +
         "\t\t}\n" +
         "\t\telse if (source == 0x20) {\n" +
             "\t\t\t//Shift bit 0 into carry:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = ((destination & 0x1) == 0x1);\n" +
+            "\t\t\tthis.CPSR.carry = ((destination & 0x1) == 0x1);\n" +
             "\t\t\tdestination = 0;\n" +
         "\t\t}\n" +
         "\t\telse {\n" +
             "\t\t\t//Everything Zero'd:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = false;\n" +
+            "\t\t\tthis.CPSR.carry = false;\n" +
             "\t\t\tdestination = 0;\n" +
         "\t\t}\n" +
     "\t}\n" +
     "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPUCore.CPSRNegative = (destination < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (destination == 0);\n" +
+    "\tthis.CPSR.negative = (destination < 0);\n" +
+    "\tthis.CPSR.zero = (destination == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
     return spew;
@@ -546,23 +546,23 @@ DynarecTHUMBAssemblerCore.prototype.LSR = function (instructionValue) {
     "\tif (source > 0) {\n" +
         "\t\tif (source < 0x20) {\n" +
             "\t\t\t//Shift the register data right logically:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = (((destination >> ((source - 1) | 0)) & 0x1) == 0x1);\n" +
+            "\t\t\tthis.CPSR.carry = (((destination >> ((source - 1) | 0)) & 0x1) == 0x1);\n" +
             "\t\t\tdestination = (destination >>> source) | 0;\n" +
         "\t\t}\n" +
         "\t\telse if (source == 0x20) {\n" +
             "\t\t\t//Shift bit 31 into carry:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = (destination < 0);\n" +
+            "\t\t\tthis.CPSR.carry = (destination < 0);\n" +
             "\t\t\tdestination = 0;\n" +
         "\t\t}\n" +
         "\t\telse {\n" +
             "\t\t\t//Everything Zero'd:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = false;\n" +
+            "\t\t\tthis.CPSR.carry = false;\n" +
             "\t\t\tdestination = 0;\n" +
         "\t\t}\n" +
     "\t}\n" +
     "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPUCore.CPSRNegative = (destination < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (destination == 0);\n" +
+    "\tthis.CPSR.negative = (destination < 0);\n" +
+    "\tthis.CPSR.zero = (destination == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
     return spew;
@@ -574,18 +574,18 @@ DynarecTHUMBAssemblerCore.prototype.ASR = function (instructionValue) {
     "\tif (source > 0) {\n" +
         "\t\tif (source < 0x20) {\n" +
             "\t\t\t//Shift the register data right arithmetically:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = (((destination >> ((source - 1) | 0)) & 0x1) == 0x1);\n" +
+            "\t\t\tthis.CPSR.carry = (((destination >> ((source - 1) | 0)) & 0x1) == 0x1);\n" +
             "\t\t\tdestination >>= source;\n" +
         "\t\t}\n" +
         "\t\telse {\n" +
             "\t\t\t//Set all bits with bit 31:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = (destination < 0);\n" +
+            "\t\t\tthis.CPSR.carry = (destination < 0);\n" +
             "\t\t\tdestination >>= 0x1F;\n" +
         "\t\t}\n" +
     "\t}\n" +
     "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPUCore.CPSRNegative = (destination < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (destination == 0);\n" +
+    "\tthis.CPSR.negative = (destination < 0);\n" +
+    "\tthis.CPSR.zero = (destination == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
     return spew;
@@ -612,17 +612,17 @@ DynarecTHUMBAssemblerCore.prototype.ROR = function (instructionValue) {
         "\t\tsource &= 0x1F;\n" +
         "\t\tif (source > 0) {\n" +
             "\t\t\t//CPSR Carry is set by the last bit shifted out:\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = (((destination >>> ((source - 1) | 0)) & 0x1) != 0);\n" +
+            "\t\t\tthis.CPSR.carry = (((destination >>> ((source - 1) | 0)) & 0x1) != 0);\n" +
             "\t\t\t//Perform rotate:\n" +
             "\t\t\tdestination = (destination << ((0x20 - source) | 0)) | (destination >>> (source | 0));\n" +
         "\t\t}\n" +
         "\t\telse {\n" +
-            "\t\t\tthis.CPUCore.CPSRCarry = (destination < 0);\n" +
+            "\t\t\tthis.CPSR.carry = (destination < 0);\n" +
         "\t\t}\n" +
     "\t}\n" +
     "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPUCore.CPSRNegative = (destination < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (destination == 0);\n" +
+    "\tthis.CPSR.negative = (destination < 0);\n" +
+    "\tthis.CPSR.zero = (destination == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
     return spew;
@@ -633,18 +633,18 @@ DynarecTHUMBAssemblerCore.prototype.TST = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise AND:\n" +
     "\tvar result = source & destination;\n" +
-    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (result == 0);\n";
+    "\tthis.CPSR.negative = (result < 0);\n" +
+    "\tthis.CPSR.zero = (result == 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.NEG = function (instructionValue) {
     var spew = "\t//NEG:\n" +
     "\tvar source = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
-    "\tthis.CPUCore.CPSROverflow = ((source ^ (-(source | 0))) == 0);\n" +
+    "\tthis.CPSR.overflow = ((source ^ (-(source | 0))) == 0);\n" +
     "\t//Perform Subtraction:\n" +
     "\tsource = (-(source | 0)) | 0;\n" +
-    "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
+    "\tthis.CPSR.negative = (source < 0);\n" +
+    "\tthis.CPSR.zero = (source == 0);\n" +
     "\t//Update destination register:\n" +
      "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
@@ -667,8 +667,8 @@ DynarecTHUMBAssemblerCore.prototype.ORR = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise OR:\n" +
     "\tvar result = source | destination;\n" +
-    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (result == 0);\n" +
+    "\tthis.CPSR.negative = (result < 0);\n" +
+    "\tthis.CPSR.zero = (result == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -679,9 +679,9 @@ DynarecTHUMBAssemblerCore.prototype.MUL = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform MUL32:\n" +
     "\tvar result = this.CPUCore.performMUL32(source | 0, destination | 0, 0) | 0;\n" +
-    "\tthis.CPUCore.CPSRCarry = false;\n" +
-    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (result == 0);\n" +
+    "\tthis.CPSR.carry = false;\n" +
+    "\tthis.CPSR.negative = (result < 0);\n" +
+    "\tthis.CPSR.zero = (result == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -692,8 +692,8 @@ DynarecTHUMBAssemblerCore.prototype.BIC = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise AND with a bitwise NOT on source:\n" +
     "\tvar result = (~source) & destination;\n" +
-    "\tthis.CPUCore.CPSRNegative = (result < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (result == 0);\n" +
+    "\tthis.CPSR.negative = (result < 0);\n" +
+    "\tthis.CPSR.zero = (result == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -702,8 +702,8 @@ DynarecTHUMBAssemblerCore.prototype.MVN = function (instructionValue) {
     var spew = "\t//MVN:\n" +
     "\t//Perform bitwise NOT on source:\n" +
     "\tvar source = ~this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "];\n" +
-    "\tthis.CPUCore.CPSRNegative = (source < 0);\n" +
-    "\tthis.CPUCore.CPSRZero = (source == 0);\n" +
+    "\tthis.CPSR.negative = (source < 0);\n" +
+    "\tthis.CPSR.zero = (source == 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
