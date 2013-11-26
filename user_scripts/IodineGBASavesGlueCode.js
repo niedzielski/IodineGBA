@@ -177,7 +177,8 @@ function decodeBlob(blobData) {
 	return blobProperties;
 }
 function refreshStorageListing() {
-	var keys = getLocalStorageKeys();
+	ExportSave();
+    var keys = getLocalStorageKeys();
 	var blobPairs = [];
 	for (var index = 0; index < keys.length; ++index) {
 		blobPairs[index] = [keys[index], JSON.stringify(findValue(keys[index]))];

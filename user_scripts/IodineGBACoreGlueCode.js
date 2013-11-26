@@ -150,7 +150,7 @@ function registerGUIEvents() {
                 speed.textContent = "Speed: " + Iodine.getSpeedPercentage();
             }
     ,500);
-    setInterval(ExportSave, 60000); //Do periodic saves.
+    //setInterval(ExportSave, 60000); //Do periodic saves.
 }
 function resetPlayButton() {
     document.getElementById("pause").style.display = "none";
