@@ -474,8 +474,8 @@ GameBoyAdvanceCPU.prototype.setADDFlags = function (operand1, operand2) {
     var result = unsignedResult | 0;
     this.setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
     this.CPSR.setCarry(unsignedResult > 0xFFFFFFFF);
-    this.CPSR.setNegative(result < 0);
-    this.CPSR.setZero(result == 0);
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
     return result | 0;
 }
 GameBoyAdvanceCPU.prototype.setADCFlags = function (operand1, operand2) {
@@ -486,8 +486,8 @@ GameBoyAdvanceCPU.prototype.setADCFlags = function (operand1, operand2) {
     var result = unsignedResult | 0;
     this.setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
     this.CPSR.setCarry(unsignedResult > 0xFFFFFFFF);
-    this.CPSR.setNegative(result < 0);
-    this.CPSR.setZero(result == 0);
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
     return result | 0;
 }
 GameBoyAdvanceCPU.prototype.setSUBFlags = function (operand1, operand2) {
@@ -497,8 +497,8 @@ GameBoyAdvanceCPU.prototype.setSUBFlags = function (operand1, operand2) {
     var result = ((operand1 | 0) - (operand2 | 0)) | 0;
     this.setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
     this.CPSR.setCarry(operand1 >= operand2);
-    this.CPSR.setNegative(result < 0);
-    this.CPSR.setZero(result == 0);
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
     return result | 0;
 }
 GameBoyAdvanceCPU.prototype.setSBCFlags = function (operand1, operand2) {
@@ -509,8 +509,8 @@ GameBoyAdvanceCPU.prototype.setSBCFlags = function (operand1, operand2) {
     var result = unsignedResult | 0;
     this.setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
     this.CPSR.setCarry(unsignedResult >= 0);
-    this.CPSR.setNegative(result < 0);
-    this.CPSR.setZero(result == 0);
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
     return result | 0;
 }
 GameBoyAdvanceCPU.prototype.setCMPFlags = function (operand1, operand2) {
@@ -520,8 +520,8 @@ GameBoyAdvanceCPU.prototype.setCMPFlags = function (operand1, operand2) {
     var result = ((operand1 | 0) - (operand2 | 0)) | 0;
     this.setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
     this.CPSR.setCarry(operand1 >= operand2);
-    this.CPSR.setNegative(result < 0);
-    this.CPSR.setZero(result == 0);
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
 }
 GameBoyAdvanceCPU.prototype.setCMNFlags = function (operand1, operand2) {
     //Update flags for an addition operation:
@@ -531,8 +531,8 @@ GameBoyAdvanceCPU.prototype.setCMNFlags = function (operand1, operand2) {
     var result = unsignedResult | 0;
     this.setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
     this.CPSR.setCarry(unsignedResult > 0xFFFFFFFF);
-    this.CPSR.setNegative(result < 0);
-    this.CPSR.setZero(result == 0);
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
 }
 GameBoyAdvanceCPU.prototype.setVFlagForADD = function (operand1, operand2, result) {
     operand1 = operand1 | 0;

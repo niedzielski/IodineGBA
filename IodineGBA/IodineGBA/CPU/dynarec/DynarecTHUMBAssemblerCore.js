@@ -375,8 +375,8 @@ DynarecTHUMBAssemblerCore.prototype.LSLimm = function (instructionValue) {
         "\tsource <<= " + this.toHex(offset) + ";\n";
     }
     spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPSR.setNegative(source < 0);\n" +
-    "\tthis.CPSR.setZero(source == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(source | 0);\n" +
+    "\tthis.CPSR.setZeroInt(source | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
@@ -391,8 +391,8 @@ DynarecTHUMBAssemblerCore.prototype.LSRimm = function (instructionValue) {
         "\t//Perform shift:\n" +
         "\tsource = (source >>> " + this.toHex(offset) + ") | 0;\n" +
         "//Perform CPSR updates for N and Z (But not V):\n" +
-        "\tthis.CPSR.setNegative(source < 0);\n" +
-        "\tthis.CPSR.setZero(source == 0);\n" +
+        "\tthis.CPSR.setNegativeInt(source | 0);\n" +
+        "\tthis.CPSR.setZeroInt(source | 0);\n" +
         "\t//Update destination register:\n" +
         "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     }
@@ -421,8 +421,8 @@ DynarecTHUMBAssemblerCore.prototype.ASRimm = function (instructionValue) {
         "\tsource >>= 0x1F;\n";
     }
     spew += "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPSR.setNegative(source < 0);\n" +
-    "\tthis.CPSR.setZero(source == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(source | 0);\n" +
+    "\tthis.CPSR.setZeroInt(source | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
@@ -493,8 +493,8 @@ DynarecTHUMBAssemblerCore.prototype.AND = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise AND:\n" +
     "\tvar result = source & destination;\n" +
-    "\tthis.CPSR.setNegative(result < 0);\n" +
-    "\tthis.CPSR.setZero(result == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(result | 0);\n" +
+    "\tthis.CPSR.setZeroInt(result | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -505,8 +505,8 @@ DynarecTHUMBAssemblerCore.prototype.EOR = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise EOR:\n" +
     "\tvar result = source ^ destination;\n" +
-    "\tthis.CPSR.setNegative(result < 0);\n" +
-    "\tthis.CPSR.setZero(result == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(result | 0);\n" +
+    "\tthis.CPSR.setZeroInt(result | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -533,8 +533,8 @@ DynarecTHUMBAssemblerCore.prototype.LSL = function (instructionValue) {
         "\t\t}\n" +
     "\t}\n" +
     "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPSR.setNegative(destination < 0);\n" +
-    "\tthis.CPSR.setZero(destination == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(destination | 0);\n" +
+    "\tthis.CPSR.setZeroInt(destination | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
     return spew;
@@ -561,8 +561,8 @@ DynarecTHUMBAssemblerCore.prototype.LSR = function (instructionValue) {
         "\t\t}\n" +
     "\t}\n" +
     "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPSR.setNegative(destination < 0);\n" +
-    "\tthis.CPSR.setZero(destination == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(destination | 0);\n" +
+    "\tthis.CPSR.setZeroInt(destination | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
     return spew;
@@ -584,8 +584,8 @@ DynarecTHUMBAssemblerCore.prototype.ASR = function (instructionValue) {
         "\t\t}\n" +
     "\t}\n" +
     "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPSR.setNegative(destination < 0);\n" +
-    "\tthis.CPSR.setZero(destination == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(destination | 0);\n" +
+    "\tthis.CPSR.setZeroInt(destination | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
     return spew;
@@ -621,8 +621,8 @@ DynarecTHUMBAssemblerCore.prototype.ROR = function (instructionValue) {
         "\t\t}\n" +
     "\t}\n" +
     "\t//Perform CPSR updates for N and Z (But not V):\n" +
-    "\tthis.CPSR.setNegative(destination < 0);\n" +
-    "\tthis.CPSR.setZero(destination == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(destination | 0);\n" +
+    "\tthis.CPSR.setZeroInt(destination | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = destination | 0;\n";
     return spew;
@@ -633,8 +633,8 @@ DynarecTHUMBAssemblerCore.prototype.TST = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise AND:\n" +
     "\tvar result = source & destination;\n" +
-    "\tthis.CPSR.setNegative(result < 0);\n" +
-    "\tthis.CPSR.setZero(result == 0);\n";
+    "\tthis.CPSR.setNegativeInt(result | 0);\n" +
+    "\tthis.CPSR.setZeroInt(result | 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.NEG = function (instructionValue) {
@@ -643,8 +643,8 @@ DynarecTHUMBAssemblerCore.prototype.NEG = function (instructionValue) {
     "\tthis.CPSR.setOverflow((source ^ (-(source | 0))) == 0);\n" +
     "\t//Perform Subtraction:\n" +
     "\tsource = (-(source | 0)) | 0;\n" +
-    "\tthis.CPSR.setNegative(source < 0);\n" +
-    "\tthis.CPSR.setZero(source == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(source | 0);\n" +
+    "\tthis.CPSR.setZeroInt(source | 0);\n" +
     "\t//Update destination register:\n" +
      "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
@@ -667,8 +667,8 @@ DynarecTHUMBAssemblerCore.prototype.ORR = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise OR:\n" +
     "\tvar result = source | destination;\n" +
-    "\tthis.CPSR.setNegative(result < 0);\n" +
-    "\tthis.CPSR.setZero(result == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(result | 0);\n" +
+    "\tthis.CPSR.setZeroInt(result | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -680,8 +680,8 @@ DynarecTHUMBAssemblerCore.prototype.MUL = function (instructionValue) {
     "\t//Perform MUL32:\n" +
     "\tvar result = this.CPUCore.performMUL32(source | 0, destination | 0, 0) | 0;\n" +
     "\tthis.CPSR.setCarryFalse();\n" +
-    "\tthis.CPSR.setNegative(result < 0);\n" +
-    "\tthis.CPSR.setZero(result == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(result | 0);\n" +
+    "\tthis.CPSR.setZeroInt(result | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -692,8 +692,8 @@ DynarecTHUMBAssemblerCore.prototype.BIC = function (instructionValue) {
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform bitwise AND with a bitwise NOT on source:\n" +
     "\tvar result = (~source) & destination;\n" +
-    "\tthis.CPSR.setNegative(result < 0);\n" +
-    "\tthis.CPSR.setZero(result == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(result | 0);\n" +
+    "\tthis.CPSR.setZeroInt(result | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = result | 0;\n";
     return spew;
@@ -702,8 +702,8 @@ DynarecTHUMBAssemblerCore.prototype.MVN = function (instructionValue) {
     var spew = "\t//MVN:\n" +
     "\t//Perform bitwise NOT on source:\n" +
     "\tvar source = ~this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "];\n" +
-    "\tthis.CPSR.setNegative(source < 0);\n" +
-    "\tthis.CPSR.setZero(source == 0);\n" +
+    "\tthis.CPSR.setNegativeInt(source | 0);\n" +
+    "\tthis.CPSR.setZeroInt(source | 0);\n" +
     "\t//Update destination register:\n" +
     "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = source | 0;\n";
     return spew;
