@@ -38,6 +38,9 @@ function ARMCPSRAttributeTable() {
     function setZeroTrue() {
         zero = true;
     };
+    function setZeroFalse() {
+        zero = false;
+    };
     function getZero() {
         return zero;
     };
@@ -51,7 +54,7 @@ function ARMCPSRAttributeTable() {
         return overflow;
     };
     function getOverflowAnti() {
-        return overflow;
+        return !overflow;
     };
     function setCarry(toSet) {
         carry = !!toSet;
@@ -72,6 +75,7 @@ function ARMCPSRAttributeTable() {
         "getNegativeAnti":getNegativeAnti,
         "setZero":setZero,
         "setZeroTrue":setZeroTrue,
+        "setZeroFalse":setZeroFalse,
         "getZero":getZero,
         "getZeroAnti":getZeroAnti,
         "setOverflow":setOverflow,
