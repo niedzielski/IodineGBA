@@ -58,33 +58,33 @@ ARMInstructionSet.prototype.conditionCodeTest = function () {
                         //Put this case first, since it's the most common!
             return true;
         case 0x0:        //EQ (equal)
-            return this.CPSR.zero;
+            return this.CPSR.getZero();
         case 0x1:        //NE (not equal)
-            return !this.CPSR.zero;
+            return this.CPSR.getZeroAnti();
         case 0x2:        //CS (unsigned higher or same)
-            return this.CPSR.carry;
+            return this.CPSR.getCarry();
         case 0x3:        //CC (unsigned lower)
-            return !this.CPSR.carry;
+            return this.CPSR.getCarryAnti();
         case 0x4:        //MI (negative)
-            return this.CPSR.negative;
+            return this.CPSR.getNegative();
         case 0x5:        //PL (positive or zero)
-            return !this.CPSR.negative;
+            return this.CPSR.getNegativeAnti();
         case 0x6:        //VS (overflow)
-            return this.CPSR.overflow;
+            return this.CPSR.getOverflow();
         case 0x7:        //VC (no overflow)
-            return !this.CPSR.overflow;
+            return this.CPSR.getOverflowAnti();
         case 0x8:        //HI (unsigned higher)
-            return this.CPSR.carry && !this.CPSR.zero;
+            return this.CPSR.getCarry() && this.CPSR.getZeroAnti();
         case 0x9:        //LS (unsigned lower or same)
-            return !this.CPSR.carry || this.CPSR.zero;
+            return this.CPSR.getCarryAnti() || this.CPSR.getZero();
         case 0xA:        //GE (greater or equal)
-            return this.CPSR.negative == this.CPSR.overflow;
+            return this.CPSR.getNegative() == this.CPSR.getOverflow();
         case 0xB:        //LT (less than)
-            return this.CPSR.negative != this.CPSR.overflow;
+            return this.CPSR.getNegative() != this.CPSR.getOverflow();
         case 0xC:        //GT (greater than)
-            return !this.CPSR.zero && this.CPSR.negative == this.CPSR.overflow;
+            return this.CPSR.getZeroAnti() && this.CPSR.getNegative() == this.CPSR.getOverflow();
         case 0xD:        //LE (less than or equal)
-            return this.CPSR.zero || this.CPSR.negative != this.CPSR.overflow;
+            return this.CPSR.getZero() || this.CPSR.getNegative() != this.CPSR.getOverflow();
         //case 0xF:        //Reserved (Never Execute)
         default:
             return false;
@@ -368,8 +368,8 @@ ARMInstructionSet.prototype.ANDS = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    parentObj.CPSR.negative = (result < 0);
-    parentObj.CPSR.zero = (result == 0);
+    parentObj.CPSR.setNegative(result < 0);
+    parentObj.CPSR.setZero(result == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
 }
@@ -385,8 +385,8 @@ ARMInstructionSet.prototype.EORS = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise EOR:
     var result = operand1 ^ operand2;
-    parentObj.CPSR.negative = (result < 0);
-    parentObj.CPSR.zero = (result == 0);
+    parentObj.CPSR.setNegative(result < 0);
+    parentObj.CPSR.setZero(result == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
 }
@@ -434,7 +434,7 @@ ARMInstructionSet.prototype.ADC = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Addition w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0) + ((parentObj.CPSR.carry) ? 1 : 0)) | 0);
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0) + ((parentObj.CPSR.getCarry()) ? 1 : 0)) | 0);
 }
 ARMInstructionSet.prototype.ADCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
@@ -447,7 +447,7 @@ ARMInstructionSet.prototype.SBC = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Subtraction w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0) - ((parentObj.CPSR.carry) ? 0 : 1)) | 0);
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
 }
 ARMInstructionSet.prototype.SBCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
@@ -460,7 +460,7 @@ ARMInstructionSet.prototype.RSC = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Reverse Subtraction w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0) - ((parentObj.CPSR.carry) ? 0 : 1)) | 0);
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
 }
 ARMInstructionSet.prototype.RSCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
@@ -473,16 +473,16 @@ ARMInstructionSet.prototype.TSTS = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    parentObj.CPSR.negative = (result < 0);
-    parentObj.CPSR.zero = (result == 0);
+    parentObj.CPSR.setNegative(result < 0);
+    parentObj.CPSR.setZero(result == 0);
 }
 ARMInstructionSet.prototype.TEQS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise EOR:
     var result = operand1 ^ operand2;
-    parentObj.CPSR.negative = (result < 0);
-    parentObj.CPSR.zero = (result == 0);
+    parentObj.CPSR.setNegative(result < 0);
+    parentObj.CPSR.setZero(result == 0);
 }
 ARMInstructionSet.prototype.CMPS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
@@ -506,8 +506,8 @@ ARMInstructionSet.prototype.ORRS = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise OR:
     var result = operand1 | operand2;
-    parentObj.CPSR.negative = (result < 0);
-    parentObj.CPSR.zero = (result == 0);
+    parentObj.CPSR.setNegative(result < 0);
+    parentObj.CPSR.setZero(result == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
 }
@@ -519,8 +519,8 @@ ARMInstructionSet.prototype.MOV = function (parentObj, operand2OP) {
 ARMInstructionSet.prototype.MOVS = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform move:
-    parentObj.CPSR.negative = (operand2 < 0);
-    parentObj.CPSR.zero = (operand2 == 0);
+    parentObj.CPSR.setNegative(operand2 < 0);
+    parentObj.CPSR.setZero(operand2 == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, operand2 | 0);
 }
@@ -538,8 +538,8 @@ ARMInstructionSet.prototype.BICS = function (parentObj, operand2OP) {
     var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    parentObj.CPSR.negative = (result < 0);
-    parentObj.CPSR.zero = (result == 0);
+    parentObj.CPSR.setNegative(result < 0);
+    parentObj.CPSR.setZero(result == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
 }
@@ -551,8 +551,8 @@ ARMInstructionSet.prototype.MVN = function (parentObj, operand2OP) {
 ARMInstructionSet.prototype.MVNS = function (parentObj, operand2OP) {
     var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform move negative:
-    parentObj.CPSR.negative = (operand2 < 0);
-    parentObj.CPSR.zero = (operand2 == 0);
+    parentObj.CPSR.setNegative(operand2 < 0);
+    parentObj.CPSR.setZero(operand2 == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, operand2 | 0);
 }
@@ -573,9 +573,9 @@ ARMInstructionSet.prototype.MUL = function (parentObj, operand2OP) {
 ARMInstructionSet.prototype.MULS = function (parentObj, operand2OP) {
     //Perform multiplication:
     var result = parentObj.CPUCore.performMUL32(parentObj.registers[parentObj.execute & 0xF] | 0, parentObj.registers[(parentObj.execute >> 8) & 0xF] | 0, 0) | 0;
-    parentObj.CPSR.carry = false;
-    parentObj.CPSR.negative = (result < 0);
-    parentObj.CPSR.zero = (result == 0);
+    parentObj.CPSR.setCarryFalse();
+    parentObj.CPSR.setNegative(result < 0);
+    parentObj.CPSR.setZero(result == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, result | 0);
 }
@@ -592,9 +592,9 @@ ARMInstructionSet.prototype.MLAS = function (parentObj, operand2OP) {
     var result = parentObj.CPUCore.performMUL32(parentObj.registers[parentObj.execute & 0xF] | 0, parentObj.registers[(parentObj.execute >> 8) & 0xF] | 0, 1) | 0;
     //Perform addition:
     result = ((result | 0) + (parentObj.registers[(parentObj.execute >> 12) & 0xF] | 0)) | 0;
-    parentObj.CPSR.carry = false;
-    parentObj.CPSR.negative = (result < 0);
-    parentObj.CPSR.zero = (result == 0);
+    parentObj.CPSR.setCarryFalse();
+    parentObj.CPSR.setNegative(result < 0);
+    parentObj.CPSR.setZero(result == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, result | 0);
 }
@@ -608,9 +608,9 @@ ARMInstructionSet.prototype.UMULL = function (parentObj, operand2OP) {
 ARMInstructionSet.prototype.UMULLS = function (parentObj, operand2OP) {
     //Perform multiplication:
     parentObj.CPUCore.performUMUL64(parentObj.registers[parentObj.execute & 0xF] | 0, parentObj.registers[(parentObj.execute >> 8) & 0xF] | 0);
-    parentObj.CPSR.carry = false;
-    parentObj.CPSR.negative = ((parentObj.CPUCore.mul64ResultHigh | 0) < 0);
-    parentObj.CPSR.zero = ((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
+    parentObj.CPSR.setCarryFalse();
+    parentObj.CPSR.setNegative((parentObj.CPUCore.mul64ResultHigh | 0) < 0);
+    parentObj.CPSR.setZero((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
@@ -625,9 +625,9 @@ ARMInstructionSet.prototype.UMLAL = function (parentObj, operand2OP) {
 ARMInstructionSet.prototype.UMLALS = function (parentObj, operand2OP) {
     //Perform multiplication:
     parentObj.CPUCore.performUMLA64(parentObj.registers[parentObj.execute & 0xF] | 0, parentObj.registers[(parentObj.execute >> 8) & 0xF] | 0, parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0, parentObj.registers[(parentObj.execute >> 12) & 0xF] | 0);
-    parentObj.CPSR.carry = false;
-    parentObj.CPSR.negative = ((parentObj.CPUCore.mul64ResultHigh | 0) < 0);
-    parentObj.CPSR.zero = ((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
+    parentObj.CPSR.setCarryFalse();
+    parentObj.CPSR.setNegative((parentObj.CPUCore.mul64ResultHigh | 0) < 0);
+    parentObj.CPSR.setZero((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
@@ -642,9 +642,9 @@ ARMInstructionSet.prototype.SMULL = function (parentObj, operand2OP) {
 ARMInstructionSet.prototype.SMULLS = function (parentObj, operand2OP) {
     //Perform multiplication:
     parentObj.CPUCore.performMUL64(parentObj.registers[parentObj.execute & 0xF] | 0, parentObj.registers[(parentObj.execute >> 8) & 0xF] | 0);
-    parentObj.CPSR.carry = false;
-    parentObj.CPSR.negative = ((parentObj.CPUCore.mul64ResultHigh | 0) < 0);
-    parentObj.CPSR.zero = ((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
+    parentObj.CPSR.setCarryFalse();
+    parentObj.CPSR.setNegative((parentObj.CPUCore.mul64ResultHigh | 0) < 0);
+    parentObj.CPSR.setZero((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
@@ -659,9 +659,9 @@ ARMInstructionSet.prototype.SMLAL = function (parentObj, operand2OP) {
 ARMInstructionSet.prototype.SMLALS = function (parentObj, operand2OP) {
     //Perform multiplication:
     parentObj.CPUCore.performMLA64(parentObj.registers[parentObj.execute & 0xF] | 0, parentObj.registers[(parentObj.execute >> 8) & 0xF] | 0, parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0, parentObj.registers[(parentObj.execute >> 12) & 0xF] | 0);
-    parentObj.CPSR.carry = false;
-    parentObj.CPSR.negative = ((parentObj.CPUCore.mul64ResultHigh | 0) < 0);
-    parentObj.CPSR.zero = ((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
+    parentObj.CPSR.setCarryFalse();
+    parentObj.CPSR.setNegative((parentObj.CPUCore.mul64ResultHigh | 0) < 0);
+    parentObj.CPSR.setZero((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
     //Update destination register and guard CPSR for PC:
     parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
@@ -1152,7 +1152,7 @@ ARMInstructionSet.prototype.llis = function (parentObj, operand) {
     var shifter = (operand >> 7) & 0x1F;
     //Check to see if we need to update CPSR:
     if (shifter > 0) {
-        parentObj.CPSR.carry = ((register << (shifter - 1)) < 0); 
+        parentObj.CPSR.setCarry((register << (shifter - 1)) < 0); 
     }
     //Shift the register data left:
     return register << shifter;
@@ -1183,16 +1183,16 @@ ARMInstructionSet.prototype.llrs = function (parentObj, operand) {
     if (shifter > 0) {
         if (shifter < 0x20) {
             //Shift the register data left:
-            parentObj.CPSR.carry = ((register << ((shifter - 1) | 0)) < 0);
+            parentObj.CPSR.setCarry((register << ((shifter - 1) | 0)) < 0);
             return register << shifter;
         }
         else if (shifter == 0x20) {
             //Shift bit 0 into carry:
-            parentObj.CPSR.carry = ((register & 0x1) == 0x1);
+            parentObj.CPSR.setCarry((register & 0x1) == 0x1);
         }
         else {
             //Everything Zero'd:
-            parentObj.CPSR.carry = false;
+            parentObj.CPSR.setCarryFalse();
         }
         return 0;
     }
@@ -1229,12 +1229,12 @@ ARMInstructionSet.prototype.lris = function (parentObj, operand) {
     var shifter = (operand >> 7) & 0x1F;
     //Check to see if we need to update CPSR:
     if (shifter > 0) {
-        parentObj.CPSR.carry = (((register >>> (shifter - 1)) & 0x1) == 0x1); 
+        parentObj.CPSR.setCarry(((register >>> (shifter - 1)) & 0x1) == 0x1); 
         //Shift the register data right logically:
         return register >>> shifter;
     }
     else {
-        parentObj.CPSR.carry = (register < 0);
+        parentObj.CPSR.setCarry(register < 0);
         //Return 0:
         return 0;
     }
@@ -1264,16 +1264,16 @@ ARMInstructionSet.prototype.lrrs = function (parentObj, operand) {
     if (shifter > 0) {
         if (shifter < 0x20) {
             //Shift the register data right logically:
-            parentObj.CPSR.carry = (((register >> ((shifter - 1) | 0)) & 0x1) == 0x1);
+            parentObj.CPSR.setCarry(((register >> ((shifter - 1) | 0)) & 0x1) == 0x1);
             return (register >>> shifter) | 0;
         }
         else if (shifter == 0x20) {
             //Shift bit 31 into carry:
-            parentObj.CPSR.carry = (register < 0);
+            parentObj.CPSR.setCarry(register < 0);
         }
         else {
             //Everything Zero'd:
-            parentObj.CPSR.carry = false;
+            parentObj.CPSR.setCarryFalse();
         }
         return 0;
     }
@@ -1311,12 +1311,12 @@ ARMInstructionSet.prototype.aris = function (parentObj, operand) {
     var shifter = (operand >> 7) & 0x1F;
     //Check to see if we need to update CPSR:
     if (shifter > 0) {
-        parentObj.CPSR.carry = (((register >>> (shifter - 1)) & 0x1) == 0x1);
+        parentObj.CPSR.setCarry(((register >>> (shifter - 1)) & 0x1) == 0x1);
     }
     else {
         //Shift full length if shifter is zero:
         shifter = 0x1F;
-        parentObj.CPSR.carry = (register < 0);
+        parentObj.CPSR.setCarry(register < 0);
     }
     //Shift the register data right:
     return register >> shifter;
@@ -1346,12 +1346,12 @@ ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
     if (shifter > 0) {
         if (shifter < 0x20) {
             //Shift the register data right arithmetically:
-            parentObj.CPSR.carry = (((register >> ((shifter - 1) | 0)) & 0x1) == 0x1);
+            parentObj.CPSR.setCarry(((register >> ((shifter - 1) | 0)) & 0x1) == 0x1);
             return register >> shifter;
         }
         else {
             //Set all bits with bit 31:
-            parentObj.CPSR.carry = (register < 0);
+            parentObj.CPSR.setCarry(register < 0);
             return register >> 0x1F;
         }
     }
@@ -1377,7 +1377,7 @@ ARMInstructionSet.prototype.rri2 = function (operand) {
     }
     else {
         //RRX
-        return ((this.CPSR.carry) ? 0x80000000 : 0) | (register >>> 0x1);
+        return ((this.CPSR.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
     }
 }
 ARMInstructionSet.prototype.rris = function (parentObj, operand) {
@@ -1392,13 +1392,13 @@ ARMInstructionSet.prototype.rris = function (parentObj, operand) {
     var shifter = (operand >> 7) & 0x1F;
     if (shifter > 0) {
         //ROR
-        parentObj.CPSR.carry = (((register >>> (shifter - 1)) & 0x1) == 0x1);
+        parentObj.CPSR.setCarry(((register >>> (shifter - 1)) & 0x1) == 0x1);
         return (register << (0x20 - shifter)) | (register >>> shifter);
     }
     else {
         //RRX
-        var rrxValue = ((parentObj.CPSR.carry) ? 0x80000000 : 0) | (register >>> 0x1);
-        parentObj.CPSR.carry = ((register & 0x1) != 0);
+        var rrxValue = ((parentObj.CPSR.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
+        parentObj.CPSR.setCarry((register & 0x1) != 0);
         return rrxValue | 0;
     }
 }
@@ -1433,12 +1433,12 @@ ARMInstructionSet.prototype.rrrs = function (parentObj, operand) {
         shifter &= 0x1F;
         if (shifter > 0) {
             //ROR
-            parentObj.CPSR.carry = (((register >>> (shifter - 1)) & 0x1) == 0x1);
+            parentObj.CPSR.setCarry(((register >>> (shifter - 1)) & 0x1) == 0x1);
             return (register << (0x20 - shifter)) | (register >>> shifter);
         }
         else {
             //No shift, but make carry set to bit 31:
-            parentObj.CPSR.carry = (register < 0);
+            parentObj.CPSR.setCarry(register < 0);
         }
     }
     //If shift is 0, just return the register without mod:
@@ -1467,10 +1467,10 @@ ARMInstructionSet.prototype.imms = function (parentObj, operand) {
 }
 ARMInstructionSet.prototype.rc = function (parentObj) {
     return (
-        ((parentObj.CPSR.negative) ? 0x80000000 : 0) |
-        ((parentObj.CPSR.zero) ? 0x40000000 : 0) |
-        ((parentObj.CPSR.carry) ? 0x20000000 : 0) |
-        ((parentObj.CPSR.overflow) ? 0x10000000 : 0) |
+        ((parentObj.CPSR.getNegative()) ? 0x80000000 : 0) |
+        ((parentObj.CPSR.getZero()) ? 0x40000000 : 0) |
+        ((parentObj.CPSR.getCarry()) ? 0x20000000 : 0) |
+        ((parentObj.CPSR.getOverflow()) ? 0x10000000 : 0) |
         ((parentObj.CPUCore.IRQDisabled) ? 0x80 : 0) |
         ((parentObj.CPUCore.FIQDisabled) ? 0x40 : 0) |
         0x20 | parentObj.CPUCore.MODEBits
@@ -1479,10 +1479,10 @@ ARMInstructionSet.prototype.rc = function (parentObj) {
 ARMInstructionSet.prototype.rcs = function (parentObj, operand) {
     operand = operand | 0;
     var newcpsr = parentObj.readRegister(operand & 0xF) | 0;
-    parentObj.CPSR.negative = (newcpsr < 0);
-    parentObj.CPSR.zero = ((newcpsr & 0x40000000) != 0);
-    parentObj.CPSR.carry = ((newcpsr & 0x20000000) != 0);
-    parentObj.CPSR.overflow = ((newcpsr & 0x10000000) != 0);
+    parentObj.CPSR.setNegative(newcpsr < 0);
+    parentObj.CPSR.setZero((newcpsr & 0x40000000) != 0);
+    parentObj.CPSR.setCarry((newcpsr & 0x20000000) != 0);
+    parentObj.CPSR.setOverflow((newcpsr & 0x10000000) != 0);
     if ((operand & 0x10000) == 0x10000 && parentObj.CPUCore.MODEBits != 0x10) {
         parentObj.CPUCore.IRQDisabled = ((newcpsr & 0x80) != 0);
         parentObj.CPUCore.assertIRQ();
@@ -1560,10 +1560,10 @@ ARMInstructionSet.prototype.rss = function (parentObj, operand) {
 ARMInstructionSet.prototype.ic = function (parentObj, operand) {
     operand = operand | 0;
     operand = parentObj.imm(parentObj, operand | 0) | 0;
-    parentObj.CPSR.negative = (operand < 0);
-    parentObj.CPSR.zero = ((operand & 0x40000000) != 0);
-    parentObj.CPSR.carry = ((operand & 0x20000000) != 0);
-    parentObj.CPSR.overflow = ((operand & 0x10000000) != 0);
+    parentObj.CPSR.setNegative(operand < 0);
+    parentObj.CPSR.setZero((operand & 0x40000000) != 0);
+    parentObj.CPSR.setCarry((operand & 0x20000000) != 0);
+    parentObj.CPSR.setOverflow((operand & 0x10000000) != 0);
 }
 ARMInstructionSet.prototype.is = function (parentObj, operand) {
     operand = operand | 0;

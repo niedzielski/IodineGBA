@@ -16,8 +16,70 @@
  *
  */
 function ARMCPSRAttributeTable() {
-    this.negative = false;        //N Bit
-    this.zero = false;            //Z Bit
-    this.overflow = false;        //V Bit
-    this.carry = false;           //C Bit
+    var negative = false;        //N Bit
+    var zero = false;            //Z Bit
+    var overflow = false;        //V Bit
+    var carry = false;           //C Bit
+    function setNegative(toSet) {
+        negative = !!toSet;
+    };
+    function setNegativeFalse() {
+        negative = false;
+    };
+    function getNegative() {
+        return negative;
+    };
+    function getNegativeAnti() {
+        return !negative;
+    };
+    function setZero(toSet) {
+        zero = !!toSet;
+    };
+    function setZeroTrue() {
+        zero = true;
+    };
+    function getZero() {
+        return zero;
+    };
+    function getZeroAnti() {
+        return !zero;
+    };
+    function setOverflow(toSet) {
+        overflow = !!toSet;
+    };
+    function getOverflow() {
+        return overflow;
+    };
+    function getOverflowAnti() {
+        return overflow;
+    };
+    function setCarry(toSet) {
+        carry = !!toSet;
+    };
+    function setCarryFalse() {
+        carry = false;
+    };
+    function getCarry() {
+        return carry;
+    };
+    function getCarryAnti() {
+        return !carry;
+    };
+    return {
+        "setNegative":setNegative,
+        "setNegativeFalse":setNegativeFalse,
+        "getNegative":getNegative,
+        "getNegativeAnti":getNegativeAnti,
+        "setZero":setZero,
+        "setZeroTrue":setZeroTrue,
+        "getZero":getZero,
+        "getZeroAnti":getZeroAnti,
+        "setOverflow":setOverflow,
+        "getOverflow":getOverflow,
+        "getOverflowAnti":getOverflowAnti,
+        "setCarry":setCarry,
+        "setCarryFalse":setCarryFalse,
+        "getCarry":getCarry,
+        "getCarryAnti":getCarryAnti
+    };
 }
