@@ -79,7 +79,7 @@ GameBoyAdvanceSaves.prototype.readEEPROM8 = function (address) {
     var data = 0;
     if ((this.saveType | 0) == 3) {
         //EEPROM:
-        data = this.EEPROMChip.read8(address | 0) | 0;
+        data = this.EEPROMChip.read8() | 0;
     }
     else {
         //UNKNOWN:
@@ -105,7 +105,7 @@ GameBoyAdvanceSaves.prototype.readEEPROM16 = function (address) {
     var data = 0;
     if ((this.saveType | 0) == 3) {
         //EEPROM:
-        data = this.EEPROMChip.read16(address | 0) | 0;
+        data = this.EEPROMChip.read16() | 0;
     }
     else {
         //UNKNOWN:
@@ -131,7 +131,7 @@ GameBoyAdvanceSaves.prototype.readEEPROM32 = function (address) {
     var data = 0;
     if ((this.saveType | 0) == 3) {
         //EEPROM:
-        data = this.EEPROMChip.read32(address | 0) | 0;
+        data = this.EEPROMChip.read32() | 0;
     }
     else {
         //UNKNOWN:
@@ -174,7 +174,7 @@ GameBoyAdvanceSaves.prototype.writeEEPROM8 = function (address, data) {
     data = data | 0;
     if ((this.saveType | 0) == 3) {
         //EEPROM:
-        this.EEPROMChip.write(address | 0, data | 0);
+        this.EEPROMChip.write(data | 0);
     }
     else {
         //Unknown:
