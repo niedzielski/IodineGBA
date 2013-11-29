@@ -90,7 +90,9 @@ GameBoyAdvanceEEPROMChip.prototype.write8 = function (data) {
     switch (this.mode | 0) {
         //Idle Mode:
         case 0:
-            this.mode = data | 0;
+            if ((data | 0) == 1) {
+                this.mode = 1;
+            }
             break;
         //Select Mode:
         case 0x1:
@@ -111,7 +113,7 @@ GameBoyAdvanceEEPROMChip.prototype.write8 = function (data) {
         //Read Mode:
         case 0x5:
         case 0x6:
-            this.resetMode();
+            //this.resetMode();
     }
 }
 GameBoyAdvanceEEPROMChip.prototype.write16 = function (data) {
@@ -139,14 +141,12 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForWrite = function (data) {
     switch (this.bitsProcessed | 0) {
         case 0x6:
             //6 bit address mode:
-            this.largestSizePossible = 0x200;
-            this.allocate();
-            this.changeModeToActive();
+            if (this.largestSizePossible == 0x200) {
+                this.changeModeToActive();
+            }
             break;
         case 0xE:
             //14 bit address mode:
-            this.largestSizePossible = 0x2000;
-            this.allocate();
             this.changeModeToActive();
     }
 }
@@ -156,14 +156,12 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForRead = function (data) {
     switch (this.bitsProcessed | 0) {
         case 0x6:
             //6 bit address mode:
-            this.largestSizePossible = 0x200;
-            this.allocate();
-            this.changeModeToActive();
+            if (this.largestSizePossible == 0x200) {
+                this.changeModeToActive();
+            }
             break;
         case 0xE:
             //14 bit address mode:
-            this.largestSizePossible = 0x2000;
-            this.allocate();
             this.changeModeToActive();
             break;
         default:
