@@ -26,7 +26,7 @@ GameBoyAdvanceSaves.prototype.initialize = function () {
     this.UNDETERMINED = new GameBoyAdvanceSaveDeterminer(this);
     this.SRAMChip = new GameBoyAdvanceSRAMChip();
     this.FLASHChip = new GameBoyAdvanceFLASHChip(this.cartridge.flash_is128, this.cartridge.flash_isAtmel);
-    this.EEPROMChip = new GameBoyAdvanceEEPROMChip();
+    this.EEPROMChip = new GameBoyAdvanceEEPROMChip(this.cartridge.IOCore);
     this.currentChip = this.UNDETERMINED;
     this.referenceSave(this.saveType);
 }

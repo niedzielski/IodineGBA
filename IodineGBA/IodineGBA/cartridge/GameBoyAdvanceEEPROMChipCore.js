@@ -15,13 +15,14 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceEEPROMChip() {
+function GameBoyAdvanceEEPROMChip(IOCore) {
     this.saves = null;
     this.largestSizePossible = 0x200;
     this.mode = 0;
     this.bitsProcessed = 0;
     this.address = 0;
     this.buffer = getUint8Array(8);
+    this.IOCore = IOCore;
     //Special note to emulator authors: EEPROM command ending bit "0" can also be a "1"...
 }
 GameBoyAdvanceEEPROMChip.prototype.initialize = function () {
@@ -96,31 +97,34 @@ GameBoyAdvanceEEPROMChip.prototype.write8 = function (data) {
 }
 GameBoyAdvanceEEPROMChip.prototype.write16 = function (data) {
     data = data & 0x1;
-    switch (this.mode | 0) {
-        //Idle Mode:
-        case 0:
-            this.mode = data | 0;
-            break;
-        //Select Mode:
-        case 0x1:
-            this.selectMode(data | 0);
-            break;
-        //Address Mode (Write):
-        case 0x2:
-            this.addressModeForWrite(data | 0);
-            break;
-        //Address Mode (Read):
-        case 0x3:
-            this.addressModeForRead(data | 0);
-            break;
-        //Write Mode:
-        case 0x4:
-            this.writeMode(data | 0);
-            break;
-        //Read Mode:
-        case 0x5:
-        case 0x6:
-            this.resetMode();
+    if ((this.IOCore.systemStatus & 0x1) == 0x1) {
+        //Writes only work in DMA:
+        switch (this.mode | 0) {
+                //Idle Mode:
+            case 0:
+                this.mode = data | 0;
+                break;
+                //Select Mode:
+            case 0x1:
+                this.selectMode(data | 0);
+                break;
+                //Address Mode (Write):
+            case 0x2:
+                this.addressModeForWrite(data | 0);
+                break;
+                //Address Mode (Read):
+            case 0x3:
+                this.addressModeForRead(data | 0);
+                break;
+                //Write Mode:
+            case 0x4:
+                this.writeMode(data | 0);
+                break;
+                //Read Mode:
+            case 0x5:
+            case 0x6:
+                this.resetMode();
+        }
     }
 }
 GameBoyAdvanceEEPROMChip.prototype.write32 = function (data) {
@@ -145,8 +149,12 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForWrite = function (data) {
     switch (this.bitsProcessed | 0) {
         case 0x6:
             //6 bit address mode:
-            if ((this.largestSizePossible | 0) == 0x200) {
+            if (this.IOCore.dma.wordCountShadow[3] < 0x4A && (this.largestSizePossible | 0) == 0x200) {
                 this.changeModeToActive();
+            }
+            else {
+                this.largestSizePossible = 0x2000;
+                this.allocate();
             }
             break;
         case 0xE:
@@ -160,8 +168,12 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForRead = function (data) {
     switch (this.bitsProcessed | 0) {
         case 0x6:
             //6 bit address mode:
-            if ((this.largestSizePossible | 0) == 0x200) {
+            if (this.IOCore.dma.wordCountShadow[3] < 0xA && (this.largestSizePossible | 0) == 0x200) {
                 this.changeModeToActive();
+            }
+            else {
+                this.largestSizePossible = 0x2000;
+                this.allocate();
             }
             break;
         case 0xE:
