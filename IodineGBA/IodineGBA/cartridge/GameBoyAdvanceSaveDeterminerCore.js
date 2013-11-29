@@ -75,6 +75,16 @@ GameBoyAdvanceSaveDeterminer.prototype.writeGPIO8 = function (address, data) {
     data = data | 0;
     //GPIO (TODO):
 }
+GameBoyAdvanceSaveDeterminer.prototype.writeGPIO16 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    //GPIO (TODO):
+}
+GameBoyAdvanceSaveDeterminer.prototype.writeGPIO32 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    //GPIO (TODO):
+}
 GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM8 = function (address, data) {
     address = address | 0;
     data = data | 0;
@@ -83,6 +93,26 @@ GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM8 = function (address, data) {
         this.possible = this.flags.EEPROM | 0;
         this.checkDetermination();
         this.saveCore.writeEEPROM8(address | 0, data | 0);
+    }
+}
+GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM16 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
+        //EEPROM:
+        this.possible = this.flags.EEPROM | 0;
+        this.checkDetermination();
+        this.saveCore.writeEEPROM16(address | 0, data | 0);
+    }
+}
+GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM32 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
+        //EEPROM:
+        this.possible = this.flags.EEPROM | 0;
+        this.checkDetermination();
+        this.saveCore.writeEEPROM32(address | 0, data | 0);
     }
 }
 GameBoyAdvanceSaveDeterminer.prototype.readEEPROM8 = function (address) {

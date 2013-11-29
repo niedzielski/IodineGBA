@@ -77,23 +77,15 @@ GameBoyAdvanceEEPROMChip.prototype.read8 = function () {
             this.resetMode();
         }
     }
-    else if ((this.mode | 0) == 4) {
-        //Report that the writes aren't done yet:
-        data = 0;
-    }
     return data | 0;
 }
-GameBoyAdvanceEEPROMChip.prototype.read16 = function (address) {
-    var data = this.read8() | 0;
-    data |= this.read8() << 8;
-    return data | 0;
+GameBoyAdvanceEEPROMChip.prototype.read16 = function () {
+    return this.read8() | 0;
 }
-GameBoyAdvanceEEPROMChip.prototype.read32 = function (address) {
-    var data = this.read16() | 0;
-    data |= this.read16() << 16;
-    return data | 0;
+GameBoyAdvanceEEPROMChip.prototype.read32 = function () {
+    return this.read8() | 0;
 }
-GameBoyAdvanceEEPROMChip.prototype.write = function (data) {
+GameBoyAdvanceEEPROMChip.prototype.write8 = function (data) {
     data = data & 0x1;
     switch (this.mode | 0) {
         //Idle Mode:
@@ -118,9 +110,15 @@ GameBoyAdvanceEEPROMChip.prototype.write = function (data) {
             break;
         //Read Mode:
         case 0x5:
+        case 0x6:
             this.resetMode();
-            
     }
+}
+GameBoyAdvanceEEPROMChip.prototype.write16 = function (data) {
+    this.write8(data | 0);
+}
+GameBoyAdvanceEEPROMChip.prototype.write32 = function (data) {
+    this.write8(data | 0);
 }
 GameBoyAdvanceEEPROMChip.prototype.selectMode = function (data) {
     data = data | 0;
