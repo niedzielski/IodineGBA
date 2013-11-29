@@ -72,7 +72,7 @@ GameBoyAdvanceEEPROMChip.prototype.read8 = function () {
         //Increment our bits counter:
         this.bitsProcessed = ((this.bitsProcessed | 0) + 1) | 0;
         //Check for end of read:
-        if ((this.bitsProcessed | 0) == 0x3F) {
+        if ((this.bitsProcessed | 0) == 0x40) {
             //Finished read and now idle:
             this.resetMode();
         }
@@ -155,24 +155,16 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForRead = function (data) {
     //Check for how many bits we've shifted in:
     switch (this.bitsProcessed | 0) {
         case 0x6:
-            if ((data | 0) == 0) {
-                //6 bit address mode:
-                this.largestSizePossible = 0x200;
-                this.allocate();
-                this.changeModeToActive();
-            }
+            //6 bit address mode:
+            this.largestSizePossible = 0x200;
+            this.allocate();
+            this.changeModeToActive();
             break;
         case 0xE:
-            if ((data | 0) == 0) {
-                //14 bit address mode:
-                this.largestSizePossible = 0x2000;
-                this.allocate();
-                this.changeModeToActive();
-            }
-            else {
-                //Invalid address mode stop:
-                this.resetMode();
-            }
+            //14 bit address mode:
+            this.largestSizePossible = 0x2000;
+            this.allocate();
+            this.changeModeToActive();
             break;
         default:
             //Shift in our address bit:
