@@ -771,17 +771,17 @@ GameBoyAdvanceMemory.prototype.readROM132 = function (parentObj, address) {
 GameBoyAdvanceMemory.prototype.readROM28 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.ROM2Access8();
-    return parentObj.cartridge.readROM8(address & 0x1FFFFFF) | 0;
+    return parentObj.cartridge.readROM8Space2(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM216 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.ROM2Access16();
-    return parentObj.cartridge.readROM16(address & 0x1FFFFFF) | 0;
+    return parentObj.cartridge.readROM16Space2(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM232 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.ROM2Access32();
-    return parentObj.cartridge.readROM32(address & 0x1FFFFFF) | 0;
+    return parentObj.cartridge.readROM32Space2(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readSRAM8 = function (parentObj, address) {
     address = address | 0;
