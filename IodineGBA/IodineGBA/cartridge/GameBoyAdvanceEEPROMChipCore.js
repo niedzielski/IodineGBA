@@ -22,6 +22,7 @@ function GameBoyAdvanceEEPROMChip() {
     this.bitsProcessed = 0;
     this.address = 0;
     this.buffer = getUint8Array(8);
+    //Special note to emulator authors: EEPROM command ending bit "0" can also be a "1"...
 }
 GameBoyAdvanceEEPROMChip.prototype.initialize = function () {
     this.allocate();
@@ -189,10 +190,13 @@ GameBoyAdvanceEEPROMChip.prototype.writeMode = function (data) {
     if ((this.bitsProcessed | 0) < 0x40) {
         //Push a bit into the buffer:
         this.pushBuffer(data | 0);
+        //Save on last write bit push:
+        if ((this.bitsProcessed | 0) == 0x40) {
+            //64 bits buffered, so copy our buffer to the save data:
+            this.copyBuffer();
+        }
     }
     else {
-        //64 bits buffered, so copy our buffer to the save data:
-        this.copyBuffer();
         //Reset back to initial:
         this.resetMode();
     }
