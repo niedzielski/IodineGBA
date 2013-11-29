@@ -55,31 +55,34 @@ GameBoyAdvanceEEPROMChip.prototype.read8 = function () {
 }
 GameBoyAdvanceEEPROMChip.prototype.read16 = function () {
     var data = 1;
-    if ((this.mode | 0) == 5) {
-        //Return 4 junk 0 bits:
-        data = 0;
-        if ((this.bitsProcessed | 0) < 3) {
-            //Increment our bits counter:
-            this.bitsProcessed = ((this.bitsProcessed | 0) + 1) | 0;
-        }
-        else {
-            //Reset our bits counter:
-            this.bitsProcessed = 0;
-            //Change mode for the actual reads:
-            this.mode = 6;
-        }
-    }
-    else if ((this.mode | 0) == 6) {
-        //Return actual serial style data:
-        var address = ((this.bitsProcessed >> 3) + (this.address | 0)) | 0;
-        data = (this.saves[address | 0] >> ((0x7 - (this.bitsProcessed & 0x7)) | 0)) & 0x1;
-        //Increment our bits counter:
-        this.bitsProcessed = ((this.bitsProcessed | 0) + 1) | 0;
-        //Check for end of read:
-        if ((this.bitsProcessed | 0) == 0x40) {
-            //Finished read and now idle:
-            this.resetMode();
-        }
+    switch (this.mode | 0) {
+        case 0x5:
+            //Return 4 junk 0 bits:
+            data = 0;
+            if ((this.bitsProcessed | 0) < 3) {
+                //Increment our bits counter:
+                this.bitsProcessed = ((this.bitsProcessed | 0) + 1) | 0;
+            }
+            else {
+                //Reset our bits counter:
+                this.bitsProcessed = 0;
+                //Change mode for the actual reads:
+                this.mode = 6;
+            }
+            break;
+        case 0x6:
+            //Return actual serial style data:
+            var address = ((this.bitsProcessed >> 3) + (this.address | 0)) | 0;
+            data = (this.saves[address | 0] >> ((0x7 - (this.bitsProcessed & 0x7)) | 0)) & 0x1;
+            //Check for end of read:
+            if ((this.bitsProcessed | 0) < 0x3F) {
+                //Increment our bits counter:
+                this.bitsProcessed = ((this.bitsProcessed | 0) + 1) | 0;
+            }
+            else {
+                //Finished read and now idle:
+                this.resetMode();
+            }
     }
     return data | 0;
 }
@@ -141,7 +144,7 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForWrite = function (data) {
     switch (this.bitsProcessed | 0) {
         case 0x6:
             //6 bit address mode:
-            if (this.largestSizePossible == 0x200) {
+            if ((this.largestSizePossible | 0) == 0x200) {
                 this.changeModeToActive();
             }
             break;
@@ -156,7 +159,7 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForRead = function (data) {
     switch (this.bitsProcessed | 0) {
         case 0x6:
             //6 bit address mode:
-            if (this.largestSizePossible == 0x200) {
+            if ((this.largestSizePossible | 0) == 0x200) {
                 this.changeModeToActive();
             }
             break;
