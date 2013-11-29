@@ -23,7 +23,11 @@ Screenshots
 * **Pokemon Ruby:**
 
     ![Pokemon Ruby](http://i.imgur.com/OO9XCRk.png "Pokemon Ruby")
+   
+* **Super Mario Advance:**
     
+    ![Super Mario Advance](http://i.imgur.com/ewhtAJg.png "Super Mario Advance")
+
 * **Mario & Luigi Superstar Saga:**
     
     ![Mario & Luigi Superstar Saga](http://i.imgur.com/Do8TbsMh.png "Mario & Luigi Superstar Saga")
