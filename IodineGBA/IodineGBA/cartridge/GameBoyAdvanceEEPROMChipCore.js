@@ -50,6 +50,10 @@ GameBoyAdvanceEEPROMChip.prototype.load = function (save) {
     }
 }
 GameBoyAdvanceEEPROMChip.prototype.read8 = function () {
+    //Can't do real reading with 8-bit reads:
+    return 0x1;
+}
+GameBoyAdvanceEEPROMChip.prototype.read16 = function () {
     var data = 1;
     if ((this.mode | 0) == 5) {
         //Return 4 junk 0 bits:
@@ -79,20 +83,19 @@ GameBoyAdvanceEEPROMChip.prototype.read8 = function () {
     }
     return data | 0;
 }
-GameBoyAdvanceEEPROMChip.prototype.read16 = function () {
-    return this.read8() | 0;
-}
 GameBoyAdvanceEEPROMChip.prototype.read32 = function () {
-    return this.read8() | 0;
+    //Can't do real reading with 32-bit reads:
+    return 0x10001;
 }
 GameBoyAdvanceEEPROMChip.prototype.write8 = function (data) {
+    //Fails on hardware
+}
+GameBoyAdvanceEEPROMChip.prototype.write16 = function (data) {
     data = data & 0x1;
     switch (this.mode | 0) {
         //Idle Mode:
         case 0:
-            if ((data | 0) == 1) {
-                this.mode = 1;
-            }
+            this.mode = data | 0;
             break;
         //Select Mode:
         case 0x1:
@@ -113,14 +116,11 @@ GameBoyAdvanceEEPROMChip.prototype.write8 = function (data) {
         //Read Mode:
         case 0x5:
         case 0x6:
-            //this.resetMode();
+            this.resetMode();
     }
 }
-GameBoyAdvanceEEPROMChip.prototype.write16 = function (data) {
-    this.write8(data | 0);
-}
 GameBoyAdvanceEEPROMChip.prototype.write32 = function (data) {
-    this.write8(data | 0);
+    //Fails on hardware
 }
 GameBoyAdvanceEEPROMChip.prototype.selectMode = function (data) {
     data = data | 0;
@@ -188,10 +188,8 @@ GameBoyAdvanceEEPROMChip.prototype.writeMode = function (data) {
         this.pushBuffer(data | 0);
     }
     else {
-        if ((data | 0) == 0) {
-            //64 bits buffered, so copy our buffer to the save data:
-            this.copyBuffer();
-        }
+        //64 bits buffered, so copy our buffer to the save data:
+        this.copyBuffer();
         //Reset back to initial:
         this.resetMode();
     }
