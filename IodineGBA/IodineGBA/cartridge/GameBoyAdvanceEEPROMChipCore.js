@@ -139,10 +139,14 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForWrite = function (data) {
     switch (this.bitsProcessed | 0) {
         case 0x6:
             //6 bit address mode:
+            this.largestSizePossible = 0x200;
+            this.allocate();
             this.changeModeToActive();
             break;
         case 0xE:
             //14 bit address mode:
+            this.largestSizePossible = 0x2000;
+            this.allocate();
             this.changeModeToActive();
     }
 }
@@ -153,12 +157,16 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForRead = function (data) {
         case 0x6:
             if ((data | 0) == 0) {
                 //6 bit address mode:
+                this.largestSizePossible = 0x200;
+                this.allocate();
                 this.changeModeToActive();
             }
             break;
         case 0xE:
             if ((data | 0) == 0) {
                 //14 bit address mode:
+                this.largestSizePossible = 0x2000;
+                this.allocate();
                 this.changeModeToActive();
             }
             else {
@@ -174,6 +182,8 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForRead = function (data) {
     }
 }
 GameBoyAdvanceEEPROMChip.prototype.changeModeToActive = function () {
+    //Ensure the address range:
+    this.address &= 0x3FF;
     //Addressing in units of 8 bytes:
     this.address <<= 3;
     //Reset our bits counter:
