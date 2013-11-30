@@ -194,45 +194,6 @@ GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
     }
     return data | 0;
 }
-GameBoyAdvanceCartridge.prototype.readROM8 = function (address) {
-    address = address | 0;
-    var data = 0;
-    if ((address | 0) < 0x100) {
-        //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO8(address | 0) | 0;
-    }
-    else {
-        //Definitely ROM:
-        data = this.readROMOnly8(address | 0) | 0;
-    }
-    return data | 0;
-}
-GameBoyAdvanceCartridge.prototype.readROM16 = function (address) {
-    address = address | 0;
-    var data = 0;
-    if ((address | 0) < 0x100) {
-        //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO16(address | 0) | 0;
-    }
-    else {
-        //Definitely ROM:
-        data = this.readROMOnly16(address | 0) | 0;
-    }
-    return data | 0;
-}
-GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
-    address = address | 0;
-    var data = 0;
-    if ((address | 0) < 0x100) {
-        //Possibly GPIO:
-        data = this.IOCore.saves.readGPIO32(address | 0) | 0;
-    }
-    else {
-        //Definitely ROM:
-        data = this.readROMOnly32(address | 0) | 0;
-    }
-    return data | 0;
-}
 GameBoyAdvanceCartridge.prototype.readROM8Space2 = function (address) {
     address = address | 0;
     var data = 0;
