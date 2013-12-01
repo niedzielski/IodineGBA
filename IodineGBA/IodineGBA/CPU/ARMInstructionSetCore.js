@@ -42,53 +42,12 @@ ARMInstructionSet.prototype.executeIteration = function () {
 ARMInstructionSet.prototype.executeARM = function () {
     //Don't execute if the pipeline is still invalid:
     if ((this.CPUCore.pipelineInvalid | 0) == 0) {
-        //Check the condition code:
-        if (this.conditionCodeTest()) {
-            this.instructionMap[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)]();
-        }
+        this.instructionMap[((this.execute >> 16) & 0xFFF0) | ((this.execute >> 4) & 0xF)]();
     }
 }
 ARMInstructionSet.prototype.incrementProgramCounter = function () {
     //Increment The Program Counter:
     this.registers[15] = ((this.registers[15] | 0) + 4) | 0;
-}
-ARMInstructionSet.prototype.conditionCodeTest = function () {
-    switch (this.execute >>> 28) {
-        case 0xE:        //AL (always)
-                        //Put this case first, since it's the most common!
-            return true;
-        case 0x0:        //EQ (equal)
-            return this.CPSR.getZero();
-        case 0x1:        //NE (not equal)
-            return !this.CPSR.getZero();
-        case 0x2:        //CS (unsigned higher or same)
-            return this.CPSR.getCarry();
-        case 0x3:        //CC (unsigned lower)
-            return !this.CPSR.getCarry();
-        case 0x4:        //MI (negative)
-            return this.CPSR.getNegative();
-        case 0x5:        //PL (positive or zero)
-            return !this.CPSR.getNegative();
-        case 0x6:        //VS (overflow)
-            return this.CPSR.getOverflow();
-        case 0x7:        //VC (no overflow)
-            return !this.CPSR.getOverflow();
-        case 0x8:        //HI (unsigned higher)
-            return this.CPSR.getCarry() && !this.CPSR.getZero();
-        case 0x9:        //LS (unsigned lower or same)
-            return !this.CPSR.getCarry() || this.CPSR.getZero();
-        case 0xA:        //GE (greater or equal)
-            return this.CPSR.getNegative() == this.CPSR.getOverflow();
-        case 0xB:        //LT (less than)
-            return this.CPSR.getNegative() != this.CPSR.getOverflow();
-        case 0xC:        //GT (greater than)
-            return !this.CPSR.getZero() && this.CPSR.getNegative() == this.CPSR.getOverflow();
-        case 0xD:        //LE (less than or equal)
-            return this.CPSR.getZero() || this.CPSR.getNegative() != this.CPSR.getOverflow();
-        //case 0xF:        //Reserved (Never Execute)
-        default:
-            return false;
-    }
 }
 ARMInstructionSet.prototype.getLR = function () {
     return ((this.readPC() | 0) - 4) | 0;
@@ -4579,11 +4538,13 @@ ARMInstructionSet.prototype.generateStoreLoadInstructionSector2 = function (inst
 ARMInstructionSet.prototype.compileReducedInstructionMap = function (instructionMap) {
     //Flatten the multi-dimensional decode array:
     this.instructionMap = [];
-    for (var range1 = 0; range1 < 0x100; ++range1) {
-        var instrDecoded = instructionMap[range1];
-        for (var range2 = 0; range2 < 0x10; ++range2) {
-            var instructionCombo = instrDecoded[range2];
-            this.instructionMap.push(this.appendInstruction(this, instructionCombo[0], instructionCombo[1]));
+    for (var conditionCode = 0; conditionCode < 0x10; ++conditionCode) {
+        for (var range1 = 0; range1 < 0x100; ++range1) {
+            var instrDecoded = instructionMap[range1];
+            for (var range2 = 0; range2 < 0x10; ++range2) {
+                var instructionCombo = instrDecoded[range2];
+                this.instructionMap.push(this.appendInstruction(this, conditionCode | 0, instructionCombo[0], instructionCombo[1]));
+            }
         }
     }
     //Force length to be ready only:
@@ -4594,8 +4555,98 @@ ARMInstructionSet.prototype.compileReducedInstructionMap = function (instruction
         //Some browsers throw here....
     }
 }
-ARMInstructionSet.prototype.appendInstruction = function (parentObj, decodedInstr, decodedOperand) {
-    return function () {
-        decodedInstr(parentObj, decodedOperand);
+ARMInstructionSet.prototype.appendInstruction = function (parentObj, conditionCode, decodedInstr, decodedOperand) {
+    switch (conditionCode & 0xF) {
+        case 0x0:        //EQ (equal)
+            return function () {
+                if (parentObj.CPSR.getZero()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x1:        //NE (not equal)
+            return function () {
+                if (!parentObj.CPSR.getZero()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x2:        //CS (unsigned higher or same)
+            return function () {
+                if (parentObj.CPSR.getCarry()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x3:        //CC (unsigned lower)
+            return function () {
+                if (!parentObj.CPSR.getCarry()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x4:        //MI (negative)
+            return function () {
+                if (parentObj.CPSR.getNegative()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x5:        //PL (positive or zero)
+            return function () {
+                if (!parentObj.CPSR.getNegative()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x6:        //VS (overflow)
+            return function () {
+                if (parentObj.CPSR.getOverflow()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x7:        //VC (no overflow)
+            return function () {
+                if (!parentObj.CPSR.getOverflow()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x8:        //HI (unsigned higher)
+            return function () {
+                if (parentObj.CPSR.getCarry() && !parentObj.CPSR.getZero()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0x9:        //LS (unsigned lower or same)
+            return function () {
+                if (!parentObj.CPSR.getCarry() || parentObj.CPSR.getZero()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0xA:        //GE (greater or equal)
+            return function () {
+                if (parentObj.CPSR.getNegative() == parentObj.CPSR.getOverflow()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0xB:        //LT (less than)
+            return function () {
+                if (parentObj.CPSR.getNegative() != parentObj.CPSR.getOverflow()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0xC:        //GT (greater than)
+            return function () {
+                if (!parentObj.CPSR.getZero() && parentObj.CPSR.getNegative() == parentObj.CPSR.getOverflow()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0xD:        //LE (less than or equal)
+            return function () {
+                if (parentObj.CPSR.getZero() || parentObj.CPSR.getNegative() != parentObj.CPSR.getOverflow()) {
+                    decodedInstr(parentObj, decodedOperand);
+                }
+            }
+        case 0xE:        //AL (always)
+            return function () {
+                decodedInstr(parentObj, decodedOperand);
+            }
+        case 0xF:        //Reserved (Never Execute)
+        default:
+            return function () {};
     }
 }
