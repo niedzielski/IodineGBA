@@ -432,7 +432,7 @@ DynarecTHUMBAssemblerCore.prototype.ADDreg = function (instructionValue) {
     "\tvar operand1 = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
     "\tvar operand2 = this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
     "\t//Update destination register:\n" +
-    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.SUBreg = function (instructionValue) {
@@ -440,21 +440,21 @@ DynarecTHUMBAssemblerCore.prototype.SUBreg = function (instructionValue) {
     "\tvar operand1 = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
     "\tvar operand2 = this.registers[" + this.toHex((instructionValue >> 6) & 0x7) + "] | 0;\n" +
     "\t//Update destination register:\n" +
-    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.ADDimm3 = function (instructionValue) {
     var spew = "\t//ADDimm3:\n" +
     "\tvar operand1 = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
     "\t//Update destination register:\n" +
-    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setADDFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0;\n";
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPSR.setADDFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.SUBimm3 = function (instructionValue) {
     var spew = "\t//SUBimm3:\n" +
     "\tvar operand1 = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
     "\t//Update destination register:\n" +
-    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setSUBFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0;\n";
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPSR.setSUBFlags(operand1 | 0, " + this.toHex((instructionValue >> 6) & 0x7) + ") | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.MOVimm8 = function (instructionValue) {
@@ -470,21 +470,21 @@ DynarecTHUMBAssemblerCore.prototype.CMPimm8 = function (instructionValue) {
     var spew = "\t//CMPimm8:\n" +
     "\t//Compare an 8-bit immediate value with a register:\n" +
     "\tvar operand1 = this.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] | 0;\n" +
-    "\tthis.CPUCore.setCMPFlags(operand1 | 0, " + this.toHex(instructionValue & 0xFF) + ");\n";
+    "\tthis.CPSR.setCMPFlags(operand1 | 0, " + this.toHex(instructionValue & 0xFF) + ");\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.ADDimm8 = function (instructionValue) {
     var spew = "\t//ADDimm8:\n" +
     "\t//Add an 8-bit immediate value with a register:\n" +
     "\tvar operand1 = this.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] | 0;\n" +
-    "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = this.CPUCore.setADDFlags(operand1 | 0, " + this.toHex(instructionValue & 0xFF) + ") | 0;\n";
+    "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = this.CPSR.setADDFlags(operand1 | 0, " + this.toHex(instructionValue & 0xFF) + ") | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.SUBimm8 = function (instructionValue) {
     var spew = "\t//SUBimm8:\n" +
     "\t//Subtract an 8-bit immediate value with a register:\n" +
     "\tvar operand1 = this.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] | 0;\n" +
-    "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = this.CPUCore.setSUBFlags(operand1 | 0, " + this.toHex(instructionValue & 0xFF) + ") | 0;\n";
+    "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = this.CPSR.setSUBFlags(operand1 | 0, " + this.toHex(instructionValue & 0xFF) + ") | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.AND = function (instructionValue) {
@@ -594,14 +594,14 @@ DynarecTHUMBAssemblerCore.prototype.ADC = function (instructionValue) {
     var spew = "\t//ADC:\n" +
     "\tvar operand1 = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\tvar operand2 = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
-    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setADCFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.SBC = function (instructionValue) {
     var spew = "\t//SBC:\n" +
     "\tvar operand1 = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\tvar operand2 = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
-    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPUCore.setSBCFlags(operand1 | 0, operand2 | 0) | 0;\n";
+    "\tthis.registers[" + this.toHex(instructionValue & 0x7) + "] = this.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0;\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.ROR = function (instructionValue) {
@@ -652,13 +652,13 @@ DynarecTHUMBAssemblerCore.prototype.NEG = function (instructionValue) {
 DynarecTHUMBAssemblerCore.prototype.CMP = function (instructionValue) {
     var spew = "\t//CMP:\n" +
     "\t//Compare two registers:\n" +
-    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
+    "\tthis.CPSR.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.CMN = function (instructionValue) {
     var spew = "\t//CMN:\n" +
     "\t//Compare two registers:\n" +
-    "\tthis.CPUCore.setCMNFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
+    "\tthis.CPSR.setCMNFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.ORR = function (instructionValue) {
@@ -739,25 +739,25 @@ DynarecTHUMBAssemblerCore.prototype.ADDH_HH = function (instructionValue) {
 DynarecTHUMBAssemblerCore.prototype.CMPH_LL = function (instructionValue) {
     var spew = "\t//CMPH_LL:\n" +
     "\t//Compare two registers:\n" +
-    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
+    "\tthis.CPSR.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.CMPH_LH = function (instructionValue) {
     var spew = "\t//CMPH_LH:\n" +
     "\t//Compare two registers:\n" +
-    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0);\n";
+    "\tthis.CPSR.setCMPFlags(this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0, this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.CMPH_HL = function (instructionValue) {
     var spew = "\t//CMPH_HL:\n" +
     "\t//Compare two registers:\n" +
-    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
+    "\tthis.CPSR.setCMPFlags(this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0, this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.CMPH_HH = function (instructionValue) {
     var spew = "\t//CMPH_HH:\n" +
     "\t//Compare two registers:\n" +
-    "\tthis.CPUCore.setCMPFlags(this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0, this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0);\n";
+    "\tthis.CPSR.setCMPFlags(this.registers[" + this.toHex(0x8 | (instructionValue & 0x7)) + "] | 0, this.registers[" + this.toHex(0x8 | ((instructionValue >> 3) & 0x7)) + "] | 0);\n";
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.MOVH_LL = function (instructionValue) {

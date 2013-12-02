@@ -417,13 +417,13 @@ ARMInstructionSet.prototype.SUBS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SUBS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSB = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
@@ -443,13 +443,13 @@ ARMInstructionSet.prototype.RSBS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSBS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADD = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
@@ -469,13 +469,13 @@ ARMInstructionSet.prototype.ADDS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
     var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADDS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADC = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
@@ -495,13 +495,13 @@ ARMInstructionSet.prototype.ADCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADCS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SBC = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
@@ -521,13 +521,13 @@ ARMInstructionSet.prototype.SBCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SBCS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSC = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
@@ -547,13 +547,13 @@ ARMInstructionSet.prototype.RSCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSCS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.TSTS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
@@ -590,22 +590,22 @@ ARMInstructionSet.prototype.TEQS2 = function (parentObj, operand2OP) {
 ARMInstructionSet.prototype.CMPS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
-    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 ARMInstructionSet.prototype.CMPS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
-    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 ARMInstructionSet.prototype.CMNS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();
     var operand2 = operand2OP(parentObj, parentObj.execute | 0);
-    parentObj.CPUCore.setCMNFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMNFlags(operand1 | 0, operand2 | 0);
 }
 ARMInstructionSet.prototype.CMNS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0);
-    parentObj.CPUCore.setCMNFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMNFlags(operand1 | 0, operand2 | 0);
 }
 ARMInstructionSet.prototype.ORR = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister();

@@ -185,25 +185,25 @@ THUMBInstructionSet.prototype.ADDreg = function (parentObj) {
     var operand1 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
     var operand2 = parentObj.readLowRegister(parentObj.execute >> 6) | 0;
     //Update destination register:
-    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.SUBreg = function (parentObj) {
     var operand1 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
     var operand2 = parentObj.readLowRegister(parentObj.execute >> 6) | 0;
     //Update destination register:
-    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.ADDimm3 = function (parentObj) {
     var operand1 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
     var operand2 = (parentObj.execute >> 6) & 0x7;
     //Update destination register:
-    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.SUBimm3 = function (parentObj) {
     var operand1 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
     var operand2 = (parentObj.execute >> 6) & 0x7;
     //Update destination register:
-    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.MOVimm8 = function (parentObj) {
     //Get the 8-bit value to move into the register:
@@ -217,19 +217,19 @@ THUMBInstructionSet.prototype.CMPimm8 = function (parentObj) {
     //Compare an 8-bit immediate value with a register:
     var operand1 = parentObj.readLowRegister(parentObj.execute >> 8) | 0;
     var operand2 = parentObj.execute & 0xFF;
-    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.ADDimm8 = function (parentObj) {
     //Add an 8-bit immediate value with a register:
     var operand1 = parentObj.readLowRegister(parentObj.execute >> 8) | 0;
     var operand2 = parentObj.execute & 0xFF;
-    parentObj.writeLowRegister(parentObj.execute >> 8, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.writeLowRegister(parentObj.execute >> 8, parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.SUBimm8 = function (parentObj) {
     //Subtract an 8-bit immediate value from a register:
     var operand1 = parentObj.readLowRegister(parentObj.execute >> 8) | 0;
     var operand2 = parentObj.execute & 0xFF;
-    parentObj.writeLowRegister(parentObj.execute >> 8, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.writeLowRegister(parentObj.execute >> 8, parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.AND = function (parentObj) {
     var source = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
@@ -331,13 +331,13 @@ THUMBInstructionSet.prototype.ADC = function (parentObj) {
     var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
     //Update destination register:
-    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.SBC = function (parentObj) {
     var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
     //Update destination register:
-    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPUCore.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.writeLowRegister(parentObj.execute | 0, parentObj.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 THUMBInstructionSet.prototype.ROR = function (parentObj) {
     var source = parentObj.readLowRegister(parentObj.execute >> 3) & 0xFF;
@@ -382,13 +382,13 @@ THUMBInstructionSet.prototype.CMP = function (parentObj) {
     //Compare two registers:
     var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
-    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.CMN = function (parentObj) {
     //Compare two registers:
     var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
-    parentObj.CPUCore.setCMNFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMNFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.ORR = function (parentObj) {
     var source = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
@@ -461,25 +461,25 @@ THUMBInstructionSet.prototype.CMPH_LL = function (parentObj) {
     //Compare two registers:
     var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
-    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.CMPH_LH = function (parentObj) {
     //Compare two registers:
     var operand1 = parentObj.readLowRegister(parentObj.execute | 0) | 0;
     var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
-    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.CMPH_HL = function (parentObj) {
     //Compare two registers:
     var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
     var operand2 = parentObj.readLowRegister(parentObj.execute >> 3) | 0;
-    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.CMPH_HH = function (parentObj) {
     //Compare two registers:
     var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
     var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
-    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+    parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 THUMBInstructionSet.prototype.MOVH_LL = function (parentObj) {
     //Move a register to another register:
