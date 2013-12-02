@@ -322,8 +322,25 @@ ARMInstructionSet.prototype.AND = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 & operand2);
 }
+ARMInstructionSet.prototype.AND2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise AND:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 & operand2);
+}
 ARMInstructionSet.prototype.ANDS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    parentObj.CPSR.setNegativeInt(result | 0);
+    parentObj.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+}
+ARMInstructionSet.prototype.ANDS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
@@ -339,8 +356,25 @@ ARMInstructionSet.prototype.EOR = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 ^ operand2);
 }
+ARMInstructionSet.prototype.EOR2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise EOR:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 ^ operand2);
+}
 ARMInstructionSet.prototype.EORS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise EOR:
+    var result = operand1 ^ operand2;
+    parentObj.CPSR.setNegativeInt(result | 0);
+    parentObj.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+}
+ARMInstructionSet.prototype.EORS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise EOR:
     var result = operand1 ^ operand2;
@@ -356,8 +390,21 @@ ARMInstructionSet.prototype.SUB = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0)) | 0);
 }
+ARMInstructionSet.prototype.SUB2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform Subtraction:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0)) | 0);
+}
 ARMInstructionSet.prototype.SUBS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Update destination register:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.SUBS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
@@ -369,8 +416,21 @@ ARMInstructionSet.prototype.RSB = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0)) | 0);
 }
+ARMInstructionSet.prototype.RSB2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform Subtraction:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0)) | 0);
+}
 ARMInstructionSet.prototype.RSBS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Update destination register:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+}
+ARMInstructionSet.prototype.RSBS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
@@ -382,8 +442,21 @@ ARMInstructionSet.prototype.ADD = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0)) | 0);
 }
+ARMInstructionSet.prototype.ADD2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform Addition:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0)) | 0);
+}
 ARMInstructionSet.prototype.ADDS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
+    //Update destination register:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.ADDS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
     //Update destination register:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setADDFlags(operand1 | 0, operand2 | 0) | 0);
@@ -395,8 +468,21 @@ ARMInstructionSet.prototype.ADC = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0) + ((parentObj.CPSR.getCarry()) ? 1 : 0)) | 0);
 }
+ARMInstructionSet.prototype.ADC2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform Addition w/ Carry:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0) + ((parentObj.CPSR.getCarry()) ? 1 : 0)) | 0);
+}
 ARMInstructionSet.prototype.ADCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Update destination register:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.ADCS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setADCFlags(operand1 | 0, operand2 | 0) | 0);
@@ -408,8 +494,21 @@ ARMInstructionSet.prototype.SBC = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
 }
+ARMInstructionSet.prototype.SBC2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform Subtraction w/ Carry:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
+}
 ARMInstructionSet.prototype.SBCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Update destination register:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.SBCS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
@@ -421,14 +520,35 @@ ARMInstructionSet.prototype.RSC = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
 }
+ARMInstructionSet.prototype.RSC2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform Reverse Subtraction w/ Carry:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
+}
 ARMInstructionSet.prototype.RSCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
     parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
 }
+ARMInstructionSet.prototype.RSCS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Update destination register:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+}
 ARMInstructionSet.prototype.TSTS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    parentObj.CPSR.setNegativeInt(result | 0);
+    parentObj.CPSR.setZeroInt(result | 0);
+}
+ARMInstructionSet.prototype.TSTS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
@@ -443,13 +563,31 @@ ARMInstructionSet.prototype.TEQS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
 }
+ARMInstructionSet.prototype.TEQS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise EOR:
+    var result = operand1 ^ operand2;
+    parentObj.CPSR.setNegativeInt(result | 0);
+    parentObj.CPSR.setZeroInt(result | 0);
+}
 ARMInstructionSet.prototype.CMPS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
 }
+ARMInstructionSet.prototype.CMPS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    parentObj.CPUCore.setCMPFlags(operand1 | 0, operand2 | 0);
+}
 ARMInstructionSet.prototype.CMNS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0);
+    parentObj.CPUCore.setCMNFlags(operand1 | 0, operand2 | 0);
+}
+ARMInstructionSet.prototype.CMNS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0);
     parentObj.CPUCore.setCMNFlags(operand1 | 0, operand2 | 0);
 }
@@ -460,8 +598,25 @@ ARMInstructionSet.prototype.ORR = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 | operand2);
 }
+ARMInstructionSet.prototype.ORR2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise OR:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 | operand2);
+}
 ARMInstructionSet.prototype.ORRS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise OR:
+    var result = operand1 | operand2;
+    parentObj.CPSR.setNegativeInt(result | 0);
+    parentObj.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+}
+ARMInstructionSet.prototype.ORRS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise OR:
     var result = operand1 | operand2;
@@ -491,8 +646,27 @@ ARMInstructionSet.prototype.BIC = function (parentObj, operand2OP) {
     //Update destination register:
     parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 & operand2);
 }
+ARMInstructionSet.prototype.BIC2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
+    //NOT operand 2:
+    var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise AND:
+    //Update destination register:
+    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 & operand2);
+}
 ARMInstructionSet.prototype.BICS = function (parentObj, operand2OP) {
     var operand1 = parentObj.registers[(parentObj.execute >> 16) & 0xF] | 0;
+    //NOT operand 2:
+    var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    parentObj.CPSR.setNegativeInt(result | 0);
+    parentObj.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+}
+ARMInstructionSet.prototype.BICS2 = function (parentObj, operand2OP) {
+    var operand1 = parentObj.guardRegisterRead((parentObj.execute >> 16) & 0xF) | 0;
     //NOT operand 2:
     var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
@@ -1777,7 +1951,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.AND,
+                this.AND2,
                 this.llr
             ],
             [
@@ -1785,7 +1959,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.AND,
+                this.AND2,
                 this.lrr
             ],
             [
@@ -1793,7 +1967,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.AND,
+                this.AND2,
                 this.arr
             ],
             [
@@ -1801,7 +1975,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.AND,
+                this.AND2,
                 this.rrr
             ],
             [
@@ -1844,7 +2018,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.llis
             ],
             [
-                this.ANDS,
+                this.ANDS2,
                 this.llrs
             ],
             [
@@ -1852,7 +2026,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lris
             ],
             [
-                this.ANDS,
+                this.ANDS2,
                 this.lrrs
             ],
             [
@@ -1860,7 +2034,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.aris
             ],
             [
-                this.ANDS,
+                this.ANDS2,
                 this.arrs
             ],
             [
@@ -1868,7 +2042,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rris
             ],
             [
-                this.ANDS,
+                this.ANDS2,
                 this.rrrs
             ],
             [
@@ -1911,7 +2085,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.EOR,
+                this.EOR2,
                 this.llr
             ],
             [
@@ -1919,7 +2093,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.EOR,
+                this.EOR2,
                 this.lrr
             ],
             [
@@ -1927,7 +2101,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.EOR,
+                this.EOR2,
                 this.arr
             ],
             [
@@ -1935,7 +2109,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.EOR,
+                this.EOR2,
                 this.rrr
             ],
             [
@@ -1978,7 +2152,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.llis
             ],
             [
-                this.EORS,
+                this.EORS2,
                 this.llrs
             ],
             [
@@ -1986,7 +2160,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lris
             ],
             [
-                this.EORS,
+                this.EORS2,
                 this.lrrs
             ],
             [
@@ -1994,7 +2168,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.aris
             ],
             [
-                this.EORS,
+                this.EORS2,
                 this.arrs
             ],
             [
@@ -2002,7 +2176,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rris
             ],
             [
-                this.EORS,
+                this.EORS2,
                 this.rrrs
             ],
             [
@@ -2045,7 +2219,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.SUB,
+                this.SUB2,
                 this.llr
             ],
             [
@@ -2053,7 +2227,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.SUB,
+                this.SUB2,
                 this.lrr
             ],
             [
@@ -2061,7 +2235,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.SUB,
+                this.SUB2,
                 this.arr
             ],
             [
@@ -2069,7 +2243,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.SUB,
+                this.SUB2,
                 this.rrr
             ],
             [
@@ -2112,7 +2286,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.SUBS,
+                this.SUBS2,
                 this.llr
             ],
             [
@@ -2120,7 +2294,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.SUBS,
+                this.SUBS2,
                 this.lrr
             ],
             [
@@ -2128,7 +2302,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.SUBS,
+                this.SUBS2,
                 this.arr
             ],
             [
@@ -2136,7 +2310,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.SUBS,
+                this.SUBS2,
                 this.rrr
             ],
             [
@@ -2179,7 +2353,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.RSB,
+                this.RSB2,
                 this.llr
             ],
             [
@@ -2187,7 +2361,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.RSB,
+                this.RSB2,
                 this.lrr
             ],
             [
@@ -2195,7 +2369,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.RSB,
+                this.RSB2,
                 this.arr
             ],
             [
@@ -2203,7 +2377,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.RSB,
+                this.RSB2,
                 this.rrr
             ],
             [
@@ -2246,7 +2420,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.RSBS,
+                this.RSBS2,
                 this.llr
             ],
             [
@@ -2254,7 +2428,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.RSBS,
+                this.RSBS2,
                 this.lrr
             ],
             [
@@ -2262,7 +2436,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.RSBS,
+                this.RSBS2,
                 this.arr
             ],
             [
@@ -2270,7 +2444,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.RSBS,
+                this.RSBS2,
                 this.rrr
             ],
             [
@@ -2313,7 +2487,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.ADD,
+                this.ADD2,
                 this.llr
             ],
             [
@@ -2321,7 +2495,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.ADD,
+                this.ADD2,
                 this.lrr
             ],
             [
@@ -2329,7 +2503,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.ADD,
+                this.ADD2,
                 this.arr
             ],
             [
@@ -2337,7 +2511,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.ADD,
+                this.ADD2,
                 this.rrr
             ],
             [
@@ -2380,7 +2554,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.ADDS,
+                this.ADDS2,
                 this.llr
             ],
             [
@@ -2388,7 +2562,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.ADDS,
+                this.ADDS2,
                 this.lrr
             ],
             [
@@ -2396,7 +2570,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.ADDS,
+                this.ADDS2,
                 this.arr
             ],
             [
@@ -2404,7 +2578,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.ADDS,
+                this.ADDS2,
                 this.rrr
             ],
             [
@@ -2447,7 +2621,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.ADC,
+                this.ADC2,
                 this.llr
             ],
             [
@@ -2455,7 +2629,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.ADC,
+                this.ADC2,
                 this.lrr
             ],
             [
@@ -2463,7 +2637,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.ADC,
+                this.ADC2,
                 this.arr
             ],
             [
@@ -2471,7 +2645,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.ADC,
+                this.ADC2,
                 this.rrr
             ],
             [
@@ -2514,7 +2688,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.ADCS,
+                this.ADCS2,
                 this.llr
             ],
             [
@@ -2522,7 +2696,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.ADCS,
+                this.ADCS2,
                 this.lrr
             ],
             [
@@ -2530,7 +2704,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.ADCS,
+                this.ADCS2,
                 this.arr
             ],
             [
@@ -2538,7 +2712,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.ADCS,
+                this.ADCS2,
                 this.rrr
             ],
             [
@@ -2581,7 +2755,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.SBC,
+                this.SBC2,
                 this.llr
             ],
             [
@@ -2589,7 +2763,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.SBC,
+                this.SBC2,
                 this.lrr
             ],
             [
@@ -2597,7 +2771,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.SBC,
+                this.SBC2,
                 this.arr
             ],
             [
@@ -2605,7 +2779,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.SBC,
+                this.SBC2,
                 this.rrr
             ],
             [
@@ -2648,7 +2822,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.SBCS,
+                this.SBCS2,
                 this.llr
             ],
             [
@@ -2656,7 +2830,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.SBCS,
+                this.SBCS2,
                 this.lrr
             ],
             [
@@ -2664,7 +2838,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.SBCS,
+                this.SBCS2,
                 this.arr
             ],
             [
@@ -2672,7 +2846,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.SBCS,
+                this.SBCS2,
                 this.rrr
             ],
             [
@@ -2715,7 +2889,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.RSC,
+                this.RSC2,
                 this.llr
             ],
             [
@@ -2723,7 +2897,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.RSC,
+                this.RSC2,
                 this.lrr
             ],
             [
@@ -2731,7 +2905,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.RSC,
+                this.RSC2,
                 this.arr
             ],
             [
@@ -2739,7 +2913,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.RSC,
+                this.RSC2,
                 this.rrr
             ],
             [
@@ -2782,7 +2956,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.RSCS,
+                this.RSCS2,
                 this.llr
             ],
             [
@@ -2790,7 +2964,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.RSCS,
+                this.RSCS2,
                 this.lrr
             ],
             [
@@ -2798,7 +2972,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.RSCS,
+                this.RSCS2,
                 this.arr
             ],
             [
@@ -2806,7 +2980,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.RSCS,
+                this.RSCS2,
                 this.rrr
             ],
             [
@@ -2916,7 +3090,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.llis
             ],
             [
-                this.TSTS,
+                this.TSTS2,
                 this.llrs
             ],
             [
@@ -2924,7 +3098,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lris
             ],
             [
-                this.TSTS,
+                this.TSTS2,
                 this.lrrs
             ],
             [
@@ -2932,7 +3106,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.aris
             ],
             [
-                this.TSTS,
+                this.TSTS2,
                 this.arrs
             ],
             [
@@ -2940,7 +3114,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rris
             ],
             [
-                this.TSTS,
+                this.TSTS2,
                 this.rrrs
             ],
             [
@@ -3050,7 +3224,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.llis
             ],
             [
-                this.TEQS,
+                this.TEQS2,
                 this.llrs
             ],
             [
@@ -3058,7 +3232,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lris
             ],
             [
-                this.TEQS,
+                this.TEQS2,
                 this.lrrs
             ],
             [
@@ -3066,7 +3240,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.aris
             ],
             [
-                this.TEQS,
+                this.TEQS2,
                 this.arrs
             ],
             [
@@ -3074,7 +3248,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rris
             ],
             [
-                this.TEQS,
+                this.TEQS2,
                 this.rrrs
             ],
             [
@@ -3184,7 +3358,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.CMPS,
+                this.CMPS2,
                 this.llr
             ],
             [
@@ -3192,7 +3366,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.CMPS,
+                this.CMPS2,
                 this.lrr
             ],
             [
@@ -3200,7 +3374,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.CMPS,
+                this.CMPS2,
                 this.arr
             ],
             [
@@ -3208,7 +3382,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.CMPS,
+                this.CMPS2,
                 this.rrr
             ],
             [
@@ -3318,7 +3492,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.CMNS,
+                this.CMNS2,
                 this.llr
             ],
             [
@@ -3326,7 +3500,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.CMNS,
+                this.CMNS2,
                 this.lrr
             ],
             [
@@ -3334,7 +3508,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.CMNS,
+                this.CMNS2,
                 this.arr
             ],
             [
@@ -3342,7 +3516,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.CMNS,
+                this.CMNS2,
                 this.rrr
             ],
             [
@@ -3385,7 +3559,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.ORR,
+                this.ORR2,
                 this.llr
             ],
             [
@@ -3393,7 +3567,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.ORR,
+                this.ORR2,
                 this.lrr
             ],
             [
@@ -3401,7 +3575,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.ORR,
+                this.ORR2,
                 this.arr
             ],
             [
@@ -3409,7 +3583,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.ORR,
+                this.ORR2,
                 this.rrr
             ],
             [
@@ -3452,7 +3626,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.llis
             ],
             [
-                this.ORRS,
+                this.ORRS2,
                 this.llrs
             ],
             [
@@ -3460,7 +3634,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lris
             ],
             [
-                this.ORRS,
+                this.ORRS2,
                 this.lrrs
             ],
             [
@@ -3468,7 +3642,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.aris
             ],
             [
-                this.ORRS,
+                this.ORRS2,
                 this.arrs
             ],
             [
@@ -3476,7 +3650,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rris
             ],
             [
-                this.ORRS,
+                this.ORRS2,
                 this.rrrs
             ],
             [
@@ -3653,7 +3827,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lli
             ],
             [
-                this.BIC,
+                this.BIC2,
                 this.llr
             ],
             [
@@ -3661,7 +3835,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lri
             ],
             [
-                this.BIC,
+                this.BIC2,
                 this.lrr
             ],
             [
@@ -3669,7 +3843,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.ari
             ],
             [
-                this.BIC,
+                this.BIC2,
                 this.arr
             ],
             [
@@ -3677,7 +3851,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rri
             ],
             [
-                this.BIC,
+                this.BIC2,
                 this.rrr
             ],
             [
@@ -3720,7 +3894,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.llis
             ],
             [
-                this.BICS,
+                this.BICS2,
                 this.llrs
             ],
             [
@@ -3728,7 +3902,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.lris
             ],
             [
-                this.BICS,
+                this.BICS2,
                 this.lrrs
             ],
             [
@@ -3736,7 +3910,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.aris
             ],
             [
-                this.BICS,
+                this.BICS2,
                 this.arrs
             ],
             [
@@ -3744,7 +3918,7 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
                 this.rris
             ],
             [
-                this.BICS,
+                this.BICS2,
                 this.rrrs
             ],
             [
