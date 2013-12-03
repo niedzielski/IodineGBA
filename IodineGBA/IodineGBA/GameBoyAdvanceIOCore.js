@@ -175,10 +175,10 @@ GameBoyAdvanceIO.prototype.handleCPUDynarec = function () {
 }
 GameBoyAdvanceIO.prototype.preprocessCPUHandler = function (useDynarec) {
     useDynarec = useDynarec | 0;
-    this.flaggedDynarec = useDynarec;
-    if ((this.lastDynarecUsage | 0) != useDynarec) {
-        this.lastDynarecUsage = useDynarec;
-        this.handleCPU = (useDynarec == 0) ? this.handleCPUInterpreter : this.handleCPUDynarec;
+    this.flaggedDynarec = useDynarec | 0;
+    if ((this.lastDynarecUsage | 0) != (useDynarec | 0)) {
+        this.lastDynarecUsage = (useDynarec | 0);
+        this.handleCPU = ((useDynarec | 0) == 0) ? this.handleCPUInterpreter : this.handleCPUDynarec;
         this.preprocessSystemStepper();
     }
 }
@@ -207,31 +207,27 @@ GameBoyAdvanceIO.prototype.handleStop = function () {
 }
 GameBoyAdvanceIO.prototype.cyclesUntilNextHALTEvent = function () {
     //Find the clocks to the next HALT leave or DMA event:
-    var haltClocks = this.irq.nextEventTime() | 0;
-    var dmaClocks = this.dma.nextEventTime() | 0;
-    return this.solveClosestTime(haltClocks, dmaClocks) | 0;
+    return this.solveClosestTime(this.irq.nextEventTime() | 0, this.dma.nextEventTime() | 0) | 0;
 }
 GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
     //Find the clocks to the next IRQ or DMA event:
-    var irqClocks = this.irq.nextIRQEventTime() | 0;
-    var dmaClocks = this.dma.nextEventTime() | 0;
-    return this.solveClosestTime(irqClocks, dmaClocks) | 0;
+    return this.solveClosestTime(this.irq.nextIRQEventTime() | 0, this.dma.nextEventTime() | 0) | 0;
 }
 GameBoyAdvanceIO.prototype.solveClosestTime = function (clocks1, clocks2) {
     clocks1 = clocks1 | 0;
     clocks2 = clocks2 | 0;
     //Find the clocks closest to the next event:
     var clocks = this.getRemainingCycles() | 0;
-    if (clocks1 >= 0) {
-        if (clocks2 >= 0) {
-            clocks = Math.min(clocks, clocks1, clocks2) | 0;
+    if ((clocks1 | 0) >= 0) {
+        if ((clocks2 | 0) >= 0) {
+            clocks = Math.min(clocks | 0, clocks1 | 0, clocks2 | 0) | 0;
         }
         else {
-            clocks = Math.min(clocks, clocks1) | 0;
+            clocks = Math.min(clocks | 0, clocks1 | 0) | 0;
         }
     }
-    else if (clocks2 >= 0) {
-        clocks = Math.min(clocks, clocks2) | 0;
+    else if ((clocks2 | 0) >= 0) {
+        clocks = Math.min(clocks | 0, clocks2 | 0) | 0;
     }
     return clocks | 0;
 }
