@@ -33,16 +33,17 @@ THUMBInstructionSet.prototype.executeIteration = function () {
     //Push the new fetch access:
     this.fetch = this.wait.CPUGetOpcode16(this.readPC() | 0) | 0;
     //Execute Instruction:
-    this.executeTHUMB();
+    this.instructionMap[this.execute >> 6](this);
     //Update the pipelining state:
     this.execute = this.decode | 0;
     this.decode = this.fetch | 0;
 }
-THUMBInstructionSet.prototype.executeTHUMB = function () {
-    if ((this.CPUCore.pipelineInvalid | 0) == 0) {
-        //No condition code:
-        this.instructionMap[this.execute >> 6](this);
-    }
+THUMBInstructionSet.prototype.executeBubble = function () {
+    //Push the new fetch access:
+    this.fetch = this.wait.CPUGetOpcode16(this.readPC() | 0) | 0;
+    //Update the pipelining state:
+    this.execute = this.decode | 0;
+    this.decode = this.fetch | 0;
 }
 THUMBInstructionSet.prototype.incrementProgramCounter = function () {
     //Increment The Program Counter:

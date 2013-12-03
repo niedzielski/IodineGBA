@@ -84,18 +84,31 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     //No pending interruption for dynarec:
     this.breakNormalExecution = false;
     //No pending IRQs to check for yet:
-    this.executeIteration = this.executeIterationWithoutIRQ;
+    this.executeIteration = this.executeBubble;
 }
-GameBoyAdvanceCPU.prototype.executeIterationWithIRQ = function () {
+GameBoyAdvanceCPU.prototype.executeIRQ = function () {
     //Handle an IRQ:
     this.IRQ();
     //Execute the CPU stepping normally:
-    this.executeIteration = this.executeIterationWithoutIRQ;
-    this.executeIterationWithoutIRQ();
+    this.executeIteration = this.executeBubble;
+    this.executeBubble();
 }
-GameBoyAdvanceCPU.prototype.executeIterationWithoutIRQ = function () {
+GameBoyAdvanceCPU.prototype.executeBubble = function () {
     //Tick the pipeline and bubble out invalidity:
     this.pipelineInvalid >>= 1;
+    //Tick the pipeline of the selected instruction set:
+    this.instructionHandle.executeBubble();
+    //Increment the program counter if we didn't just branch:
+    if ((this.pipelineInvalid | 0) < 0x4) {
+        if ((this.pipelineInvalid | 0) == 1) {
+            //Change state to normal execution:
+            this.pipelineInvalid = 0;
+            this.executeIteration = this.executeIterationRegular;
+        }
+        this.instructionHandle.incrementProgramCounter();
+    }
+}
+GameBoyAdvanceCPU.prototype.executeIterationRegular = function () {
     //Tick the pipeline of the selected instruction set:
     this.instructionHandle.executeIteration();
     //Increment the program counter if we didn't just branch:
@@ -114,6 +127,13 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
         this.registers[15] = branchTo | 0;
         //Mark pipeline as invalid:
         this.pipelineInvalid = 0x4;
+        //Check what executor to use:
+        if (this.processIRQ) {
+            this.executeIteration = this.executeIRQ;
+        }
+        else {
+            this.executeIteration = this.executeBubble;
+        }
         //Next PC fetch has to update the address bus:
         this.wait.NonSequentialBroadcast();
     }
@@ -137,7 +157,7 @@ GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
 GameBoyAdvanceCPU.prototype.assertIRQ = function () {
     this.processIRQ = this.triggeredIRQ && !this.IRQDisabled;
     if (this.processIRQ) {
-        this.executeIteration = this.executeIterationWithIRQ;
+        this.executeIteration = this.executeIRQ;
     }
     this.checkCPUExecutionStatus();
 }
