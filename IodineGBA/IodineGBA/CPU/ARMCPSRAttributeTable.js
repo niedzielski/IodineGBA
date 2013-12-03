@@ -80,6 +80,7 @@ function ARMCPSRAttributeTable() {
         //Update flags for an addition operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
+        //We let this get outside of int32 on purpose:
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
@@ -92,6 +93,7 @@ function ARMCPSRAttributeTable() {
         //Update flags for an addition operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
+        //We let this get outside of int32 on purpose:
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0) + ((carry) ? 1 : 0);
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
@@ -115,6 +117,7 @@ function ARMCPSRAttributeTable() {
         //Update flags for a subtraction operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
+        //We let this get outside of int32 on purpose:
         var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - ((carry) ? 0 : 1);
         var result = unsignedResult | 0;
         setVFlagForSUB(operand1, operand2, result);
@@ -137,6 +140,7 @@ function ARMCPSRAttributeTable() {
         //Update flags for an addition operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
+        //We let this get outside of int32 on purpose:
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
