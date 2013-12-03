@@ -87,7 +87,7 @@ function ARMCPSRAttributeTable() {
         carry = (unsignedResult > 0xFFFFFFFF);
         negative = (result < 0);
         zero = (result == 0);
-        return result | 0;
+        return result;
     };
     function setADCFlags(operand1, operand2) {
         //Update flags for an addition operation:
@@ -100,7 +100,7 @@ function ARMCPSRAttributeTable() {
         carry = (unsignedResult > 0xFFFFFFFF);
         negative = (result < 0);
         zero = (result == 0);
-        return result | 0;
+        return result;
     };
     function setSUBFlags(operand1, operand2) {
         //Update flags for a subtraction operation:
@@ -111,7 +111,7 @@ function ARMCPSRAttributeTable() {
         carry = ((operand1 >>> 0) >= (operand2 >>> 0));
         negative = (result < 0);
         zero = (result == 0);
-        return result | 0;
+        return result;
     };
     function setSBCFlags(operand1, operand2) {
         //Update flags for a subtraction operation:
