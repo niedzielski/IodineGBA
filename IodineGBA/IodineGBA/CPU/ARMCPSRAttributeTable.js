@@ -82,7 +82,7 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
         var result = unsignedResult | 0;
-        setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
+        setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF);
         negative = (result < 0);
         zero = (result == 0);
