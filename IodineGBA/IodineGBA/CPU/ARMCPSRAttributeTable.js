@@ -16,36 +16,46 @@
  *
  */
 function ARMCPSRAttributeTable() {
-    var negative = false;        //N Bit
-    var zero = false;            //Z Bit
+    var negative = 0;            //N Bit
+    var zero = 1;                //Z Bit
     var overflow = false;        //V Bit
     var carry = false;           //C Bit
     function setNegative(toSet) {
-        negative = !!toSet;
+        if (!!toSet) {
+            negative = -1;
+        }
+        else {
+            negative = 0;
+        }
     };
     function setNegativeInt(toSet) {
-        negative = ((toSet | 0) < 0);
+        negative = toSet | 0;
     };
     function setNegativeFalse() {
-        negative = false;
+        negative = 0;
     };
     function getNegative() {
-        return !!negative;
+        return (negative < 0);
     };
     function setZero(toSet) {
-        zero = !!toSet;
+        if (!!toSet) {
+            zero = 0;
+        }
+        else {
+            zero = 1;
+        }
     };
     function setZeroInt(toSet) {
-        zero = ((toSet | 0) == 0);
+        zero = toSet | 0;
     };
     function setZeroTrue() {
-        zero = true;
+        zero = 0;
     };
     function setZeroFalse() {
-        zero = false;
+        zero = 1;
     };
     function getZero() {
-        return !!zero;
+        return (zero == 0);
     };
     function setOverflow(toSet) {
         overflow = !!toSet;
@@ -85,8 +95,8 @@ function ARMCPSRAttributeTable() {
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF);
-        negative = (result < 0);
-        zero = (result == 0);
+        negative = result | 0;
+        zero = result | 0;
         return result | 0;
     };
     function setADCFlags(operand1, operand2) {
@@ -98,8 +108,8 @@ function ARMCPSRAttributeTable() {
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF);
-        negative = (result < 0);
-        zero = (result == 0);
+        negative = result | 0;
+        zero = result | 0;
         return result | 0;
     };
     function setSUBFlags(operand1, operand2) {
@@ -109,8 +119,8 @@ function ARMCPSRAttributeTable() {
         var result = (operand1 - operand2) | 0;
         setVFlagForSUB(operand1, operand2, result);
         carry = ((operand1 >>> 0) >= (operand2 >>> 0));
-        negative = (result < 0);
-        zero = (result == 0);
+        negative = result | 0;
+        zero = result | 0;
         return result | 0;
     };
     function setSBCFlags(operand1, operand2) {
@@ -122,8 +132,8 @@ function ARMCPSRAttributeTable() {
         var result = unsignedResult | 0;
         setVFlagForSUB(operand1, operand2, result);
         carry = (unsignedResult >= 0);
-        negative = (result < 0);
-        zero = (result == 0);
+        negative = result | 0;
+        zero = result | 0;
         return result | 0;
     };
     function setCMPFlags(operand1, operand2) {
@@ -133,8 +143,8 @@ function ARMCPSRAttributeTable() {
         var result = (operand1 - operand2) | 0;
         setVFlagForSUB(operand1, operand2, result);
         carry = ((operand1 >>> 0) >= (operand2 >>> 0));
-        negative = (result < 0);
-        zero = (result == 0);
+        negative = result | 0;
+        zero = result | 0;
     };
     function setCMNFlags(operand1, operand2) {
         //Update flags for an addition operation:
@@ -145,8 +155,8 @@ function ARMCPSRAttributeTable() {
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF);
-        negative = (result < 0);
-        zero = (result == 0);
+        negative = result | 0;
+        zero = result | 0;
     };
     return {
         "setNegative":setNegative,
