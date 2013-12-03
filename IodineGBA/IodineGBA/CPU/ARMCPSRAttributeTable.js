@@ -30,7 +30,7 @@ function ARMCPSRAttributeTable() {
         negative = false;
     };
     function getNegative() {
-        return negative;
+        return !!negative;
     };
     function setZero(toSet) {
         zero = !!toSet;
@@ -45,13 +45,13 @@ function ARMCPSRAttributeTable() {
         zero = false;
     };
     function getZero() {
-        return zero;
+        return !!zero;
     };
     function setOverflow(toSet) {
         overflow = !!toSet;
     };
     function getOverflow() {
-        return overflow;
+        return !!overflow;
     };
     function setCarry(toSet) {
         carry = !!toSet;
@@ -60,7 +60,7 @@ function ARMCPSRAttributeTable() {
         carry = false;
     };
     function getCarry() {
-        return carry;
+        return !!carry;
     };
     function setVFlagForADD(operand1, operand2, result) {
         //Compute the overflow flag for addition:

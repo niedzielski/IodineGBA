@@ -1508,7 +1508,7 @@ ARMInstructionSet.prototype.arrs = function (parentObj, operand) {
     return register | 0;
 }
 ARMInstructionSet.prototype.rri = function (parentObj, operand) {
-    return parentObj.rri2(operand);
+    return parentObj.rri2(operand) | 0;
 }
 ARMInstructionSet.prototype.rri2 = function (operand) {
     operand = operand | 0;
@@ -1660,7 +1660,7 @@ ARMInstructionSet.prototype.rs = function (parentObj) {
             break;
         default:
             //Instruction hit an invalid SPSR request:
-            return parentObj.rc(parentObj);
+            return parentObj.rc(parentObj) | 0;
     }
     return (
         ((spsr[0]) ? 0x80000000 : 0) |
