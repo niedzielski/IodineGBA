@@ -223,7 +223,7 @@ GameBoyAdvanceIO.prototype.solveClosestTime = function (clocks1, clocks2) {
     //Find the clocks closest to the next event:
     var clocks = this.getRemainingCycles() | 0;
     if (clocks1 >= 0) {
-        if ((clocks2 | 0) >= 0) {
+        if (clocks2 >= 0) {
             clocks = Math.min(clocks, clocks1, clocks2) | 0;
         }
         else {
@@ -233,15 +233,17 @@ GameBoyAdvanceIO.prototype.solveClosestTime = function (clocks1, clocks2) {
     else if (clocks2 >= 0) {
         clocks = Math.min(clocks, clocks2) | 0;
     }
-    return clocks;
+    return clocks | 0;
 }
 GameBoyAdvanceIO.prototype.deflagStepper = function (statusFlag) {
+    statusFlag = statusFlag | 0;
     //Deflag a system event to step through:
     this.systemStatus = this.systemStatus & (~statusFlag);
     this.cpu.checkCPUExecutionStatus();
     this.preprocessSystemStepper();
 }
 GameBoyAdvanceIO.prototype.flagStepper = function (statusFlag) {
+    statusFlag = statusFlag | 0;
     //Flag a system event to step through:
     this.systemStatus = this.systemStatus | statusFlag;
     this.cpu.checkCPUExecutionStatus();
