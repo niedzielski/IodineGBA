@@ -78,71 +78,71 @@ function ARMCPSRAttributeTable() {
     };
     function setADDFlags(operand1, operand2) {
         //Update flags for an addition operation:
-        operand1 >>>= 0;
-        operand2 >>>= 0;
-        var unsignedResult = operand1 + operand2;
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
         var result = unsignedResult | 0;
         setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
         carry = (unsignedResult > 0xFFFFFFFF);
-        negative = ((result | 0) < 0);
-        zero = ((result | 0) == 0);
+        negative = (result < 0);
+        zero = (result == 0);
         return result | 0;
     };
     function setADCFlags(operand1, operand2) {
         //Update flags for an addition operation:
-        operand1 >>>= 0;
-        operand2 >>>= 0;
-        var unsignedResult = operand1 + operand2 + ((carry) ? 1 : 0);
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0) + ((carry) ? 1 : 0);
         var result = unsignedResult | 0;
-        setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
+        setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF);
-        negative = ((result | 0) < 0);
-        zero = ((result | 0) == 0);
+        negative = (result < 0);
+        zero = (result == 0);
         return result | 0;
     };
     function setSUBFlags(operand1, operand2) {
         //Update flags for a subtraction operation:
-        operand1 >>>= 0;
-        operand2 >>>= 0;
-        var result = ((operand1 | 0) - (operand2 | 0)) | 0;
-        setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
-        carry = (operand1 >= operand2);
-        negative = ((result | 0) < 0);
-        zero = ((result | 0) == 0);
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        var result = (operand1 - operand2) | 0;
+        setVFlagForSUB(operand1, operand2, result);
+        carry = ((operand1 >>> 0) >= (operand2 >>> 0));
+        negative = (result < 0);
+        zero = (result == 0);
         return result | 0;
     };
     function setSBCFlags(operand1, operand2) {
         //Update flags for a subtraction operation:
-        operand1 >>>= 0;
-        operand2 >>>= 0;
-        var unsignedResult = operand1 - operand2 - ((carry) ? 0 : 1);
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - ((carry) ? 0 : 1);
         var result = unsignedResult | 0;
-        setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
+        setVFlagForSUB(operand1, operand2, result);
         carry = (unsignedResult >= 0);
-        negative = ((result | 0) < 0);
-        zero = ((result | 0) == 0);
-        return result | 0;
+        negative = (result < 0);
+        zero = (result == 0);
+        return result;
     };
     function setCMPFlags(operand1, operand2) {
         //Update flags for a subtraction operation:
-        operand1 >>>= 0;
-        operand2 >>>= 0;
-        var result = ((operand1 | 0) - (operand2 | 0)) | 0;
-        setVFlagForSUB(operand1 | 0, operand2 | 0, result | 0);
-        carry = (operand1 >= operand2);
-        negative = ((result | 0) < 0);
-        zero = ((result | 0) == 0);
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        var result = (operand1 - operand2) | 0;
+        setVFlagForSUB(operand1, operand2, result);
+        carry = ((operand1 >>> 0) >= (operand2 >>> 0));
+        negative = (result < 0);
+        zero = (result == 0);
     };
     function setCMNFlags(operand1, operand2) {
         //Update flags for an addition operation:
-        operand1 >>>= 0;
-        operand2 >>>= 0;
-        var unsignedResult = operand1 + operand2;
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
         var result = unsignedResult | 0;
-        setVFlagForADD(operand1 | 0, operand2 | 0, result | 0);
+        setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF);
-        negative = ((result | 0) < 0);
-        zero = ((result | 0) == 0);
+        negative = (result < 0);
+        zero = (result == 0);
     };
     return {
         "setNegative":setNegative,
