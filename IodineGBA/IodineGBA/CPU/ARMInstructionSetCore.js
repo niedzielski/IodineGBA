@@ -84,6 +84,14 @@ ARMInstructionSet.prototype.guardRegisterWrite = function (address, data) {
         this.CPUCore.branch(data & -4);
     }
 }
+ARMInstructionSet.prototype.guard12OffsetRegisterWrite = function (data) {
+    data = data | 0;
+    this.guardRegisterWrite((this.execute >> 0xC) & 0xF, data | 0);
+}
+ARMInstructionSet.prototype.guard16OffsetRegisterWrite = function (data) {
+    data = data | 0;
+    this.guardRegisterWrite((this.execute >> 0x10) & 0xF, data | 0);
+}
 ARMInstructionSet.prototype.guardProgramCounterRegisterWriteCPSR = function (data) {
     data = data | 0;
     //Restore SPSR to CPSR:
@@ -104,6 +112,14 @@ ARMInstructionSet.prototype.guardRegisterWriteCPSR = function (address, data) {
         //Restore SPSR to CPSR:
         this.guardProgramCounterRegisterWriteCPSR(data | 0);
     }
+}
+ARMInstructionSet.prototype.guard12OffsetRegisterWriteCPSR = function (data) {
+    data = data | 0;
+    this.guardRegisterWriteCPSR((this.execute >> 0xC) & 0xF, data | 0);
+}
+ARMInstructionSet.prototype.guard16OffsetRegisterWriteCPSR = function (data) {
+    data = data | 0;
+    this.guardRegisterWriteCPSR((this.execute >> 0x10) & 0xF, data | 0);
 }
 ARMInstructionSet.prototype.guardUserRegisterWrite = function (address, data) {
     //Guard only on user access, not PC!:
@@ -329,7 +345,7 @@ ARMInstructionSet.prototype.BX = function (parentObj, operand2OP) {
 }
 ARMInstructionSet.prototype.B = function (parentObj, operand2OP) {
     //Branch:
-    parentObj.CPUCore.branch(((parentObj.readRegister(0xF) | 0) + ((parentObj.execute << 8) >> 6)) | 0);
+    parentObj.CPUCore.branch(((parentObj.readPC() | 0) + ((parentObj.execute << 8) >> 6)) | 0);
 }
 ARMInstructionSet.prototype.BL = function (parentObj, operand2OP) {
     //Branch with Link:
@@ -341,14 +357,14 @@ ARMInstructionSet.prototype.AND = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 & operand2);
+    parentObj.guard12OffsetRegisterWrite(operand1 & operand2);
 }
 ARMInstructionSet.prototype.AND2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 & operand2);
+    parentObj.guard12OffsetRegisterWrite(operand1 & operand2);
 }
 ARMInstructionSet.prototype.ANDS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
@@ -358,7 +374,7 @@ ARMInstructionSet.prototype.ANDS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(result | 0);
 }
 ARMInstructionSet.prototype.ANDS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
@@ -368,21 +384,21 @@ ARMInstructionSet.prototype.ANDS2 = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(result | 0);
 }
 ARMInstructionSet.prototype.EOR = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise EOR:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 ^ operand2);
+    parentObj.guard12OffsetRegisterWrite(operand1 ^ operand2);
 }
 ARMInstructionSet.prototype.EOR2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise EOR:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 ^ operand2);
+    parentObj.guard12OffsetRegisterWrite(operand1 ^ operand2);
 }
 ARMInstructionSet.prototype.EORS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
@@ -392,7 +408,7 @@ ARMInstructionSet.prototype.EORS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(result | 0);
 }
 ARMInstructionSet.prototype.EORS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
@@ -402,163 +418,163 @@ ARMInstructionSet.prototype.EORS2 = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(result | 0);
 }
 ARMInstructionSet.prototype.SUB = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Subtraction:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0)) | 0);
 }
 ARMInstructionSet.prototype.SUB2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Subtraction:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0)) | 0);
 }
 ARMInstructionSet.prototype.SUBS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SUBS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSB = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Subtraction:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0)) | 0);
 }
 ARMInstructionSet.prototype.RSB2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Subtraction:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0)) | 0);
 }
 ARMInstructionSet.prototype.RSBS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSBS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADD = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Addition:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
 }
 ARMInstructionSet.prototype.ADD2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Addition:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
 }
 ARMInstructionSet.prototype.ADDS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADDS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADC = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Addition w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0) + ((parentObj.CPSR.getCarry()) ? 1 : 0)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0) + (parentObj.CPSR.getCarryInt() | 0)) | 0);
 }
 ARMInstructionSet.prototype.ADC2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Addition w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) + (operand2 | 0) + ((parentObj.CPSR.getCarry()) ? 1 : 0)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0) + (parentObj.CPSR.getCarryInt() | 0)) | 0);
 }
 ARMInstructionSet.prototype.ADCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADCS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SBC = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Subtraction w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0) - (parentObj.CPSR.getCarryIntReverse() | 0)) | 0);
 }
 ARMInstructionSet.prototype.SBC2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Subtraction w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand1 | 0) - (operand2 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0) - (parentObj.CPSR.getCarryIntReverse() | 0)) | 0);
 }
 ARMInstructionSet.prototype.SBCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SBCS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSC = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Reverse Subtraction w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0) - (parentObj.CPSR.getCarryIntReverse() | 0)) | 0);
 }
 ARMInstructionSet.prototype.RSC2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform Reverse Subtraction w/ Carry:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ((operand2 | 0) - (operand1 | 0) - ((parentObj.CPSR.getCarry()) ? 0 : 1)) | 0);
+    parentObj.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0) - (parentObj.CPSR.getCarryIntReverse() | 0)) | 0);
 }
 ARMInstructionSet.prototype.RSCS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSCS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, parentObj.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.TSTS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
@@ -617,14 +633,14 @@ ARMInstructionSet.prototype.ORR = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise OR:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 | operand2);
+    parentObj.guard12OffsetRegisterWrite(operand1 | operand2);
 }
 ARMInstructionSet.prototype.ORR2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise OR:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 | operand2);
+    parentObj.guard12OffsetRegisterWrite(operand1 | operand2);
 }
 ARMInstructionSet.prototype.ORRS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
@@ -634,7 +650,7 @@ ARMInstructionSet.prototype.ORRS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(result | 0);
 }
 ARMInstructionSet.prototype.ORRS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
@@ -644,12 +660,12 @@ ARMInstructionSet.prototype.ORRS2 = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(result | 0);
 }
 ARMInstructionSet.prototype.MOV = function (parentObj, operand2OP) {
     //Perform move:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand2OP(parentObj, parentObj.execute | 0) | 0);
+    parentObj.guard12OffsetRegisterWrite(operand2OP(parentObj, parentObj.execute | 0) | 0);
 }
 ARMInstructionSet.prototype.MOVS = function (parentObj, operand2OP) {
     var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
@@ -657,7 +673,7 @@ ARMInstructionSet.prototype.MOVS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(operand2 | 0);
     parentObj.CPSR.setZeroInt(operand2 | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, operand2 | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(operand2 | 0);
 }
 ARMInstructionSet.prototype.BIC = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
@@ -665,7 +681,7 @@ ARMInstructionSet.prototype.BIC = function (parentObj, operand2OP) {
     var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 & operand2);
+    parentObj.guard12OffsetRegisterWrite(operand1 & operand2);
 }
 ARMInstructionSet.prototype.BIC2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
@@ -673,7 +689,7 @@ ARMInstructionSet.prototype.BIC2 = function (parentObj, operand2OP) {
     var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Perform bitwise AND:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand1 & operand2);
+    parentObj.guard12OffsetRegisterWrite(operand1 & operand2);
 }
 ARMInstructionSet.prototype.BICS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
@@ -684,7 +700,7 @@ ARMInstructionSet.prototype.BICS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(result | 0);
 }
 ARMInstructionSet.prototype.BICS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
@@ -695,12 +711,12 @@ ARMInstructionSet.prototype.BICS2 = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, result | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(result | 0);
 }
 ARMInstructionSet.prototype.MVN = function (parentObj, operand2OP) {
     //Perform move negative:
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, ~operand2OP(parentObj, parentObj.execute | 0));
+    parentObj.guard12OffsetRegisterWrite(~operand2OP(parentObj, parentObj.execute | 0));
 }
 ARMInstructionSet.prototype.MVNS = function (parentObj, operand2OP) {
     var operand2 = ~operand2OP(parentObj, parentObj.execute | 0) | 0;
@@ -708,11 +724,11 @@ ARMInstructionSet.prototype.MVNS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(operand2 | 0);
     parentObj.CPSR.setZeroInt(operand2 | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWriteCPSR((parentObj.execute >> 12) & 0xF, operand2 | 0);
+    parentObj.guard12OffsetRegisterWriteCPSR(operand2 | 0);
 }
 ARMInstructionSet.prototype.MRS = function (parentObj, operand2OP) {
     //Transfer PSR to Register
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, operand2OP(parentObj) | 0);
+    parentObj.guard12OffsetRegisterWrite(operand2OP(parentObj) | 0);
 }
 ARMInstructionSet.prototype.MSR = function (parentObj, operand2OP) {
     //Transfer Register/Immediate to PSR:
@@ -722,7 +738,7 @@ ARMInstructionSet.prototype.MUL = function (parentObj, operand2OP) {
     //Perform multiplication:
     var result = parentObj.CPUCore.performMUL32(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0, 0) | 0;
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, result | 0);
+    parentObj.guard16OffsetRegisterWrite(result | 0);
 }
 ARMInstructionSet.prototype.MULS = function (parentObj, operand2OP) {
     //Perform multiplication:
@@ -731,7 +747,7 @@ ARMInstructionSet.prototype.MULS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, result | 0);
+    parentObj.guard16OffsetRegisterWrite(result | 0);
 }
 ARMInstructionSet.prototype.MLA = function (parentObj, operand2OP) {
     //Perform multiplication:
@@ -739,7 +755,7 @@ ARMInstructionSet.prototype.MLA = function (parentObj, operand2OP) {
     //Perform addition:
     result = ((result | 0) + (parentObj.read12OffsetRegister() | 0));
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, result | 0);
+    parentObj.guard16OffsetRegisterWrite(result | 0);
 }
 ARMInstructionSet.prototype.MLAS = function (parentObj, operand2OP) {
     //Perform multiplication:
@@ -750,14 +766,14 @@ ARMInstructionSet.prototype.MLAS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, result | 0);
+    parentObj.guard16OffsetRegisterWrite(result | 0);
 }
 ARMInstructionSet.prototype.UMULL = function (parentObj, operand2OP) {
     //Perform multiplication:
     parentObj.CPUCore.performUMUL64(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0);
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
+    parentObj.guard16OffsetRegisterWrite(parentObj.CPUCore.mul64ResultHigh | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.mul64ResultLow | 0);
 }
 ARMInstructionSet.prototype.UMULLS = function (parentObj, operand2OP) {
     //Perform multiplication:
@@ -766,15 +782,15 @@ ARMInstructionSet.prototype.UMULLS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(parentObj.CPUCore.mul64ResultHigh | 0);
     parentObj.CPSR.setZero((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
+    parentObj.guard16OffsetRegisterWrite(parentObj.CPUCore.mul64ResultHigh | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.mul64ResultLow | 0);
 }
 ARMInstructionSet.prototype.UMLAL = function (parentObj, operand2OP) {
     //Perform multiplication:
     parentObj.CPUCore.performUMLA64(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0, parentObj.read16OffsetRegister() | 0, parentObj.read12OffsetRegister() | 0);
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
+    parentObj.guard16OffsetRegisterWrite(parentObj.CPUCore.mul64ResultHigh | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.mul64ResultLow | 0);
 }
 ARMInstructionSet.prototype.UMLALS = function (parentObj, operand2OP) {
     //Perform multiplication:
@@ -783,15 +799,15 @@ ARMInstructionSet.prototype.UMLALS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(parentObj.CPUCore.mul64ResultHigh | 0);
     parentObj.CPSR.setZero((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
+    parentObj.guard16OffsetRegisterWrite(parentObj.CPUCore.mul64ResultHigh | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.mul64ResultLow | 0);
 }
 ARMInstructionSet.prototype.SMULL = function (parentObj, operand2OP) {
     //Perform multiplication:
     parentObj.CPUCore.performMUL64(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0);
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
+    parentObj.guard16OffsetRegisterWrite(parentObj.CPUCore.mul64ResultHigh | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.mul64ResultLow | 0);
 }
 ARMInstructionSet.prototype.SMULLS = function (parentObj, operand2OP) {
     //Perform multiplication:
@@ -800,15 +816,15 @@ ARMInstructionSet.prototype.SMULLS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(parentObj.CPUCore.mul64ResultHigh | 0);
     parentObj.CPSR.setZero((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
+    parentObj.guard16OffsetRegisterWrite(parentObj.CPUCore.mul64ResultHigh | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.mul64ResultLow | 0);
 }
 ARMInstructionSet.prototype.SMLAL = function (parentObj, operand2OP) {
     //Perform multiplication:
     parentObj.CPUCore.performMLA64(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0, parentObj.read16OffsetRegister() | 0, parentObj.read12OffsetRegister() | 0);
     //Update destination register:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
+    parentObj.guard16OffsetRegisterWrite(parentObj.CPUCore.mul64ResultHigh | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.mul64ResultLow | 0);
 }
 ARMInstructionSet.prototype.SMLALS = function (parentObj, operand2OP) {
     //Perform multiplication:
@@ -817,8 +833,8 @@ ARMInstructionSet.prototype.SMLALS = function (parentObj, operand2OP) {
     parentObj.CPSR.setNegativeInt(parentObj.CPUCore.mul64ResultHigh | 0);
     parentObj.CPSR.setZero((parentObj.CPUCore.mul64ResultHigh | 0) == 0 && (parentObj.CPUCore.mul64ResultLow | 0) == 0);
     //Update destination register and guard CPSR for PC:
-    parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, parentObj.CPUCore.mul64ResultHigh | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.mul64ResultLow | 0);
+    parentObj.guard16OffsetRegisterWrite(parentObj.CPUCore.mul64ResultHigh | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.mul64ResultLow | 0);
 }
 ARMInstructionSet.prototype.STRH = function (parentObj, operand2OP) {
     //Perform halfword store calculations:
@@ -830,19 +846,19 @@ ARMInstructionSet.prototype.LDRH = function (parentObj, operand2OP) {
     //Perform halfword load calculations:
     var address = operand2OP(parentObj, parentObj.execute | 0, false) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read16(address | 0) | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.read16(address | 0) | 0);
 }
 ARMInstructionSet.prototype.LDRSH = function (parentObj, operand2OP) {
     //Perform signed halfword load calculations:
     var address = operand2OP(parentObj, parentObj.execute | 0, false) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read16(address | 0) << 16) >> 16);
+    parentObj.guard12OffsetRegisterWrite((parentObj.CPUCore.read16(address | 0) << 16) >> 16);
 }
 ARMInstructionSet.prototype.LDRSB = function (parentObj, operand2OP) {
     //Perform signed byte load calculations:
     var address = operand2OP(parentObj, parentObj.execute | 0, false) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read8(address | 0) << 24) >> 24);
+    parentObj.guard12OffsetRegisterWrite((parentObj.CPUCore.read8(address | 0) << 24) >> 24);
 }
 ARMInstructionSet.prototype.STR = function (parentObj, operand2OP) {
     //Perform word store calculations:
@@ -854,7 +870,7 @@ ARMInstructionSet.prototype.LDR = function (parentObj, operand2OP) {
     //Perform word load calculations:
     var address = operand2OP(parentObj, parentObj.execute | 0, false) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read32(address | 0) | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.read32(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STRB = function (parentObj, operand2OP) {
     //Perform byte store calculations:
@@ -866,7 +882,7 @@ ARMInstructionSet.prototype.LDRB = function (parentObj, operand2OP) {
     //Perform byte store calculations:
     var address = operand2OP(parentObj, parentObj.execute | 0, false) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read8(address | 0) | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.read8(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STRHT = function (parentObj, operand2OP) {
     //Perform halfword store calculations (forced user-mode):
@@ -878,19 +894,19 @@ ARMInstructionSet.prototype.LDRHT = function (parentObj, operand2OP) {
     //Perform halfword load calculations (forced user-mode):
     var address = operand2OP(parentObj, parentObj.execute | 0, true) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read16(address | 0) | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.read16(address | 0) | 0);
 }
 ARMInstructionSet.prototype.LDRSHT = function (parentObj, operand2OP) {
     //Perform signed halfword load calculations (forced user-mode):
     var address = operand2OP(parentObj, parentObj.execute | 0, true) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read16(address | 0) << 16) >> 16);
+    parentObj.guard12OffsetRegisterWrite((parentObj.CPUCore.read16(address | 0) << 16) >> 16);
 }
 ARMInstructionSet.prototype.LDRSBT = function (parentObj, operand2OP) {
     //Perform signed byte load calculations (forced user-mode):
     var address = operand2OP(parentObj, parentObj.execute | 0, true) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, (parentObj.CPUCore.read8(address | 0) << 24) >> 24);
+    parentObj.guard12OffsetRegisterWrite((parentObj.CPUCore.read8(address | 0) << 24) >> 24);
 }
 ARMInstructionSet.prototype.STRT = function (parentObj, operand2OP) {
     //Perform word store calculations (forced user-mode):
@@ -902,7 +918,7 @@ ARMInstructionSet.prototype.LDRT = function (parentObj, operand2OP) {
     //Perform word load calculations (forced user-mode):
     var address = operand2OP(parentObj, parentObj.execute | 0, true) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read32(address | 0) | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.read32(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STRBT = function (parentObj, operand2OP) {
     //Perform byte store calculations (forced user-mode):
@@ -914,7 +930,7 @@ ARMInstructionSet.prototype.LDRBT = function (parentObj, operand2OP) {
     //Perform byte load calculations (forced user-mode):
     var address = operand2OP(parentObj, parentObj.execute | 0, true) | 0;
     //Read from memory location:
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, parentObj.CPUCore.read8(address | 0) | 0);
+    parentObj.guard12OffsetRegisterWrite(parentObj.CPUCore.read8(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STMIA = function (parentObj, operand2OP) {
     //Only initialize the STMIA sequence if the register list is non-empty:
@@ -951,7 +967,7 @@ ARMInstructionSet.prototype.STMIAW = function (parentObj, operand2OP) {
             }
         }
         //Store the updated base address back into register:
-        parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
+        parentObj.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         parentObj.wait.NonSequentialBroadcast();
     }
@@ -991,7 +1007,7 @@ ARMInstructionSet.prototype.STMDAW = function (parentObj, operand2OP) {
             }
         }
         //Store the updated base address back into register:
-        parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
+        parentObj.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         parentObj.wait.NonSequentialBroadcast();
     }
@@ -1031,7 +1047,7 @@ ARMInstructionSet.prototype.STMIBW = function (parentObj, operand2OP) {
             }
         }
         //Store the updated base address back into register:
-        parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
+        parentObj.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         parentObj.wait.NonSequentialBroadcast();
     }
@@ -1071,7 +1087,7 @@ ARMInstructionSet.prototype.STMDBW = function (parentObj, operand2OP) {
             }
         }
         //Store the updated base address back into register:
-        parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
+        parentObj.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         parentObj.wait.NonSequentialBroadcast();
     }
@@ -1111,7 +1127,7 @@ ARMInstructionSet.prototype.LDMIAW = function (parentObj, operand2OP) {
             }
         }
         //Store the updated base address back into register:
-        parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
+        parentObj.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         parentObj.wait.NonSequentialBroadcast();
     }
@@ -1151,7 +1167,7 @@ ARMInstructionSet.prototype.LDMDAW = function (parentObj, operand2OP) {
             }
         }
         //Store the updated base address back into register:
-        parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
+        parentObj.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         parentObj.wait.NonSequentialBroadcast();
     }
@@ -1191,7 +1207,7 @@ ARMInstructionSet.prototype.LDMIBW = function (parentObj, operand2OP) {
             }
         }
         //Store the updated base address back into register:
-        parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
+        parentObj.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         parentObj.wait.NonSequentialBroadcast();
     }
@@ -1231,7 +1247,7 @@ ARMInstructionSet.prototype.LDMDBW = function (parentObj, operand2OP) {
             }
         }
         //Store the updated base address back into register:
-        parentObj.guardRegisterWrite((parentObj.execute >> 16) & 0xF, currentAddress | 0);
+        parentObj.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         parentObj.wait.NonSequentialBroadcast();
     }
@@ -1242,7 +1258,7 @@ ARMInstructionSet.prototype.SWP = function (parentObj, operand2OP) {
     //Clock a cycle for the processing delaying the CPU:
     parentObj.wait.CPUInternalSingleCyclePrefetch();
     parentObj.CPUCore.write32(base | 0, parentObj.readRegister(parentObj.execute & 0xF) | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, data | 0);
+    parentObj.guard12OffsetRegisterWrite(data | 0);
 }
 ARMInstructionSet.prototype.SWPB = function (parentObj, operand2OP) {
     var base = parentObj.read16OffsetRegister() | 0;
@@ -1250,7 +1266,7 @@ ARMInstructionSet.prototype.SWPB = function (parentObj, operand2OP) {
     //Clock a cycle for the processing delaying the CPU:
     parentObj.wait.CPUInternalSingleCyclePrefetch();
     parentObj.CPUCore.write8(base | 0, parentObj.readRegister(parentObj.execute & 0xF) | 0);
-    parentObj.guardRegisterWrite((parentObj.execute >> 12) & 0xF, data | 0);
+    parentObj.guard12OffsetRegisterWrite(data | 0);
 }
 ARMInstructionSet.prototype.SWI = function (parentObj, operand2OP) {
     //Software Interrupt:

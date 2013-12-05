@@ -72,6 +72,22 @@ function ARMCPSRAttributeTable() {
     function getCarry() {
         return !!carry;
     };
+    function getCarryInt() {
+        if (carry) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    };
+    function getCarryIntReverse() {
+        if (carry) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
+    };
     function setVFlagForADD(operand1, operand2, result) {
         //Compute the overflow flag for addition:
         operand1 = operand1 | 0;
@@ -173,6 +189,8 @@ function ARMCPSRAttributeTable() {
         "setCarry":setCarry,
         "setCarryFalse":setCarryFalse,
         "getCarry":getCarry,
+        "getCarryInt":getCarryInt,
+        "getCarryIntReverse":getCarryIntReverse,
         "setADDFlags":setADDFlags,
         "setADCFlags":setADCFlags,
         "setSUBFlags":setSUBFlags,
