@@ -154,11 +154,8 @@ GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
         case 3: //DMA Inside Halt State
             this.stepHandle = this.handleDMA;
             break;
-        case 4: //Handle Stop State
+        default: //Handle Stop State
             this.stepHandle = this.handleStop;
-            break;
-        default:
-            throw(new Error("Invalid state selected."));
     }
 }
 GameBoyAdvanceIO.prototype.handleCPUInterpreter = function () {
