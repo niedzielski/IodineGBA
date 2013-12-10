@@ -27,6 +27,7 @@ function GameBoyAdvanceBGTEXTRenderer(gfx, BGLayer) {
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.initialize = function () {
     this.scratchBuffer = getInt32Array(248);
+    this.tileFetched = getInt32Array(8);
     this.BGXCoord = 0;
     this.BGYCoord = 0;
     this.palettePreprocess();
@@ -42,18 +43,24 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
         line = ((line | 0) - (this.gfx.mosaicRenderer.getMosaicYOffset(line | 0) | 0)) | 0;
     }
     var yTileOffset = ((line | 0) + (this.BGYCoord | 0)) & 0x7;
-    var pixelPipelinePosition = this.BGXCoord & 0x7;
     var yTileStart = ((line | 0) + (this.BGYCoord | 0)) >> 3;
     var xTileStart = this.BGXCoord >> 3;
-    for (var position = 0, chrData = 0; (position | 0) < 240;) {
+    //Fetch tile attributes:
+    var chrData = this.fetchTile(yTileStart | 0, xTileStart | 0) | 0;
+    xTileStart = ((xTileStart | 0) + 1) | 0;
+    //Get 8 pixels of data:
+    this.processVRAM(chrData | 0, yTileOffset | 0);
+    //Copy the buffered tile to line:
+    this.fetchVRAMStart(chrData | 0, this.BGXCoord & 0x7);
+    //Process full 8 pixels at a time:
+    for (var position = (8 - (this.BGXCoord & 0x7)) | 0; (position | 0) < 240; position = ((position | 0) + 8) | 0) {
+        //Fetch tile attributes:
         chrData = this.fetchTile(yTileStart | 0, xTileStart | 0) | 0;
         xTileStart = ((xTileStart | 0) + 1) | 0;
-        while ((pixelPipelinePosition | 0) < 0x8) {
-            this.scratchBuffer[position | 0] = this.priorityFlag | this.fetchVRAM(chrData | 0, pixelPipelinePosition | 0, yTileOffset | 0);
-            pixelPipelinePosition = ((pixelPipelinePosition | 0) + 1) | 0;
-            position = ((position | 0) + 1) | 0;
-        }
-        pixelPipelinePosition &= 0x7;
+        //Get 8 pixels of data:
+        this.processVRAM(chrData | 0, yTileOffset | 0);
+        //Copy the buffered tile to line:
+        this.fetchVRAM(chrData | 0, position | 0);
     }
     if (this.gfx.BGMosaic[this.BGLayer & 3]) {
         //Pixelize the line horizontally:
@@ -97,42 +104,181 @@ GameBoyAdvanceBGTEXTRenderer.prototype.computeTileNumber = function (yTile, xTil
     }
     return tileNumber | 0;
 }
-GameBoyAdvanceBGTEXTRenderer.prototype.fetch4BitVRAM = function (chrData, xOffset, yOffset) {
+GameBoyAdvanceBGTEXTRenderer.prototype.process4BitVRAM = function (chrData, yOffset) {
     //16 color tile mode:
     chrData = chrData | 0;
-    xOffset = xOffset | 0;
     yOffset = yOffset | 0;
     //Parse flip attributes, grab palette, and then output pixel:
     var address = (chrData & 0x3FF) << 5;
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
     address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 2));
-    address = ((address | 0) + ((((chrData & 0x400) == 0x400) ? (0x7 - (xOffset | 0)) : (xOffset | 0)) >> 1));
-    address = this.VRAM[address & 0xFFFF] | 0;
-    if ((xOffset & 0x1) != ((chrData & 0x400) >> 10)) {
-        address = address >> 4;
-    }
-    address = ((chrData >> 8) & 0xF0) | (address & 0xF);
-    return this.palette16[address & 0xFF] | 0;
+    //Copy out our pixels:
+    this.render4BitVRAM((chrData >> 8) & 0xF0, address | 0);
 }
-GameBoyAdvanceBGTEXTRenderer.prototype.fetch8BitVRAM = function (chrData, xOffset, yOffset) {
+GameBoyAdvanceBGTEXTRenderer.prototype.render4BitVRAM = function (paletteOffset, address) {
+    paletteOffset = paletteOffset | 0;
+    address = address | 0;
+    var data = 0;
+    //Unrolled data tile line fetch:
+    if ((address | 0) < 0x10000) {
+        //Tile address valid:
+        data = this.VRAM[address | 0] | 0;
+        this.tileFetched[0] = this.palette16[paletteOffset | (data & 0xF)] | 0;
+        this.tileFetched[1] = this.palette16[paletteOffset | (data >> 4)] | 0;
+        data = this.VRAM[address | 1] | 0;
+        this.tileFetched[2] = this.palette16[paletteOffset | (data & 0xF)] | 0;
+        this.tileFetched[3] = this.palette16[paletteOffset | (data >> 4)] | 0;
+        data = this.VRAM[address | 2] | 0;
+        this.tileFetched[4] = this.palette16[paletteOffset | (data & 0xF)] | 0;
+        this.tileFetched[5] = this.palette16[paletteOffset | (data >> 4)] | 0;
+        data = this.VRAM[address | 3] | 0;
+        this.tileFetched[6] = this.palette16[paletteOffset | (data & 0xF)] | 0;
+        this.tileFetched[7] = this.palette16[paletteOffset | (data >> 4)] | 0;
+    }
+    else {
+        //In GBA mode on NDS, we display transparency on invalid tiles:
+        data = this.gfx.transparency | 0;
+        this.tileFetched[0] = data | 0;
+        this.tileFetched[1] = data | 0;
+        this.tileFetched[2] = data | 0;
+        this.tileFetched[3] = data | 0;
+        this.tileFetched[4] = data | 0;
+        this.tileFetched[5] = data | 0;
+        this.tileFetched[6] = data | 0;
+        this.tileFetched[7] = data | 0;
+    }
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.process8BitVRAM = function (chrData, yOffset) {
     //256 color tile mode:
     chrData = chrData | 0;
-    xOffset = xOffset | 0;
     yOffset = yOffset | 0;
     //Parse flip attributes and output pixel:
-    var address = (chrData & 0x3FF) << 6;
+    var address = (chrData & 0x1FF) << 6;
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
     address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 3)) | 0;
-    address = ((address | 0) + ((((chrData & 0x400) == 0x400) ? (0x7 - (xOffset | 0)) : (xOffset | 0)) | 0)) | 0;
-    return this.palette256[this.VRAM[address & 0xFFFF] & 0xFF] | 0;
+    //Copy out our pixels:
+    this.render8BitVRAM(address | 0);
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAM = function (address) {
+    address = address | 0;
+    if ((address | 0) < 0x10000) {
+        //Tile address valid:
+        this.tileFetched[0] = this.palette256[this.VRAM[address | 0] | 0] | 0;
+        this.tileFetched[1] = this.palette256[this.VRAM[address | 1] | 0] | 0;
+        this.tileFetched[2] = this.palette256[this.VRAM[address | 2] | 0] | 0;
+        this.tileFetched[3] = this.palette256[this.VRAM[address | 3] | 0] | 0;
+        this.tileFetched[4] = this.palette256[this.VRAM[address | 4] | 0] | 0;
+        this.tileFetched[5] = this.palette256[this.VRAM[address | 5] | 0] | 0;
+        this.tileFetched[6] = this.palette256[this.VRAM[address | 6] | 0] | 0;
+        this.tileFetched[7] = this.palette256[this.VRAM[address | 7] | 0] | 0;
+    }
+    else {
+        //In GBA mode on NDS, we display transparency on invalid tiles:
+        var data = this.gfx.transparency | 0;
+        this.tileFetched[0] = data | 0;
+        this.tileFetched[1] = data | 0;
+        this.tileFetched[2] = data | 0;
+        this.tileFetched[3] = data | 0;
+        this.tileFetched[4] = data | 0;
+        this.tileFetched[5] = data | 0;
+        this.tileFetched[6] = data | 0;
+        this.tileFetched[7] = data | 0;
+    }
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAMStart = function (chrData, pixelPipelinePosition) {
+    chrData = chrData | 0;
+    pixelPipelinePosition = pixelPipelinePosition | 0;
+    var position = 0;
+    if ((chrData & 0x400) == 0) {
+        //Normal Horizontal:
+        switch (pixelPipelinePosition | 0) {
+            case 0:
+                this.scratchBuffer[0] = this.priorityFlag | this.tileFetched[0];
+                position = ((position | 0) + 1) | 0;
+            case 1:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[1];
+                position = ((position | 0) + 1) | 0;
+            case 2:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[2];
+                position = ((position | 0) + 1) | 0;
+            case 3:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[3];
+                position = ((position | 0) + 1) | 0;
+            case 4:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[4];
+                position = ((position | 0) + 1) | 0;
+            case 5:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[5];
+                position = ((position | 0) + 1) | 0;
+            case 6:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[6];
+                position = ((position | 0) + 1) | 0;
+            case 7:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[7];
+        }
+    }
+    else {
+        //Flipped Horizontally:
+        switch (pixelPipelinePosition | 0) {
+            case 0:
+                this.scratchBuffer[0] = this.priorityFlag | this.tileFetched[7];
+                position = ((position | 0) + 1) | 0;
+            case 1:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[6];
+                position = ((position | 0) + 1) | 0;
+            case 2:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[5];
+                position = ((position | 0) + 1) | 0;
+            case 3:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[4];
+                position = ((position | 0) + 1) | 0;
+            case 4:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[3];
+                position = ((position | 0) + 1) | 0;
+            case 5:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[2];
+                position = ((position | 0) + 1) | 0;
+            case 6:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[1];
+                position = ((position | 0) + 1) | 0;
+            case 7:
+                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[0];
+        }
+    }
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAM = function (chrData, position) {
+    chrData = chrData | 0;
+    position = position | 0;
+    if ((chrData & 0x400) == 0) {
+        //Normal Horizontal:
+        this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[0];
+        this.scratchBuffer[((position | 0) + 1) | 0] = this.priorityFlag | this.tileFetched[1];
+        this.scratchBuffer[((position | 0) + 2) | 0] = this.priorityFlag | this.tileFetched[2];
+        this.scratchBuffer[((position | 0) + 3) | 0] = this.priorityFlag | this.tileFetched[3];
+        this.scratchBuffer[((position | 0) + 4) | 0] = this.priorityFlag | this.tileFetched[4];
+        this.scratchBuffer[((position | 0) + 5) | 0] = this.priorityFlag | this.tileFetched[5];
+        this.scratchBuffer[((position | 0) + 6) | 0] = this.priorityFlag | this.tileFetched[6];
+        this.scratchBuffer[((position | 0) + 7) | 0] = this.priorityFlag | this.tileFetched[7];
+    }
+    else {
+        //Flipped Horizontally:
+        this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[7];
+        this.scratchBuffer[((position | 0) + 1) | 0] = this.priorityFlag | this.tileFetched[6];
+        this.scratchBuffer[((position | 0) + 2) | 0] = this.priorityFlag | this.tileFetched[5];
+        this.scratchBuffer[((position | 0) + 3) | 0] = this.priorityFlag | this.tileFetched[4];
+        this.scratchBuffer[((position | 0) + 4) | 0] = this.priorityFlag | this.tileFetched[3];
+        this.scratchBuffer[((position | 0) + 5) | 0] = this.priorityFlag | this.tileFetched[2];
+        this.scratchBuffer[((position | 0) + 6) | 0] = this.priorityFlag | this.tileFetched[1];
+        this.scratchBuffer[((position | 0) + 7) | 0] = this.priorityFlag | this.tileFetched[0];
+    }
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.palettePreprocess = function () {
     //Make references:
     if (this.gfx.BGPalette256[this.BGLayer & 3]) {
-        this.fetchVRAM = this.fetch8BitVRAM;
+        this.processVRAM = this.process8BitVRAM;
     }
     else {
-        this.fetchVRAM = this.fetch4BitVRAM;
+        this.processVRAM = this.process4BitVRAM;
     }
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.screenSizePreprocess = function () {
