@@ -26,7 +26,7 @@ function GameBoyAdvanceBGTEXTRenderer(gfx, BGLayer) {
     this.initialize();
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.initialize = function () {
-    this.scratchBuffer = getInt32Array(248);
+    this.scratchBuffer = getInt32Array(247);
     this.tileFetched = getInt32Array(8);
     this.BGXCoord = 0;
     this.BGYCoord = 0;
@@ -188,33 +188,25 @@ GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAM = function (address) {
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAMStart = function (chrData, pixelPipelinePosition) {
     chrData = chrData | 0;
     pixelPipelinePosition = pixelPipelinePosition | 0;
-    var position = 0;
     if ((chrData & 0x400) == 0) {
         //Normal Horizontal:
         switch (pixelPipelinePosition | 0) {
             case 0:
                 this.scratchBuffer[0] = this.priorityFlag | this.tileFetched[0];
-                position = ((position | 0) + 1) | 0;
             case 1:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[1];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(1 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[1];
             case 2:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[2];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(2 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[2];
             case 3:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[3];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(3 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[3];
             case 4:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[4];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(4 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[4];
             case 5:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[5];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(5 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[5];
             case 6:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[6];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(6 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[6];
             case 7:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[7];
+                this.scratchBuffer[(7 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[7];
         }
     }
     else {
@@ -222,27 +214,20 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAMStart = function (chrData, pixel
         switch (pixelPipelinePosition | 0) {
             case 0:
                 this.scratchBuffer[0] = this.priorityFlag | this.tileFetched[7];
-                position = ((position | 0) + 1) | 0;
             case 1:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[6];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(1 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[6];
             case 2:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[5];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(2 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[5];
             case 3:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[4];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(3 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[4];
             case 4:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[3];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(4 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[3];
             case 5:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[2];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(5 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[2];
             case 6:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[1];
-                position = ((position | 0) + 1) | 0;
+                this.scratchBuffer[(6 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[1];
             case 7:
-                this.scratchBuffer[position | 0] = this.priorityFlag | this.tileFetched[0];
+                this.scratchBuffer[(7 - (pixelPipelinePosition | 0)) | 0] = this.priorityFlag | this.tileFetched[0];
         }
     }
 }
