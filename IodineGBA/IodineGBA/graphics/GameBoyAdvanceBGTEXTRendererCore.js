@@ -153,7 +153,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.process8BitVRAM = function (chrData, yOff
     chrData = chrData | 0;
     yOffset = yOffset | 0;
     //Parse flip attributes and output pixel:
-    var address = (chrData & 0x1FF) << 6;
+    var address = (chrData & 0x3FF) << 6;
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
     address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 3)) | 0;
     //Copy out our pixels:
