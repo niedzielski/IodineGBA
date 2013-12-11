@@ -163,14 +163,14 @@ GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAM = function (address) {
     address = address | 0;
     if ((address | 0) < 0x10000) {
         //Tile address valid:
-        this.tileFetched[0] = this.palette256[this.VRAM[address | 0] | 0] | 0;
-        this.tileFetched[1] = this.palette256[this.VRAM[address | 1] | 0] | 0;
-        this.tileFetched[2] = this.palette256[this.VRAM[address | 2] | 0] | 0;
-        this.tileFetched[3] = this.palette256[this.VRAM[address | 3] | 0] | 0;
-        this.tileFetched[4] = this.palette256[this.VRAM[address | 4] | 0] | 0;
-        this.tileFetched[5] = this.palette256[this.VRAM[address | 5] | 0] | 0;
-        this.tileFetched[6] = this.palette256[this.VRAM[address | 6] | 0] | 0;
-        this.tileFetched[7] = this.palette256[this.VRAM[address | 7] | 0] | 0;
+        this.tileFetched[0] = this.palette256[this.VRAM[address | 0] & 0xFF] | 0;
+        this.tileFetched[1] = this.palette256[this.VRAM[address | 1] & 0xFF] | 0;
+        this.tileFetched[2] = this.palette256[this.VRAM[address | 2] & 0xFF] | 0;
+        this.tileFetched[3] = this.palette256[this.VRAM[address | 3] & 0xFF] | 0;
+        this.tileFetched[4] = this.palette256[this.VRAM[address | 4] & 0xFF] | 0;
+        this.tileFetched[5] = this.palette256[this.VRAM[address | 5] & 0xFF] | 0;
+        this.tileFetched[6] = this.palette256[this.VRAM[address | 6] & 0xFF] | 0;
+        this.tileFetched[7] = this.palette256[this.VRAM[address | 7] & 0xFF] | 0;
     }
     else {
         //In GBA mode on NDS, we display transparency on invalid tiles:
@@ -186,6 +186,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAM = function (address) {
     }
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAMStart = function (chrData, pixelPipelinePosition) {
+    //Handle the the first tile of the scan-line specially:
     chrData = chrData | 0;
     pixelPipelinePosition = pixelPipelinePosition | 0;
     if ((chrData & 0x400) == 0) {

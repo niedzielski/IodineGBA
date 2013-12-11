@@ -1643,7 +1643,7 @@ ARMInstructionSet.prototype.rc = function (parentObj) {
         ((parentObj.CPSR.getOverflow()) ? 0x10000000 : 0) |
         ((parentObj.CPUCore.IRQDisabled) ? 0x80 : 0) |
         ((parentObj.CPUCore.FIQDisabled) ? 0x40 : 0) |
-        0x20 | parentObj.CPUCore.MODEBits
+        parentObj.CPUCore.MODEBits
     );
 }
 ARMInstructionSet.prototype.rcs = function (parentObj, operand) {
@@ -1653,7 +1653,7 @@ ARMInstructionSet.prototype.rcs = function (parentObj, operand) {
     parentObj.CPSR.setZero((newcpsr & 0x40000000) != 0);
     parentObj.CPSR.setCarry((newcpsr & 0x20000000) != 0);
     parentObj.CPSR.setOverflow((newcpsr & 0x10000000) != 0);
-    if ((operand & 0x10000) == 0x10000 && parentObj.CPUCore.MODEBits != 0x10) {
+    if ((operand & 0x10000) == 0x10000 && (parentObj.CPUCore.MODEBits | 0) != 0x10) {
         parentObj.CPUCore.IRQDisabled = ((newcpsr & 0x80) != 0);
         parentObj.CPUCore.assertIRQ();
         parentObj.CPUCore.FIQDisabled = ((newcpsr & 0x40) != 0);
