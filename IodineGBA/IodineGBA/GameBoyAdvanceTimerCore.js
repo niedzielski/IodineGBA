@@ -26,6 +26,12 @@ GameBoyAdvanceTimer.prototype.prescalarLookup = [
     0x100,
     0x400
 ];
+GameBoyAdvanceTimer.prototype.prescalarShiftLookup = [
+    0,
+    0x6,
+    0x8,
+    0xA
+];
 GameBoyAdvanceTimer.prototype.initialize = function () {
     this.nextTimer0OverflowSingle = (!!Math.imul) ? this.nextTimer0OverflowSingleFast : this.nextTimer0OverflowSingleSlow;
     this.initializeTimers();
@@ -38,6 +44,7 @@ GameBoyAdvanceTimer.prototype.initializeTimers = function () {
     this.timer0IRQ = false;
     this.timer0Precounter = 0;
     this.timer0Prescalar = 1;
+    this.timer0PrescalarShifted = 0;
     this.timer1Counter = 0;
     this.timer1Reload = 0;
     this.timer1Control = 0;
@@ -45,6 +52,7 @@ GameBoyAdvanceTimer.prototype.initializeTimers = function () {
     this.timer1IRQ = false;
     this.timer1Precounter = 0;
     this.timer1Prescalar = 1;
+    this.timer1PrescalarShifted = 0;
     this.timer1CountUp = false;
     this.timer2Counter = 0;
     this.timer2Reload = 0;
@@ -53,6 +61,7 @@ GameBoyAdvanceTimer.prototype.initializeTimers = function () {
     this.timer2IRQ = false;
     this.timer2Precounter = 0;
     this.timer2Prescalar = 1;
+    this.timer2PrescalarShifted = 0;
     this.timer2CountUp = false;
     this.timer3Counter = 0;
     this.timer3Reload = 0;
@@ -61,6 +70,7 @@ GameBoyAdvanceTimer.prototype.initializeTimers = function () {
     this.timer3IRQ = false;
     this.timer3Precounter = 0;
     this.timer3Prescalar = 1;
+    this.timer3PrescalarShifted = 0;
     this.timer3CountUp = false;
     this.timer1UseMainClocks = false;
     this.timer1UseChainedClocks = false;
@@ -100,8 +110,9 @@ GameBoyAdvanceTimer.prototype.clockTimer0 = function (clocks) {
     if (this.timer0Enabled) {
         this.timer0Precounter = ((this.timer0Precounter | 0) + (clocks | 0)) | 0;
         while ((this.timer0Precounter | 0) >= (this.timer0Prescalar | 0)) {
-            this.timer0Precounter = ((this.timer0Precounter | 0) - (this.timer0Prescalar | 0)) | 0;
-            this.timer0Counter = ((this.timer0Counter | 0) + 1) | 0;
+            var iterations = Math.min((this.timer0Precounter | 0) >> (this.timer0PrescalarShifted | 0), (0x10000 - (this.timer0Counter | 0)) | 0);
+            this.timer0Precounter = ((this.timer0Precounter | 0) - ((iterations | 0) << (this.timer0PrescalarShifted | 0))) | 0;
+            this.timer0Counter = ((this.timer0Counter | 0) + (iterations | 0)) | 0;
             if ((this.timer0Counter | 0) > 0xFFFF) {
                 this.timer0Counter = this.timer0Reload | 0;
                 this.timer0ExternalTriggerCheck();
@@ -115,8 +126,9 @@ GameBoyAdvanceTimer.prototype.clockTimer1 = function (clocks) {
     if (this.timer1UseMainClocks) {
         this.timer1Precounter = ((this.timer1Precounter | 0) + (clocks | 0)) | 0;
         while ((this.timer1Precounter | 0) >= (this.timer1Prescalar | 0)) {
-            this.timer1Precounter = ((this.timer1Precounter | 0) - (this.timer1Prescalar | 0)) | 0;
-            this.timer1Counter = ((this.timer1Counter | 0) + 1) | 0;
+            var iterations = Math.min((this.timer1Precounter | 0) >> (this.timer1PrescalarShifted | 0), (0x10000 - (this.timer1Counter | 0)) | 0);
+            this.timer1Precounter = ((this.timer1Precounter | 0) - ((iterations | 0) << (this.timer1PrescalarShifted | 0))) | 0;
+            this.timer1Counter = ((this.timer1Counter | 0) + (iterations | 0)) | 0;
             if ((this.timer1Counter | 0) > 0xFFFF) {
                 this.timer1Counter = this.timer1Reload | 0;
                 this.timer1ExternalTriggerCheck();
@@ -130,8 +142,9 @@ GameBoyAdvanceTimer.prototype.clockTimer2 = function (clocks) {
     if (this.timer2UseMainClocks) {
         this.timer2Precounter = ((this.timer2Precounter | 0) + (clocks | 0)) | 0;
         while ((this.timer2Precounter | 0) >= (this.timer2Prescalar | 0)) {
-            this.timer2Precounter = ((this.timer2Precounter | 0) - (this.timer2Prescalar | 0)) | 0;
-            this.timer2Counter = ((this.timer2Counter | 0) + 1) | 0;
+            var iterations = Math.min((this.timer2Precounter | 0) >> (this.timer2PrescalarShifted | 0), (0x10000 - (this.timer2Counter | 0)) | 0);
+            this.timer2Precounter = ((this.timer2Precounter | 0) - ((iterations | 0) << (this.timer2PrescalarShifted | 0))) | 0;
+            this.timer2Counter = ((this.timer2Counter | 0) + (iterations | 0)) | 0;
             if ((this.timer2Counter | 0) > 0xFFFF) {
                 this.timer2Counter = this.timer2Reload | 0;
                 this.timer2ExternalTriggerCheck();
@@ -145,8 +158,9 @@ GameBoyAdvanceTimer.prototype.clockTimer3 = function (clocks) {
     if (this.timer3UseMainClocks) {
         this.timer3Precounter = ((this.timer3Precounter | 0) + (clocks | 0)) | 0;
         while ((this.timer3Precounter | 0) >= (this.timer3Prescalar | 0)) {
-            this.timer3Precounter = ((this.timer3Precounter | 0) - (this.timer3Prescalar | 0)) | 0;
-            this.timer3Counter = ((this.timer3Counter | 0) + 1) | 0;
+            var iterations = Math.min((this.timer3Precounter | 0) >> (this.timer3PrescalarShifted | 0), (0x10000 - (this.timer3Counter | 0)) | 0);
+            this.timer3Precounter = ((this.timer3Precounter | 0) - ((iterations | 0) << (this.timer3PrescalarShifted | 0))) | 0;
+            this.timer3Counter = ((this.timer3Counter | 0) + (iterations | 0)) | 0;
             if ((this.timer3Counter | 0) > 0xFFFF) {
                 this.timer3Counter = this.timer3Reload | 0;
                 this.timer3ExternalTriggerCheck();
@@ -233,6 +247,7 @@ GameBoyAdvanceTimer.prototype.writeTM0CNT_H = function (data) {
     }
     this.timer0IRQ = ((data & 0x40) == 0x40);
     this.timer0Prescalar = this.prescalarLookup[data & 0x03] | 0;
+    this.timer0PrescalarShifted = this.prescalarShiftLookup[data & 0x03] | 0;
 }
 GameBoyAdvanceTimer.prototype.readTM0CNT_L0 = function () {
     return this.timer0Counter & 0xFF;
@@ -272,6 +287,7 @@ GameBoyAdvanceTimer.prototype.writeTM1CNT_H = function (data) {
     this.timer1IRQ = ((data & 0x40) == 0x40);
     this.timer1CountUp = ((data & 0x4) == 0x4);
     this.timer1Prescalar = this.prescalarLookup[data & 0x03] | 0;
+    this.timer1PrescalarShifted = this.prescalarShiftLookup[data & 0x03] | 0;
     this.preprocessTimer1();
 }
 GameBoyAdvanceTimer.prototype.readTM1CNT_L0 = function () {
@@ -309,6 +325,7 @@ GameBoyAdvanceTimer.prototype.writeTM2CNT_H = function (data) {
     this.timer2IRQ = ((data & 0x40) == 0x40);
     this.timer2CountUp = ((data & 0x4) == 0x4);
     this.timer2Prescalar = this.prescalarLookup[data & 0x03] | 0;
+    this.timer2PrescalarShifted = this.prescalarShiftLookup[data & 0x03] | 0;
     this.preprocessTimer2();
 }
 GameBoyAdvanceTimer.prototype.readTM2CNT_L0 = function () {
@@ -346,6 +363,7 @@ GameBoyAdvanceTimer.prototype.writeTM3CNT_H = function (data) {
     this.timer3IRQ = ((data & 0x40) == 0x40);
     this.timer3CountUp = ((data & 0x4) == 0x4);
     this.timer3Prescalar = this.prescalarLookup[data & 0x03] | 0;
+    this.timer3PrescalarShifted = this.prescalarShiftLookup[data & 0x03] | 0;
     this.preprocessTimer3();
 }
 GameBoyAdvanceTimer.prototype.readTM3CNT_L0 = function () {
