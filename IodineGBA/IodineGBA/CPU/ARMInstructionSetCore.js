@@ -4754,7 +4754,7 @@ ARMInstructionSet.prototype.compileReducedInstructionMap = function (instruction
             var instrDecoded = instructionMap[range1];
             for (var range2 = 0; range2 < 0x10; ++range2) {
                 var instructionCombo = instrDecoded[range2];
-                this.instructionMap.push(this.appendInstruction(this, conditionCode | 0, instructionCombo[0], instructionCombo[1]));
+                this.instructionMap.push(this.appendInstruction(this, this.CPSR, conditionCode | 0, instructionCombo[0], instructionCombo[1]));
             }
         }
     }
@@ -4766,89 +4766,89 @@ ARMInstructionSet.prototype.compileReducedInstructionMap = function (instruction
         //Some browsers throw here....
     }
 }
-ARMInstructionSet.prototype.appendInstruction = function (parentObj, conditionCode, decodedInstr, decodedOperand) {
+ARMInstructionSet.prototype.appendInstruction = function (parentObj, CPSR, conditionCode, decodedInstr, decodedOperand) {
     switch (conditionCode & 0xF) {
         case 0x0:        //EQ (equal)
             return function () {
-                if (parentObj.CPSR.getZero()) {
+                if (CPSR.getZero()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x1:        //NE (not equal)
             return function () {
-                if (!parentObj.CPSR.getZero()) {
+                if (!CPSR.getZero()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x2:        //CS (unsigned higher or same)
             return function () {
-                if (parentObj.CPSR.getCarry()) {
+                if (CPSR.getCarry()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x3:        //CC (unsigned lower)
             return function () {
-                if (!parentObj.CPSR.getCarry()) {
+                if (!CPSR.getCarry()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x4:        //MI (negative)
             return function () {
-                if (parentObj.CPSR.getNegative()) {
+                if (CPSR.getNegative()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x5:        //PL (positive or zero)
             return function () {
-                if (!parentObj.CPSR.getNegative()) {
+                if (!CPSR.getNegative()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x6:        //VS (overflow)
             return function () {
-                if (parentObj.CPSR.getOverflow()) {
+                if (CPSR.getOverflow()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x7:        //VC (no overflow)
             return function () {
-                if (!parentObj.CPSR.getOverflow()) {
+                if (!CPSR.getOverflow()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x8:        //HI (unsigned higher)
             return function () {
-                if (parentObj.CPSR.getCarry() && !parentObj.CPSR.getZero()) {
+                if (CPSR.getCarry() && !CPSR.getZero()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0x9:        //LS (unsigned lower or same)
             return function () {
-                if (!parentObj.CPSR.getCarry() || parentObj.CPSR.getZero()) {
+                if (!CPSR.getCarry() || CPSR.getZero()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0xA:        //GE (greater or equal)
             return function () {
-                if (parentObj.CPSR.getNegative() == parentObj.CPSR.getOverflow()) {
+                if (CPSR.getNegative() == CPSR.getOverflow()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0xB:        //LT (less than)
             return function () {
-                if (parentObj.CPSR.getNegative() != parentObj.CPSR.getOverflow()) {
+                if (CPSR.getNegative() != CPSR.getOverflow()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0xC:        //GT (greater than)
             return function () {
-                if (!parentObj.CPSR.getZero() && parentObj.CPSR.getNegative() == parentObj.CPSR.getOverflow()) {
+                if (!CPSR.getZero() && CPSR.getNegative() == CPSR.getOverflow()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
         case 0xD:        //LE (less than or equal)
             return function () {
-                if (parentObj.CPSR.getZero() || parentObj.CPSR.getNegative() != parentObj.CPSR.getOverflow()) {
+                if (CPSR.getZero() || CPSR.getNegative() != CPSR.getOverflow()) {
                     decodedInstr(parentObj, decodedOperand);
                 }
             }
