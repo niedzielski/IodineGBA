@@ -75,16 +75,19 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     this.pipelineInvalid = 0x4;        //Mark pipeline as invalid.
     //Pre-initialize stack pointers if no BIOS loaded:
     if (!this.IOCore.BIOSFound || this.IOCore.settings.SKIPBoot) {
-        this.registersSVC[0] = 0x3007FE0;
-        this.registersIRQ[0] = 0x3007FA0;
-        this.registers[13] = 0x3007F00;
-        this.registers[15] = 0x8000000;
-        this.MODEBits = 0x1F;
+        this.HLEReset();
     }
     //No pending interruption for dynarec:
     this.breakNormalExecution = false;
     //No pending IRQs to check for yet:
     this.executeIteration = this.executeBubble;
+}
+GameBoyAdvanceCPU.prototype.HLEReset = function () {
+    this.registersSVC[0] = 0x3007FE0;
+    this.registersIRQ[0] = 0x3007FA0;
+    this.registers[13] = 0x3007F00;
+    this.registers[15] = 0x8000000;
+    this.MODEBits = 0x1F;
 }
 GameBoyAdvanceCPU.prototype.executeIRQ = function () {
     //Handle an IRQ:
@@ -145,8 +148,8 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
             this.HLEIRQExit();
         }
         else {
-            //Illegal to branch directly into BIOS (Except for return from IRQ), only SWIs can:
-            throw(new Error("Could not handle branch to: " + branchTo.toString(16)));
+            //Reset to start of ROM if no BIOS ROM found:
+            this.HLEReset();
         }
     }
 }
@@ -261,7 +264,7 @@ GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
     //Return from an exception mode:
-    var data = this.setSUBFlags(this.registers[0xE] | 0, 4) | 0;
+    var data = this.CPSR.setSUBFlags(this.registers[0xE] | 0, 4) | 0;
     //Restore SPSR to CPSR:
     this.SPSRtoCPSR();
     data &= (!this.InTHUMB) ? -4 : -2;
