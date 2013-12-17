@@ -160,7 +160,14 @@ ARMInstructionSet.prototype.guardUserRegisterWriteLDM = function (parentObj, add
     address = address | 0;
     data = data | 0;
     if ((address | 0) < 0xF) {
-        parentObj.guardUserRegisterWrite(address | 0, data | 0);
+        if ((parentObj.execute & 0x8000) == 0x8000) {
+            //PC is going to be loaded, don't do user-mode:
+            parentObj.guardRegisterWrite(address | 0, data | 0);
+        }
+        else {
+            //PC isn't in the list, do user-mode:
+            parentObj.guardUserRegisterWrite(address | 0, data | 0);
+        }
     }
     else {
         parentObj.guardProgramCounterRegisterWriteCPSR(data | 0);
