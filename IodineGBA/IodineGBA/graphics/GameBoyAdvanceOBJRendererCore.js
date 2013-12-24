@@ -337,6 +337,7 @@ GameBoyAdvanceOBJRenderer.prototype.writeOAM16 = function (address, data) {
         default:
             this.OBJMatrixParameters[address >> 4][(address >> 2) & 0x3] = (data << 16) >> 16;
     }
+    address = address << 1;
     this.OAMRAM[address | 0] = data & 0xFF;
     this.OAMRAM[address | 1] = data >> 8;
 }
