@@ -184,7 +184,7 @@ function refreshStorageListing() {
 		blobPairs[index] = [keys[index], JSON.stringify(findValue(keys[index]))];
 	}
 	this.href = "data:application/octet-stream;base64," + base64(generateMultiBlob(blobPairs));
-	this.download = "gameboy_advance_saves.export";
+	this.download = "gameboy_advance_saves_" + ((new Date()).getTime()) + ".export";
 }
 function checkStorageLength() {
 	try {
