@@ -376,7 +376,7 @@ GameBoyAdvanceGraphics.prototype.incrementScanLineQueue = function () {
     }
 }
 GameBoyAdvanceGraphics.prototype.isRenderingCheckPreprocess = function () {
-    var isInVisibleLines = (!this.forcedBlank && (this.currentScanLine | 0) < 160);
+    var isInVisibleLines = (!this.forcedBlank && !this.inVBlank);
     this.isRendering = (isInVisibleLines && !this.inHBlank);
     this.isOAMRendering = (isInVisibleLines && (!this.inHBlank || !this.HBlankIntervalFree));
 }
