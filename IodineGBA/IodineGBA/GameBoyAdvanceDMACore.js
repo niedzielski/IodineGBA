@@ -166,12 +166,12 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
                 this.enableDMAChannel(dmaChannel | 0);
             }
         }
-        /*else {
+        else {
             this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel | 0][this.dmaType[dmaChannel | 0] | 0] | 0;
             if ((this.enabled[dmaChannel | 0] | 0) > 0) {
                 this.reconfigureDMAChannel(dmaChannel | 0);
             }
-        }*/
+        }
     }
     else {
         this.enabled[dmaChannel | 0] = 0;
@@ -417,6 +417,7 @@ GameBoyAdvanceDMA.prototype.finalDMAAddresses = function (dmaChannel, source, de
     //Update source address:
     switch (this.sourceControl[dmaChannel | 0] | 0) {
         case 0:    //Increment
+        case 3:    //Forbidden (VBA has it increment)
             this.sourceShadow[dmaChannel | 0] = ((source | 0) + (transferred | 0)) | 0;
             break;
         case 1:    //Decrement
@@ -445,6 +446,7 @@ GameBoyAdvanceDMA.prototype.incrementDMAAddresses = function (dmaChannel, source
     //Update source address:
     switch (this.sourceControl[dmaChannel | 0] | 0) {
         case 0:    //Increment
+        case 3:    //Forbidden (VBA has it increment)
             this.sourceShadow[dmaChannel | 0] = ((source | 0) + (transferred | 0)) | 0;
             break;
         case 1:
