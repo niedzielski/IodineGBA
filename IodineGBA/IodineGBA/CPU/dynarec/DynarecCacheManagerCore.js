@@ -177,13 +177,6 @@ DynarecCacheManagerCore.prototype.branchTHUMB = function (branchTo) {
         this.registers[15] = branchTo | 0;
         //Mark pipeline as invalid:
         this.CPUCore.pipelineInvalid = 0x4;
-        //Check what executor to use:
-        if (this.CPUCore.processIRQ) {
-            this.CPUCore.executeIteration = this.CPUCore.executeIRQ;
-        }
-        else {
-            this.CPUCore.executeIteration = this.CPUCore.executeBubble;
-        }
         //Next PC fetch has to update the address bus:
         this.CPUCore.wait.NonSequentialBroadcast();
     }
@@ -216,13 +209,6 @@ DynarecCacheManagerCore.prototype.branchARM = function (branchTo) {
         this.registers[15] = branchTo | 0;
         //Mark pipeline as invalid:
         this.CPUCore.pipelineInvalid = 0x4;
-        //Check what executor to use:
-        if (this.CPUCore.processIRQ) {
-            this.CPUCore.executeIteration = this.CPUCore.executeIRQ;
-        }
-        else {
-            this.CPUCore.executeIteration = this.CPUCore.executeBubble;
-        }
         //Next PC fetch has to update the address bus:
         this.CPUCore.wait.NonSequentialBroadcast();
     }
