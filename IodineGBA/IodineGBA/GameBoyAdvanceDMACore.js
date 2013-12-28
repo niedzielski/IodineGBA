@@ -215,18 +215,8 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
         this.is32Bit[2] = 0x4;
     }
     else {
-        if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
-            //Flag immediate DMA transfers for processing now:
-            this.pending[dmaChannel | 0] = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
-            this.IOCore.flagStepper(0x1);
-        }
-        else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0)) {
-            //Only enable display sync if set on line 162:
-            if ((this.IOCore.gfx.currentScanLine | 0) != 162) {
-                this.enabled[dmaChannel | 0] = 0;
-                return;
-            }
-        }
+        //Check for immediate/display sync:
+        this.reconfigureDMAChannel(dmaChannel | 0);
         //Shadow copy the word count:
         this.wordCountShadow[dmaChannel | 0] = this.wordCount[dmaChannel | 0] | 0;
     }
@@ -237,37 +227,15 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
 }
 GameBoyAdvanceDMA.prototype.reconfigureDMAChannel = function (dmaChannel) {
     dmaChannel = dmaChannel | 0;
-    if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_A | 0)) {
-        //Assert the FIFO A DMA request signal:
-        this.IOCore.sound.checkFIFOAPendingSignal();
-        //Direct Sound DMA Hardwired To Wordcount Of 4:
-        this.wordCountShadow[1] = 0x4;
-        //Destination Hardwired to 0x40000A0:
-        this.destinationShadow[1] = 0x40000A0;
-        //Bit-mode Hardwired to 32-bit:
-        this.is32Bit[1] = 0x4;
+    if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
+        //Flag immediate DMA transfers for processing now:
+        this.pending[dmaChannel | 0] = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
+        this.IOCore.flagStepper(0x1);
     }
-    else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
-        //Assert the FIFO B DMA request signal:
-        this.IOCore.sound.checkFIFOBPendingSignal();
-        //Direct Sound DMA Hardwired To Wordcount Of 4:
-        this.wordCountShadow[2] = 0x4;
-        //Destination Hardwired to 0x40000A4:
-        this.destinationShadow[2] = 0x40000A4;
-        //Bit-mode Hardwired to 32-bit:
-        this.is32Bit[2] = 0x4;
-    }
-    else {
-        if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
-            //Flag immediate DMA transfers for processing now:
-            this.pending[dmaChannel | 0] = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
-            this.IOCore.flagStepper(0x1);
-        }
-        else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0)) {
-            //Only enable display sync if set on line 162:
-            if ((this.IOCore.gfx.currentScanLine | 0) != 162) {
-                this.enabled[dmaChannel | 0] = 0;
-            }
+    else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0)) {
+        //Only enable display sync if set on line 162:
+        if ((this.IOCore.gfx.currentScanLine | 0) != 162) {
+            this.enabled[dmaChannel | 0] = 0;
         }
     }
 }
