@@ -166,6 +166,10 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
                 this.enableDMAChannel(dmaChannel | 0);
             }
         }
+        /*
+            DMA seems to not allow changing its type while it's running.
+            Some games rely on this to not have broken audio (kirby's nightmare in dreamland).
+         */
     }
     else {
         this.enabled[dmaChannel | 0] = 0;
