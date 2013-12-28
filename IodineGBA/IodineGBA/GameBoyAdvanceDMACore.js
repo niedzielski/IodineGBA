@@ -166,12 +166,6 @@ GameBoyAdvanceDMA.prototype.writeDMAControl1 = function (dmaChannel, data) {
                 this.enableDMAChannel(dmaChannel | 0);
             }
         }
-        else {
-            this.enabled[dmaChannel | 0] = this.DMA_ENABLE_TYPE[dmaChannel | 0][this.dmaType[dmaChannel | 0] | 0] | 0;
-            if ((this.enabled[dmaChannel | 0] | 0) > 0) {
-                this.reconfigureDMAChannel(dmaChannel | 0);
-            }
-        }
     }
     else {
         this.enabled[dmaChannel | 0] = 0;
@@ -215,8 +209,18 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
         this.is32Bit[2] = 0x4;
     }
     else {
-        //Check for immediate/display sync:
-        this.reconfigureDMAChannel(dmaChannel | 0);
+        if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
+            //Flag immediate DMA transfers for processing now:
+            this.pending[dmaChannel | 0] = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
+            this.IOCore.flagStepper(0x1);
+        }
+        else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0)) {
+            //Only enable display sync if set on line 162:
+            if ((this.IOCore.gfx.currentScanLine | 0) != 162) {
+                this.enabled[dmaChannel | 0] = 0;
+                return;
+            }
+        }
         //Shadow copy the word count:
         this.wordCountShadow[dmaChannel | 0] = this.wordCount[dmaChannel | 0] | 0;
     }
@@ -224,20 +228,6 @@ GameBoyAdvanceDMA.prototype.enableDMAChannel = function (dmaChannel) {
     this.sourceShadow[dmaChannel | 0] = this.source[dmaChannel | 0] | 0;
     //Shadow copy the destination address:
     this.destinationShadow[dmaChannel | 0] = this.destination[dmaChannel | 0] | 0;
-}
-GameBoyAdvanceDMA.prototype.reconfigureDMAChannel = function (dmaChannel) {
-    dmaChannel = dmaChannel | 0;
-    if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
-        //Flag immediate DMA transfers for processing now:
-        this.pending[dmaChannel | 0] = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
-        this.IOCore.flagStepper(0x1);
-    }
-    else if ((this.enabled[dmaChannel | 0] | 0) == (this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0)) {
-        //Only enable display sync if set on line 162:
-        if ((this.IOCore.gfx.currentScanLine | 0) != 162) {
-            this.enabled[dmaChannel | 0] = 0;
-        }
-    }
 }
 GameBoyAdvanceDMA.prototype.soundFIFOARequest = function () {
     this.requestDMA(this.DMA_REQUEST_TYPE.FIFO_A | 0);
