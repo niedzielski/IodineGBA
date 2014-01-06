@@ -28,8 +28,8 @@ var keyZones = [
                 ["r", [50]],
                 ["l", [49]]
 ];
-function keyDown(event) {
-    var keyCode = event.keyCode;
+function keyDown(e) {
+    var keyCode = e.keyCode;
     var keyMapLength = keyZones.length;
     for (var keyMapIndex = 0; keyMapIndex < keyMapLength; ++keyMapIndex) {
         var keyCheck = keyZones[keyMapIndex];
@@ -39,15 +39,15 @@ function keyDown(event) {
             if (keysMapped[index] == keyCode) {
                 Iodine.keyDown(keyCheck[0]);
                 try {
-                    event.preventDefault();
+                    e.preventDefault();
                 }
                 catch (error) { }
             }
         }
     }
 }
-function keyUp(event) {
-    var keyCode = event.keyCode;
+function keyUp(e) {
+    var keyCode = e.keyCode;
     var keyMapLength = keyZones.length;
     for (var keyMapIndex = 0; keyMapIndex < keyMapLength; ++keyMapIndex) {
         var keyCheck = keyZones[keyMapIndex];
@@ -57,15 +57,15 @@ function keyUp(event) {
             if (keysMapped[index] == keyCode) {
                 Iodine.keyUp(keyCheck[0]);
                 try {
-                    event.preventDefault();
+                    e.preventDefault();
                 }
                 catch (error) { }
             }
         }
     }
 }
-function keyUpPreprocess(event) {
-    switch (event.keyCode) {
+function keyUpPreprocess(e) {
+    switch (e.keyCode) {
         case 68:
             lowerVolume();
             break;
@@ -82,6 +82,6 @@ function keyUpPreprocess(event) {
             break;
         default:
             //Control keys / other
-            keyUp(event);
+            keyUp(e);
     }
 }

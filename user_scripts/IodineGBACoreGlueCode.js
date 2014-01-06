@@ -47,21 +47,21 @@ function registerGUIEvents() {
     addEvent("keyup", document, keyUpPreprocess);
     addEvent("change", document.getElementById("rom_load"), fileLoadROM);
     addEvent("change", document.getElementById("bios_load"), fileLoadBIOS);
-    addEvent("click", document.getElementById("play"), function (event) {
+    addEvent("click", document.getElementById("play"), function (e) {
         Iodine.play();
         this.style.display = "none";
         document.getElementById("pause").style.display = "inline";
-        event.preventDefault();
+        e.preventDefault();
     });
-    addEvent("click", document.getElementById("pause"), function (event) {
+    addEvent("click", document.getElementById("pause"), function (e) {
         Iodine.pause();
         this.style.display = "none";
         document.getElementById("play").style.display = "inline";
-        event.preventDefault();
+        e.preventDefault();
     });
-    addEvent("click", document.getElementById("restart"), function (event) {
+    addEvent("click", document.getElementById("restart"), function (e) {
         Iodine.restart();
-        event.preventDefault();
+        e.preventDefault();
     });
     document.getElementById("sound").checked = false;
     addEvent("click", document.getElementById("sound"), function () {
@@ -94,7 +94,7 @@ function registerGUIEvents() {
                 Blitter.setSmoothScaling(this.checked);
              }
     });
-    addEvent("change", document.getElementById("import"), function () {
+    addEvent("change", document.getElementById("import"), function (e) {
              if (typeof this.files != "undefined") {
                 try {
                     if (this.files.length >= 1) {
@@ -140,7 +140,7 @@ function registerGUIEvents() {
              else {
                 writeRedTemporaryText("could not find the handle on the file to open.");
              }
-             event.preventDefault();
+             e.preventDefault();
     });
     addEvent("click", document.getElementById("export"), refreshStorageListing);
     addEvent("unload", window, ExportSave);
