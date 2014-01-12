@@ -776,6 +776,7 @@ GameBoyAdvanceMemory.prototype.readUnused16 = function (parentObj, address) {
     return (controller.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused32 = function (parentObj, address) {
+    address = address | 0;
     parentObj.wait.FASTAccess2();
     var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
     return controller.getCurrentFetchValue() | 0;
