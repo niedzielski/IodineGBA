@@ -223,7 +223,7 @@ GameBoyAdvanceDMA0.prototype.finalizeDMA = function (source, destination, transf
 }
 GameBoyAdvanceDMA0.prototype.checkIRQTrigger = function () {
     if ((this.irqFlagging | 0) == 0x40) {
-        this.IOCore.irq.requestIRQ(0x100);
+        this.DMACore.IOCore.irq.requestIRQ(0x100);
     }
 }
 GameBoyAdvanceDMA0.prototype.finalDMAAddresses = function (source, destination, transferred) {
@@ -279,11 +279,11 @@ GameBoyAdvanceDMA0.prototype.nextEventTime = function () {
     switch (this.enabled | 0) {
             //V_BLANK
         case 0x2:
-            clocks = this.IOCore.gfx.nextVBlankEventTime() | 0;
+            clocks = this.DMACore.IOCore.gfx.nextVBlankEventTime() | 0;
             break;
             //H_BLANK:
         case 0x4:
-            clocks = this.IOCore.gfx.nextHBlankDMAEventTime() | 0;
+            clocks = this.DMACore.IOCore.gfx.nextHBlankDMAEventTime() | 0;
     }
     return clocks | 0;
 }
