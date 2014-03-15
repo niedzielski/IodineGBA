@@ -31,7 +31,6 @@ GameBoyAdvanceCPU.prototype.initialize = function () {
     this.swi = new GameBoyAdvanceSWI(this);
     this.dynarec = new DynarecBranchListenerCore(this);
     this.instructionHandle = this.ARM;
-    this.calculateMUL32 = (!!Math.imul) ? this.calculateMUL32Fast : this.calculateMUL32Slow;
     this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.IOCore.memory);
 }
 GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
@@ -489,25 +488,31 @@ GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
     }
     this.MODEBits = newMode | 0;
 }
-GameBoyAdvanceCPU.prototype.calculateMUL32Slow = function (rs, rd) {
-    rs = rs | 0;
-    rd = rd | 0;
-    /*
-     We have to split up the 32 bit multiplication,
-     as JavaScript does multiplication on the FPU
-     as double floats, which drops the low bits
-     rather than the high bits.
-     */
-    var lowMul = (rs & 0xFFFF) * rd;
-    var highMul = (rs >> 16) * rd;
-    //Cut off bits above bit 31 and return with proper sign:
-    return ((highMul << 16) + lowMul) | 0;
+if (!!Math.imul) {
+    //Math.imul found, insert the optimized path in:
+    GameBoyAdvanceCPU.prototype.calculateMUL32 = function (rs, rd) {
+        rs = rs | 0;
+        rd = rd | 0;
+        //Used a proposed non-legacy extension that can do 32 bit signed multiplication:
+        return Math.imul(rs | 0, rd | 0) | 0;
+    }
 }
-GameBoyAdvanceCPU.prototype.calculateMUL32Fast = function (rs, rd) {
-    rs = rs | 0;
-    rd = rd | 0;
-    //Used a proposed non-legacy extension that can do 32 bit signed multiplication:
-    return Math.imul(rs | 0, rd | 0) | 0;
+else {
+    //Math.imul not found, use the compatibility method:
+    GameBoyAdvanceCPU.prototype.calculateMUL32 = function (rs, rd) {
+        rs = rs | 0;
+        rd = rd | 0;
+        /*
+         We have to split up the 32 bit multiplication,
+         as JavaScript does multiplication on the FPU
+         as double floats, which drops the low bits
+         rather than the high bits.
+         */
+        var lowMul = (rs & 0xFFFF) * rd;
+        var highMul = (rs >> 16) * rd;
+        //Cut off bits above bit 31 and return with proper sign:
+        return ((highMul << 16) + lowMul) | 0;
+    }
 }
 GameBoyAdvanceCPU.prototype.performMUL32 = function (rs, rd, MLAClocks) {
     rs = rs | 0;
