@@ -490,12 +490,7 @@ GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
 }
 if (!!Math.imul) {
     //Math.imul found, insert the optimized path in:
-    GameBoyAdvanceCPU.prototype.calculateMUL32 = function (rs, rd) {
-        rs = rs | 0;
-        rd = rd | 0;
-        //Used a proposed non-legacy extension that can do 32 bit signed multiplication:
-        return Math.imul(rs | 0, rd | 0) | 0;
-    }
+    GameBoyAdvanceCPU.prototype.calculateMUL32 = Math.imul;
 }
 else {
     //Math.imul not found, use the compatibility method:
