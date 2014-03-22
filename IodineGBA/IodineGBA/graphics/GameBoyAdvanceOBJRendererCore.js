@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -39,9 +39,7 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
 GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
     this.OAMRAM = getUint8Array(0x400);
     this.OAMRAM16 = getUint16View(this.OAMRAM);
-    this.readOAM16 = (this.OAMRAM16) ? this.readOAM16Optimized : this.readOAM16Slow;
     this.OAMRAM32 = getInt32View(this.OAMRAM);
-    this.readOAM32 = (this.OAMRAM32) ? this.readOAM32Optimized : this.readOAM32Slow;
     this.scratchBuffer = getInt32Array(240);
     this.scratchWindowBuffer = getInt32Array(240);
     this.scratchOBJBuffer = getInt32Array(128);
@@ -345,17 +343,21 @@ GameBoyAdvanceOBJRenderer.prototype.writeOAM16 = function (address, data) {
 GameBoyAdvanceOBJRenderer.prototype.readOAM = function (address) {
     return this.OAMRAM[address & 0x3FF] | 0;
 }
-GameBoyAdvanceOBJRenderer.prototype.readOAM16Slow = function (address) {
-    return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8);
+if (__VIEWS_SUPPORTED__) {
+    GameBoyAdvanceOBJRenderer.prototype.readOAM16 = function (address) {
+        address = address | 0;
+        return this.OAMRAM16[(address >> 1) & 0x1FF] | 0;
+    }
+    GameBoyAdvanceOBJRenderer.prototype.readOAM32 = function (address) {
+        address = address | 0;
+        return this.OAMRAM32[(address >> 2) & 0xFF] | 0;
+    }
 }
-GameBoyAdvanceOBJRenderer.prototype.readOAM16Optimized = function (address) {
-    address = address | 0;
-    return this.OAMRAM16[(address >> 1) & 0x1FF] | 0;
-}
-GameBoyAdvanceOBJRenderer.prototype.readOAM32Slow = function (address) {
-    return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8) | (this.OAMRAM[address | 2] << 16)  | (this.OAMRAM[address | 3] << 24);
-}
-GameBoyAdvanceOBJRenderer.prototype.readOAM32Optimized = function (address) {
-    address = address | 0;
-    return this.OAMRAM32[(address >> 2) & 0xFF] | 0;
+else {
+    GameBoyAdvanceOBJRenderer.prototype.readOAM16 = function (address) {
+        return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8);
+    }
+    GameBoyAdvanceOBJRenderer.prototype.readOAM32 = function (address) {
+        return this.OAMRAM[address] | (this.OAMRAM[address | 1] << 8) | (this.OAMRAM[address | 2] << 16)  | (this.OAMRAM[address | 3] << 24);
+    }
 }

@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -94,3 +94,4 @@ function getArray(size_t) {
     }
     return genericArray;
 }
+var __VIEWS_SUPPORTED__ = getUint16View(getInt32Array(1)) !== null;

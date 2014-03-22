@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,7 +19,6 @@ function GameBoyAdvanceBGTEXTRenderer(gfx, BGLayer) {
     this.gfx = gfx;
     this.VRAM = this.gfx.VRAM;
     this.VRAM16 = this.gfx.VRAM16;
-    this.fetchTile = (this.VRAM16) ? this.fetchTileOptimized : this.fetchTileNormal;
     this.palette16 = this.gfx.palette16;
     this.palette256 = this.gfx.palette256;
     this.BGLayer = BGLayer | 0;
@@ -68,17 +67,21 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
     }
     return this.scratchBuffer;
 }
-GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileNormal = function (yTileStart, xTileStart) {
-    //Find the tile code to locate the tile block:
-    var address = ((this.computeTileNumber(yTileStart, xTileStart) | this.BGScreenBaseBlock) << 1) & 0xFFFF;
-    return (this.VRAM[address | 1] << 8) | this.VRAM[address];
+if (__VIEWS_SUPPORTED__) {
+    GameBoyAdvanceBGTEXTRenderer.prototype.fetchTile = function (yTileStart, xTileStart) {
+        yTileStart = yTileStart | 0;
+        xTileStart = xTileStart | 0;
+        //Find the tile code to locate the tile block:
+        var address = this.computeTileNumber(yTileStart | 0, xTileStart | 0) | this.BGScreenBaseBlock;
+        return this.VRAM16[address & 0x7FFF] | 0;
+    }
 }
-GameBoyAdvanceBGTEXTRenderer.prototype.fetchTileOptimized = function (yTileStart, xTileStart) {
-    yTileStart = yTileStart | 0;
-    xTileStart = xTileStart | 0;
-    //Find the tile code to locate the tile block:
-    var address = this.computeTileNumber(yTileStart | 0, xTileStart | 0) | this.BGScreenBaseBlock;
-    return this.VRAM16[address & 0x7FFF] | 0;
+else {
+    GameBoyAdvanceBGTEXTRenderer.prototype.fetchTile = function (yTileStart, xTileStart) {
+        //Find the tile code to locate the tile block:
+        var address = ((this.computeTileNumber(yTileStart, xTileStart) | this.BGScreenBaseBlock) << 1) & 0xFFFF;
+        return (this.VRAM[address | 1] << 8) | this.VRAM[address];
+    }
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.computeTileNumber = function (yTile, xTile) {
     //Return the true tile number:
