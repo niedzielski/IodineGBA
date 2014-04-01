@@ -94,6 +94,10 @@ function registerGUIEvents() {
                 Blitter.setSmoothScaling(this.checked);
              }
     });
+    document.getElementById("toggleDynamicSpeed").checked = false;
+    addEvent("click", document.getElementById("toggleDynamicSpeed"), function () {
+             Iodine.toggleDynamicSpeed(this.checked);
+    });
     addEvent("change", document.getElementById("import"), function (e) {
              if (typeof this.files != "undefined") {
                 try {
@@ -144,12 +148,10 @@ function registerGUIEvents() {
     });
     addEvent("click", document.getElementById("export"), refreshStorageListing);
     addEvent("unload", window, ExportSave);
-    setInterval(
-            function () {
-                var speed = document.getElementById("speed");
-                speed.textContent = "Speed: " + Iodine.getSpeedPercentage();
-            }
-    ,500);
+    Iodine.attachSpeedHandler(function (speed) {
+        var speedDOM = document.getElementById("speed");
+        speedDOM.textContent = "Speed: " + speed;
+    });
     //setInterval(ExportSave, 60000); //Do periodic saves.
 }
 function resetPlayButton() {
