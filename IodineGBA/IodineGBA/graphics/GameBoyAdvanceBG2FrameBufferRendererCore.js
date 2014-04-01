@@ -42,7 +42,7 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) 
     line = line | 0;
     return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
-if (__VIEWS_SUPPORTED__) {
+if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
         x = x | 0;
         y = y | 0;

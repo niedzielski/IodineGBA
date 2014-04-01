@@ -1029,7 +1029,7 @@ GameBoyAdvanceGraphics.prototype.writeBLDY = function (data) {
     this.graphicsJIT();
     this.colorEffectsRenderer.writeBLDY(data | 0);
 }
-if (__VIEWS_SUPPORTED__) {
+if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceGraphics.prototype.writeVRAM16 = function (address, data) {
         address = address | 0;
         data = data | 0;

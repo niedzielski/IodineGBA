@@ -343,7 +343,7 @@ GameBoyAdvanceOBJRenderer.prototype.writeOAM16 = function (address, data) {
 GameBoyAdvanceOBJRenderer.prototype.readOAM = function (address) {
     return this.OAMRAM[address & 0x3FF] | 0;
 }
-if (__VIEWS_SUPPORTED__) {
+if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceOBJRenderer.prototype.readOAM16 = function (address) {
         address = address | 0;
         return this.OAMRAM16[(address >> 1) & 0x1FF] | 0;

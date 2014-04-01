@@ -25,9 +25,9 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     this.timerClocks = 0;
     this.serialClocks = 0;
     this.nextEventClocks = 0;
+    this.BIOSFound = false;
     this.lastDynarecUsage = 1;
     this.flaggedDynarec = 0;
-    this.BIOSFound = false;
     //References passed to us:
     this.settings = settings;
     this.coreExposed = coreExposed;
@@ -140,6 +140,15 @@ GameBoyAdvanceIO.prototype.getRemainingCycles = function () {
     //Return the number of cycles left until iteration end:
     return Math.max(this.cyclesToIterate | 0, 0) | 0;
 }
+GameBoyAdvanceIO.prototype.preprocessCPUHandler = function (useDynarec) {
+    useDynarec = useDynarec | 0;
+    this.flaggedDynarec = useDynarec;
+    if ((this.lastDynarecUsage | 0) != useDynarec) {
+        this.lastDynarecUsage = useDynarec;
+        this.handleCPU = (useDynarec == 0) ? this.handleCPUInterpreter : this.handleCPUDynarec;
+        this.preprocessSystemStepper();
+    }
+}
 GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
     switch (this.systemStatus | 0) {
         case 0: //CPU Handle State
@@ -169,15 +178,6 @@ GameBoyAdvanceIO.prototype.handleCPUDynarec = function () {
     this.flaggedDynarec = 0;
     this.cpu.dynarec.enter();
     this.preprocessCPUHandler(this.flaggedDynarec | 0);
-}
-GameBoyAdvanceIO.prototype.preprocessCPUHandler = function (useDynarec) {
-    useDynarec = useDynarec | 0;
-    this.flaggedDynarec = useDynarec;
-    if ((this.lastDynarecUsage | 0) != useDynarec) {
-        this.lastDynarecUsage = useDynarec;
-        this.handleCPU = (useDynarec == 0) ? this.handleCPUInterpreter : this.handleCPUDynarec;
-        this.preprocessSystemStepper();
-    }
 }
 GameBoyAdvanceIO.prototype.handleDMA = function () {
     this.dma.perform();

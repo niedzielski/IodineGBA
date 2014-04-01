@@ -31,6 +31,7 @@ DynarecTHUMBAssemblerCore.prototype.generateSpew = function () {
     batched += this.generatePipelineSpew2();
     this.incrementInternalPC();
     var length = this.records.length - 2;
+    this.pipelineCode = batched;
     for (var index = 0; index < length && !this.branched; index++) {
         batched += this.generateBodySpew(index >>> 0, this.records[index >>> 0] >>> 0);
         this.incrementInternalPC();
@@ -41,7 +42,7 @@ DynarecTHUMBAssemblerCore.prototype.toHex = function (toConvert) {
     return "0x" + toConvert.toString(16);
 }
 DynarecTHUMBAssemblerCore.prototype.getStubCode = function () {
-    return this.stubCode;
+    return [this.pipelineCode, this.stubCode];
 }
 DynarecTHUMBAssemblerCore.prototype.incrementInternalPC = function () {
     this.currentPC = this.nextInstructionPC() >>> 0;
@@ -979,6 +980,65 @@ DynarecTHUMBAssemblerCore.prototype.PUSHlr = function (instructionValue) {
     }
     spew += "\t//Updating the address bus back to PC fetch:\n" +
     "\tthis.wait.NonSequentialBroadcast();\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.POP = function (instructionValue) {
+    var spew = "\t//POP:\n";
+    //Only initialize the POP sequence if the register list is non-empty:
+    if ((instructionValue & 0xFF) > 0) {
+        spew += "\t//Updating the address bus away from PC fetch:\n" +
+        "\tthis.wait.NonSequentialBroadcast();\n";
+        for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((instructionValue & (1 << rListPosition)) != 0) {
+                spew += "\t//POP stack into a register:\n" +
+                "\tthis.registers[" + this.toHex(rListPosition & 0x7) + "] = this.stackMemoryCache.memoryRead32(this.registers[0xD] >>> 0) | 0;\n" +
+                "\tthis.registers[0xD] = ((this.registers[0xD] | 0) + 4) | 0;\n";
+            }
+        }
+        spew += "\t//Updating the address bus back to PC fetch:\n" +
+        "\tthis.wait.NonSequentialBroadcast();\n";
+    }
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.POPpc = function (instructionValue) {
+    var spew = "\t//POPpc:\n" +
+    "\t//Updating the address bus away from PC fetch:\n" +
+    "\tthis.wait.NonSequentialBroadcast();\n";
+    for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
+        if ((instructionValue & (1 << rListPosition)) != 0) {
+            spew += "\t//POP stack into a register:\n" +
+            "\tthis.registers[" + this.toHex(rListPosition & 0x7) + "] = this.stackMemoryCache.memoryRead32(this.registers[0xD] >>> 0) | 0;\n" +
+            "\tthis.registers[0xD] = ((this.registers[0xD] | 0) + 4) | 0;\n";
+        }
+    }
+    spew += "\tPOP stack into the program counter (r15):\n" +
+    "\tthis.registers[0xF] = this.stackMemoryCache.memoryRead32(this.registers[0xD] >>> 0) | 0;\n" +
+    "\tthis.registers[0xD] = ((this.registers[0xD] | 0) + 4) | 0;\n" +
+    "\t//Updating the address bus back to PC fetch:\n" +
+    "\tthis.wait.NonSequentialBroadcast();\n";
+    return spew;
+}
+DynarecTHUMBAssemblerCore.prototype.STMIA = function (instructionValue) {
+    var spew = "\t//POP:\n";
+    //Only initialize the STMIA sequence if the register list is non-empty:
+    if ((instructionValue & 0xFF) > 0) {
+        spew += "\t//Updating the address bus away from PC fetch:\n" +
+        "\tvar currentAddress = this.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] | 0;\n" +
+        "\tthis.wait.NonSequentialBroadcast();\n";
+        var count = 0;
+        for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((instructionValue & (1 << rListPosition)) != 0) {
+                spew += "\t//Push a register into memory:\n" +
+                "\tthis.stackMemoryCache.memoryWrite32(((currentAddress >>> 0) + " + this.toHex(count) + ") >>> 0, this.registers[" + this.toHex(rListPosition & 0x7) + "] | 0) | 0;\n" +
+                "\tthis.registers[0xD] = ((this.registers[0xD] | 0) + 4) | 0;\n";
+                count += 4;
+            }
+        }
+        spew += "\t//Store the updated base address back into register:\n" +
+        "\tthis.registers[" + this.toHex((instructionValue >> 8) & 0x7) + "] = ((currentAddress | 0) + " + this.toHex(count) + ") | 0;\n" +
+        "\t//Updating the address bus back to PC fetch:\n" +
+        "\tthis.wait.NonSequentialBroadcast();\n";
+    }
     return spew;
 }
 DynarecTHUMBAssemblerCore.prototype.B = function (instructionValue) {

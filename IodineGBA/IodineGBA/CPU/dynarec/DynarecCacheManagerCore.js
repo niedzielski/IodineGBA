@@ -39,6 +39,7 @@ function DynarecCacheManagerCore(dynarec, start, end, InTHUMB) {
     this.execute = null;
     this.lastBranch = 0;
     this.lastStubCall = null;
+    this.lastContinueCall = null;
 }
 DynarecCacheManagerCore.prototype.MAGIC_HOT_COUNT = 1000;
 DynarecCacheManagerCore.prototype.MAGIC_BAD_COUNT_RATIO = 0.001;
@@ -170,7 +171,8 @@ DynarecCacheManagerCore.prototype.branchTHUMB = function (branchTo) {
         }
         else {
             //Go out and find the stub:
-            this.lastStubCall = (this.dynarec.handleNextWithStatus(branchTo | 0, true)) ? this.dynarec.currentCache : null;
+            this.lastContinueCall = null;
+            this.lastStubCall = (this.dynarec.handleNextWithStatus(branchTo | 0, true, false)) ? this.dynarec.currentCache : null;
             this.lastBranch = branchTo | 0;
         }
         //Branch to new address:
@@ -193,6 +195,48 @@ DynarecCacheManagerCore.prototype.branchTHUMB = function (branchTo) {
         }
     }
 }
+DynarecCacheManagerCore.prototype.continueTailTHUMB = function (branchTo) {
+    branchTo = branchTo | 0;
+    if ((branchTo | 0) > 0x3FFF || this.CPUCore.IOCore.BIOSFound) {
+        if ((this.lastBranch | 0) == (branchTo | 0) && this.lastContinueCall) {
+            //Use our cached stub:
+            this.dynarec.attachNextCache(this.lastContinueCall)
+        }
+        else {
+            //Go out and find the stub:
+            this.lastStubCall = null;
+            this.lastContinueCall = (this.dynarec.handleNextWithStatus(branchTo | 0, true, true)) ? this.dynarec.currentCache : null;
+            this.lastBranch = branchTo | 0;
+        }
+        //Branch to new address:
+        this.registers[15] = branchTo | 0;
+    }
+    else {
+        //Should not get here ever:
+        throw(new Error("Could not handle continuation to: " + branchTo.toString(16)));
+    }
+}
+DynarecCacheManagerCore.prototype.continueTailARM = function (branchTo) {
+    branchTo = branchTo | 0;
+    if ((branchTo | 0) > 0x3FFF || this.CPUCore.IOCore.BIOSFound) {
+        if ((this.lastBranch | 0) == (branchTo | 0) && this.lastContinueCall) {
+            //Use our cached stub:
+            this.dynarec.attachNextCache(this.lastContinueCall)
+        }
+        else {
+            //Go out and find the stub:
+            this.lastStubCall = null;
+            this.lastContinueCall = (this.dynarec.handleNextWithStatus(branchTo | 0, false, true)) ? this.dynarec.currentCache : null;
+            this.lastBranch = branchTo | 0;
+        }
+        //Branch to new address:
+        this.registers[15] = branchTo | 0;
+    }
+    else {
+        //Should not get here ever:
+        throw(new Error("Could not handle continuation to: " + branchTo.toString(16)));
+    }
+}
 DynarecCacheManagerCore.prototype.branchARM = function (branchTo) {
     branchTo = branchTo | 0;
     if ((branchTo | 0) > 0x3FFF || this.CPUCore.IOCore.BIOSFound) {
@@ -202,7 +246,8 @@ DynarecCacheManagerCore.prototype.branchARM = function (branchTo) {
         }
         else {
             //Go out and find the stub:
-            this.lastStubCall = (this.dynarec.handleNextWithStatus(branchTo | 0, false)) ? this.dynarec.currentCache : null;
+            this.lastContinueCall = null;
+            this.lastStubCall = (this.dynarec.handleNextWithStatus(branchTo | 0, false, false)) ? this.dynarec.currentCache : null;
             this.lastBranch = branchTo | 0;
         }
         //Branch to new address:

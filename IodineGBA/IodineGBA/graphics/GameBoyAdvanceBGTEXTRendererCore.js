@@ -67,7 +67,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
     }
     return this.scratchBuffer;
 }
-if (__VIEWS_SUPPORTED__) {
+if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceBGTEXTRenderer.prototype.fetchTile = function (yTileStart, xTileStart) {
         yTileStart = yTileStart | 0;
         xTileStart = xTileStart | 0;

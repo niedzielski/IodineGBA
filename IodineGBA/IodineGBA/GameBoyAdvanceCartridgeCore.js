@@ -118,7 +118,7 @@ GameBoyAdvanceCartridge.prototype.readROMOnly8 = function (address) {
     }
     return data | 0;
 }
-if (__VIEWS_SUPPORTED__) {
+if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceCartridge.prototype.readROMOnly16 = function (address) {
         address = address | 0;
         var data = 0;
