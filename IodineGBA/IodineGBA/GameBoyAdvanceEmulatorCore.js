@@ -50,6 +50,8 @@ function GameBoyAdvanceEmulator() {
     this.saveImportHandler = null;            //Save import handler attached by GUI.
     this.speedCallback = null;                //Speed report handler attached by GUI.
     this.graphicsFrameCallback = null;        //Graphics blitter handler attached by GUI.
+    this.clockCyclesSinceStart = 0;           //Clocking hueristics reference
+    this.metricCollectionCounted = 0;         //Clocking hueristics reference
     this.metricStart = null;                  //Date object reference.
     this.calculateTimings();                  //Calculate some multipliers against the core emulator timer.
     this.generateCoreExposed();               //Generate a limit API for the core to call this shell object.
@@ -219,8 +221,8 @@ GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
     this.CPUCyclesTotal = this.CPUCyclesPerIteration = (this.clocksPerSecond / 1000 * this.settings.timerIntervalRate) | 0;
 }
 GameBoyAdvanceEmulator.prototype.calculateSpeedPercentage = function () {
-    if (this.metricStart && !this.paused) {
-        if (this.metricCollectionCounted++ >= this.settings.metricCollectionMinimum) {
+    if (this.metricStart) {
+        if (this.metricCollectionCounted >= this.settings.metricCollectionMinimum) {
             var metricEnd = new Date();
             var timeDiff = Math.max(metricEnd.getTime() - this.metricStart.getTime(), 1);
             var result = ((this.settings.timerIntervalRate * this.clockCyclesSinceStart / timeDiff) / this.CPUCyclesPerIteration) * 100;
@@ -233,13 +235,15 @@ GameBoyAdvanceEmulator.prototype.calculateSpeedPercentage = function () {
                 }
             }
             this.resetMetrics();
-            this.speedCallback(result.toFixed(2) + "%");
+            if (this.speedCallback) {
+                this.speedCallback(result.toFixed(2) + "%");
+            }
         }
     }
     else {
         this.resetMetrics();
-        return "Paused";
     }
+    ++this.metricCollectionCounted;
 }
 GameBoyAdvanceEmulator.prototype.initializeCore = function () {
     //Setup a new instance of the i/o core:

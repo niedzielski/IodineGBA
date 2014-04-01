@@ -241,7 +241,7 @@ GameBoyAdvanceWait.prototype.CPUInternalCycleDoPrefetch = function (clocks) {
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    switch (this.IOCore.cpu.registers[15] >>> 24) {
+    switch ((this.IOCore.cpu.registers[15] >> 24) & 0xFF) {
         case 0x8:
         case 0x9:
             while ((clocks | 0) >= (this.CARTWaitState0Second | 0)) {
@@ -277,7 +277,7 @@ GameBoyAdvanceWait.prototype.CPUInternalSingleCycleDoPrefetch = function () {
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    switch (this.IOCore.cpu.registers[15] >>> 24) {
+    switch ((this.IOCore.cpu.registers[15] >> 24) & 0xFF) {
         case 0x8:
         case 0x9:
             if (1 >= (this.CARTWaitState0Second | 0)) {
