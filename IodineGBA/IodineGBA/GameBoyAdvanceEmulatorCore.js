@@ -17,7 +17,6 @@
  */
 function GameBoyAdvanceEmulator() {
     this.settings = {
-        "slowDownBusHack":false,            //Double up wait states hack.
         "SKIPBoot":false,                   //Skip the BIOS boot screen.
         "dynarecEnabled":false,             //Use the dynarec engine?
         "lineSkip":false,                   //Skip every other line draw.
@@ -388,10 +387,4 @@ GameBoyAdvanceEmulator.prototype.toggleDynamicSpeed = function (dynamicSpeed) {
 }
 GameBoyAdvanceEmulator.prototype.toggleLineSkip = function (lineSkip) {
     this.settings.lineSkip = !!lineSkip;
-}
-GameBoyAdvanceEmulator.prototype.toggleSlowDownBusHack = function (slowDownBusHack) {
-    this.settings.slowDownBusHack = !!slowDownBusHack;
-    if (!this.faultFound && this.romFound) {
-        this.IOCore.wait.preprocessBusSpeedHack(this.settings.slowDownBusHack);
-    }
 }
