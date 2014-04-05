@@ -679,7 +679,7 @@ DynarecTHUMBAssemblerCore.prototype.MUL = function (instructionValue) {
     "\tvar source = this.registers[" + this.toHex((instructionValue >> 3) & 0x7) + "] | 0;\n" +
     "\tvar destination = this.registers[" + this.toHex(instructionValue & 0x7) + "] | 0;\n" +
     "\t//Perform MUL32:\n" +
-    "\tvar result = this.CPUCore.performMUL32(source | 0, destination | 0, 0) | 0;\n" +
+    "\tvar result = this.CPUCore.performMUL32(source | 0, destination | 0) | 0;\n" +
     "\tthis.CPSR.setCarryFalse();\n" +
     "\tthis.CPSR.setNegativeInt(result | 0);\n" +
     "\tthis.CPSR.setZeroInt(result | 0);\n" +

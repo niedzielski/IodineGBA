@@ -743,13 +743,13 @@ ARMInstructionSet.prototype.MSR = function (parentObj, operand2OP) {
 }
 ARMInstructionSet.prototype.MUL = function (parentObj, operand2OP) {
     //Perform multiplication:
-    var result = parentObj.CPUCore.performMUL32(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0, 0) | 0;
+    var result = parentObj.CPUCore.performMUL32(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0) | 0;
     //Update destination register:
     parentObj.guard16OffsetRegisterWrite(result | 0);
 }
 ARMInstructionSet.prototype.MULS = function (parentObj, operand2OP) {
     //Perform multiplication:
-    var result = parentObj.CPUCore.performMUL32(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0, 0) | 0;
+    var result = parentObj.CPUCore.performMUL32(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0) | 0;
     parentObj.CPSR.setCarryFalse();
     parentObj.CPSR.setNegativeInt(result | 0);
     parentObj.CPSR.setZeroInt(result | 0);
@@ -758,7 +758,7 @@ ARMInstructionSet.prototype.MULS = function (parentObj, operand2OP) {
 }
 ARMInstructionSet.prototype.MLA = function (parentObj, operand2OP) {
     //Perform multiplication:
-    var result = parentObj.CPUCore.performMUL32(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0, 1) | 0;
+    var result = parentObj.CPUCore.performMUL32MLA(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0) | 0;
     //Perform addition:
     result = ((result | 0) + (parentObj.read12OffsetRegister() | 0));
     //Update destination register:
@@ -766,7 +766,7 @@ ARMInstructionSet.prototype.MLA = function (parentObj, operand2OP) {
 }
 ARMInstructionSet.prototype.MLAS = function (parentObj, operand2OP) {
     //Perform multiplication:
-    var result = parentObj.CPUCore.performMUL32(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0, 1) | 0;
+    var result = parentObj.CPUCore.performMUL32MLA(parentObj.read0OffsetRegister() | 0, parentObj.read8OffsetRegister() | 0) | 0;
     //Perform addition:
     result = ((result | 0) + (parentObj.read12OffsetRegister() | 0)) | 0;
     parentObj.CPSR.setCarryFalse();

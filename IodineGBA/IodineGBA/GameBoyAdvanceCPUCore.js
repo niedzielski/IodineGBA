@@ -509,22 +509,39 @@ else {
         return ((highMul << 16) + lowMul) | 0;
     }
 }
-GameBoyAdvanceCPU.prototype.performMUL32 = function (rs, rd, MLAClocks) {
+GameBoyAdvanceCPU.prototype.performMUL32 = function (rs, rd) {
     rs = rs | 0;
     rd = rd | 0;
-    MLAClocks = MLAClocks | 0;
     //Predict the internal cycle time:
     if ((rd >>> 8) == 0 || (rd >>> 8) == 0xFFFFFF) {
-        this.IOCore.wait.CPUInternalCyclePrefetch((1 + (MLAClocks | 0)) | 0);
+        this.IOCore.wait.CPUInternalCyclePrefetch(1);
     }
     else if ((rd >>> 16) == 0 || (rd >>> 16) == 0xFFFF) {
-        this.IOCore.wait.CPUInternalCyclePrefetch((2 + (MLAClocks | 0)) | 0);
+        this.IOCore.wait.CPUInternalCyclePrefetch(2);
     }
     else if ((rd >>> 24) == 0 || (rd >>> 24) == 0xFF) {
-        this.IOCore.wait.CPUInternalCyclePrefetch((3 + (MLAClocks | 0)) | 0);
+        this.IOCore.wait.CPUInternalCyclePrefetch(4);
     }
     else {
-        this.IOCore.wait.CPUInternalCyclePrefetch((4 + (MLAClocks | 0)) | 0);
+        this.IOCore.wait.CPUInternalCyclePrefetch(4);
+    }
+    return this.calculateMUL32(rs | 0, rd | 0) | 0;
+}
+GameBoyAdvanceCPU.prototype.performMUL32MLA = function (rs, rd) {
+    rs = rs | 0;
+    rd = rd | 0;
+    //Predict the internal cycle time:
+    if ((rd >>> 8) == 0 || (rd >>> 8) == 0xFFFFFF) {
+        this.IOCore.wait.CPUInternalCyclePrefetch(2);
+    }
+    else if ((rd >>> 16) == 0 || (rd >>> 16) == 0xFFFF) {
+        this.IOCore.wait.CPUInternalCyclePrefetch(3);
+    }
+    else if ((rd >>> 24) == 0 || (rd >>> 24) == 0xFF) {
+        this.IOCore.wait.CPUInternalCyclePrefetch(4);
+    }
+    else {
+        this.IOCore.wait.CPUInternalCyclePrefetch(5);
     }
     return this.calculateMUL32(rs | 0, rd | 0) | 0;
 }
