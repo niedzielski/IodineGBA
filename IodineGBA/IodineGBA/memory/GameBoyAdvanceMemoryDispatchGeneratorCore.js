@@ -52,8 +52,8 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite8 = function 
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead16 = function () {
     return this.compileMemoryReadDispatch([
                                        this.memory.readUnused16,
-                                       (this.memory.externalRAM16) ? this.memory.readExternalWRAM16Optimized : this.memory.readExternalWRAM16Slow,
-                                       (this.memory.internalRAM16) ? this.memory.readInternalWRAM16Optimized : this.memory.readInternalWRAM16Slow,
+                                       this.memory.readExternalWRAM16,
+                                       this.memory.readInternalWRAM16,
                                        this.memory.readIODispatch16,
                                        this.memory.readPalette16,
                                        this.memory.readVRAM16,
@@ -62,14 +62,14 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead16 = function 
                                        this.memory.readROM116,
                                        this.memory.readROM216,
                                        this.memory.readSRAM16,
-                                       (this.memory.IOCore.BIOSFound) ? ((this.memory.BIOS16) ? this.memory.readBIOS16Optimized : this.memory.readBIOS16Slow) : this.memory.readUnused16
+                                       (this.memory.IOCore.BIOSFound) ? this.memory.readBIOS16 : this.memory.readUnused16
                                        ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite16 = function () {
     return this.compileMemoryWriteDispatch([
                                        this.memory.writeUnused16,
-                                       (this.memory.externalRAM16) ? this.memory.writeExternalWRAM16Optimized : this.memory.writeExternalWRAM16Slow,
-                                       (this.memory.internalRAM16) ? this.memory.writeInternalWRAM16Optimized : this.memory.writeInternalWRAM16Slow,
+                                       this.memory.writeExternalWRAM16,
+                                       this.memory.writeInternalWRAM16,
                                        this.memory.writeIODispatch16,
                                        this.memory.writePalette16,
                                        this.memory.writeVRAM16,
@@ -83,8 +83,8 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite16 = function
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead32 = function () {
     return this.compileMemoryReadDispatch([
                                            this.memory.readUnused32,
-                                           (this.memory.externalRAM32) ? this.memory.readExternalWRAM32Optimized : this.memory.readExternalWRAM32Slow,
-                                           (this.memory.internalRAM32) ? this.memory.readInternalWRAM32Optimized : this.memory.readInternalWRAM32Slow,
+                                           this.memory.readExternalWRAM32,
+                                           this.memory.readInternalWRAM32,
                                            this.memory.readIODispatch32,
                                            this.memory.readPalette32,
                                            this.memory.readVRAM32,
@@ -93,14 +93,14 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead32 = function 
                                            this.memory.readROM132,
                                            this.memory.readROM232,
                                            this.memory.readSRAM32,
-                                           (this.memory.IOCore.BIOSFound) ? ((this.memory.BIOS32) ? this.memory.readBIOS32Optimized : this.memory.readBIOS32Slow) : this.memory.readUnused32
+                                           (this.memory.IOCore.BIOSFound) ? this.memory.readBIOS32 : this.memory.readUnused32
                                            ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite32 = function () {
     return this.compileMemoryWriteDispatch([
                                             this.memory.writeUnused32,
-                                            (this.memory.externalRAM32) ? this.memory.writeExternalWRAM32Optimized : this.memory.writeExternalWRAM32Slow,
-                                            (this.memory.internalRAM32) ? this.memory.writeInternalWRAM32Optimized : this.memory.writeInternalWRAM32Slow,
+                                            this.memory.writeExternalWRAM32,
+                                           this.memory.writeInternalWRAM32,
                                             this.memory.writeIODispatch32,
                                             this.memory.writePalette32,
                                             this.memory.writeVRAM32,
