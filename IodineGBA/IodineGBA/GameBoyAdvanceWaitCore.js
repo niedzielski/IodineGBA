@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -295,22 +295,16 @@ GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
 }
 GameBoyAdvanceWait.prototype.resetPrebuffer = function () {
     this.ROMPrebuffer = 0;
-}
-GameBoyAdvanceWait.prototype.FASTAccess2 = function () {
-    this.IOCore.updateCoreSingle();
-    this.nonSequential = 0;
+    this.nonSequential = 0x100;
 }
 GameBoyAdvanceWait.prototype.WRAMAccess8 = function () {
     this.IOCore.updateCore(this.WRAMWaitState | 0);
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.WRAMAccess16 = function () {
     this.IOCore.updateCore(this.WRAMWaitState | 0);
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.WRAMAccess32 = function () {
     this.IOCore.updateCore(this.WRAMWaitState << 1);
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.ROM0Access8 = function () {
     this.IOCore.updateCore(this.waitStateClocks[0x8 | this.nonSequential] | 0);
@@ -368,7 +362,6 @@ GameBoyAdvanceWait.prototype.ROM2Access32CPU = function () {
 }
 GameBoyAdvanceWait.prototype.SRAMAccess = function () {
     this.IOCore.updateCore(this.SRAMWaitState | 0);
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess8 = function () {
     if (!this.IOCore.gfx.isRendering) {
@@ -377,7 +370,6 @@ GameBoyAdvanceWait.prototype.VRAMAccess8 = function () {
     else {
         this.IOCore.updateCoreTwice();
     }
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess16 = function () {
     if (!this.IOCore.gfx.isRendering) {
@@ -386,7 +378,6 @@ GameBoyAdvanceWait.prototype.VRAMAccess16 = function () {
     else {
         this.IOCore.updateCoreTwice();
     }
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
     if (!this.IOCore.gfx.isRendering) {
@@ -395,7 +386,6 @@ GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
     else {
         this.IOCore.updateCore(4);
     }
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.OAMAccess8 = function () {
     if (!this.IOCore.gfx.isOAMRendering) {
@@ -404,7 +394,6 @@ GameBoyAdvanceWait.prototype.OAMAccess8 = function () {
     else {
        this.IOCore.updateCoreTwice();
     }
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.OAMAccess16 = function () {
     if (!this.IOCore.gfx.isOAMRendering) {
@@ -413,7 +402,6 @@ GameBoyAdvanceWait.prototype.OAMAccess16 = function () {
     else {
         this.IOCore.updateCoreTwice();
     }
-    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
     if (!this.IOCore.gfx.isOAMRendering) {
@@ -422,5 +410,4 @@ GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
     else {
         this.IOCore.updateCoreTwice();
     }
-    this.nonSequential = 0;
 }
