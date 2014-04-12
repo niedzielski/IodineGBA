@@ -19,7 +19,6 @@ function GameBoyAdvanceWait(IOCore) {
     this.IOCore = IOCore;
     this.memory = this.IOCore.memory;
     this.initialize();
-    this.opcodeCache = new GameBoyAdvanceMemoryCache(this.memory);
 }
 GameBoyAdvanceWait.prototype.GAMEPAKWaitStateTable = [
     4, 3, 2, 8
@@ -246,48 +245,24 @@ GameBoyAdvanceWait.prototype.doPrefetchBuffering = function (clocks) {
     //Clock for fetch time:
     this.IOCore.updateCoreSingle();
 }
-GameBoyAdvanceWait.prototype.CPUGetOpcode16 = function (address) {
-    address = address | 0;
-    var data = 0;
-    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
-        data = this.getROMRead16(address | 0) | 0;
-    }
-    else {
-        data = this.opcodeCache.memoryReadFast16(address >>> 0) | 0;
-    }
-    return data | 0;
-}
 GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     //Caching enabled:
     address = address | 0;
     if ((this.ROMPrebuffer | 0) > 0) {
         //Cache hit:
-        this.doPrefetchBuffering(this.waitStateClocks[(address >> 24) & 0xFF] | 0);
+        this.doPrefetchBuffering(this.waitStateClocks[address & 0xFF] | 0);
     }
     else {
         //Cache is empty:
-        this.IOCore.updateCore(this.waitStateClocks[(address >> 24) | this.nonSequential] | 0);
+        this.IOCore.updateCore(this.waitStateClocks[address | this.nonSequential] | 0);
         this.nonSequential = 0;
     }
-    return this.IOCore.cartridge.readROM16(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceWait.prototype.getROMRead16NoPrefetch = function (address) {
     //Caching disabled:
     address = address | 0;
-    this.IOCore.updateCore(this.waitStateClocks[(address >> 24) | this.nonSequential | this.nonSequentialROM] | 0);
+    this.IOCore.updateCore(this.waitStateClocks[address | this.nonSequential | this.nonSequentialROM] | 0);
     this.nonSequentialROM = this.nonSequential = 0;
-    return this.IOCore.cartridge.readROM16(address & 0x1FFFFFF) | 0;
-}
-GameBoyAdvanceWait.prototype.CPUGetOpcode32 = function (address) {
-    address = address | 0;
-    var data = 0;
-    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
-        data = this.getROMRead32(address | 0) | 0;
-    }
-    else {
-        data = this.opcodeCache.memoryReadFast32(address >>> 0) | 0;
-    }
-    return data | 0;
 }
 GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
     //Caching enabled:
@@ -295,29 +270,30 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
     switch (this.ROMPrebuffer | 0) {
         case 0:
             //Cache miss:
-            this.IOCore.updateCore(this.waitStateClocksFull[(address >> 24) | this.nonSequential] | 0);
+            this.IOCore.updateCore(this.waitStateClocksFull[address | this.nonSequential] | 0);
             this.nonSequential = 0;
             break;
         case 1:
             //Partial miss if only 16 bits out of 32 bits stored:
             this.ROMPrebuffer = 0;
-            this.IOCore.updateCore(this.waitStateClocks[(address >> 24) & 0xFF] | 0);
+            this.IOCore.updateCore(this.waitStateClocks[address & 0xFF] | 0);
             break;
         default:
             //Cache hit:
-            this.doPrefetchBuffering(this.waitStateClocksFull[(address >> 24) & 0xFF] | 0);
+            this.doPrefetchBuffering(this.waitStateClocksFull[address & 0xFF] | 0);
     }
-    return this.IOCore.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceWait.prototype.getROMRead32NoPrefetch = function (address) {
     //Caching disabled:
     address = address | 0;
-    this.IOCore.updateCore(this.waitStateClocksFull[(address >> 24) | this.nonSequential | this.nonSequentialROM] | 0);
+    this.IOCore.updateCore(this.waitStateClocksFull[address | this.nonSequential | this.nonSequentialROM] | 0);
     this.nonSequentialROM = this.nonSequential = 0;
-    return this.IOCore.cartridge.readROM32(address & 0x1FFFFFF) | 0;
 }
 GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
     this.nonSequential = 0x100;
+    this.ROMPrebuffer = 0;
+}
+GameBoyAdvanceWait.prototype.resetPrebuffer = function () {
     this.ROMPrebuffer = 0;
 }
 GameBoyAdvanceWait.prototype.FASTAccess2 = function () {
@@ -344,9 +320,15 @@ GameBoyAdvanceWait.prototype.ROM0Access16 = function () {
     this.IOCore.updateCore(this.waitStateClocks[0x8 | this.nonSequential] | 0);
     this.nonSequential = 0;
 }
+GameBoyAdvanceWait.prototype.ROM0Access16CPU = function () {
+    this.getROMRead16(0x8);
+}
 GameBoyAdvanceWait.prototype.ROM0Access32 = function () {
     this.IOCore.updateCore(this.waitStateClocksFull[0x8 | this.nonSequential] | 0);
     this.nonSequential = 0;
+}
+GameBoyAdvanceWait.prototype.ROM0Access32CPU = function () {
+    this.getROMRead32(0x8);
 }
 GameBoyAdvanceWait.prototype.ROM1Access8 = function () {
     this.IOCore.updateCore(this.waitStateClocks[0xA | this.nonSequential] | 0);
@@ -356,9 +338,15 @@ GameBoyAdvanceWait.prototype.ROM1Access16 = function () {
     this.IOCore.updateCore(this.waitStateClocks[0xA | this.nonSequential] | 0);
     this.nonSequential = 0;
 }
+GameBoyAdvanceWait.prototype.ROM1Access16CPU = function () {
+    this.getROMRead16(0xA);
+}
 GameBoyAdvanceWait.prototype.ROM1Access32 = function () {
     this.IOCore.updateCore(this.waitStateClocksFull[0xA | this.nonSequential] | 0);
     this.nonSequential = 0;
+}
+GameBoyAdvanceWait.prototype.ROM1Access32CPU = function () {
+    this.getROMRead32(0xA);
 }
 GameBoyAdvanceWait.prototype.ROM2Access8 = function () {
     this.IOCore.updateCore(this.waitStateClocks[0xC | this.nonSequential] | 0);
@@ -368,9 +356,15 @@ GameBoyAdvanceWait.prototype.ROM2Access16 = function () {
     this.IOCore.updateCore(this.waitStateClocks[0xC | this.nonSequential] | 0);
     this.nonSequential = 0;
 }
+GameBoyAdvanceWait.prototype.ROM2Access16CPU = function () {
+    this.getROMRead16(0xC);
+}
 GameBoyAdvanceWait.prototype.ROM2Access32 = function () {
     this.IOCore.updateCore(this.waitStateClocksFull[0xC | this.nonSequential] | 0);
     this.nonSequential = 0;
+}
+GameBoyAdvanceWait.prototype.ROM2Access32CPU = function () {
+    this.getROMRead32(0xC);
 }
 GameBoyAdvanceWait.prototype.SRAMAccess = function () {
     this.IOCore.updateCore(this.SRAMWaitState | 0);

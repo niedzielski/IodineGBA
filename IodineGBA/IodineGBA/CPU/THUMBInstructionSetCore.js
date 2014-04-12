@@ -27,11 +27,12 @@ THUMBInstructionSet.prototype.initialize = function () {
     this.decode = 0;
     this.execute = 0;
     this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.CPUCore.memory);
+    this.instructionMemoryCache = new GameBoyAdvanceTHUMBInstructionMemoryCache(this.CPUCore.memory);
     this.compileInstructionMap();
 }
 THUMBInstructionSet.prototype.executeIteration = function () {
     //Push the new fetch access:
-    this.fetch = this.wait.CPUGetOpcode16(this.readPC() | 0) | 0;
+    this.fetch = this.instructionMemoryCache.memoryReadFast16(this.readPC() >>> 0) | 0;
     //Execute Instruction:
     this.instructionMap[this.execute >> 6](this);
     //Update the pipelining state:
@@ -40,7 +41,7 @@ THUMBInstructionSet.prototype.executeIteration = function () {
 }
 THUMBInstructionSet.prototype.executeBubble = function () {
     //Push the new fetch access:
-    this.fetch = this.wait.CPUGetOpcode16(this.readPC() | 0) | 0;
+    this.fetch = this.instructionMemoryCache.memoryReadFast16(this.readPC() >>> 0) | 0;
     //Update the pipelining state:
     this.execute = this.decode | 0;
     this.decode = this.fetch | 0;

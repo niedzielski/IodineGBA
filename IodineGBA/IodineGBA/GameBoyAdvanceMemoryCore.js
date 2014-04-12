@@ -45,8 +45,10 @@ function GameBoyAdvanceMemory(IOCore) {
     this.memoryReader8 = generator.generateMemoryRead8();
     this.memoryWriter8 = generator.generateMemoryWrite8();
     this.memoryReader16 = generator.generateMemoryRead16();
+    this.memoryReader16CPU = generator.generateMemoryInstructionRead16();
     this.memoryWriter16 = generator.generateMemoryWrite16();
     this.memoryReader32 = generator.generateMemoryRead32();
+    this.memoryReader32CPU = generator.generateMemoryInstructionRead32();
     this.memoryWriter32 = generator.generateMemoryWrite32();
 }
 GameBoyAdvanceMemory.prototype.loadReferences = function () {
@@ -724,9 +726,19 @@ GameBoyAdvanceMemory.prototype.readROM016 = function (parentObj, address) {
     parentObj.wait.ROM0Access16();
     return parentObj.cartridge.readROM16(address & 0x1FFFFFE) | 0;
 }
+GameBoyAdvanceMemory.prototype.readROM016CPU = function (parentObj, address) {
+    address = address | 0;
+    parentObj.wait.ROM0Access16CPU();
+    return parentObj.cartridge.readROM16(address & 0x1FFFFFE) | 0;
+}
 GameBoyAdvanceMemory.prototype.readROM032 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.ROM0Access32();
+    return parentObj.cartridge.readROM32(address & 0x1FFFFFC) | 0;
+}
+GameBoyAdvanceMemory.prototype.readROM032CPU = function (parentObj, address) {
+    address = address | 0;
+    parentObj.wait.ROM0Access32CPU();
     return parentObj.cartridge.readROM32(address & 0x1FFFFFC) | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM18 = function (parentObj, address) {
@@ -739,9 +751,19 @@ GameBoyAdvanceMemory.prototype.readROM116 = function (parentObj, address) {
     parentObj.wait.ROM1Access16();
     return parentObj.cartridge.readROM16(address & 0x1FFFFFE) | 0;
 }
+GameBoyAdvanceMemory.prototype.readROM116CPU = function (parentObj, address) {
+    address = address | 0;
+    parentObj.wait.ROM1Access16CPU();
+    return parentObj.cartridge.readROM16(address & 0x1FFFFFE) | 0;
+}
 GameBoyAdvanceMemory.prototype.readROM132 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.ROM1Access32();
+    return parentObj.cartridge.readROM32(address & 0x1FFFFFC) | 0;
+}
+GameBoyAdvanceMemory.prototype.readROM132CPU = function (parentObj, address) {
+    address = address | 0;
+    parentObj.wait.ROM1Access32CPU();
     return parentObj.cartridge.readROM32(address & 0x1FFFFFC) | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM28 = function (parentObj, address) {
@@ -754,9 +776,19 @@ GameBoyAdvanceMemory.prototype.readROM216 = function (parentObj, address) {
     parentObj.wait.ROM2Access16();
     return parentObj.cartridge.readROM16Space2(address & 0x1FFFFFE) | 0;
 }
+GameBoyAdvanceMemory.prototype.readROM216CPU = function (parentObj, address) {
+    address = address | 0;
+    parentObj.wait.ROM2Access16CPU();
+    return parentObj.cartridge.readROM16Space2(address & 0x1FFFFFE) | 0;
+}
 GameBoyAdvanceMemory.prototype.readROM232 = function (parentObj, address) {
     address = address | 0;
     parentObj.wait.ROM2Access32();
+    return parentObj.cartridge.readROM32Space2(address & 0x1FFFFFC) | 0;
+}
+GameBoyAdvanceMemory.prototype.readROM232CPU = function (parentObj, address) {
+    address = address | 0;
+    parentObj.wait.ROM2Access32CPU();
     return parentObj.cartridge.readROM32Space2(address & 0x1FFFFFC) | 0;
 }
 GameBoyAdvanceMemory.prototype.readSRAM8 = function (parentObj, address) {

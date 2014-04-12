@@ -28,11 +28,12 @@ ARMInstructionSet.prototype.initialize = function () {
     this.decode = 0;
     this.execute = 0;
     this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.CPUCore.memory);
+    this.instructionMemoryCache = new GameBoyAdvanceARMInstructionMemoryCache(this.CPUCore.memory);
     this.compileReducedInstructionMap(this.compileInstructionMap());
 }
 ARMInstructionSet.prototype.executeIteration = function () {
     //Push the new fetch access:
-    this.fetch = this.wait.CPUGetOpcode32(this.readPC() | 0) | 0;
+    this.fetch = this.instructionMemoryCache.memoryReadFast32(this.readPC() >>> 0) | 0;
     //Execute Conditional Instruction:
     this.instructionMap[((this.execute >> 16) & 0xFFF0) | ((this.execute >> 4) & 0xF)]();
     //Update the pipelining state:
@@ -41,7 +42,7 @@ ARMInstructionSet.prototype.executeIteration = function () {
 }
 ARMInstructionSet.prototype.executeBubble = function () {
     //Push the new fetch access:
-    this.fetch = this.wait.CPUGetOpcode32(this.readPC() | 0) | 0;
+    this.fetch = this.instructionMemoryCache.memoryReadFast32(this.readPC() >>> 0) | 0;
     //Update the pipelining state:
     this.execute = this.decode | 0;
     this.decode = this.fetch | 0;
