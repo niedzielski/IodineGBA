@@ -398,8 +398,13 @@ GameBoyAdvanceGraphics.prototype.copyLineToFrameBuffer = function (line) {
     }
     else {
         if (!this.greenSwap) {
-            for (; (position | 0) < 240; offsetStart = ((offsetStart | 0) + 1) | 0, position = ((position | 0) + 1) | 0) {
-                this.frameBuffer[offsetStart | 0] = this.lineBuffer[position | 0] | 0;
+            if (!!this.frameBuffer.set) {
+                this.frameBuffer.set(this.lineBuffer, offsetStart | 0);
+            }
+            else {
+                for (; (position | 0) < 240; offsetStart = ((offsetStart | 0) + 1) | 0, position = ((position | 0) + 1) | 0) {
+                    this.frameBuffer[offsetStart | 0] = this.lineBuffer[position | 0] | 0;
+                }
             }
         }
         else {
