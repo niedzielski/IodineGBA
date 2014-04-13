@@ -43,27 +43,53 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) 
     return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
 if (__LITTLE_ENDIAN__) {
-    GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
-        x = x | 0;
-        y = y | 0;
-        //Output pixel:
-        if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 240 && (y | 0) < 160) {
-            var address = (((y * 240) | 0) + (x | 0)) | 0;
-            return this.VRAM16[address & 0xFFFF] & 0x7FFF;
+    if (!!Math.imul) {
+        GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
+            x = x | 0;
+            y = y | 0;
+            //Output pixel:
+            if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 240 && (y | 0) < 160) {
+                var address = (Math.imul(y | 0, 240) + (x | 0)) | 0;
+                return this.VRAM16[address & 0xFFFF] & 0x7FFF;
+            }
+            //Out of range, output transparency:
+            return this.transparency | 0;
         }
-        //Out of range, output transparency:
-        return this.transparency | 0;
+        GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5Pixel = function (x, y) {
+            x = x | 0;
+            y = y | 0;
+            //Output pixel:
+            if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 160 && (y | 0) < 128) {
+                var address = ((this.frameSelect | 0) + Math.imul(y | 0, 160) + (x | 0)) | 0;
+                return this.VRAM16[address & 0xFFFF] & 0x7FFF;
+            }
+            //Out of range, output transparency:
+            return this.transparency | 0;
+        }
     }
-    GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5Pixel = function (x, y) {
-        x = x | 0;
-        y = y | 0;
-        //Output pixel:
-        if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 160 && (y | 0) < 128) {
-            var address = ((this.frameSelect | 0) + ((y * 160) | 0) + (x | 0)) | 0;
-            return this.VRAM16[address & 0xFFFF] & 0x7FFF;
+    else {
+        GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
+            x = x | 0;
+            y = y | 0;
+            //Output pixel:
+            if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 240 && (y | 0) < 160) {
+                var address = (((y * 240) | 0) + (x | 0)) | 0;
+                return this.VRAM16[address & 0xFFFF] & 0x7FFF;
+            }
+            //Out of range, output transparency:
+            return this.transparency | 0;
         }
-        //Out of range, output transparency:
-        return this.transparency | 0;
+        GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode5Pixel = function (x, y) {
+            x = x | 0;
+            y = y | 0;
+            //Output pixel:
+            if ((x | 0) > -1 && (y | 0) > -1 && (x | 0) < 160 && (y | 0) < 128) {
+                var address = ((this.frameSelect | 0) + ((y * 160) | 0) + (x | 0)) | 0;
+                return this.VRAM16[address & 0xFFFF] & 0x7FFF;
+            }
+            //Out of range, output transparency:
+            return this.transparency | 0;
+        }
     }
 }
 else {
