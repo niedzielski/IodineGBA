@@ -260,31 +260,42 @@ GameBoyAdvanceMemory.prototype.writeVRAM32 = function (parentObj, address, data)
     parentObj.gfx.writeVRAM32(address & 0x1FFFC, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeOAM8 = function (parentObj, address, data) {
-    address = address | 0;
-    data = data | 0;
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess8();
 }
 GameBoyAdvanceMemory.prototype.writeOAM16 = function (parentObj, address, data) {
-    address = address | 0;
+    address = address & 0x3FE;
     data = data | 0;
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess16();
-    parentObj.gfx.writeOAM16(address & 0x3FE, data | 0);
+    parentObj.gfx.writeOAM16(address >> 1, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeOAM32 = function (parentObj, address, data) {
-    address = address | 0;
+    address = address & 0x3FC;
     data = data | 0;
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess32();
-    parentObj.gfx.writeOAM32(address & 0x3FC, data | 0);
+    parentObj.gfx.writeOAM32(address >> 2, data | 0);
 }
-GameBoyAdvanceMemory.prototype.writePalette8 = function (parentObj, address, data) {
-    address = address | 0;
-    data = data | 0;
-    parentObj.IOCore.updateGraphicsClocking();
-    parentObj.wait.VRAMAccess8();
-    parentObj.gfx.writePalette16(address & 0x3FE, (data * 0x101) | 0);
+if (!!Math.imul) {
+    //Math.imul found, insert the optimized path in:
+    GameBoyAdvanceMemory.prototype.writePalette8 = function (parentObj, address, data) {
+        address = address | 0;
+        data = data | 0;
+        parentObj.IOCore.updateGraphicsClocking();
+        parentObj.wait.VRAMAccess8();
+        parentObj.gfx.writePalette16(address & 0x3FE, Math.imul(data | 0, 0x101) | 0);
+    }
+}
+else {
+    //Math.imul not found, use the compatibility method:
+    GameBoyAdvanceMemory.prototype.writePalette8 = function (parentObj, address, data) {
+        address = address | 0;
+        data = data | 0;
+        parentObj.IOCore.updateGraphicsClocking();
+        parentObj.wait.VRAMAccess8();
+        parentObj.gfx.writePalette16(address & 0x3FE, (data * 0x101) | 0);
+    }
 }
 GameBoyAdvanceMemory.prototype.writePalette16 = function (parentObj, address, data) {
     address = address | 0;

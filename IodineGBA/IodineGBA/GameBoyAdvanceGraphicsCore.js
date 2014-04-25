@@ -1094,7 +1094,7 @@ else {
         this.VRAM[address | 0] = data & 0xFF;
         this.VRAM[address | 1] = (data >> 8) & 0xFF;
         this.VRAM[address | 2] = (data >> 16) & 0xFF;
-        this.VRAM[address | 3] = (data >> 24) & 0xFF;
+        this.VRAM[address | 3] = data >>> 24;
     }
     GameBoyAdvanceGraphics.prototype.readVRAM16 = function (address) {
         return this.VRAM[address | 0] | (this.VRAM[address | 1] << 8);
@@ -1116,7 +1116,7 @@ else {
         this.paletteRAM[address] = data & 0xFF;
         this.paletteRAM[address | 1] = (data >> 8) & 0xFF;
         this.paletteRAM[address | 2] = (data >> 16) & 0xFF;
-        this.paletteRAM[address | 3] = (data >> 24) & 0xFF;
+        this.paletteRAM[address | 3] = data >>> 24;
         address >>= 1;
         var palette = data & 0x7FFF;
         this.writePalette256Color(address, palette);
@@ -1140,14 +1140,13 @@ GameBoyAdvanceGraphics.prototype.writeOAM16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.graphicsJIT();
-    this.objRenderer.writeOAM16(address >> 1, data | 0);
+    this.objRenderer.writeOAM16(address | 0, data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeOAM32 = function (address, data) {
-    address = address >> 1;
+    address = address | 0;
     data = data | 0;
     this.graphicsJIT();
-    this.objRenderer.writeOAM16(address | 0, data & 0xFFFF);
-    this.objRenderer.writeOAM16(address | 1, (data >> 16) & 0xFFFF);
+    this.objRenderer.writeOAM32(address | 0, data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readOAM = function (address) {
     return this.objRenderer.readOAM(address | 0) | 0;

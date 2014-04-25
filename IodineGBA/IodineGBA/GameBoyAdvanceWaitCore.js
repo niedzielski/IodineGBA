@@ -176,7 +176,7 @@ GameBoyAdvanceWait.prototype.readConfigureWRAM8 = function (address) {
             data = this.WRAMConfiguration & 0x2F;
             break;
         case 3:
-            data = (this.WRAMConfiguration >> 24) & 0xFF;
+            data = this.WRAMConfiguration >>> 24;
     }
     return data | 0;
 }
@@ -201,7 +201,7 @@ GameBoyAdvanceWait.prototype.CPUInternalCycleDoPrefetch = function (clocks) {
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    var waitClocks = this.waitStateClocks[(this.IOCore.cpu.registers[15] >> 24) & 0xFF] | 0;
+    var waitClocks = this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0;
     waitClocks = Math.floor((clocks | 0) / Math.max(waitClocks, 1));
     this.ROMPrebuffer = Math.min((this.ROMPrebuffer | 0) + waitClocks, 8) | 0;
 }
@@ -218,7 +218,7 @@ GameBoyAdvanceWait.prototype.CPUInternalSingleCycleDoPrefetch = function () {
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    if ((this.waitStateClocks[(this.IOCore.cpu.registers[15] >> 24) & 0xFF] | 0) > 0) {
+    if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
         this.ROMPrebuffer = Math.min((this.ROMPrebuffer | 0) + 1, 8) | 0;
     }
 }

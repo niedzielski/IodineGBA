@@ -3940,7 +3940,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG0CNT0(data & 0xFF);
         parentObj.gfx.writeBG0CNT1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG1CNT0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG1CNT1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG1CNT1(data >>> 24);
     }
     //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
     //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
@@ -3950,7 +3950,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG2CNT0(data & 0xFF);
         parentObj.gfx.writeBG2CNT1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG3CNT0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG3CNT1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG3CNT1(data >>> 24);
     }
     //4000010h - BG0HOFS - BG0 X-Offset (W)
     //4000012h - BG0VOFS - BG0 Y-Offset (W)
@@ -3960,7 +3960,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG0HOFS0(data & 0xFF);
         parentObj.gfx.writeBG0HOFS1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG0VOFS0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG0VOFS1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG0VOFS1(data >>> 24);
     }
     //4000014h - BG1HOFS - BG1 X-Offset (W)
     //4000016h - BG1VOFS - BG1 Y-Offset (W)
@@ -3970,7 +3970,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG1HOFS0(data & 0xFF);
         parentObj.gfx.writeBG1HOFS1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG1VOFS0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG1VOFS1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG1VOFS1(data >>> 24);
     }
     //4000018h - BG2HOFS - BG2 X-Offset (W)
     //400001Ah - BG2VOFS - BG2 Y-Offset (W)
@@ -3980,7 +3980,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG2HOFS0(data & 0xFF);
         parentObj.gfx.writeBG2HOFS1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG2VOFS0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG2VOFS1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG2VOFS1(data >>> 24);
     }
     //400001Ch - BG3HOFS - BG3 X-Offset (W)
     //400001Eh - BG3VOFS - BG3 Y-Offset (W)
@@ -3990,7 +3990,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG3HOFS0(data & 0xFF);
         parentObj.gfx.writeBG3HOFS1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG3VOFS0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG3VOFS1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG3VOFS1(data >>> 24);
     }
     //4000020h - BG2PA - BG2 Rotation/Scaling Parameter A (alias dx) (W)
     //4000022h - BG2PB - BG2 Rotation/Scaling Parameter B (alias dmx) (W)
@@ -4000,7 +4000,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG2PA0(data & 0xFF);
         parentObj.gfx.writeBG2PA1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG2PB0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG2PB1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG2PB1(data >>> 24);
     }
     //4000024h - BG2PC - BG2 Rotation/Scaling Parameter C (alias dy) (W)
     //4000026h - BG2PD - BG2 Rotation/Scaling Parameter D (alias dmy) (W)
@@ -4010,7 +4010,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG2PC0(data & 0xFF);
         parentObj.gfx.writeBG2PC1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG2PD0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG2PD1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG2PD1(data >>> 24);
     }
     //4000028h - BG2X_L - BG2 Reference Point X-Coordinate, lower 16 bit (W)
     //400002Ah - BG2X_H - BG2 Reference Point X-Coordinate, upper 12 bit (W)
@@ -4020,7 +4020,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG2X_L0(data & 0xFF);
         parentObj.gfx.writeBG2X_L1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG2X_H0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG2X_H1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG2X_H1(data >>> 24);
     }
     //400002Ch - BG2Y_L - BG2 Reference Point Y-Coordinate, lower 16 bit (W)
     //400002Eh - BG2Y_H - BG2 Reference Point Y-Coordinate, upper 12 bit (W)
@@ -4030,7 +4030,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG2Y_L0(data & 0xFF);
         parentObj.gfx.writeBG2Y_L1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG2Y_H0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG2Y_H1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG2Y_H1(data >>> 24);
     }
     //4000030h - BG3PA - BG3 Rotation/Scaling Parameter A (alias dx) (W)
     //4000032h - BG3PB - BG3 Rotation/Scaling Parameter B (alias dmx) (W)
@@ -4040,7 +4040,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG3PA0(data & 0xFF);
         parentObj.gfx.writeBG3PA1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG3PB0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG3PB1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG3PB1(data >>> 24);
     }
     //4000034h - BG3PC - BG3 Rotation/Scaling Parameter C (alias dy) (W)
     //4000036h - BG3PD - BG3 Rotation/Scaling Parameter D (alias dmy) (W)
@@ -4050,7 +4050,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG3PC0(data & 0xFF);
         parentObj.gfx.writeBG3PC1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG3PD0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG3PD1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG3PD1(data >>> 24);
     }
     //4000038h - BG3X_L - BG3 Reference Point X-Coordinate, lower 16 bit (W)
     //400003Ah - BG3X_H - BG3 Reference Point X-Coordinate, upper 12 bit (W)
@@ -4060,7 +4060,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG3X_L0(data & 0xFF);
         parentObj.gfx.writeBG3X_L1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG3X_H0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG3X_H1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG3X_H1(data >>> 24);
     }
     //400003Ch - BG3Y_L - BG3 Reference Point Y-Coordinate, lower 16 bit (W)
     //400003Eh - BG3Y_H - BG3 Reference Point Y-Coordinate, upper 12 bit (W)
@@ -4070,7 +4070,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBG3Y_L0(data & 0xFF);
         parentObj.gfx.writeBG3Y_L1((data >> 8) & 0xFF);
         parentObj.gfx.writeBG3Y_H0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBG3Y_H1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBG3Y_H1(data >>> 24);
     }
     //4000040h - WIN0H - Window 0 Horizontal Dimensions (W)
     //4000042h - WIN1H - Window 1 Horizontal Dimensions (W)
@@ -4080,7 +4080,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeWIN0H0(data & 0xFF);
         parentObj.gfx.writeWIN0H1((data >> 8) & 0xFF);
         parentObj.gfx.writeWIN1H0((data >> 16) & 0xFF);
-        parentObj.gfx.writeWIN1H1((data >> 24) & 0xFF);
+        parentObj.gfx.writeWIN1H1(data >>> 24);
     }
     //4000044h - WIN0V - Window 0 Vertical Dimensions (W)
     //4000046h - WIN1V - Window 1 Vertical Dimensions (W)
@@ -4090,7 +4090,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeWIN0V0(data & 0xFF);
         parentObj.gfx.writeWIN0V1((data >> 8) & 0xFF);
         parentObj.gfx.writeWIN1V0((data >> 16) & 0xFF);
-        parentObj.gfx.writeWIN1V1((data >> 24) & 0xFF);
+        parentObj.gfx.writeWIN1V1(data >>> 24);
     }
     //4000048h - WININ - Control of Inside of Window(s) (R/W)
     //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
@@ -4100,7 +4100,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeWININ0(data & 0xFF);
         parentObj.gfx.writeWININ1((data >> 8) & 0xFF);
         parentObj.gfx.writeWINOUT0((data >> 16) & 0xFF);
-        parentObj.gfx.writeWINOUT1((data >> 24) & 0xFF);
+        parentObj.gfx.writeWINOUT1(data >>> 24);
     }
     //400004Ch - MOSAIC - Mosaic Size (W)
     //400004Eh - NOT USED - ZERO
@@ -4118,7 +4118,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.gfx.writeBLDCNT0(data & 0xFF);
         parentObj.gfx.writeBLDCNT1((data >> 8) & 0xFF);
         parentObj.gfx.writeBLDALPHA0((data >> 16) & 0xFF);
-        parentObj.gfx.writeBLDALPHA1((data >> 24) & 0xFF);
+        parentObj.gfx.writeBLDALPHA1(data >>> 24);
     }
     //4000054h - BLDY - Brightness (Fade-In/Out) Coefficient (W)
     writeIO[0x54 >> 2] = function (parentObj, data) {
@@ -4138,7 +4138,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         //NR11:
         parentObj.sound.writeSOUND1CNT_H0((data >> 16) & 0xFF);
         //NR12:
-        parentObj.sound.writeSOUND1CNT_H1((data >> 24) & 0xFF);
+        parentObj.sound.writeSOUND1CNT_H1(data >>> 24);
     }
     //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
     //4000066h - NOT USED - ZERO
@@ -4180,7 +4180,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         //NR31:
         parentObj.sound.writeSOUND3CNT_H0((data >> 16) & 0xFF);
         //NR32:
-        parentObj.sound.writeSOUND3CNT_H1((data >> 24) & 0xFF);
+        parentObj.sound.writeSOUND3CNT_H1(data >>> 24);
     }
     //4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
     //4000076h - NOT USED - ZERO
@@ -4222,7 +4222,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         //NR51:
         parentObj.sound.writeSOUNDCNT_L1((data >> 8) & 0xFF);
         parentObj.sound.writeSOUNDCNT_H0((data >> 16) & 0xFF);
-        parentObj.sound.writeSOUNDCNT_H1((data >> 24) & 0xFF);
+        parentObj.sound.writeSOUNDCNT_H1(data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)
@@ -4249,7 +4249,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.sound.writeWAVE(0, data & 0xFF);
         parentObj.sound.writeWAVE(0x1, (data >> 8) & 0xFF);
         parentObj.sound.writeWAVE(0x2, (data >> 16) & 0xFF);
-        parentObj.sound.writeWAVE(0x3, (data >> 24) & 0xFF);
+        parentObj.sound.writeWAVE(0x3, data >>> 24);
     }
     //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
     //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
@@ -4259,7 +4259,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.sound.writeWAVE(0x4, data & 0xFF);
         parentObj.sound.writeWAVE(0x5, (data >> 8) & 0xFF);
         parentObj.sound.writeWAVE(0x6, (data >> 16) & 0xFF);
-        parentObj.sound.writeWAVE(0x7, (data >> 24) & 0xFF);
+        parentObj.sound.writeWAVE(0x7, data >>> 24);
     }
     //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
     //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
@@ -4269,7 +4269,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.sound.writeWAVE(0x8, data & 0xFF);
         parentObj.sound.writeWAVE(0x9, (data >> 8) & 0xFF);
         parentObj.sound.writeWAVE(0xA, (data >> 16) & 0xFF);
-        parentObj.sound.writeWAVE(0xB, (data >> 24) & 0xFF);
+        parentObj.sound.writeWAVE(0xB, data >>> 24);
     }
     //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
     //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
@@ -4279,7 +4279,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.sound.writeWAVE(0xC, data & 0xFF);
         parentObj.sound.writeWAVE(0xD, (data >> 8) & 0xFF);
         parentObj.sound.writeWAVE(0xE, (data >> 16) & 0xFF);
-        parentObj.sound.writeWAVE(0xF, (data >> 24) & 0xFF);
+        parentObj.sound.writeWAVE(0xF, data >>> 24);
     }
     //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
     //40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
@@ -4289,7 +4289,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.sound.writeFIFOA(data & 0xFF);
         parentObj.sound.writeFIFOA((data >> 8) & 0xFF);
         parentObj.sound.writeFIFOA((data >> 16) & 0xFF);
-        parentObj.sound.writeFIFOA((data >> 24) & 0xFF);
+        parentObj.sound.writeFIFOA(data >>> 24);
     }
     //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
     //40000A6h - FIFO_B_H - FIFO Channel B Second Word (W)
@@ -4299,7 +4299,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.sound.writeFIFOB(data & 0xFF);
         parentObj.sound.writeFIFOB((data >> 8) & 0xFF);
         parentObj.sound.writeFIFOB((data >> 16) & 0xFF);
-        parentObj.sound.writeFIFOB((data >> 24) & 0xFF);
+        parentObj.sound.writeFIFOB(data >>> 24);
     }
     //40000A8h through 40000AFh - NOT USED - GLITCHED
     this.fillWriteTableNOP(writeIO, 0xA8 >> 2, 0xAC >> 2);
@@ -4329,7 +4329,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.dma.writeDMAWordCount1(0, (data >> 8) & 0x3F);
         parentObj.dma.writeDMAControl0(0, (data >> 16) & 0xFF);
         parentObj.IOCore.updateCoreClocking();
-        parentObj.dma.writeDMAControl1(0, (data >> 24) & 0xFF);
+        parentObj.dma.writeDMAControl1(0, data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //40000BCh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
@@ -4358,7 +4358,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.dma.writeDMAWordCount1(1, (data >> 8) & 0x3F);
         parentObj.dma.writeDMAControl0(1, (data >> 16) & 0xFF);
         parentObj.IOCore.updateCoreClocking();
-        parentObj.dma.writeDMAControl1(1, (data >> 24) & 0xFF);
+        parentObj.dma.writeDMAControl1(1, data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //40000C8h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
@@ -4387,7 +4387,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.dma.writeDMAWordCount1(2, (data >> 8) & 0x3F);
         parentObj.dma.writeDMAControl0(2, (data >> 16) & 0xFF);
         parentObj.IOCore.updateCoreClocking();
-        parentObj.dma.writeDMAControl1(2, (data >> 24) & 0xFF);
+        parentObj.dma.writeDMAControl1(2, data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //40000D4h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
@@ -4416,7 +4416,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.dma.writeDMAWordCount1(3, (data >> 8) & 0xFF);
         parentObj.dma.writeDMAControl0(3, (data >> 16) & 0xFF);
         parentObj.IOCore.updateCoreClocking();
-        parentObj.dma.writeDMAControl1(3, (data >> 24) & 0xFF);
+        parentObj.dma.writeDMAControl1(3, data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //40000E0h through 40000FFh - NOT USED - GLITCHED
@@ -4471,7 +4471,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.serial.writeSIODATA_A0(data & 0xFF);
         parentObj.serial.writeSIODATA_A1((data >> 8) & 0xFF);
         parentObj.serial.writeSIODATA_B0((data >> 16) & 0xFF);
-        parentObj.serial.writeSIODATA_B1((data >> 24) & 0xFF);
+        parentObj.serial.writeSIODATA_B1(data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //4000124h - Serial Data C (R/W)
@@ -4482,7 +4482,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.serial.writeSIODATA_C0(data & 0xFF);
         parentObj.serial.writeSIODATA_C1((data >> 8) & 0xFF);
         parentObj.serial.writeSIODATA_D0((data >> 16) & 0xFF);
-        parentObj.serial.writeSIODATA_D1((data >> 24) & 0xFF);
+        parentObj.serial.writeSIODATA_D1(data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //4000128h - SIOCNT - SIO Sub Mode Control (R/W)
@@ -4493,7 +4493,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.serial.writeSIOCNT0(data & 0xFF);
         parentObj.serial.writeSIOCNT1((data >> 8) & 0xFF);
         parentObj.serial.writeSIODATA8_0((data >> 16) & 0xFF);
-        parentObj.serial.writeSIODATA8_1((data >> 24) & 0xFF);
+        parentObj.serial.writeSIODATA8_1(data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //400012Ch through 400012Fh - NOT USED - GLITCHED
@@ -4503,7 +4503,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
     writeIO[0x130 >> 2] = function (parentObj, data) {
         data = data | 0;
         parentObj.joypad.writeKeyControl0((data >> 16) & 0xFF);
-        parentObj.joypad.writeKeyControl1((data >> 24) & 0xFF);
+        parentObj.joypad.writeKeyControl1(data >>> 24);
     }
     //4000134h - RCNT (R/W) - Mode Selection
     writeIO[0x134 >> 2] = function (parentObj, data) {
@@ -4532,7 +4532,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.serial.writeJOYBUS_RECV0(data & 0xFF);
         parentObj.serial.writeJOYBUS_RECV1((data >> 8) & 0xFF);
         parentObj.serial.writeJOYBUS_RECV2((data >> 16) & 0xFF);
-        parentObj.serial.writeJOYBUS_RECV3((data >> 24) & 0xFF);
+        parentObj.serial.writeJOYBUS_RECV3(data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //4000154h - JoyBus Send (R/W)
@@ -4543,7 +4543,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.serial.writeJOYBUS_SEND0(data & 0xFF);
         parentObj.serial.writeJOYBUS_SEND1((data >> 8) & 0xFF);
         parentObj.serial.writeJOYBUS_SEND2((data >> 16) & 0xFF);
-        parentObj.serial.writeJOYBUS_SEND3((data >> 24) & 0xFF);
+        parentObj.serial.writeJOYBUS_SEND3(data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //4000158h - JoyBus Stat (R/W)
@@ -4563,7 +4563,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO32 = functi
         parentObj.irq.writeIE0(data & 0xFF);
         parentObj.irq.writeIE1((data >> 8) & 0xFF);
         parentObj.irq.writeIF0((data >> 16) & 0xFF);
-        parentObj.irq.writeIF1((data >> 24) & 0xFF);
+        parentObj.irq.writeIF1(data >>> 24);
         parentObj.IOCore.updateCoreEventTime();
     }
     //4000204h - WAITCNT - Waitstate Control (R/W)
