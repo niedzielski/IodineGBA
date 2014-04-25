@@ -1140,13 +1140,13 @@ GameBoyAdvanceGraphics.prototype.writeOAM16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.graphicsJIT();
-    this.objRenderer.writeOAM16(address | 0, data | 0);
+    this.objRenderer.writeOAM16(address >> 1, data | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeOAM32 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.graphicsJIT();
-    this.objRenderer.writeOAM32(address | 0, data | 0);
+    this.objRenderer.writeOAM32(address >> 2, data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readOAM = function (address) {
     return this.objRenderer.readOAM(address | 0) | 0;

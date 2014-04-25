@@ -264,18 +264,18 @@ GameBoyAdvanceMemory.prototype.writeOAM8 = function (parentObj, address, data) {
     parentObj.wait.OAMAccess8();
 }
 GameBoyAdvanceMemory.prototype.writeOAM16 = function (parentObj, address, data) {
-    address = address & 0x3FE;
+    address = address | 0;
     data = data | 0;
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess16();
-    parentObj.gfx.writeOAM16(address >> 1, data | 0);
+    parentObj.gfx.writeOAM16(address & 0x3FE, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeOAM32 = function (parentObj, address, data) {
-    address = address & 0x3FC;
+    address = address | 0;
     data = data | 0;
     parentObj.IOCore.updateGraphicsClocking();
     parentObj.wait.OAMAccess32();
-    parentObj.gfx.writeOAM32(address >> 2, data | 0);
+    parentObj.gfx.writeOAM32(address & 0x3FC, data | 0);
 }
 if (!!Math.imul) {
     //Math.imul found, insert the optimized path in:
