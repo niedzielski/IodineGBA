@@ -229,18 +229,38 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (parentObj, address,
         parentObj.wait.writeConfigureWRAM32(data | 0);
     }
 }
-GameBoyAdvanceMemory.prototype.writeVRAM8 = function (parentObj, address, data) {
-    address = address | 0;
-    data = data | 0;
-    parentObj.IOCore.updateGraphicsClocking();
-    parentObj.wait.VRAMAccess8();
-    if ((address & 0x10000) != 0) {
-        if ((address & 0x17FFF) < 0x14000 && (parentObj.gfx.BGMode | 0) >= 3) {
-            parentObj.gfx.writeVRAM16(address & 0x17FFE, (data * 0x101) | 0);
+if (!!Math.imul) {
+    //Math.imul found, insert the optimized path in:
+    GameBoyAdvanceMemory.prototype.writeVRAM8 = function (parentObj, address, data) {
+        address = address | 0;
+        data = data | 0;
+        parentObj.IOCore.updateGraphicsClocking();
+        parentObj.wait.VRAMAccess8();
+        if ((address & 0x10000) != 0) {
+            if ((address & 0x17FFF) < 0x14000 && (parentObj.gfx.BGMode | 0) >= 3) {
+                parentObj.gfx.writeVRAM16(address & 0x17FFE, Math.imul(data | 0, 0x101) | 0);
+            }
+        }
+        else {
+            parentObj.gfx.writeVRAM16(address & 0xFFFE, Math.imul(data | 0, 0x101) | 0);
         }
     }
-    else {
-        parentObj.gfx.writeVRAM16(address & 0xFFFE, (data * 0x101) | 0);
+}
+else {
+    //Math.imul not found, use the compatibility method:
+    GameBoyAdvanceMemory.prototype.writeVRAM8 = function (parentObj, address, data) {
+        address = address | 0;
+        data = data | 0;
+        parentObj.IOCore.updateGraphicsClocking();
+        parentObj.wait.VRAMAccess8();
+        if ((address & 0x10000) != 0) {
+            if ((address & 0x17FFF) < 0x14000 && (parentObj.gfx.BGMode | 0) >= 3) {
+                parentObj.gfx.writeVRAM16(address & 0x17FFE, (data * 0x101) | 0);
+            }
+        }
+        else {
+            parentObj.gfx.writeVRAM16(address & 0xFFFE, (data * 0x101) | 0);
+        }
     }
 }
 GameBoyAdvanceMemory.prototype.writeVRAM16 = function (parentObj, address, data) {

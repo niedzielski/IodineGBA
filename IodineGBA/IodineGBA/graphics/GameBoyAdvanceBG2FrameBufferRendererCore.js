@@ -44,6 +44,7 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) 
 }
 if (__LITTLE_ENDIAN__) {
     if (!!Math.imul) {
+        //Math.imul found, insert the optimized path in:
         GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
             x = x | 0;
             y = y | 0;
@@ -68,6 +69,7 @@ if (__LITTLE_ENDIAN__) {
         }
     }
     else {
+        //Math.imul not found, use the compatibility method:
         GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
             x = x | 0;
             y = y | 0;

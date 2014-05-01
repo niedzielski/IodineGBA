@@ -36,16 +36,46 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
     //Horizontal Rectangle:
     16, 32, 32, 64
 ];
-GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
-    this.OAMRAM = getUint8Array(0x400);
-    this.OAMRAM16 = getUint16View(this.OAMRAM);
-    this.OAMRAM32 = getInt32View(this.OAMRAM);
-    this.scratchBuffer = getInt32Array(240);
-    this.scratchWindowBuffer = getInt32Array(240);
-    this.scratchOBJBuffer = getInt32Array(128);
-    this.targetBuffer = null;
-    this.initializeMatrixStorage();
-    this.initializeOAMTable();
+if (__VIEWS_SUPPORTED__) {
+    GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
+        this.OAMRAM = getUint8Array(0x400);
+        this.OAMRAM16 = getUint16View(this.OAMRAM);
+        this.OAMRAM32 = getInt32View(this.OAMRAM);
+        this.scratchBuffer = getInt32Array(240);
+        this.scratchWindowBuffer = getInt32Array(240);
+        this.scratchOBJBuffer = getInt32Array(128);
+        this.clearingBuffer = getInt32Array(240);
+        this.targetBuffer = null;
+        this.initializeClearingBuffer();
+        this.initializeMatrixStorage();
+        this.initializeOAMTable();
+    }
+    GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
+        this.targetBuffer.set(this.clearingBuffer);
+    }
+    GameBoyAdvanceOBJRenderer.prototype.initializeClearingBuffer = function () {
+        for (var position = 0; position < 240; ++position) {
+            this.clearingBuffer[position] = this.transparency;
+        }
+    }
+}
+else {
+    GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
+        this.OAMRAM = getUint8Array(0x400);
+        this.OAMRAM16 = getUint16View(this.OAMRAM);
+        this.OAMRAM32 = getInt32View(this.OAMRAM);
+        this.scratchBuffer = getInt32Array(240);
+        this.scratchWindowBuffer = getInt32Array(240);
+        this.scratchOBJBuffer = getInt32Array(128);
+        this.targetBuffer = null;
+        this.initializeMatrixStorage();
+        this.initializeOAMTable();
+    }
+    GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
+        for (var position = 0; position < 240; ++position) {
+            this.targetBuffer[position] = this.transparency;
+        }
+    }
 }
 GameBoyAdvanceOBJRenderer.prototype.initializeMatrixStorage = function () {
     this.OBJMatrixParameters = [];
@@ -73,11 +103,6 @@ GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line, isOBJWin
     this.clearScratch();
     for (var objNumber = 0; objNumber < 0x80; ++objNumber) {
         this.renderSprite(line, this.OAMTable[objNumber], isOBJWindow);
-    }
-}
-GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
-    for (var position = 0; position < 240; ++position) {
-        this.targetBuffer[position] = this.transparency;
     }
 }
 GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJWindow) {
@@ -120,36 +145,72 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
         }
     }
 }
-GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
-    xSize = xSize | 0;
-    ySize = ySize | 0;
-    yOffset = yOffset | 0;
-    var xDiff = (-(xSize >> 1)) | 0;
-    var yDiff = ((yOffset | 0) - (ySize >> 1)) | 0;
-    var xSizeOriginal = (xSize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
-    var xSizeFixed = xSizeOriginal << 8;
-    var ySizeOriginal = (ySize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
-    var ySizeFixed = ySizeOriginal << 8;
-    var params = this.OBJMatrixParameters[sprite.matrixParameters | 0];
-    var dx = params[0] | 0;
-    var dmx = params[1] | 0;
-    var dy = params[2] | 0;
-    var dmy = params[3] | 0;
-    var pa = ((dx | 0) * (xDiff | 0)) | 0;
-    var pb = ((dmx | 0) * (yDiff | 0)) | 0;
-    var pc = ((dy | 0) * (xDiff | 0)) | 0;
-    var pd = ((dmy | 0) * (yDiff | 0)) | 0;
-    var x = ((pa | 0) + (pb | 0) + (xSizeFixed >> 1)) | 0;
-    var y = ((pc | 0) + (pd | 0) + (ySizeFixed >> 1)) | 0;
-    var tileNumber = sprite.tileNumber | 0;
-    for (var position = 0; (position | 0) < (xSize | 0); position = (position + 1) | 0, x = ((x | 0) + (dx | 0)) | 0, y = ((y | 0) + (dy | 0)) | 0) {
-        if ((x | 0) >= 0 && (y | 0) >= 0 && (x | 0) < (xSizeFixed | 0) && (y | 0) < (ySizeFixed | 0)) {
-            //Coordinates in range, fetch pixel:
-            this.scratchOBJBuffer[position | 0] = this.fetchMatrixPixel(sprite, tileNumber | 0, x >> 8, y >> 8, xSizeOriginal | 0) | 0;
+if (!!Math.imul) {
+    //Math.imul found, insert the optimized path in:
+    GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
+        xSize = xSize | 0;
+        ySize = ySize | 0;
+        yOffset = yOffset | 0;
+        var xDiff = (-(xSize >> 1)) | 0;
+        var yDiff = ((yOffset | 0) - (ySize >> 1)) | 0;
+        var xSizeOriginal = (xSize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
+        var xSizeFixed = xSizeOriginal << 8;
+        var ySizeOriginal = (ySize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
+        var ySizeFixed = ySizeOriginal << 8;
+        var params = this.OBJMatrixParameters[sprite.matrixParameters | 0];
+        var dx = params[0] | 0;
+        var dmx = params[1] | 0;
+        var dy = params[2] | 0;
+        var dmy = params[3] | 0;
+        var pa = Math.imul(dx | 0, xDiff | 0) | 0;
+        var pb = Math.imul(dmx | 0, yDiff | 0) | 0;
+        var pc = Math.imul(dy | 0, xDiff | 0) | 0;
+        var pd = Math.imul(dmy | 0, yDiff | 0) | 0;
+        var x = ((pa | 0) + (pb | 0) + (xSizeFixed >> 1)) | 0;
+        var y = ((pc | 0) + (pd | 0) + (ySizeFixed >> 1)) | 0;
+        var tileNumber = sprite.tileNumber | 0;
+        for (var position = 0; (position | 0) < (xSize | 0); position = (position + 1) | 0, x = ((x | 0) + (dx | 0)) | 0, y = ((y | 0) + (dy | 0)) | 0) {
+            if ((x | 0) >= 0 && (y | 0) >= 0 && (x | 0) < (xSizeFixed | 0) && (y | 0) < (ySizeFixed | 0)) {
+                //Coordinates in range, fetch pixel:
+                this.scratchOBJBuffer[position | 0] = this.fetchMatrixPixel(sprite, tileNumber | 0, x >> 8, y >> 8, xSizeOriginal | 0) | 0;
+            }
+            else {
+                //Coordinates outside of range, transparency defaulted:
+                this.scratchOBJBuffer[position | 0] = this.transparency | 0;
+            }
         }
-        else {
-            //Coordinates outside of range, transparency defaulted:
-            this.scratchOBJBuffer[position | 0] = this.transparency | 0;
+    }
+}
+else {
+    //Math.imul not found, use the compatibility method:
+    GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
+        var xDiff = -(xSize >> 1);
+        var yDiff = yOffset - (ySize >> 1);
+        var xSizeOriginal = xSize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0);
+        var xSizeFixed = xSizeOriginal << 8;
+        var ySizeOriginal = ySize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0);
+        var ySizeFixed = ySizeOriginal << 8;
+        var params = this.OBJMatrixParameters[sprite.matrixParameters];
+        var dx = params[0];
+        var dmx = params[1];
+        var dy = params[2];
+        var dmy = params[3];
+        var pa = dx * xDiff;
+        var pb = dmx * yDiff;
+        var pc = dy * xDiff;
+        var pd = dmy * yDiff;
+        var x = pa + pb + (xSizeFixed >> 1);
+        var y = pc + pd + (ySizeFixed >> 1);
+        var tileNumber = sprite.tileNumber;
+        for (var position = 0; position < xSize; ++position, x += dx, y += dy) {
+            if (x >= 0 && y >= 0 && x < xSizeFixed && y < ySizeFixed) {
+                //Coordinates in range, fetch pixel:
+                this.scratchOBJBuffer[position] = this.fetchMatrixPixel(sprite, tileNumber, x >> 8, y >> 8, xSizeOriginal);
+            }
+            else {
+                //Coordinates outside of range, transparency defaulted:
+                this.scratchOBJBuffer[position] = this.transparency;
+            }
         }
     }
 }
