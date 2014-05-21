@@ -161,7 +161,7 @@ function compileInstructionMap() {
     function readLowRegister(address) {
         //Low register read:
         address = address | 0;
-        return "parentObj.registers[" + (address & 0x7) + "] | 0";
+        return "parentObj.registers[" + (address & 0x7) + "]";
     }
     function read0OffsetLowRegister(instruction) {
         //Low register read at 0 bit offset:
@@ -182,7 +182,7 @@ function compileInstructionMap() {
     function readHighRegister(address) {
         //High register read:
         address = address | 0x8;
-        return "parentObj.registers[" + (address & 0xF) + "] | 0";
+        return "parentObj.registers[" + (address & 0xF) + "]";
     }
     function writeLowRegister(address, data) {
         //Low register write:
@@ -242,7 +242,7 @@ function compileInstructionMap() {
         return "parentObj.registers[0xF]";
     }
     function LSLimm(instruction) {
-        var code = "var source = " + read3OffsetLowRegister(instruction) + ";";
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " | 0;";
         var offset = (instruction >> 6) & 0x1F;
         if (offset > 0) {
             //CPSR Carry is set by the last bit shifted out:
@@ -258,7 +258,7 @@ function compileInstructionMap() {
         return Function("parentObj", code);
     }
     function LSRimm(instruction) {
-        var code = "var source = " + read3OffsetLowRegister(instruction) + ";";
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " | 0;";
         var offset = (instruction >> 6) & 0x1F;
         if (offset > 0) {
             //CPSR Carry is set by the last bit shifted out:
@@ -278,7 +278,7 @@ function compileInstructionMap() {
         return Function("parentObj", code);
     }
     function ASRimm(instruction) {
-        var code = "var source = " + read3OffsetLowRegister(instruction) + ";";
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " | 0;";
         var offset = (instruction >> 6) & 0x1F;
         if (offset > 0) {
             //CPSR Carry is set by the last bit shifted out:
@@ -301,28 +301,28 @@ function compileInstructionMap() {
         var operand1 = read3OffsetLowRegister(instruction);
         var operand2 = read6OffsetLowRegister(instruction);
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + ", " + operand2 + ")");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + " | 0, " + operand2 + ")");
         return Function("parentObj", code);
     }
     function SUBreg(instruction) {
         var operand1 = read3OffsetLowRegister(instruction);
         var operand2 = read6OffsetLowRegister(instruction);
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + ", " + operand2 + ")");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + " | 0, " + operand2 + ")");
         return Function("parentObj", code);
     }
     function ADDimm3(instruction) {
         var operand1 = read3OffsetLowRegister(instruction);
         var operand2 = (instruction >> 6) & 0x7;
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + ", " + operand2 + ")");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + " | 0, " + operand2 + ")");
         return Function("parentObj", code);
     }
     function SUBimm3(instruction) {
         var operand1 = read3OffsetLowRegister(instruction);
         var operand2 = (instruction >> 6) & 0x7;
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + ", " + operand2 + ")");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + " | 0, " + operand2 + ")");
         return Function("parentObj", code);
     }
     function MOVimm8(instruction) {
@@ -338,179 +338,193 @@ function compileInstructionMap() {
         //Compare an 8-bit immediate value with a register:
         var operand1 = read8OffsetLowRegister(instruction);
         var operand2 = instruction & 0xFF;
-        var code = "parentObj.CPSR.setCMPFlags(" + operand1 + ", " + operand2 + ");";
+        var code = "parentObj.CPSR.setCMPFlags(" + operand1 + " | 0, " + operand2 + ");";
         return Function("parentObj", code);
     }
-    function ADDimm8(parentObj) {
+    function ADDimm8(instruction) {
         //Add an 8-bit immediate value with a register:
-        var operand1 = parentObj.read8OffsetLowRegister() | 0;
-        var operand2 = parentObj.execute & 0xFF;
-        parentObj.write8OffsetLowRegister(parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+        var operand1 = read8OffsetLowRegister(instruction);
+        var operand2 = instruction & 0xFF;
+        var code = write8OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + " | 0, " + operand2 + ")");
+        return Function("parentObj", code);
     }
-    function SUBimm8(parentObj) {
+    function SUBimm8(instruction) {
         //Subtract an 8-bit immediate value from a register:
-        var operand1 = parentObj.read8OffsetLowRegister() | 0;
-        var operand2 = parentObj.execute & 0xFF;
-        parentObj.write8OffsetLowRegister(parentObj.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+        var operand1 = read8OffsetLowRegister(instruction);
+        var operand2 = instruction & 0xFF;
+        var code = write8OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + " | 0, " + operand2 + ")");
+        return Function("parentObj", code);
     }
-    function AND(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() | 0;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function AND(instruction) {
+        var source = read3OffsetLowRegister(instruction);
+        var destination = read0OffsetLowRegister(instruction);
         //Perform bitwise AND:
-        var result = source & destination;
-        parentObj.CPSR.setNegativeInt(result | 0);
-        parentObj.CPSR.setZeroInt(result | 0);
+        var code = "var result = " + source + " & " + destination + ";";
+        code += "parentObj.CPSR.setNegativeInt(result | 0);";
+        code += "parentObj.CPSR.setZeroInt(result | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(result | 0);
+        code += write0OffsetLowRegister(instruction, "result");
+        return Function("parentObj", code);
     }
-    function EOR(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() | 0;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function EOR(instruction) {
+        var source = read3OffsetLowRegister(instruction);
+        var destination = read0OffsetLowRegister(instruction);
         //Perform bitwise EOR:
-        var result = source ^ destination;
-        parentObj.CPSR.setNegativeInt(result | 0);
-        parentObj.CPSR.setZeroInt(result | 0);
+        var code = "var result = " + source + " ^ " + destination + ";";
+        code += "parentObj.CPSR.setNegativeInt(result | 0);";
+        code += "parentObj.CPSR.setZeroInt(result | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(result | 0);
+        code += write0OffsetLowRegister(instruction, "result");
+        return Function("parentObj", code);
     }
-    function LSL(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() & 0xFF;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function LSL(instruction) {
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " & 0xFF;";
+        code += "var destination = " + read0OffsetLowRegister(instruction) + " | 0;";
         //Check to see if we need to update CPSR:
-        if (source > 0) {
-            if (source < 0x20) {
+        code += "if (source > 0) {";
+            code += "if (source < 0x20) {";
                 //Shift the register data left:
-                parentObj.CPSR.setCarry((destination << ((source - 1) | 0)) < 0);
-                destination <<= source;
-            }
-            else if (source == 0x20) {
+                code += "parentObj.CPSR.setCarry((destination << ((source - 1) | 0)) < 0);";
+                code += "destination <<= source;";
+            code += "}";
+            code += "else if (source == 0x20) {";
                 //Shift bit 0 into carry:
-                parentObj.CPSR.setCarry((destination & 0x1) == 0x1);
-                destination = 0;
-            }
-            else {
+                code += "parentObj.CPSR.setCarry((destination & 0x1) == 0x1);";
+                code += "destination = 0;";
+            code += "}";
+            code += "else {";
                 //Everything Zero'd:
-                parentObj.CPSR.setCarryFalse();
-                destination = 0;
-            }
-        }
+                code += "parentObj.CPSR.setCarryFalse();";
+                code += "destination = 0;";
+            code += "}";
+        code += "}";
         //Perform CPSR updates for N and Z (But not V):
-        parentObj.CPSR.setNegativeInt(destination | 0);
-        parentObj.CPSR.setZeroInt(destination | 0);
+        code += "parentObj.CPSR.setNegativeInt(destination | 0);";
+        code += "parentObj.CPSR.setZeroInt(destination | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(destination | 0);
+        code += write0OffsetLowRegister(instruction, "destination");
+        return Function("parentObj", code);
     }
-    function LSR(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() & 0xFF;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function LSR(instruction) {
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " & 0xFF;";
+        code += "var destination = " + read0OffsetLowRegister(instruction) + " | 0;";
         //Check to see if we need to update CPSR:
-        if (source > 0) {
-            if (source < 0x20) {
+        code += "if (source > 0) {";
+            code += "if (source < 0x20) {";
                 //Shift the register data right logically:
-                parentObj.CPSR.setCarry(((destination >> ((source - 1) | 0)) & 0x1) == 0x1);
-                destination = (destination >>> source) | 0;
-            }
-            else if (source == 0x20) {
+                code += "parentObj.CPSR.setCarry(((destination >> ((source - 1) | 0)) & 0x1) == 0x1);";
+                code += "destination = (destination >>> source) | 0;";
+            code += "}";
+            code += "else if (source == 0x20) {";
                 //Shift bit 31 into carry:
-                parentObj.CPSR.setCarry(destination < 0);
-                destination = 0;
-            }
-            else {
+                code += "parentObj.CPSR.setCarry(destination < 0);";
+                code += "destination = 0;";
+            code += "}";
+            code += "else {";
                 //Everything Zero'd:
-                parentObj.CPSR.setCarryFalse();
-                destination = 0;
-            }
-        }
+                code += "parentObj.CPSR.setCarryFalse();";
+                code += "destination = 0;";
+            code += "}";
+        code += "}";
         //Perform CPSR updates for N and Z (But not V):
-        parentObj.CPSR.setNegativeInt(destination | 0);
-        parentObj.CPSR.setZeroInt(destination | 0);
+        code += "parentObj.CPSR.setNegativeInt(destination | 0);";
+        code += "parentObj.CPSR.setZeroInt(destination | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(destination | 0);
+        code += write0OffsetLowRegister(instruction, "destination");
+        return Function("parentObj", code);
     }
-    function ASR(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() & 0xFF;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function ASR(instruction) {
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " & 0xFF;";
+        code += "var destination = " + read0OffsetLowRegister(instruction) + " | 0;";
         //Check to see if we need to update CPSR:
-        if (source > 0) {
-            if (source < 0x20) {
+        code += "if (source > 0) {";
+            code += "if (source < 0x20) {";
                 //Shift the register data right arithmetically:
-                parentObj.CPSR.setCarry(((destination >> ((source - 1) | 0)) & 0x1) == 0x1);
-                destination >>= source;
-            }
-            else {
+                code += "parentObj.CPSR.setCarry(((destination >> ((source - 1) | 0)) & 0x1) == 0x1);";
+                code += "destination >>= source;";
+            code += "}";
+            code += "else {";
                 //Set all bits with bit 31:
-                parentObj.CPSR.setCarry(destination < 0);
-                destination >>= 0x1F;
-            }
-        }
+                code += "parentObj.CPSR.setCarry(destination < 0);";
+                code += "destination >>= 0x1F;";
+            code += "}";
+        code += "}";
         //Perform CPSR updates for N and Z (But not V):
-        parentObj.CPSR.setNegativeInt(destination | 0);
-        parentObj.CPSR.setZeroInt(destination | 0);
+        code += "parentObj.CPSR.setNegativeInt(destination | 0);";
+        code += "parentObj.CPSR.setZeroInt(destination | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(destination | 0);
+        code += write0OffsetLowRegister(instruction, "destination");
+        return Function("parentObj", code);
     }
-    function ADC(parentObj) {
-        var operand1 = parentObj.read0OffsetLowRegister() | 0;
-        var operand2 = parentObj.read3OffsetLowRegister() | 0;
+    function ADC(instruction) {
+        var operand1 = read0OffsetLowRegister(instruction);
+        var operand2 = read3OffsetLowRegister(instruction);
         //Update destination register:
-        parentObj.write0OffsetLowRegister(parentObj.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADCFlags(" + operand1 + " | 0, " + operand2 + " | 0)");
+        return Function("parentObj", code);
     }
-    function SBC(parentObj) {
-        var operand1 = parentObj.read0OffsetLowRegister() | 0;
-        var operand2 = parentObj.read3OffsetLowRegister() | 0;
+    function SBC(instruction) {
+        var operand1 = read0OffsetLowRegister(instruction);
+        var operand2 = read3OffsetLowRegister(instruction);
         //Update destination register:
-        parentObj.write0OffsetLowRegister(parentObj.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSBCFlags(" + operand1 + " | 0, " + operand2 + " | 0)");
+        return Function("parentObj", code);
     }
-    function ROR(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() & 0xFF;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
-        if (source > 0) {
-            source &= 0x1F;
-            if (source > 0) {
+    function ROR(instruction) {
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " & 0xFF;";
+        code += "var destination = " + read0OffsetLowRegister(instruction) + " | 0;";
+        code += "if (source > 0) {";
+            code += "source &= 0x1F;";
+            code += "if (source > 0) {";
                 //CPSR Carry is set by the last bit shifted out:
-                parentObj.CPSR.setCarry(((destination >>> ((source - 1) | 0)) & 0x1) != 0);
+                code += "parentObj.CPSR.setCarry(((destination >>> ((source - 1) | 0)) & 0x1) != 0);";
                 //Perform rotate:
-                destination = (destination << ((0x20 - source) | 0)) | (destination >>> (source | 0));
-            }
-            else {
-                parentObj.CPSR.setCarry(destination < 0);
-            }
-        }
+                code += "destination = (destination << ((0x20 - source) | 0)) | (destination >>> (source | 0));";
+            code += "}";
+            code += "else {";
+                code += "parentObj.CPSR.setCarry(destination < 0);";
+            code += "}";
+        code += "}";
         //Perform CPSR updates for N and Z (But not V):
-        parentObj.CPSR.setNegativeInt(destination | 0);
-        parentObj.CPSR.setZeroInt(destination | 0);
+        code += "parentObj.CPSR.setNegativeInt(destination | 0);";
+        code += "parentObj.CPSR.setZeroInt(destination | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(destination | 0);
+        code += write0OffsetLowRegister(instruction, "destination");
+        return Function("parentObj", code);
     }
-    function TST(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() | 0;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function TST(instruction) {
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " | 0;";
+        code += "var destination = " + read0OffsetLowRegister(instruction) + " | 0;";
         //Perform bitwise AND:
-        var result = source & destination;
-        parentObj.CPSR.setNegativeInt(result | 0);
-        parentObj.CPSR.setZeroInt(result | 0);
+        code += "var result = source & destination;";
+        code += "parentObj.CPSR.setNegativeInt(result | 0);";
+        code += "parentObj.CPSR.setZeroInt(result | 0);";
+        return Function("parentObj", code);
     }
-    function NEG(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() | 0;
-        parentObj.CPSR.setOverflow((source ^ (-(source | 0))) == 0);
+    function NEG(instruction) {
+        var code = "var source = " + read3OffsetLowRegister(instruction) + " | 0;";
+        code += "parentObj.CPSR.setOverflow((source ^ (-(source | 0))) == 0);";
         //Perform Subtraction:
-        source = (-(source | 0)) | 0;
-        parentObj.CPSR.setNegativeInt(source | 0);
-        parentObj.CPSR.setZeroInt(source | 0);
+        code += "source = (-(source | 0)) | 0;";
+        code += "parentObj.CPSR.setNegativeInt(source | 0);";
+        code += "parentObj.CPSR.setZeroInt(source | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(source | 0);
+        code += write0OffsetLowRegister(instruction, "source");
+        return Function("parentObj", code);
     }
-    function CMP(parentObj) {
+    function CMP(instruction) {
         //Compare two registers:
-        var operand1 = parentObj.read0OffsetLowRegister() | 0;
-        var operand2 = parentObj.read3OffsetLowRegister() | 0;
-        parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+        var operand1 = read0OffsetLowRegister(instruction);
+        var operand2 = read3OffsetLowRegister(instruction);
+        var code = "parentObj.CPSR.setCMPFlags(" + operand1 + " | 0, " + operand2 + " | 0);";
+        return Function("parentObj", code);
     }
-    function CMN(parentObj) {
+    function CMN(instruction) {
         //Compare two registers:
-        var operand1 = parentObj.read0OffsetLowRegister() | 0;
-        var operand2 = parentObj.read3OffsetLowRegister() | 0;
-        parentObj.CPSR.setCMNFlags(operand1 | 0, operand2 | 0);
+        var operand1 = read0OffsetLowRegister(instruction);
+        var operand2 = read3OffsetLowRegister(instruction);
+        var code = "parentObj.CPSR.setCMNFlags(" + operand1 + " | 0, " + operand2 + " | 0);";
+        return Function("parentObj", code);
     }
     function ORR(parentObj) {
         var source = parentObj.read3OffsetLowRegister() | 0;
@@ -1153,7 +1167,7 @@ function compileInstructionMap() {
     //Set the map to prototype:
     var adjustedMap = [];
     for (var opcode = 0; opcode < 0x10000; opcode++) {
-        if (opcode < 0x3000 || (opcode >= 0xB000 && opcode < 0xB100)) {
+        if (opcode < 0x4300 || (opcode >= 0xB000 && opcode < 0xB100)) {
             adjustedMap[opcode] = instructionMap[opcode >> 6](opcode);
         }
         else {
