@@ -184,10 +184,18 @@ function compileInstructionMap() {
         address = address | 0x8;
         return "parentObj.registers[" + (address & 0xF) + "]";
     }
+    function read0OffsetHighRegister(instruction) {
+        //High register read at 0 bit offset:
+        return readHighRegister(instruction | 0);
+    }
+    function read3OffsetHighRegister(instruction) {
+        //High register read at 3 bit offset:
+        return readHighRegister(instruction >> 3);
+    }
     function writeLowRegister(address, data) {
         //Low register write:
         address = address | 0;
-        return "parentObj.registers[" + (address & 0x7) + "] = " + data + ((typeof data == "number") ? ";" : " | 0;");
+        return "parentObj.registers[" + (address & 0x7) + "] = " + data + ";";
     }
     function write0OffsetLowRegister(instruction, data) {
         //Low register write at 0 bit offset:
@@ -254,7 +262,7 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(source | 0);";
         code += "parentObj.CPSR.setZeroInt(source | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "source");
+        code += write0OffsetLowRegister(instruction, "source | 0");
         return Function("parentObj", code);
     }
     function LSRimm(instruction) {
@@ -274,7 +282,7 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(source | 0);";
         code += "parentObj.CPSR.setZeroInt(source | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "source");
+        code += write0OffsetLowRegister(instruction, "source | 0");
         return Function("parentObj", code);
     }
     function ASRimm(instruction) {
@@ -294,35 +302,35 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(source | 0);";
         code += "parentObj.CPSR.setZeroInt(source | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "source");
+        code += write0OffsetLowRegister(instruction, "source | 0");
         return Function("parentObj", code);
     }
     function ADDreg(instruction) {
         var operand1 = read3OffsetLowRegister(instruction);
         var operand2 = read6OffsetLowRegister(instruction);
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + " | 0, " + operand2 + ")");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + " | 0, " + operand2 + ") | 0");
         return Function("parentObj", code);
     }
     function SUBreg(instruction) {
         var operand1 = read3OffsetLowRegister(instruction);
         var operand2 = read6OffsetLowRegister(instruction);
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + " | 0, " + operand2 + ")");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + " | 0, " + operand2 + ") | 0");
         return Function("parentObj", code);
     }
     function ADDimm3(instruction) {
         var operand1 = read3OffsetLowRegister(instruction);
         var operand2 = (instruction >> 6) & 0x7;
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + " | 0, " + operand2 + ")");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADDFlags(" + operand1 + " | 0, " + operand2 + ") | 0");
         return Function("parentObj", code);
     }
     function SUBimm3(instruction) {
         var operand1 = read3OffsetLowRegister(instruction);
         var operand2 = (instruction >> 6) & 0x7;
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + " | 0, " + operand2 + ")");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSUBFlags(" + operand1 + " | 0, " + operand2 + ") | 0");
         return Function("parentObj", code);
     }
     function MOVimm8(instruction) {
@@ -363,7 +371,7 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(result | 0);";
         code += "parentObj.CPSR.setZeroInt(result | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "result");
+        code += write0OffsetLowRegister(instruction, "result | 0");
         return Function("parentObj", code);
     }
     function EOR(instruction) {
@@ -374,7 +382,7 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(result | 0);";
         code += "parentObj.CPSR.setZeroInt(result | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "result");
+        code += write0OffsetLowRegister(instruction, "result | 0");
         return Function("parentObj", code);
     }
     function LSL(instruction) {
@@ -402,7 +410,7 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(destination | 0);";
         code += "parentObj.CPSR.setZeroInt(destination | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "destination");
+        code += write0OffsetLowRegister(instruction, "destination | 0");
         return Function("parentObj", code);
     }
     function LSR(instruction) {
@@ -430,7 +438,7 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(destination | 0);";
         code += "parentObj.CPSR.setZeroInt(destination | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "destination");
+        code += write0OffsetLowRegister(instruction, "destination | 0");
         return Function("parentObj", code);
     }
     function ASR(instruction) {
@@ -453,21 +461,21 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(destination | 0);";
         code += "parentObj.CPSR.setZeroInt(destination | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "destination");
+        code += write0OffsetLowRegister(instruction, "destination | 0");
         return Function("parentObj", code);
     }
     function ADC(instruction) {
         var operand1 = read0OffsetLowRegister(instruction);
         var operand2 = read3OffsetLowRegister(instruction);
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADCFlags(" + operand1 + " | 0, " + operand2 + " | 0)");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setADCFlags(" + operand1 + " | 0, " + operand2 + " | 0) | 0");
         return Function("parentObj", code);
     }
     function SBC(instruction) {
         var operand1 = read0OffsetLowRegister(instruction);
         var operand2 = read3OffsetLowRegister(instruction);
         //Update destination register:
-        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSBCFlags(" + operand1 + " | 0, " + operand2 + " | 0)");
+        var code = write0OffsetLowRegister(instruction, "parentObj.CPSR.setSBCFlags(" + operand1 + " | 0, " + operand2 + " | 0) | 0");
         return Function("parentObj", code);
     }
     function ROR(instruction) {
@@ -489,14 +497,14 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(destination | 0);";
         code += "parentObj.CPSR.setZeroInt(destination | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "destination");
+        code += write0OffsetLowRegister(instruction, "destination | 0");
         return Function("parentObj", code);
     }
     function TST(instruction) {
-        var code = "var source = " + read3OffsetLowRegister(instruction) + " | 0;";
-        code += "var destination = " + read0OffsetLowRegister(instruction) + " | 0;";
+        var source = read3OffsetLowRegister(instruction);
+        var destination = read0OffsetLowRegister(instruction);
         //Perform bitwise AND:
-        code += "var result = source & destination;";
+        var code = "var result = " + source + " & " + destination + ";";
         code += "parentObj.CPSR.setNegativeInt(result | 0);";
         code += "parentObj.CPSR.setZeroInt(result | 0);";
         return Function("parentObj", code);
@@ -509,7 +517,7 @@ function compileInstructionMap() {
         code += "parentObj.CPSR.setNegativeInt(source | 0);";
         code += "parentObj.CPSR.setZeroInt(source | 0);";
         //Update destination register:
-        code += write0OffsetLowRegister(instruction, "source");
+        code += write0OffsetLowRegister(instruction, "source | 0");
         return Function("parentObj", code);
     }
     function CMP(instruction) {
@@ -526,233 +534,278 @@ function compileInstructionMap() {
         var code = "parentObj.CPSR.setCMNFlags(" + operand1 + " | 0, " + operand2 + " | 0);";
         return Function("parentObj", code);
     }
-    function ORR(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() | 0;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function ORR(instruction) {
+        var source = read3OffsetLowRegister(instruction);
+        var destination = read0OffsetLowRegister(instruction);
         //Perform bitwise OR:
-        var result = source | destination;
-        parentObj.CPSR.setNegativeInt(result | 0);
-        parentObj.CPSR.setZeroInt(result | 0);
+        var code = "var result = " + source + " | " + destination + ";";
+        code += "parentObj.CPSR.setNegativeInt(result | 0);";
+        code += "parentObj.CPSR.setZeroInt(result | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(result | 0);
+        code += write0OffsetLowRegister(instruction, "result | 0");
+        return Function("parentObj", code);
     }
-    function MUL(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() | 0;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function MUL(instruction) {
+        var source = read3OffsetLowRegister(instruction);
+        var destination = read0OffsetLowRegister(instruction);
         //Perform MUL32:
-        var result = parentObj.CPUCore.performMUL32(source | 0, destination | 0, 0) | 0;
-        parentObj.CPSR.setCarryFalse();
-        parentObj.CPSR.setNegativeInt(result | 0);
-        parentObj.CPSR.setZeroInt(result | 0);
+        var code = "var result = parentObj.CPUCore.performMUL32(" + source + " | 0, " + destination + " | 0, 0) | 0;";
+        code += "parentObj.CPSR.setCarryFalse();";
+        code += "parentObj.CPSR.setNegativeInt(result | 0);";
+        code += "parentObj.CPSR.setZeroInt(result | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(result | 0);
+        code += write0OffsetLowRegister(instruction, "result | 0");
+        return Function("parentObj", code);
     }
-    function BIC(parentObj) {
-        var source = parentObj.read3OffsetLowRegister() | 0;
-        var destination = parentObj.read0OffsetLowRegister() | 0;
+    function BIC(instruction) {
+        var source = read3OffsetLowRegister(instruction);
+        var destination = read0OffsetLowRegister(instruction);
         //Perform bitwise AND with a bitwise NOT on source:
-        var result = (~source) & destination;
-        parentObj.CPSR.setNegativeInt(result | 0);
-        parentObj.CPSR.setZeroInt(result | 0);
+        var code = "var result = (~" + source + ") & " + destination + ";";
+        code += "parentObj.CPSR.setNegativeInt(result | 0);";
+        code += "parentObj.CPSR.setZeroInt(result | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(result | 0);
+        code += write0OffsetLowRegister(instruction, "result | 0");
+        return Function("parentObj", code);
     }
-    function MVN(parentObj) {
+    function MVN(instruction) {
         //Perform bitwise NOT on source:
-        var source = ~parentObj.read3OffsetLowRegister();
-        parentObj.CPSR.setNegativeInt(source | 0);
-        parentObj.CPSR.setZeroInt(source | 0);
+        var code = "var source = ~" + read3OffsetLowRegister(instruction) + ";";
+        code += "parentObj.CPSR.setNegativeInt(source | 0);";
+        code += "parentObj.CPSR.setZeroInt(source | 0);";
         //Update destination register:
-        parentObj.write0OffsetLowRegister(source | 0);
+        code += write0OffsetLowRegister(instruction, "source | 0");
+        return Function("parentObj", code);
     }
-    function ADDH_LL(parentObj) {
-        var operand1 = parentObj.read0OffsetLowRegister() | 0;
-        var operand2 = parentObj.read3OffsetLowRegister() | 0;
+    function ADDH_LL(instruction) {
+        var operand1 = read0OffsetLowRegister(instruction);
+        var operand2 = read3OffsetLowRegister(instruction);
         //Perform Addition:
         //Update destination register:
-        parentObj.write0OffsetLowRegister(((operand1 | 0) + (operand2 | 0)) | 0);
+        var code = write0OffsetLowRegister(instruction, "((" + operand1 + " | 0) + (" + operand2 + " | 0)) | 0");
+        return Function("parentObj", code);
     }
-    function ADDH_LH(parentObj) {
-        var operand1 = parentObj.read0OffsetLowRegister() | 0;
-        var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
+    function ADDH_LH(instruction) {
+        var operand1 = read0OffsetLowRegister(instruction);
+        var operand2 = read3OffsetHighRegister(instruction);
         //Perform Addition:
         //Update destination register:
-        parentObj.write0OffsetLowRegister(((operand1 | 0) + (operand2 | 0)) | 0);
+        var code = write0OffsetLowRegister(instruction, "((" + operand1 + " | 0) + (" + operand2 + " | 0)) | 0");
+        return Function("parentObj", code);
     }
-    function ADDH_HL(parentObj) {
-        var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
-        var operand2 = parentObj.read3OffsetLowRegister() | 0;
+    function ADDH_HL(instruction) {
+        var operand1 = read0OffsetHighRegister(instruction);
+        var operand2 = read3OffsetLowRegister(instruction);
         //Perform Addition:
         //Update destination register:
-        parentObj.guardHighRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
+        var code = guardHighRegisterWrite(instruction, "((" + operand1 + " | 0) + (" + operand2 + " | 0))");
+        return Function("parentObj", code);
     }
-    function ADDH_HH(parentObj) {
-        var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
-        var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
+    function ADDH_HH(instruction) {
+        var operand1 = read0OffsetHighRegister(instruction);
+        var operand2 = read3OffsetHighRegister(instruction);
         //Perform Addition:
         //Update destination register:
-        parentObj.guardHighRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
+        var code = guardHighRegisterWrite(instruction, "((" + operand1 + " | 0) + (" + operand2 + " | 0))");
+        return Function("parentObj", code);
     }
-    function CMPH_LL(parentObj) {
+    function CMPH_LL(instruction) {
         //Compare two registers:
-        var operand1 = parentObj.read0OffsetLowRegister() | 0;
-        var operand2 = parentObj.read3OffsetLowRegister() | 0;
-        parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+        var operand1 = read0OffsetLowRegister(instruction);
+        var operand2 = read3OffsetLowRegister(instruction);
+        var code = "parentObj.CPSR.setCMPFlags(" + operand1 + " | 0, " + operand2 + " | 0);";
+        return Function("parentObj", code);
     }
-    function CMPH_LH(parentObj) {
+    function CMPH_LH(instruction) {
         //Compare two registers:
-        var operand1 = parentObj.read0OffsetLowRegister() | 0;
-        var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
-        parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+        var operand1 = read0OffsetLowRegister(instruction);
+        var operand2 = read3OffsetHighRegister(instruction);
+        var code = "parentObj.CPSR.setCMPFlags(" + operand1 + " | 0, " + operand2 + " | 0);";
+        return Function("parentObj", code);
     }
-    function CMPH_HL(parentObj) {
+    function CMPH_HL(instruction) {
         //Compare two registers:
-        var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
-        var operand2 = parentObj.read3OffsetLowRegister() | 0;
-        parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+        var operand1 = read0OffsetHighRegister(instruction);
+        var operand2 = read3OffsetLowRegister(instruction);
+        var code = "parentObj.CPSR.setCMPFlags(" + operand1 + " | 0, " + operand2 + " | 0);";
+        return Function("parentObj", code);
     }
-    function CMPH_HH(parentObj) {
+    function CMPH_HH(instruction) {
         //Compare two registers:
-        var operand1 = parentObj.readHighRegister(parentObj.execute | 0) | 0;
-        var operand2 = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
-        parentObj.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+        var operand1 = read0OffsetHighRegister(instruction);
+        var operand2 = read3OffsetHighRegister(instruction);
+        var code = "parentObj.CPSR.setCMPFlags(" + operand1 + " | 0, " + operand2 + " | 0);";
+        return Function("parentObj", code);
     }
-    function MOVH_LL(parentObj) {
+    function MOVH_LL(instruction) {
         //Move a register to another register:
-        parentObj.write0OffsetLowRegister(parentObj.read3OffsetLowRegister() | 0);
+        var code = write0OffsetLowRegister(instruction, read3OffsetLowRegister(instruction));
+        return Function("parentObj", code);
     }
-    function MOVH_LH(parentObj) {
+    function MOVH_LH(instruction) {
         //Move a register to another register:
-        parentObj.write0OffsetLowRegister(parentObj.readHighRegister(parentObj.execute >> 3) | 0);
+        var code = write0OffsetLowRegister(instruction, read3OffsetHighRegister(instruction));
+        return Function("parentObj", code);
     }
-    function MOVH_HL(parentObj) {
+    function MOVH_HL(instruction) {
         //Move a register to another register:
-        parentObj.guardHighRegisterWrite(parentObj.read3OffsetLowRegister() | 0);
+        var code = guardHighRegisterWrite(instruction, read3OffsetLowRegister(instruction));
+        return Function("parentObj", code);
     }
-    function MOVH_HH(parentObj) {
+    function MOVH_HH(instruction) {
         //Move a register to another register:
-        parentObj.guardHighRegisterWrite(parentObj.readHighRegister(parentObj.execute >> 3) | 0);
+        var code = guardHighRegisterWrite(instruction, read3OffsetHighRegister(instruction));
+        return Function("parentObj", code);
     }
-    function BX_L(parentObj) {
+    function BX_L(instruction) {
         //Branch & eXchange:
-        var address = parentObj.read3OffsetLowRegister() | 0;
-        if ((address & 0x1) == 0) {
+        var code = "var address = " + read3OffsetLowRegister(instruction) + " | 0;";
+        code += "if ((address & 0x1) == 0) {";
             //Enter ARM mode:
-            parentObj.CPUCore.enterARM();
-            parentObj.CPUCore.branch(address & -0x4);
-        }
-        else {
+            code += "parentObj.CPUCore.enterARM();";
+            code += "parentObj.CPUCore.branch(address & -0x4);";
+        code += "}";
+        code += "else {";
             //Stay in THUMB mode:
-            parentObj.CPUCore.branch(address & -0x2);
-        }
+            code += "parentObj.CPUCore.branch(address & -0x2);";
+        code += "}";
+        return Function("parentObj", code);
     }
-    function BX_H(parentObj) {
+    function BX_H(instruction) {
         //Branch & eXchange:
-        var address = parentObj.readHighRegister(parentObj.execute >> 3) | 0;
-        if ((address & 0x1) == 0) {
+        var code = "var address = " + read3OffsetHighRegister(instruction) + " | 0;";
+        code += "if ((address & 0x1) == 0) {";
             //Enter ARM mode:
-            parentObj.CPUCore.enterARM();
-            parentObj.CPUCore.branch(address & -0x4);
-        }
-        else {
+            code += "parentObj.CPUCore.enterARM();";
+            code += "parentObj.CPUCore.branch(address & -0x4);";
+        code += "}";
+        code += "else {";
             //Stay in THUMB mode:
-            parentObj.CPUCore.branch(address & -0x2);
-        }
+            code += "parentObj.CPUCore.branch(address & -0x2);";
+        code += "}";
+        return Function("parentObj", code);
     }
-    function LDRPC(parentObj) {
+    function LDRPC(instruction) {
         //PC-Relative Load
-        var data = parentObj.CPUCore.read32(((parentObj.readPC() & -3) + ((parentObj.execute & 0xFF) << 2)) | 0) | 0;
-        parentObj.write8OffsetLowRegister(data | 0);
+        var code = "var data = parentObj.CPUCore.read32(((" + readPC() + " & -3) + " + ((instruction & 0xFF) << 2) + ") | 0) | 0;";
+        code += write8OffsetLowRegister(instruction, "data");
+        return Function("parentObj", code);
     }
-    function STRreg(parentObj) {
+    function STRreg(instruction) {
         //Store Word From Register
-        var address = ((parentObj.read6OffsetLowRegister() | 0) + (parentObj.read3OffsetLowRegister() | 0)) | 0;
-        parentObj.CPUCore.write32(address | 0, parentObj.read0OffsetLowRegister() | 0);
+        var address = "((" + read6OffsetLowRegister(instruction) + " | 0) + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var code = "parentObj.CPUCore.write32(" + address + ", " + read0OffsetLowRegister(instruction) + " | 0);";
+        return Function("parentObj", code);
     }
-    function STRHreg(parentObj) {
+    function STRHreg(instruction) {
         //Store Half-Word From Register
-        var address = ((parentObj.read6OffsetLowRegister() | 0) + (parentObj.read3OffsetLowRegister() | 0)) | 0;
-        parentObj.CPUCore.write16(address | 0, parentObj.read0OffsetLowRegister() | 0);
+        var address = "((" + read6OffsetLowRegister(instruction) + " | 0) + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var code = "parentObj.CPUCore.write16(" + address + ", " + read0OffsetLowRegister(instruction) + " | 0);";
+        return Function("parentObj", code);
     }
-    function STRBreg(parentObj) {
+    function STRBreg(instruction) {
         //Store Byte From Register
-        var address = ((parentObj.read6OffsetLowRegister() | 0) + (parentObj.read3OffsetLowRegister() | 0)) | 0;
-        parentObj.CPUCore.write8(address | 0, parentObj.read0OffsetLowRegister() | 0);
+        var address = "((" + read6OffsetLowRegister(instruction) + " | 0) + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var code = "parentObj.CPUCore.write8(" + address + ", " + read0OffsetLowRegister(instruction) + " | 0);";
+        return Function("parentObj", code);
     }
-    function LDRSBreg(parentObj) {
+    function LDRSBreg(instruction) {
         //Load Signed Byte Into Register
-        var data = (parentObj.CPUCore.read8(((parentObj.read6OffsetLowRegister() | 0) + (parentObj.read3OffsetLowRegister() | 0)) | 0) << 24) >> 24;
-        parentObj.write0OffsetLowRegister(data | 0);
+        var address = "((" + read6OffsetLowRegister(instruction) + " | 0) + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var data = "(parentObj.CPUCore.read8(" + address + ") << 24) >> 24";
+        var code = write0OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function LDRreg(parentObj) {
+    function LDRreg(instruction) {
         //Load Word Into Register
-        var data = parentObj.CPUCore.read32(((parentObj.read6OffsetLowRegister() | 0) + (parentObj.read3OffsetLowRegister() | 0)) | 0) | 0;
-        parentObj.write0OffsetLowRegister(data | 0);
+        var address = "((" + read6OffsetLowRegister(instruction) + " | 0) + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var data = "parentObj.CPUCore.read32(" + address + ") | 0";
+        var code = write0OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function LDRHreg(parentObj) {
+    function LDRHreg(instruction) {
         //Load Half-Word Into Register
-        var data = parentObj.CPUCore.read16(((parentObj.read6OffsetLowRegister() | 0) + (parentObj.read3OffsetLowRegister() | 0)) | 0) | 0;
-        parentObj.write0OffsetLowRegister(data | 0);
+        var address = "((" + read6OffsetLowRegister(instruction) + " | 0) + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var data = "parentObj.CPUCore.read16(" + address + ") | 0";
+        var code = write0OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function LDRBreg(parentObj) {
+    function LDRBreg(instruction) {
         //Load Byte Into Register
-        var data = parentObj.CPUCore.read8(((parentObj.read6OffsetLowRegister() | 0) + (parentObj.read3OffsetLowRegister() | 0)) | 0) | 0;
-        parentObj.write0OffsetLowRegister(data | 0);
+        var address = "((" + read6OffsetLowRegister(instruction) + " | 0) + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var data = "parentObj.CPUCore.read8(" + address + ") | 0";
+        var code = write0OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function LDRSHreg(parentObj) {
+    function LDRSHreg(instruction) {
         //Load Signed Half-Word Into Register
-        var data = (parentObj.CPUCore.read16(((parentObj.read6OffsetLowRegister() | 0) + (parentObj.read3OffsetLowRegister() | 0)) | 0) << 16) >> 16;
-        parentObj.write0OffsetLowRegister(data | 0);
+        var address = "((" + read6OffsetLowRegister(instruction) + " | 0) + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var data = "(parentObj.CPUCore.read16(" + address + ") << 16) >> 16";
+        var code = write0OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function STRimm5(parentObj) {
+    function STRimm5(instruction) {
         //Store Word From Register
-        var address = (((parentObj.execute >> 4) & 0x7C) + (parentObj.read3OffsetLowRegister() | 0)) | 0;
-        parentObj.CPUCore.write32(address | 0, parentObj.read0OffsetLowRegister() | 0);
+        var address = "(" + ((instruction >> 4) & 0x7C) + " + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var code = "parentObj.CPUCore.write32(" + address + ", " + read0OffsetLowRegister(instruction) + " | 0);";
+        return Function("parentObj", code);
     }
-    function LDRimm5(parentObj) {
+    function LDRimm5(instruction) {
         //Load Word Into Register
-        var data = parentObj.CPUCore.read32((((parentObj.execute >> 4) & 0x7C) + (parentObj.read3OffsetLowRegister() | 0)) | 0) | 0;
-        parentObj.write0OffsetLowRegister(data | 0);
+        var address = "(" + ((instruction >> 4) & 0x7C) + " + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var data = "parentObj.CPUCore.read32(" + address + ") | 0";
+        var code = write0OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function STRBimm5(parentObj) {
+    function STRBimm5(instruction) {
         //Store Byte From Register
-        var address = (((parentObj.execute >> 6) & 0x1F) + (parentObj.read3OffsetLowRegister() | 0)) | 0;
-        parentObj.CPUCore.write8(address | 0, parentObj.read0OffsetLowRegister() | 0);
+        var address = "(" + ((instruction >> 6) & 0x1F) + " + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var code = "parentObj.CPUCore.write8(" + address + ", " + read0OffsetLowRegister(instruction) + " | 0);";
+        return Function("parentObj", code);
     }
-    function LDRBimm5(parentObj) {
+    function LDRBimm5(instruction) {
         //Load Byte Into Register
-        var data = parentObj.CPUCore.read8((((parentObj.execute >> 6) & 0x1F) + (parentObj.read3OffsetLowRegister() | 0)) | 0) | 0;
-        parentObj.write0OffsetLowRegister(data | 0);
+        var address = "(" + ((instruction >> 6) & 0x1F) + " + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var data = "parentObj.CPUCore.read8(" + address + ") | 0";
+        var code = write0OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function STRHimm5(parentObj) {
+    function STRHimm5(instruction) {
         //Store Half-Word From Register
-        var address = (((parentObj.execute >> 5) & 0x3E) + (parentObj.read3OffsetLowRegister() | 0)) | 0;
-        parentObj.CPUCore.write16(address | 0, parentObj.read0OffsetLowRegister() | 0);
+        var address = "(" + ((instruction >> 5) & 0x3E) + " + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var code = "parentObj.CPUCore.write16(" + address + ", " + read0OffsetLowRegister(instruction) + " | 0);";
+        return Function("parentObj", code);
     }
-    function LDRHimm5(parentObj) {
+    function LDRHimm5(instruction) {
         //Load Half-Word Into Register
-        var data = parentObj.CPUCore.read16((((parentObj.execute >> 5) & 0x3E) + (parentObj.read3OffsetLowRegister() | 0)) | 0) | 0;
-        parentObj.write0OffsetLowRegister(data | 0);
+        var address = "(" + ((instruction >> 5) & 0x3E) + " + (" + read3OffsetLowRegister(instruction) + " | 0)) | 0";
+        var data = "parentObj.CPUCore.read16(" + address + ") | 0";
+        var code = write0OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function STRSP(parentObj) {
+    function STRSP(instruction) {
         //Store Word From Register
-        var address = (((parentObj.execute & 0xFF) << 2) + (parentObj.readSP() | 0)) | 0;
-        parentObj.CPUCore.write32(address | 0, parentObj.read8OffsetLowRegister() | 0);
+        var address = "(" + ((instruction & 0xFF) << 2) + " + (" + readSP() + " | 0)) | 0";
+        var code = "parentObj.CPUCore.write32(" + address + ", " + read8OffsetLowRegister(instruction) + " | 0);";
+        return Function("parentObj", code);
     }
-    function LDRSP(parentObj) {
+    function LDRSP(instruction) {
         //Load Word Into Register
-        var data = parentObj.CPUCore.read32((((parentObj.execute & 0xFF) << 2) + (parentObj.readSP() | 0)) | 0) | 0;
-        parentObj.write8OffsetLowRegister(data | 0);
+        var data = "parentObj.CPUCore.read32((" + ((instruction & 0xFF) << 2) + " + (" + readSP() + " | 0)) | 0) | 0";
+        var code = write8OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function ADDPC(parentObj) {
+    function ADDPC(instruction) {
         //Add PC With Offset Into Register
-        var data = ((parentObj.readPC() & -3) + ((parentObj.execute & 0xFF) << 2)) | 0;
-        parentObj.write8OffsetLowRegister(data | 0);
+        var data = "((" + readPC() + " & -3) + " + ((instruction & 0xFF) << 2) + ") | 0";
+        var code = write8OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
-    function ADDSP(parentObj) {
+    function ADDSP(instruction) {
         //Add SP With Offset Into Register
-        var data = (((parentObj.execute & 0xFF) << 2) + (parentObj.readSP() | 0)) | 0;
-        parentObj.write8OffsetLowRegister(data | 0);
+        var data = "((" + readSP() + " | 0) + " + ((instruction & 0xFF) << 2) + ") | 0";
+        var code = write8OffsetLowRegister(instruction, data);
+        return Function("parentObj", code);
     }
     function ADDSPimm7(instruction) {
         //Add Signed Offset Into SP
@@ -970,21 +1023,23 @@ function compileInstructionMap() {
         //Update the program counter to branch address:
         parentObj.CPUCore.branch(((parentObj.readPC() | 0) + ((parentObj.execute << 21) >> 20)) | 0);
     }
-    function BLsetup(parentObj) {
+    function BLsetup(instruction) {
         //Brank with Link (High offset)
         //Update the link register to branch address:
-        parentObj.writeLR(((parentObj.readPC() | 0) + (((parentObj.execute & 0x7FF) << 21) >> 9)) | 0);
+        var code = writeLR("((" + readPC() + " | 0) + " + (((instruction & 0x7FF) << 21) >> 9) + ") | 0");
+        return Function("parentObj", code);
     }
-    function BLoff(parentObj) {
+    function BLoff(instruction) {
         //Brank with Link (Low offset)
         //Update the link register to branch address:
-        parentObj.writeLR(((parentObj.readLR() | 0) + ((parentObj.execute & 0x7FF) << 1)) | 0);
+        var code = writeLR("((" + readLR() + " | 0) + " + ((instruction & 0x7FF) << 1) + ") | 0");
         //Copy LR to PC:
-        var oldPC = parentObj.readPC() | 0;
+        code += "var oldPC = " + readPC() + " | 0;";
         //Flush Pipeline & Block PC Increment:
-        parentObj.CPUCore.branch(parentObj.readLR() & -0x2);
+        code += "parentObj.CPUCore.branch(" + readLR() + " & -0x2);";
         //Set bit 0 of LR high:
-        parentObj.writeLR(((oldPC | 0) - 0x2) | 0x1);
+        code += writeLR("((oldPC | 0) - 0x2) | 0x1");
+        return Function("parentObj", code);
     }
     function UNDEFINED(parentObj) {
         //Undefined Exception:
@@ -1167,7 +1222,7 @@ function compileInstructionMap() {
     //Set the map to prototype:
     var adjustedMap = [];
     for (var opcode = 0; opcode < 0x10000; opcode++) {
-        if (opcode < 0x4300 || (opcode >= 0xB000 && opcode < 0xB100)) {
+        if (opcode < 0xB100 || opcode >= 0xF000) {
             adjustedMap[opcode] = instructionMap[opcode >> 6](opcode);
         }
         else {
