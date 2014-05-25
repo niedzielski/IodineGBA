@@ -17,10 +17,8 @@
  */
 /*
  Browsers SHOULD work with switch mode here the best.
- Unfortunately Google Chrome does NOT compile this switch,
- and Firefox has huge recompile grinds with performance equal
- to that of the anonymouse function dispatch method).
- This switch SHOULD be converted into a dispatch table,
+ Unfortunately Firefox & Google Chrome do NOT compile this switch.
+ This switch SHOULD be converted into a dispatch table 16 bits wide,
  but current JS JIT engines do NOT do so and bail horribly!
  */
 var useSwitch = false;
@@ -1179,8 +1177,8 @@ function compileInstructionMap() {
             selfGen += "\tswitch (this.execute | 0) {\n";
                 for (var opcode = 0; opcode < 0x10000; opcode++) {
                     selfGen += "\t\tcase " + opcode + ":\n\t\t\t";
-                    selfGen += instructionMap[opcode >> 6](opcode);
-                    selfGen += "\n\t\t\tbreak;\n";
+                        selfGen += instructionMap[opcode >> 6](opcode);
+                        selfGen += "\n\t\t\tbreak;\n";              //We do NOT have cascading cases, should be very easy to optimize then!
                 }
             selfGen += "\t}";
         selfGen += "}";
@@ -1189,7 +1187,7 @@ function compileInstructionMap() {
         selfGen += "[";
         for (var opcode = 0; opcode < 0x10000; opcode++) {
             selfGen += "function (" + parentObj + ") {";
-            selfGen += instructionMap[opcode >> 6](opcode);
+                selfGen += instructionMap[opcode >> 6](opcode);
             selfGen += "}";
             if (opcode < 0xFFFF) {
                 selfGen += ",";
