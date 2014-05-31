@@ -40,7 +40,7 @@ THUMBInstructionSet.prototype.executeIteration = function () {
     this.decode = this.fetch | 0;
 }
 THUMBInstructionSet.prototype.executeDecoded = function () {
-    switch (this.instructionMap[this.execute >> 6]) {
+    switch (this.instructionMap[this.execute >> 6] & 0x7F) {
         case 0:
             this.LSLimm();
             break;
