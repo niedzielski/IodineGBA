@@ -18,10 +18,7 @@
 function GameBoyAdvanceEmulator() {
     this.settings = {
         "SKIPBoot":false,                   //Skip the BIOS boot screen.
-        "dynarecEnabled":false,             //Use the dynarec engine?
         "lineSkip":false,                   //Skip every other line draw.
-        "dynarecTHUMB":true,                //Enable THUMB compiling.
-        "dynarecARM":false,                 //Enable ARM compiling.
         "useWorkers":true,                  //Enable Web Workers for compiling.
         "audioVolume":1,                    //Starting audio volume.
         "audioBufferUnderrunLimit":4,       //Audio buffer minimum span amount over x interpreter iterations.
@@ -375,9 +372,6 @@ GameBoyAdvanceEmulator.prototype.toggleSkipBootROM = function (skipBoot) {
         this.initializeCore();
         this.importSave();
     }
-}
-GameBoyAdvanceEmulator.prototype.toggleDynarec = function (dynarecEnabled) {
-    this.settings.dynarecEnabled = false;//!!dynarecEnabled;
 }
 GameBoyAdvanceEmulator.prototype.toggleDynamicSpeed = function (dynamicSpeed) {
     this.settings.dynamicSpeed = !!dynamicSpeed;

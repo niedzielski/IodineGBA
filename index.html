@@ -28,9 +28,6 @@
         <script src="IodineGBA/IodineGBA/CPU/THUMBInstructionSetCore.js"></script>
         <script src="IodineGBA/IodineGBA/CPU/ARMCPSRAttributeTable.js"></script>
         <script src="IodineGBA/IodineGBA/CPU/GameBoyAdvanceSWICore.js"></script>
-        <script src="IodineGBA/IodineGBA/CPU/dynarec/DynarecBranchListenerCore.js"></script>
-        <script src="IodineGBA/IodineGBA/CPU/dynarec/DynarecCacheManagerCore.js"></script>
-        <script src="IodineGBA/IodineGBA/CPU/dynarec/DynarecTHUMBAssemblerCore.js"></script>
         <script src="IodineGBA/IodineGBA/graphics/GameBoyAdvanceBGTEXTRendererCore.js"></script>
         <script src="IodineGBA/IodineGBA/graphics/GameBoyAdvanceBG2FrameBufferRendererCore.js"></script>
         <script src="IodineGBA/IodineGBA/graphics/GameBoyAdvanceBGMatrixRendererCore.js"></script>
@@ -99,7 +96,6 @@
                             <button id="pause">Pause</button>
                             <button id="restart">Restart</button>
                         </div>
-                        <label class="dynarec">Enable Dynarec (LLE JIT): </label><input type="checkbox" id="lle_jit" class="dynarec checkbox">
                         <label>Line Skip: </label><input type="checkbox" id="lineskip" class="checkbox">
                         <label>Skip Boot Intro: </label><input type="checkbox" id="skip_boot" class="checkbox">
                         <label>Smooth Scaling: </label><input type="checkbox" id="toggleSmoothScaling" checked="checked" class="checkbox">

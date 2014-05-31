@@ -29,7 +29,6 @@ GameBoyAdvanceCPU.prototype.initialize = function () {
     this.ARM = new ARMInstructionSet(this);
     this.THUMB = new THUMBInstructionSet(this);
     this.swi = new GameBoyAdvanceSWI(this);
-    this.dynarec = new DynarecBranchListenerCore(this);
     this.instructionHandle = this.ARM;
     this.stackMemoryCache = new GameBoyAdvanceMemoryCache(this.IOCore.memory);
 }
@@ -76,8 +75,6 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     if (!this.IOCore.BIOSFound || this.IOCore.settings.SKIPBoot) {
         this.HLEReset();
     }
-    //No pending interruption for dynarec:
-    this.breakNormalExecution = false;
     //No pending IRQs to check for yet:
     this.executeIteration = this.executeBubble;
 }
@@ -121,10 +118,6 @@ GameBoyAdvanceCPU.prototype.executeIterationRegular = function () {
 GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
     branchTo = branchTo | 0;
     if ((branchTo | 0) > 0x3FFF || this.IOCore.BIOSFound) {
-        //Tell the JIT information on the state before branch:
-         if (this.settings.dynarecEnabled) {
-            this.dynarec.listen(this.registers[15] | 0, branchTo | 0, !!this.InTHUMB);
-        }
         //Branch to new address:
         this.registers[15] = branchTo | 0;
         //Mark pipeline as invalid:
@@ -161,10 +154,6 @@ GameBoyAdvanceCPU.prototype.assertIRQ = function () {
     if (this.processIRQ) {
         this.executeIteration = this.executeIRQ;
     }
-    this.checkCPUExecutionStatus();
-}
-GameBoyAdvanceCPU.prototype.checkCPUExecutionStatus = function () {
-    this.breakNormalExecution = ((this.IOCore.systemStatus | 0) != 0 || this.processIRQ);
 }
 GameBoyAdvanceCPU.prototype.getCurrentFetchValue = function () {
     return this.instructionHandle.getCurrentFetchValue() | 0;
@@ -208,7 +197,6 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
     //Disable IRQ:
     this.IRQDisabled = true;
     this.processIRQ = false;
-    this.checkCPUExecutionStatus();
     if (this.IOCore.BIOSFound) {
         //Exception always enter ARM mode:
         this.enterARM();
@@ -279,7 +267,6 @@ GameBoyAdvanceCPU.prototype.SWI = function () {
         //Disable IRQ:
         this.IRQDisabled = true;
         this.processIRQ = false;
-        this.checkCPUExecutionStatus();
         //Exception always enter ARM mode:
         this.enterARM();
         //SWI exception vector:
@@ -300,7 +287,6 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
         //Disable IRQ:
         this.IRQDisabled = true;
         this.processIRQ = false;
-        this.checkCPUExecutionStatus();
         //Exception always enter ARM mode:
         this.enterARM();
         //Undefined exception vector:
