@@ -123,181 +123,173 @@ THUMBInstructionSet.prototype.executeDecoded = function () {
             this.MVN();
             break;
         case 27:
-            this.ADDH_LL();
-            break;
-        case 28:
             this.ADDH_LH();
             break;
-        case 29:
+        case 28:
             this.ADDH_HL();
             break;
-        case 30:
+        case 29:
             this.ADDH_HH();
             break;
-        case 31:
-            this.CMPH_LL();
-            break;
-        case 32:
+        case 30:
             this.CMPH_LH();
             break;
-        case 33:
+        case 31:
             this.CMPH_HL();
             break;
-        case 34:
+        case 32:
             this.CMPH_HH();
             break;
-        case 35:
-            this.MOVH_LL();
-            break;
-        case 36:
+        case 33:
             this.MOVH_LH();
             break;
-        case 37:
+        case 34:
             this.MOVH_HL();
             break;
-        case 38:
+        case 35:
             this.MOVH_HH();
             break;
-        case 39:
+        case 36:
             this.BX_L();
             break;
-        case 40:
+        case 37:
             this.BX_H();
             break;
-        case 41:
+        case 38:
             this.LDRPC();
             break;
-        case 42:
+        case 39:
             this.STRreg();
             break;
-        case 43:
+        case 40:
             this.STRHreg();
             break;
-        case 44:
+        case 41:
             this.STRBreg();
             break;
-        case 45:
+        case 42:
             this.LDRSBreg();
             break;
-        case 46:
+        case 43:
             this.LDRreg();
             break;
-        case 47:
+        case 44:
             this.LDRHreg();
             break;
-        case 48:
+        case 45:
             this.LDRBreg();
             break;
-        case 49:
+        case 46:
             this.LDRSHreg();
             break;
-        case 50:
+        case 47:
             this.STRimm5();
             break;
-        case 51:
+        case 48:
             this.LDRimm5();
             break;
-        case 52:
+        case 49:
             this.STRBimm5();
             break;
-        case 53:
+        case 50:
             this.LDRBimm5();
             break;
-        case 54:
+        case 51:
             this.STRHimm5();
             break;
-        case 55:
+        case 52:
             this.LDRHimm5();
             break;
-        case 56:
+        case 53:
             this.STRSP();
             break;
-        case 57:
+        case 54:
             this.LDRSP();
             break;
-        case 58:
+        case 55:
             this.ADDPC();
             break;
-        case 59:
+        case 56:
             this.ADDSP();
             break;
-        case 60:
+        case 57:
             this.ADDSPimm7();
             break;
-        case 61:
+        case 58:
             this.PUSH();
             break;
-        case 62:
+        case 59:
             this.PUSHlr();
             break;
-        case 63:
+        case 60:
             this.POP();
             break;
-        case 64:
+        case 61:
             this.POPpc();
             break;
-        case 65:
+        case 62:
             this.STMIA();
             break;
-        case 66:
+        case 63:
             this.LDMIA();
             break;
-        case 67:
+        case 64:
             this.BEQ();
             break;
-        case 68:
+        case 65:
             this.BNE();
             break;
-        case 69:
+        case 66:
             this.BCS();
             break;
-        case 70:
+        case 67:
             this.BCC();
             break;
-        case 71:
+        case 68:
             this.BMI();
             break;
-        case 72:
+        case 69:
             this.BPL();
             break;
-        case 73:
+        case 70:
             this.BVS();
             break;
-        case 74:
+        case 71:
             this.BVC();
             break;
-        case 75:
+        case 72:
             this.BHI();
             break;
-        case 76:
+        case 73:
             this.BLS();
             break;
-        case 77:
+        case 74:
             this.BGE();
             break;
-        case 78:
+        case 75:
             this.BLT();
             break;
-        case 79:
+        case 76:
             this.BGT();
             break;
-        case 80:
+        case 77:
             this.BLE();
             break;
-        case 81:
+        case 78:
             this.SWI();
             break;
-        case 82:
+        case 79:
             this.B();
             break;
-        case 83:
+        case 80:
             this.BLsetup();
             break;
-        case 84:
+        case 81:
             this.BLoff();
             break;
-        default:
+        case 82:
             this.UNDEFINED();
+            break;
     }
 }
 THUMBInstructionSet.prototype.executeBubble = function () {
@@ -718,13 +710,6 @@ THUMBInstructionSet.prototype.MVN = function () {
     //Update destination register:
     this.write0OffsetLowRegister(source | 0);
 }
-THUMBInstructionSet.prototype.ADDH_LL = function () {
-    var operand1 = this.read0OffsetLowRegister() | 0;
-    var operand2 = this.read3OffsetLowRegister() | 0;
-    //Perform Addition:
-    //Update destination register:
-    this.write0OffsetLowRegister(((operand1 | 0) + (operand2 | 0)) | 0);
-}
 THUMBInstructionSet.prototype.ADDH_LH = function () {
     var operand1 = this.read0OffsetLowRegister() | 0;
     var operand2 = this.readHighRegister(this.execute >> 3) | 0;
@@ -746,12 +731,6 @@ THUMBInstructionSet.prototype.ADDH_HH = function () {
     //Update destination register:
     this.guardHighRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
 }
-THUMBInstructionSet.prototype.CMPH_LL = function () {
-    //Compare two registers:
-    var operand1 = this.read0OffsetLowRegister() | 0;
-    var operand2 = this.read3OffsetLowRegister() | 0;
-    this.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
-}
 THUMBInstructionSet.prototype.CMPH_LH = function () {
     //Compare two registers:
     var operand1 = this.read0OffsetLowRegister() | 0;
@@ -769,10 +748,6 @@ THUMBInstructionSet.prototype.CMPH_HH = function () {
     var operand1 = this.readHighRegister(this.execute | 0) | 0;
     var operand2 = this.readHighRegister(this.execute >> 3) | 0;
     this.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
-}
-THUMBInstructionSet.prototype.MOVH_LL = function () {
-    //Move a register to another register:
-    this.write0OffsetLowRegister(this.read3OffsetLowRegister() | 0);
 }
 THUMBInstructionSet.prototype.MOVH_LH = function () {
     //Move a register to another register:
@@ -1193,127 +1168,127 @@ THUMBInstructionSet.prototype.compileInstructionMap = function () {
     //43
     generateLowMap4(23, 24, 25, 26);
     //44
-    generateLowMap4(27, 28, 29, 30);
+    generateLowMap4(82, 27, 28, 29);
     //45
-    generateLowMap4(31, 32, 33, 34);
+    generateLowMap4(82, 30, 31, 32);
     //46
-    generateLowMap4(35, 36, 37, 38);
+    generateLowMap4(82, 33, 34, 35);
     //47
-    generateLowMap4(39, 40, 39, 40);
+    generateLowMap4(36, 37, 82, 82);
     //48-4F
-    generateLowMap(41);
+    generateLowMap(38);
     //50-51
-    generateLowMap2(42);
+    generateLowMap2(39);
     //52-53
-    generateLowMap2(43);
+    generateLowMap2(40);
     //54-55
-    generateLowMap2(44);
+    generateLowMap2(41);
     //56-57
-    generateLowMap2(45);
+    generateLowMap2(42);
     //58-59
-    generateLowMap2(46);
+    generateLowMap2(43);
     //5A-5B
-    generateLowMap2(47);
+    generateLowMap2(44);
     //5C-5D
-    generateLowMap2(48);
+    generateLowMap2(45);
     //5E-5F
-    generateLowMap2(49);
+    generateLowMap2(46);
     //60-67
-    generateLowMap(50);
+    generateLowMap(47);
     //68-6F
-    generateLowMap(51);
+    generateLowMap(48);
     //70-77
-    generateLowMap(52);
+    generateLowMap(49);
     //78-7F
-    generateLowMap(53);
+    generateLowMap(50);
     //80-87
-    generateLowMap(54);
+    generateLowMap(51);
     //88-8F
-    generateLowMap(55);
+    generateLowMap(52);
     //90-97
-    generateLowMap(56);
+    generateLowMap(53);
     //98-9F
-    generateLowMap(57);
+    generateLowMap(54);
     //A0-A7
-    generateLowMap(58);
+    generateLowMap(55);
     //A8-AF
-    generateLowMap(59);
+    generateLowMap(56);
     //B0
-    generateLowMap3(60);
+    generateLowMap3(57);
     //B1
-    generateLowMap3(85);
+    generateLowMap3(82);
     //B2
-    generateLowMap3(85);
+    generateLowMap3(82);
     //B3
-    generateLowMap3(85);
+    generateLowMap3(82);
     //B4
-    generateLowMap3(61);
+    generateLowMap3(58);
     //B5
-    generateLowMap3(62);
+    generateLowMap3(59);
     //B6
-    generateLowMap3(85);
+    generateLowMap3(82);
     //B7
-    generateLowMap3(85);
+    generateLowMap3(82);
     //B8
-    generateLowMap3(85);
+    generateLowMap3(82);
     //B9
-    generateLowMap3(85);
+    generateLowMap3(82);
     //BA
-    generateLowMap3(85);
+    generateLowMap3(82);
     //BB
-    generateLowMap3(85);
+    generateLowMap3(82);
     //BC
-    generateLowMap3(63);
+    generateLowMap3(60);
     //BD
-    generateLowMap3(64);
+    generateLowMap3(61);
     //BE
-    generateLowMap3(85);
+    generateLowMap3(82);
     //BF
-    generateLowMap3(85);
+    generateLowMap3(82);
     //C0-C7
-    generateLowMap(65);
+    generateLowMap(62);
     //C8-CF
-    generateLowMap(66);
+    generateLowMap(63);
     //D0
-    generateLowMap3(67);
+    generateLowMap3(64);
     //D1
-    generateLowMap3(68);
+    generateLowMap3(65);
     //D2
-    generateLowMap3(69);
+    generateLowMap3(66);
     //D3
-    generateLowMap3(70);
+    generateLowMap3(67);
     //D4
-    generateLowMap3(71);
+    generateLowMap3(68);
     //D5
-    generateLowMap3(72);
+    generateLowMap3(69);
     //D6
-    generateLowMap3(73);
+    generateLowMap3(70);
     //D7
-    generateLowMap3(74);
+    generateLowMap3(71);
     //D8
-    generateLowMap3(75);
+    generateLowMap3(72);
     //D9
-    generateLowMap3(76);
+    generateLowMap3(73);
     //DA
-    generateLowMap3(77);
+    generateLowMap3(74);
     //DB
-    generateLowMap3(78);
+    generateLowMap3(75);
     //DC
-    generateLowMap3(79);
+    generateLowMap3(76);
     //DD
-    generateLowMap3(80);
+    generateLowMap3(77);
     //DE
-    generateLowMap3(85);
+    generateLowMap3(82);
     //DF
-    generateLowMap3(81);
+    generateLowMap3(78);
     //E0-E7
-    generateLowMap(82);
+    generateLowMap(79);
     //E8-EF
-    generateLowMap(85);
+    generateLowMap(82);
     //F0-F7
-    generateLowMap(83);
+    generateLowMap(80);
     //F8-FF
-    generateLowMap(84);
+    generateLowMap(81);
     //Copy to typed array buffer:
     this.instructionMap = getUint8Array(1024);
     for (var copyTo = 0; copyTo < 1024; ++copyTo) {
