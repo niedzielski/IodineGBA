@@ -287,9 +287,8 @@ THUMBInstructionSet.prototype.executeDecoded = function () {
         case 81:
             this.BLoff();
             break;
-        case 82:
+        default:
             this.UNDEFINED();
-            break;
     }
 }
 THUMBInstructionSet.prototype.executeBubble = function () {
