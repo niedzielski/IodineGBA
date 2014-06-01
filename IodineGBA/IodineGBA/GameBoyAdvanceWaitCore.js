@@ -90,7 +90,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
     this.waitStateClocks[0x10A] = this.waitStateClocks[0x10B] = this.GAMEPAKWaitStateTable[(data >> 5) & 0x3] | 0;
     this.waitStateClocks[0xA] = this.waitStateClocks[0xB] =  (data > 0x7F) ? 0x1 : 0x4;
     this.waitStateClocksFull[0xA] = this.waitStateClocksFull[0xB] = this.waitStateClocks[0xA] << 1;
-    this.waitStateClocksFull[0x108] = this.waitStateClocksFull[0x109] = ((this.waitStateClocks[0x108] | 0) + (this.waitStateClocks[0xA] | 0)) | 0;
+    this.waitStateClocksFull[0x108] = this.waitStateClocksFull[0x109] = ((this.waitStateClocks[0x108] | 0) + (this.waitStateClocks[0x8] | 0)) | 0;
     this.waitStateClocksFull[0x10A] = this.waitStateClocksFull[0x10B] = ((this.waitStateClocks[0x10A] | 0) + (this.waitStateClocks[0xA] | 0)) | 0;
     this.WAITCNT0 = data | 0;
 }
