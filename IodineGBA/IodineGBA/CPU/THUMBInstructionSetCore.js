@@ -42,250 +42,250 @@ THUMBInstructionSet.prototype.executeIteration = function () {
 THUMBInstructionSet.prototype.executeDecoded = function () {
     switch (this.instructionMap[this.execute >> 6] & 0x7F) {
         case 0:
-            this.LSLimm();
-            break;
-        case 1:
-            this.LSRimm();
-            break;
-        case 2:
-            this.ASRimm();
-            break;
-        case 3:
-            this.ADDreg();
-            break;
-        case 4:
-            this.SUBreg();
-            break;
-        case 5:
-            this.ADDimm3();
-            break;
-        case 6:
-            this.SUBimm3();
-            break;
-        case 7:
-            this.MOVimm8();
-            break;
-        case 8:
             this.CMPimm8();
             break;
-        case 9:
-            this.ADDimm8();
-            break;
-        case 10:
-            this.SUBimm8();
-            break;
-        case 11:
-            this.AND();
-            break;
-        case 12:
-            this.EOR();
-            break;
-        case 13:
-            this.LSL();
-            break;
-        case 14:
-            this.LSR();
-            break;
-        case 15:
-            this.ASR();
-            break;
-        case 16:
-            this.ADC();
-            break;
-        case 17:
-            this.SBC();
-            break;
-        case 18:
-            this.ROR();
-            break;
-        case 19:
-            this.TST();
-            break;
-        case 20:
-            this.NEG();
-            break;
-        case 21:
-            this.CMP();
-            break;
-        case 22:
-            this.CMN();
-            break;
-        case 23:
-            this.ORR();
-            break;
-        case 24:
-            this.MUL();
-            break;
-        case 25:
-            this.BIC();
-            break;
-        case 26:
-            this.MVN();
-            break;
-        case 27:
-            this.ADDH_LH();
-            break;
-        case 28:
-            this.ADDH_HL();
-            break;
-        case 29:
-            this.ADDH_HH();
-            break;
-        case 30:
-            this.CMPH_LH();
-            break;
-        case 31:
-            this.CMPH_HL();
-            break;
-        case 32:
-            this.CMPH_HH();
-            break;
-        case 33:
-            this.MOVH_LH();
-            break;
-        case 34:
-            this.MOVH_HL();
-            break;
-        case 35:
-            this.MOVH_HH();
-            break;
-        case 36:
-            this.BX_L();
-            break;
-        case 37:
-            this.BX_H();
-            break;
-        case 38:
-            this.LDRPC();
-            break;
-        case 39:
-            this.STRreg();
-            break;
-        case 40:
-            this.STRHreg();
-            break;
-        case 41:
-            this.STRBreg();
-            break;
-        case 42:
-            this.LDRSBreg();
-            break;
-        case 43:
-            this.LDRreg();
-            break;
-        case 44:
-            this.LDRHreg();
-            break;
-        case 45:
-            this.LDRBreg();
-            break;
-        case 46:
-            this.LDRSHreg();
-            break;
-        case 47:
-            this.STRimm5();
-            break;
-        case 48:
-            this.LDRimm5();
-            break;
-        case 49:
-            this.STRBimm5();
-            break;
-        case 50:
-            this.LDRBimm5();
-            break;
-        case 51:
-            this.STRHimm5();
-            break;
-        case 52:
-            this.LDRHimm5();
-            break;
-        case 53:
-            this.STRSP();
-            break;
-        case 54:
-            this.LDRSP();
-            break;
-        case 55:
-            this.ADDPC();
-            break;
-        case 56:
-            this.ADDSP();
-            break;
-        case 57:
-            this.ADDSPimm7();
-            break;
-        case 58:
-            this.PUSH();
-            break;
-        case 59:
-            this.PUSHlr();
-            break;
-        case 60:
-            this.POP();
-            break;
-        case 61:
-            this.POPpc();
-            break;
-        case 62:
-            this.STMIA();
-            break;
-        case 63:
-            this.LDMIA();
-            break;
-        case 64:
+        case 1:
             this.BEQ();
             break;
-        case 65:
-            this.BNE();
+        case 2:
+            this.MOVH_LH();
             break;
-        case 66:
-            this.BCS();
+        case 3:
+            this.LDRimm5();
             break;
-        case 67:
-            this.BCC();
+        case 4:
+            this.AND();
             break;
-        case 68:
-            this.BMI();
+        case 5:
+            this.LDRBimm5();
             break;
-        case 69:
-            this.BPL();
+        case 6:
+            this.LSLimm();
             break;
-        case 70:
-            this.BVS();
+        case 7:
+            this.LSRimm();
             break;
-        case 71:
-            this.BVC();
+        case 8:
+            this.MOVimm8();
             break;
-        case 72:
-            this.BHI();
+        case 9:
+            this.CMP();
             break;
-        case 73:
-            this.BLS();
+        case 10:
+            this.LDRSP();
             break;
-        case 74:
-            this.BGE();
+        case 11:
+            this.ADDimm3();
             break;
-        case 75:
-            this.BLT();
+        case 12:
+            this.ADDreg();
             break;
-        case 76:
-            this.BGT();
+        case 13:
+            this.STRSP();
             break;
-        case 77:
-            this.BLE();
-            break;
-        case 78:
-            this.SWI();
-            break;
-        case 79:
+        case 14:
             this.B();
             break;
-        case 80:
+        case 15:
+            this.LDRPC();
+            break;
+        case 16:
+            this.MOVH_HL();
+            break;
+        case 17:
+            this.ADDimm8();
+            break;
+        case 18:
+            this.SUBreg();
+            break;
+        case 19:
+            this.BCC();
+            break;
+        case 20:
+            this.STRimm5();
+            break;
+        case 21:
+            this.ORR();
+            break;
+        case 22:
+            this.LDRHimm5();
+            break;
+        case 23:
+            this.BCS();
+            break;
+        case 24:
+            this.BNE();
+            break;
+        case 25:
+            this.BGE();
+            break;
+        case 26:
+            this.POP();
+            break;
+        case 27:
+            this.ADDH_HL();
+            break;
+        case 28:
+            this.STRHimm5();
+            break;
+        case 29:
+            this.BLE();
+            break;
+        case 30:
+            this.ASRimm();
+            break;
+        case 31:
+            this.MUL();
+            break;
+        case 32:
             this.BLsetup();
             break;
-        case 81:
+        case 33:
             this.BLoff();
+            break;
+        case 34:
+            this.BGT();
+            break;
+        case 35:
+            this.STRHreg();
+            break;
+        case 36:
+            this.LDRHreg();
+            break;
+        case 37:
+            this.BX_L();
+            break;
+        case 38:
+            this.BLT();
+            break;
+        case 39:
+            this.ADDSPimm7();
+            break;
+        case 40:
+            this.PUSHlr();
+            break;
+        case 41:
+            this.PUSH();
+            break;
+        case 42:
+            this.SUBimm8();
+            break;
+        case 43:
+            this.ROR();
+            break;
+        case 44:
+            this.LDRSHreg();
+            break;
+        case 45:
+            this.STRBimm5();
+            break;
+        case 46:
+            this.NEG();
+            break;
+        case 47:
+            this.BHI();
+            break;
+        case 48:
+            this.TST();
+            break;
+        case 49:
+            this.BX_H();
+            break;
+        case 50:
+            this.STMIA();
+            break;
+        case 51:
+            this.BLS();
+            break;
+        case 52:
+            this.SWI();
+            break;
+        case 53:
+            this.LDMIA();
+            break;
+        case 54:
+            this.MOVH_HH();
+            break;
+        case 55:
+            this.LSL();
+            break;
+        case 56:
+            this.POPpc();
+            break;
+        case 57:
+            this.LSR();
+            break;
+        case 58:
+            this.CMPH_LH();
+            break;
+        case 59:
+            this.EOR();
+            break;
+        case 60:
+            this.SUBimm3();
+            break;
+        case 61:
+            this.ADDH_LH();
+            break;
+        case 62:
+            this.BPL();
+            break;
+        case 63:
+            this.CMPH_HL();
+            break;
+        case 64:
+            this.ADDPC();
+            break;
+        case 65:
+            this.LDRSBreg();
+            break;
+        case 66:
+            this.BIC();
+            break;
+        case 67:
+            this.ADDSP();
+            break;
+        case 68:
+            this.MVN();
+            break;
+        case 69:
+            this.ASR();
+            break;
+        case 70:
+            this.LDRreg();
+            break;
+        case 71:
+            this.ADC();
+            break;
+        case 72:
+            this.SBC();
+            break;
+        case 73:
+            this.BMI();
+            break;
+        case 74:
+            this.STRreg();
+            break;
+        case 75:
+            this.CMN();
+            break;
+        case 76:
+            this.LDRBreg();
+            break;
+        case 77:
+            this.ADDH_HH();
+            break;
+        case 78:
+            this.CMPH_HH();
+            break;
+        case 79:
+            this.STRBreg();
+            break;
+        case 80:
+            this.BVS();
+            break;
+        case 81:
+            this.BVC();
             break;
         default:
             this.UNDEFINED();
@@ -1137,83 +1137,83 @@ THUMBInstructionSet.prototype.compileInstructionMap = function () {
         instructionMap.push(instruction4);
     }
     //0-7
-    generateLowMap(0);
+    generateLowMap(6);
     //8-F
-    generateLowMap(1);
-    //10-17
-    generateLowMap(2);
-    //18-19
-    generateLowMap2(3);
-    //1A-1B
-    generateLowMap2(4);
-    //1C-1D
-    generateLowMap2(5);
-    //1E-1F
-    generateLowMap2(6);
-    //20-27
     generateLowMap(7);
-    //28-2F
+    //10-17
+    generateLowMap(30);
+    //18-19
+    generateLowMap2(12);
+    //1A-1B
+    generateLowMap2(18);
+    //1C-1D
+    generateLowMap2(11);
+    //1E-1F
+    generateLowMap2(60);
+    //20-27
     generateLowMap(8);
+    //28-2F
+    generateLowMap(0);
     //30-37
-    generateLowMap(9);
+    generateLowMap(17);
     //38-3F
-    generateLowMap(10);
+    generateLowMap(42);
     //40
-    generateLowMap4(11, 12, 13, 14);
+    generateLowMap4(4, 59, 55, 57);
     //41
-    generateLowMap4(15, 16, 17, 18);
+    generateLowMap4(69, 71, 72, 43);
     //42
-    generateLowMap4(19, 20, 21, 22);
+    generateLowMap4(48, 46, 9, 75);
     //43
-    generateLowMap4(23, 24, 25, 26);
+    generateLowMap4(21, 31, 66, 68);
     //44
-    generateLowMap4(82, 27, 28, 29);
+    generateLowMap4(82, 61, 27, 77);
     //45
-    generateLowMap4(82, 30, 31, 32);
+    generateLowMap4(82, 58, 63, 78);
     //46
-    generateLowMap4(82, 33, 34, 35);
+    generateLowMap4(82, 2, 16, 54);
     //47
-    generateLowMap4(36, 37, 82, 82);
+    generateLowMap4(37, 49, 82, 82);
     //48-4F
-    generateLowMap(38);
+    generateLowMap(15);
     //50-51
-    generateLowMap2(39);
+    generateLowMap2(74);
     //52-53
-    generateLowMap2(40);
+    generateLowMap2(35);
     //54-55
-    generateLowMap2(41);
+    generateLowMap2(79);
     //56-57
-    generateLowMap2(42);
+    generateLowMap2(65);
     //58-59
-    generateLowMap2(43);
+    generateLowMap2(70);
     //5A-5B
-    generateLowMap2(44);
+    generateLowMap2(36);
     //5C-5D
-    generateLowMap2(45);
+    generateLowMap2(76);
     //5E-5F
-    generateLowMap2(46);
+    generateLowMap2(44);
     //60-67
-    generateLowMap(47);
+    generateLowMap(20);
     //68-6F
-    generateLowMap(48);
+    generateLowMap(3);
     //70-77
-    generateLowMap(49);
+    generateLowMap(45);
     //78-7F
-    generateLowMap(50);
+    generateLowMap(5);
     //80-87
-    generateLowMap(51);
+    generateLowMap(28);
     //88-8F
-    generateLowMap(52);
+    generateLowMap(22);
     //90-97
-    generateLowMap(53);
+    generateLowMap(13);
     //98-9F
-    generateLowMap(54);
+    generateLowMap(10);
     //A0-A7
-    generateLowMap(55);
+    generateLowMap(64);
     //A8-AF
-    generateLowMap(56);
+    generateLowMap(67);
     //B0
-    generateLowMap3(57);
+    generateLowMap3(39);
     //B1
     generateLowMap3(82);
     //B2
@@ -1221,9 +1221,9 @@ THUMBInstructionSet.prototype.compileInstructionMap = function () {
     //B3
     generateLowMap3(82);
     //B4
-    generateLowMap3(58);
+    generateLowMap3(41);
     //B5
-    generateLowMap3(59);
+    generateLowMap3(40);
     //B6
     generateLowMap3(82);
     //B7
@@ -1237,57 +1237,57 @@ THUMBInstructionSet.prototype.compileInstructionMap = function () {
     //BB
     generateLowMap3(82);
     //BC
-    generateLowMap3(60);
+    generateLowMap3(26);
     //BD
-    generateLowMap3(61);
+    generateLowMap3(56);
     //BE
     generateLowMap3(82);
     //BF
     generateLowMap3(82);
     //C0-C7
-    generateLowMap(62);
+    generateLowMap(50);
     //C8-CF
-    generateLowMap(63);
+    generateLowMap(53);
     //D0
-    generateLowMap3(64);
+    generateLowMap3(1);
     //D1
-    generateLowMap3(65);
+    generateLowMap3(24);
     //D2
-    generateLowMap3(66);
+    generateLowMap3(23);
     //D3
-    generateLowMap3(67);
+    generateLowMap3(19);
     //D4
-    generateLowMap3(68);
-    //D5
-    generateLowMap3(69);
-    //D6
-    generateLowMap3(70);
-    //D7
-    generateLowMap3(71);
-    //D8
-    generateLowMap3(72);
-    //D9
     generateLowMap3(73);
+    //D5
+    generateLowMap3(62);
+    //D6
+    generateLowMap3(80);
+    //D7
+    generateLowMap3(81);
+    //D8
+    generateLowMap3(47);
+    //D9
+    generateLowMap3(51);
     //DA
-    generateLowMap3(74);
+    generateLowMap3(25);
     //DB
-    generateLowMap3(75);
+    generateLowMap3(38);
     //DC
-    generateLowMap3(76);
+    generateLowMap3(34);
     //DD
-    generateLowMap3(77);
+    generateLowMap3(29);
     //DE
     generateLowMap3(82);
     //DF
-    generateLowMap3(78);
+    generateLowMap3(52);
     //E0-E7
-    generateLowMap(79);
+    generateLowMap(14);
     //E8-EF
     generateLowMap(82);
     //F0-F7
-    generateLowMap(80);
+    generateLowMap(32);
     //F8-FF
-    generateLowMap(81);
+    generateLowMap(33);
     //Copy to typed array buffer:
     this.instructionMap = getUint8Array(1024);
     for (var copyTo = 0; copyTo < 1024; ++copyTo) {
