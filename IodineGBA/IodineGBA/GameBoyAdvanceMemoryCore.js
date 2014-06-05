@@ -19,7 +19,6 @@ function GameBoyAdvanceMemory(IOCore) {
     //Reference to the emulator core:
     this.IOCore = IOCore;
     //WRAM Map Control Stuff:
-    this.memoryCaches = [];
     this.WRAMControlFlags = 0x20;
     //Load the BIOS:
     this.BIOS = getUint8Array(0x4000);
@@ -456,17 +455,7 @@ GameBoyAdvanceMemory.prototype.remapWRAM = function (data) {
             this.memoryReader32[2] = this.memoryReader32[3] = this.readUnused32;
         }
         this.WRAMControlFlags = data | 0;
-        this.checkMemoryCacheValidity();
     }
-}
-GameBoyAdvanceMemory.prototype.checkMemoryCacheValidity = function () {
-    var length = this.memoryCaches.length | 0;
-    for (var index = 0; (index | 0) < (length | 0); index = ((index | 0) + 1) | 0) {
-        this.memoryCaches[index | 0].invalidateIfWRAM();
-    }
-}
-GameBoyAdvanceMemory.prototype.addMemoryCacheRoot = function (root) {
-    this.memoryCaches.push(root);
 }
 GameBoyAdvanceMemory.prototype.readBIOS8 = function (parentObj, address) {
     address = address | 0;
