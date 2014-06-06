@@ -1300,9 +1300,9 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO16 = functio
         return parentObj.gfx.readWINOUT0() | (parentObj.gfx.readWINOUT1() << 8);
     }
     //400004Ch - MOSAIC - Mosaic Size (W)
-    readIO[0x4C >> 1] = this.memory.readUnused16IO;
+    readIO[0x4C >> 1] = this.memory.readUnused16IO1;
     //400004Eh - NOT USED - ZERO
-    readIO[0x4E >> 1] = this.memory.readUnused16IO;
+    readIO[0x4E >> 1] = this.memory.readUnused16IO2;
     //4000050h - BLDCNT - Color Special Effects Selection (R/W)
     readIO[0x50 >> 1] = function (parentObj) {
         return parentObj.gfx.readBLDCNT0() | (parentObj.gfx.readBLDCNT1() << 8);
@@ -1402,9 +1402,9 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO16 = functio
     //400008Ah - NOT USED - ZERO
     readIO[0x8A >> 1] = this.memory.readZero;
     //400008Ch - NOT USED - GLITCHED
-    readIO[0x8C >> 1] = this.memory.readUnused16IO;
+    readIO[0x8C >> 1] = this.memory.readUnused16IO1;
     //400008Eh - NOT USED - GLITCHED
-    readIO[0x8E >> 1] = this.memory.readUnused16IO;
+    readIO[0x8E >> 1] = this.memory.readUnused16IO2;
     //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
     readIO[0x90 >> 1] = function (parentObj) {
         parentObj.IOCore.updateTimerClocking();
@@ -1976,7 +1976,12 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused8 = function 
 GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused16 = function (readIO, from, to) {
     //Fill in slots of the i/o read table:
     while (from <= to) {
-        readIO[from++] = this.memory.readUnused16IO;
+        if ((from & 0x1) == 0) {
+            readIO[from++] = this.memory.readUnused16IO1;
+        }
+        else {
+            readIO[from++] = this.memory.readUnused16IO2;
+        }
     }
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused32 = function (readIO, from, to) {

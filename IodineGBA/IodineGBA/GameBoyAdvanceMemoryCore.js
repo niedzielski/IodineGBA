@@ -876,21 +876,21 @@ GameBoyAdvanceMemory.prototype.readSRAM32 = function (address) {
 GameBoyAdvanceMemory.prototype.readZero = function (parentObj) {
     return 0;
 }
-GameBoyAdvanceMemory.prototype.readUnused8IO = function (parentObj) {
-    parentObj.IOCore.updateCoreSingle();
-    var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
-    return (controller.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
-}
 GameBoyAdvanceMemory.prototype.readUnused8 = function (address) {
     address = address | 0;
     this.IOCore.updateCoreSingle();
     var controller = ((this.IOCore.systemStatus | 0) == 0) ? this.cpu : this.dma;
     return (controller.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
 }
-GameBoyAdvanceMemory.prototype.readUnused16IO = function (parentObj) {
+GameBoyAdvanceMemory.prototype.readUnused16IO1 = function (parentObj) {
     parentObj.IOCore.updateCoreSingle();
     var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
-    return (controller.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+    return controller.getCurrentFetchValue() & 0xFFFF;
+}
+GameBoyAdvanceMemory.prototype.readUnused16IO2 = function (parentObj) {
+    parentObj.IOCore.updateCoreSingle();
+    var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    return (controller.getCurrentFetchValue() >> 16) & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused16 = function (address) {
     address = address | 0;
