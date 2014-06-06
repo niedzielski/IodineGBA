@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -161,50 +161,50 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead162 = function
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead160 = function () {
     return this.compileMemoryReadDispatch([
-                                           "this.readUnused16",
-                                           "this.readInternalWRAM16",
-                                           "this.readInternalWRAM16",
-                                           "this.readIODispatch16",
-                                           "this.readPalette16",
-                                           "this.readVRAM16",
-                                           "this.readOAM16",
+                                           "this.readUnused16CPU",
+                                           "this.readInternalWRAM16CPU",
+                                           "this.readInternalWRAM16CPU",
+                                           "this.readIODispatch16CPU",
+                                           "this.readPalette16CPU",
+                                           "this.readVRAM16CPU",
+                                           "this.readOAM16CPU",
                                            "this.readROM016CPU",
                                            "this.readROM116CPU",
                                            "this.readROM216CPU",
-                                           "this.readSRAM16",
-                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
+                                           "this.readSRAM16CPU",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16CPU" : "this.readUnused16CPU"
                                            ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead161 = function () {
     return this.compileMemoryReadDispatch([
-                                           "this.readUnused16",
-                                           "this.readExternalWRAM16",
-                                           "this.readInternalWRAM16",
-                                           "this.readIODispatch16",
-                                           "this.readPalette16",
-                                           "this.readVRAM16",
-                                           "this.readOAM16",
+                                           "this.readUnused16CPU",
+                                           "this.readExternalWRAM16CPU",
+                                           "this.readInternalWRAM16CPU",
+                                           "this.readIODispatch16CPU",
+                                           "this.readPalette16CPU",
+                                           "this.readVRAM16CPU",
+                                           "this.readOAM16CPU",
                                            "this.readROM016CPU",
                                            "this.readROM116CPU",
                                            "this.readROM216CPU",
-                                           "this.readSRAM16",
-                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
+                                           "this.readSRAM16CPU",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16CPU" : "this.readUnused16CPU"
                                            ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead162 = function () {
     return this.compileMemoryReadDispatch([
-                                           "this.readUnused16",
-                                           "this.readUnused16",
-                                           "this.readUnused16",
-                                           "this.readIODispatch16",
-                                           "this.readPalette16",
-                                           "this.readVRAM16",
-                                           "this.readOAM16",
+                                           "this.readUnused16CPU",
+                                           "this.readUnused16CPU",
+                                           "this.readUnused16CPU",
+                                           "this.readIODispatch16CPU",
+                                           "this.readPalette16CPU",
+                                           "this.readVRAM16CPU",
+                                           "this.readOAM16CPU",
                                            "this.readROM016CPU",
                                            "this.readROM116CPU",
                                            "this.readROM216CPU",
-                                           "this.readSRAM16",
-                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
+                                           "this.readSRAM16CPU",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16CPU" : "this.readUnused16CPU"
                                            ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite160 = function () {
@@ -302,50 +302,50 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead322 = function
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead320 = function () {
     return this.compileMemoryReadDispatch([
-                                           "this.readUnused32",
-                                           "this.readInternalWRAM32",
-                                           "this.readInternalWRAM32",
-                                           "this.readIODispatch32",
-                                           "this.readPalette32",
-                                           "this.readVRAM32",
-                                           "this.readOAM32",
+                                           "this.readUnused32CPU",
+                                           "this.readInternalWRAM32CPU",
+                                           "this.readInternalWRAM32CPU",
+                                           "this.readIODispatch32CPU",
+                                           "this.readPalette32CPU",
+                                           "this.readVRAM32CPU",
+                                           "this.readOAM32CPU",
                                            "this.readROM032CPU",
                                            "this.readROM132CPU",
                                            "this.readROM232CPU",
-                                           "this.readSRAM32",
-                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           "this.readSRAM32CPU",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32CPU" : "this.readUnused32CPU"
                                            ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead321 = function () {
     return this.compileMemoryReadDispatch([
-                                           "this.readUnused32",
-                                           "this.readExternalWRAM32",
-                                           "this.readInternalWRAM32",
-                                           "this.readIODispatch32",
-                                           "this.readPalette32",
-                                           "this.readVRAM32",
-                                           "this.readOAM32",
+                                           "this.readUnused32CPU",
+                                           "this.readExternalWRAM32CPU",
+                                           "this.readInternalWRAM32CPU",
+                                           "this.readIODispatch32CPU",
+                                           "this.readPalette32CPU",
+                                           "this.readVRAM32CPU",
+                                           "this.readOAM32CPU",
                                            "this.readROM032CPU",
                                            "this.readROM132CPU",
                                            "this.readROM232CPU",
-                                           "this.readSRAM32",
-                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           "this.readSRAM32CPU",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32CPU" : "this.readUnused32CPU"
                                            ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead322 = function () {
     return this.compileMemoryReadDispatch([
-                                           "this.readUnused32",
-                                           "this.readUnused32",
-                                           "this.readUnused32",
-                                           "this.readIODispatch32",
-                                           "this.readPalette32",
-                                           "this.readVRAM32",
-                                           "this.readOAM32",
+                                           "this.readUnused32CPU",
+                                           "this.readUnused32CPU",
+                                           "this.readUnused32CPU",
+                                           "this.readIODispatch32CPU",
+                                           "this.readPalette32CPU",
+                                           "this.readVRAM32CPU",
+                                           "this.readOAM32CPU",
                                            "this.readROM032CPU",
                                            "this.readROM132CPU",
                                            "this.readROM232CPU",
-                                           "this.readSRAM32",
-                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           "this.readSRAM32CPU",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32CPU" : "this.readUnused32CPU"
                                            ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite320 = function () {

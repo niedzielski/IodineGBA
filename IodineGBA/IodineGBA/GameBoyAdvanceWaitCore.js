@@ -303,8 +303,16 @@ GameBoyAdvanceWait.prototype.WRAMAccess8 = function () {
 GameBoyAdvanceWait.prototype.WRAMAccess16 = function () {
     this.IOCore.updateCore(this.WRAMWaitState | 0);
 }
+GameBoyAdvanceWait.prototype.WRAMAccess16CPU = function () {
+    this.resetPrebuffer();
+    this.WRAMAccess16();
+}
 GameBoyAdvanceWait.prototype.WRAMAccess32 = function () {
     this.IOCore.updateCore(this.WRAMWaitState << 1);
+}
+GameBoyAdvanceWait.prototype.WRAMAccess32CPU = function () {
+    this.resetPrebuffer();
+    this.WRAMAccess32();
 }
 GameBoyAdvanceWait.prototype.ROM0Access8 = function () {
     this.IOCore.updateCore(this.waitStateClocks[0x8 | this.nonSequential] | 0);
@@ -363,6 +371,10 @@ GameBoyAdvanceWait.prototype.ROM2Access32CPU = function () {
 GameBoyAdvanceWait.prototype.SRAMAccess = function () {
     this.IOCore.updateCore(this.SRAMWaitState | 0);
 }
+GameBoyAdvanceWait.prototype.SRAMAccessCPU = function () {
+    this.resetPrebuffer();
+    this.SRAMAccess();
+}
 GameBoyAdvanceWait.prototype.VRAMAccess8 = function () {
     if (!this.IOCore.gfx.isRendering) {
         this.IOCore.updateCoreSingle();
@@ -379,6 +391,10 @@ GameBoyAdvanceWait.prototype.VRAMAccess16 = function () {
         this.IOCore.updateCoreTwice();
     }
 }
+GameBoyAdvanceWait.prototype.VRAMAccess16CPU = function () {
+    this.resetPrebuffer();
+    this.VRAMAccess16();
+}
 GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
     if (!this.IOCore.gfx.isRendering) {
         this.IOCore.updateCoreTwice();
@@ -386,6 +402,10 @@ GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
     else {
         this.IOCore.updateCore(4);
     }
+}
+GameBoyAdvanceWait.prototype.VRAMAccess32CPU = function () {
+    this.resetPrebuffer();
+    this.VRAMAccess32();
 }
 GameBoyAdvanceWait.prototype.OAMAccess8 = function () {
     if (!this.IOCore.gfx.isOAMRendering) {
@@ -403,6 +423,10 @@ GameBoyAdvanceWait.prototype.OAMAccess16 = function () {
         this.IOCore.updateCoreTwice();
     }
 }
+GameBoyAdvanceWait.prototype.OAMAccess16CPU = function () {
+    this.resetPrebuffer();
+    this.OAMAccess16();
+}
 GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
     if (!this.IOCore.gfx.isOAMRendering) {
         this.IOCore.updateCoreSingle();
@@ -410,4 +434,12 @@ GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
     else {
         this.IOCore.updateCoreTwice();
     }
+}
+GameBoyAdvanceWait.prototype.OAMAccess32CPU = function () {
+    this.resetPrebuffer();
+    this.OAMAccess32();
+}
+GameBoyAdvanceWait.prototype.singleClockCPU = function () {
+    this.resetPrebuffer();
+    this.IOCore.updateCoreSingle();
 }
