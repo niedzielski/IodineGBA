@@ -31,7 +31,7 @@ THUMBInstructionSet.prototype.initialize = function () {
 }
 THUMBInstructionSet.prototype.executeIteration = function () {
     //Push the new fetch access:
-    this.fetch = this.memory.memoryReadFast16(this.readPC() >>> 0) | 0;
+    this.fetch = this.memory.memoryReadCPU16(this.readPC() | 0) | 0;
     //Execute Instruction:
     this.executeDecoded();
     //Update the pipelining state:
@@ -292,7 +292,7 @@ THUMBInstructionSet.prototype.executeDecoded = function () {
 }
 THUMBInstructionSet.prototype.executeBubble = function () {
     //Push the new fetch access:
-    this.fetch = this.memory.memoryReadFast16(this.readPC() >>> 0) | 0;
+    this.fetch = this.memory.memoryReadFast16(this.readPC() | 0) | 0;
     //Update the pipelining state:
     this.execute = this.decode | 0;
     this.decode = this.fetch | 0;
@@ -899,7 +899,7 @@ THUMBInstructionSet.prototype.PUSH = function () {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push register onto the stack:
                 this.SPDecrementWord();
-                this.memory.memoryWrite32(this.readSP() >>> 0, this.readLowRegister(rListPosition | 0) | 0);
+                this.memory.memoryWrite32(this.readSP() | 0, this.readLowRegister(rListPosition | 0) | 0);
             }
         }
         //Updating the address bus back to PC fetch:
@@ -911,13 +911,13 @@ THUMBInstructionSet.prototype.PUSHlr = function () {
     this.wait.NonSequentialBroadcast();
     //Push link register onto the stack:
     this.SPDecrementWord();
-    this.memory.memoryWrite32(this.readSP() >>> 0, this.readLR() | 0);
+    this.memory.memoryWrite32(this.readSP() | 0, this.readLR() | 0);
     //Push register(s) onto the stack:
     for (var rListPosition = 7; (rListPosition | 0) > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
         if ((this.execute & (1 << rListPosition)) != 0) {
             //Push register onto the stack:
             this.SPDecrementWord();
-            this.memory.memoryWrite32(this.readSP() >>> 0, this.readLowRegister(rListPosition | 0) | 0);
+            this.memory.memoryWrite32(this.readSP() | 0, this.readLowRegister(rListPosition | 0) | 0);
         }
     }
     //Updating the address bus back to PC fetch:
@@ -932,7 +932,7 @@ THUMBInstructionSet.prototype.POP = function () {
         for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //POP stack into a register:
-                this.writeLowRegister(rListPosition | 0, this.memory.memoryRead32(this.readSP() >>> 0) | 0);
+                this.writeLowRegister(rListPosition | 0, this.memory.memoryRead32(this.readSP() | 0) | 0);
                 this.SPIncrementWord();
             }
         }
@@ -947,12 +947,12 @@ THUMBInstructionSet.prototype.POPpc = function () {
     for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
         if ((this.execute & (1 << rListPosition)) != 0) {
             //POP stack into a register:
-            this.writeLowRegister(rListPosition | 0, this.memory.memoryRead32(this.readSP() >>> 0) | 0);
+            this.writeLowRegister(rListPosition | 0, this.memory.memoryRead32(this.readSP() | 0) | 0);
             this.SPIncrementWord();
         }
     }
     //POP stack into the program counter (r15):
-    this.writePC(this.memory.memoryRead32(this.readSP() >>> 0) | 0);
+    this.writePC(this.memory.memoryRead32(this.readSP() | 0) | 0);
     this.SPIncrementWord();
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
@@ -968,7 +968,7 @@ THUMBInstructionSet.prototype.STMIA = function () {
         for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
-                this.memory.memoryWrite32(currentAddress >>> 0, this.readLowRegister(rListPosition | 0) | 0);
+                this.memory.memoryWrite32(currentAddress | 0, this.readLowRegister(rListPosition | 0) | 0);
                 currentAddress = ((currentAddress | 0) + 4) | 0;
             }
         }
@@ -989,7 +989,7 @@ THUMBInstructionSet.prototype.LDMIA = function () {
         for (var rListPosition = 0; (rListPosition | 0) < 8; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Load a register from memory:
-                this.writeLowRegister(rListPosition | 0, this.memory.memoryRead32(currentAddress >>> 0) | 0);
+                this.writeLowRegister(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
                 currentAddress = ((currentAddress | 0) + 4) | 0;
             }
         }

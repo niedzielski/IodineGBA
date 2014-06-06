@@ -18,129 +18,379 @@
 function GameBoyAdvanceMemoryDispatchGenerator(memory) {
     this.memory = memory;
 }
-GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead8 = function () {
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead80 = function () {
     return this.compileMemoryReadDispatch([
-                                               this.memory.readUnused8,
-                                               this.memory.readExternalWRAM8,
-                                               this.memory.readInternalWRAM8,
-                                               this.memory.readIODispatch8,
-                                               this.memory.readPalette8,
-                                               this.memory.readVRAM8,
-                                               this.memory.readOAM8,
-                                               this.memory.readROM08,
-                                               this.memory.readROM18,
-                                               this.memory.readROM28,
-                                               this.memory.readSRAM8,
-                                               (this.memory.IOCore.BIOSFound) ? this.memory.readBIOS8 : this.memory.readUnused8
+                                               "this.readUnused8",
+                                               "this.readInternalWRAM8",
+                                               "this.readInternalWRAM8",
+                                               "this.readIODispatch8",
+                                               "this.readPalette8",
+                                               "this.readVRAM8",
+                                               "this.readOAM8",
+                                               "this.readROM08",
+                                               "this.readROM18",
+                                               "this.readROM28",
+                                               "this.readSRAM8",
+                                               (this.memory.IOCore.BIOSFound) ? "this.readBIOS8" : "this.readUnused8"
                                                ]);
 }
-GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite8 = function () {
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead81 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused8",
+                                           "this.readExternalWRAM8",
+                                           "this.readInternalWRAM8",
+                                           "this.readIODispatch8",
+                                           "this.readPalette8",
+                                           "this.readVRAM8",
+                                           "this.readOAM8",
+                                           "this.readROM08",
+                                           "this.readROM18",
+                                           "this.readROM28",
+                                           "this.readSRAM8",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS8" : "this.readUnused8"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead82 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused8",
+                                           "this.readUnused8",
+                                           "this.readUnused8",
+                                           "this.readIODispatch8",
+                                           "this.readPalette8",
+                                           "this.readVRAM8",
+                                           "this.readOAM8",
+                                           "this.readROM08",
+                                           "this.readROM18",
+                                           "this.readROM28",
+                                           "this.readSRAM8",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS8" : "this.readUnused8"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite80 = function () {
     return this.compileMemoryWriteDispatch([
-                                            this.memory.writeUnused8,
-                                            this.memory.writeExternalWRAM8,
-                                            this.memory.writeInternalWRAM8,
-                                            this.memory.writeIODispatch8,
-                                            this.memory.writePalette8,
-                                            this.memory.writeVRAM8,
-                                            this.memory.writeOAM8,
-                                            this.memory.writeROM08,
-                                            this.memory.writeROM18,
-                                            this.memory.writeROM28,
-                                            this.memory.writeSRAM8
+                                            "this.writeUnused8",
+                                            "this.writeInternalWRAM8",
+                                            "this.writeInternalWRAM8",
+                                            "this.writeIODispatch8",
+                                            "this.writePalette8",
+                                            "this.writeVRAM8",
+                                            "this.writeOAM8",
+                                            "this.writeROM08",
+                                            "this.writeROM18",
+                                            "this.writeROM28",
+                                            "this.writeSRAM8"
                                             ]);
 }
-GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead16 = function () {
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite81 = function () {
+    return this.compileMemoryWriteDispatch([
+                                            "this.writeUnused8",
+                                            "this.writeExternalWRAM8",
+                                            "this.writeInternalWRAM8",
+                                            "this.writeIODispatch8",
+                                            "this.writePalette8",
+                                            "this.writeVRAM8",
+                                            "this.writeOAM8",
+                                            "this.writeROM08",
+                                            "this.writeROM18",
+                                            "this.writeROM28",
+                                            "this.writeSRAM8"
+                                            ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite82 = function () {
+    return this.compileMemoryWriteDispatch([
+                                            "this.writeUnused8",
+                                            "this.writeUnused8",
+                                            "this.writeUnused8",
+                                            "this.writeIODispatch8",
+                                            "this.writePalette8",
+                                            "this.writeVRAM8",
+                                            "this.writeOAM8",
+                                            "this.writeROM08",
+                                            "this.writeROM18",
+                                            "this.writeROM28",
+                                            "this.writeSRAM8"
+                                            ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead160 = function () {
     return this.compileMemoryReadDispatch([
-                                       this.memory.readUnused16,
-                                       this.memory.readExternalWRAM16,
-                                       this.memory.readInternalWRAM16,
-                                       this.memory.readIODispatch16,
-                                       this.memory.readPalette16,
-                                       this.memory.readVRAM16,
-                                       this.memory.readOAM16,
-                                       this.memory.readROM016,
-                                       this.memory.readROM116,
-                                       this.memory.readROM216,
-                                       this.memory.readSRAM16,
-                                       (this.memory.IOCore.BIOSFound) ? this.memory.readBIOS16 : this.memory.readUnused16
+                                       "this.readUnused16",
+                                       "this.readInternalWRAM16",
+                                       "this.readInternalWRAM16",
+                                       "this.readIODispatch16",
+                                       "this.readPalette16",
+                                       "this.readVRAM16",
+                                       "this.readOAM16",
+                                       "this.readROM016",
+                                       "this.readROM116",
+                                       "this.readROM216",
+                                       "this.readSRAM16",
+                                       (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
                                        ]);
 }
-GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead16 = function () {
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead161 = function () {
     return this.compileMemoryReadDispatch([
-                                           this.memory.readUnused16,
-                                           this.memory.readExternalWRAM16,
-                                           this.memory.readInternalWRAM16,
-                                           this.memory.readIODispatch16,
-                                           this.memory.readPalette16,
-                                           this.memory.readVRAM16,
-                                           this.memory.readOAM16,
-                                           this.memory.readROM016CPU,
-                                           this.memory.readROM116CPU,
-                                           this.memory.readROM216CPU,
-                                           this.memory.readSRAM16,
-                                           (this.memory.IOCore.BIOSFound) ? this.memory.readBIOS16 : this.memory.readUnused16
+                                           "this.readUnused16",
+                                           "this.readExternalWRAM16",
+                                           "this.readInternalWRAM16",
+                                           "this.readIODispatch16",
+                                           "this.readPalette16",
+                                           "this.readVRAM16",
+                                           "this.readOAM16",
+                                           "this.readROM016",
+                                           "this.readROM116",
+                                           "this.readROM216",
+                                           "this.readSRAM16",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
                                            ]);
 }
-GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite16 = function () {
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead162 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused16",
+                                           "this.readUnused16",
+                                           "this.readUnused16",
+                                           "this.readIODispatch16",
+                                           "this.readPalette16",
+                                           "this.readVRAM16",
+                                           "this.readOAM16",
+                                           "this.readROM016",
+                                           "this.readROM116",
+                                           "this.readROM216",
+                                           "this.readSRAM16",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead160 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused16",
+                                           "this.readInternalWRAM16",
+                                           "this.readInternalWRAM16",
+                                           "this.readIODispatch16",
+                                           "this.readPalette16",
+                                           "this.readVRAM16",
+                                           "this.readOAM16",
+                                           "this.readROM016CPU",
+                                           "this.readROM116CPU",
+                                           "this.readROM216CPU",
+                                           "this.readSRAM16",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead161 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused16",
+                                           "this.readExternalWRAM16",
+                                           "this.readInternalWRAM16",
+                                           "this.readIODispatch16",
+                                           "this.readPalette16",
+                                           "this.readVRAM16",
+                                           "this.readOAM16",
+                                           "this.readROM016CPU",
+                                           "this.readROM116CPU",
+                                           "this.readROM216CPU",
+                                           "this.readSRAM16",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead162 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused16",
+                                           "this.readUnused16",
+                                           "this.readUnused16",
+                                           "this.readIODispatch16",
+                                           "this.readPalette16",
+                                           "this.readVRAM16",
+                                           "this.readOAM16",
+                                           "this.readROM016CPU",
+                                           "this.readROM116CPU",
+                                           "this.readROM216CPU",
+                                           "this.readSRAM16",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite160 = function () {
     return this.compileMemoryWriteDispatch([
-                                       this.memory.writeUnused16,
-                                       this.memory.writeExternalWRAM16,
-                                       this.memory.writeInternalWRAM16,
-                                       this.memory.writeIODispatch16,
-                                       this.memory.writePalette16,
-                                       this.memory.writeVRAM16,
-                                       this.memory.writeOAM16,
-                                       this.memory.writeROM016,
-                                       this.memory.writeROM116,
-                                       this.memory.writeROM216,
-                                       this.memory.writeSRAM16
+                                       "this.writeUnused16",
+                                       "this.writeInternalWRAM16",
+                                       "this.writeInternalWRAM16",
+                                       "this.writeIODispatch16",
+                                       "this.writePalette16",
+                                       "this.writeVRAM16",
+                                       "this.writeOAM16",
+                                       "this.writeROM016",
+                                       "this.writeROM116",
+                                       "this.writeROM216",
+                                       "this.writeSRAM16"
                                        ]);
 }
-GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead32 = function () {
-    return this.compileMemoryReadDispatch([
-                                           this.memory.readUnused32,
-                                           this.memory.readExternalWRAM32,
-                                           this.memory.readInternalWRAM32,
-                                           this.memory.readIODispatch32,
-                                           this.memory.readPalette32,
-                                           this.memory.readVRAM32,
-                                           this.memory.readOAM32,
-                                           this.memory.readROM032,
-                                           this.memory.readROM132,
-                                           this.memory.readROM232,
-                                           this.memory.readSRAM32,
-                                           (this.memory.IOCore.BIOSFound) ? this.memory.readBIOS32 : this.memory.readUnused32
-                                           ]);
-}
-GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead32 = function () {
-    return this.compileMemoryReadDispatch([
-                                           this.memory.readUnused32,
-                                           this.memory.readExternalWRAM32,
-                                           this.memory.readInternalWRAM32,
-                                           this.memory.readIODispatch32,
-                                           this.memory.readPalette32,
-                                           this.memory.readVRAM32,
-                                           this.memory.readOAM32,
-                                           this.memory.readROM032CPU,
-                                           this.memory.readROM132CPU,
-                                           this.memory.readROM232CPU,
-                                           this.memory.readSRAM32,
-                                           (this.memory.IOCore.BIOSFound) ? this.memory.readBIOS32 : this.memory.readUnused32
-                                           ]);
-}
-GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite32 = function () {
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite161 = function () {
     return this.compileMemoryWriteDispatch([
-                                            this.memory.writeUnused32,
-                                            this.memory.writeExternalWRAM32,
-                                           this.memory.writeInternalWRAM32,
-                                            this.memory.writeIODispatch32,
-                                            this.memory.writePalette32,
-                                            this.memory.writeVRAM32,
-                                            this.memory.writeOAM32,
-                                            this.memory.writeROM032,
-                                            this.memory.writeROM132,
-                                            this.memory.writeROM232,
-                                            this.memory.writeSRAM32
+                                            "this.writeUnused16",
+                                            "this.writeExternalWRAM16",
+                                            "this.writeInternalWRAM16",
+                                            "this.writeIODispatch16",
+                                            "this.writePalette16",
+                                            "this.writeVRAM16",
+                                            "this.writeOAM16",
+                                            "this.writeROM016",
+                                            "this.writeROM116",
+                                            "this.writeROM216",
+                                            "this.writeSRAM16"
+                                            ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite162 = function () {
+    return this.compileMemoryWriteDispatch([
+                                            "this.writeUnused16",
+                                            "this.writeUnused16",
+                                            "this.writeUnused16",
+                                            "this.writeIODispatch16",
+                                            "this.writePalette16",
+                                            "this.writeVRAM16",
+                                            "this.writeOAM16",
+                                            "this.writeROM016",
+                                            "this.writeROM116",
+                                            "this.writeROM216",
+                                            "this.writeSRAM16"
+                                            ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead320 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused32",
+                                           "this.readInternalWRAM32",
+                                           "this.readInternalWRAM32",
+                                           "this.readIODispatch32",
+                                           "this.readPalette32",
+                                           "this.readVRAM32",
+                                           "this.readOAM32",
+                                           "this.readROM032",
+                                           "this.readROM132",
+                                           "this.readROM232",
+                                           "this.readSRAM32",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead321 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused32",
+                                           "this.readExternalWRAM32",
+                                           "this.readInternalWRAM32",
+                                           "this.readIODispatch32",
+                                           "this.readPalette32",
+                                           "this.readVRAM32",
+                                           "this.readOAM32",
+                                           "this.readROM032",
+                                           "this.readROM132",
+                                           "this.readROM232",
+                                           "this.readSRAM32",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead322 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused32",
+                                           "this.readUnused32",
+                                           "this.readUnused32",
+                                           "this.readIODispatch32",
+                                           "this.readPalette32",
+                                           "this.readVRAM32",
+                                           "this.readOAM32",
+                                           "this.readROM032",
+                                           "this.readROM132",
+                                           "this.readROM232",
+                                           "this.readSRAM32",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead320 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused32",
+                                           "this.readInternalWRAM32",
+                                           "this.readInternalWRAM32",
+                                           "this.readIODispatch32",
+                                           "this.readPalette32",
+                                           "this.readVRAM32",
+                                           "this.readOAM32",
+                                           "this.readROM032CPU",
+                                           "this.readROM132CPU",
+                                           "this.readROM232CPU",
+                                           "this.readSRAM32",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead321 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused32",
+                                           "this.readExternalWRAM32",
+                                           "this.readInternalWRAM32",
+                                           "this.readIODispatch32",
+                                           "this.readPalette32",
+                                           "this.readVRAM32",
+                                           "this.readOAM32",
+                                           "this.readROM032CPU",
+                                           "this.readROM132CPU",
+                                           "this.readROM232CPU",
+                                           "this.readSRAM32",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead322 = function () {
+    return this.compileMemoryReadDispatch([
+                                           "this.readUnused32",
+                                           "this.readUnused32",
+                                           "this.readUnused32",
+                                           "this.readIODispatch32",
+                                           "this.readPalette32",
+                                           "this.readVRAM32",
+                                           "this.readOAM32",
+                                           "this.readROM032CPU",
+                                           "this.readROM132CPU",
+                                           "this.readROM232CPU",
+                                           "this.readSRAM32",
+                                           (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
+                                           ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite320 = function () {
+    return this.compileMemoryWriteDispatch([
+                                            "this.writeUnused32",
+                                            "this.writeInternalWRAM32",
+                                            "this.writeInternalWRAM32",
+                                            "this.writeIODispatch32",
+                                            "this.writePalette32",
+                                            "this.writeVRAM32",
+                                            "this.writeOAM32",
+                                            "this.writeROM032",
+                                            "this.writeROM132",
+                                            "this.writeROM232",
+                                            "this.writeSRAM32"
+                                            ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite321 = function () {
+    return this.compileMemoryWriteDispatch([
+                                            "this.writeUnused32",
+                                            "this.writeExternalWRAM32",
+                                            "this.writeInternalWRAM32",
+                                            "this.writeIODispatch32",
+                                            "this.writePalette32",
+                                            "this.writeVRAM32",
+                                            "this.writeOAM32",
+                                            "this.writeROM032",
+                                            "this.writeROM132",
+                                            "this.writeROM232",
+                                            "this.writeSRAM32"
+                                            ]);
+}
+GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite322 = function () {
+    return this.compileMemoryWriteDispatch([
+                                            "this.writeUnused32",
+                                            "this.writeUnused32",
+                                            "this.writeUnused32",
+                                            "this.writeIODispatch32",
+                                            "this.writePalette32",
+                                            "this.writeVRAM32",
+                                            "this.writeOAM32",
+                                            "this.writeROM032",
+                                            "this.writeROM132",
+                                            "this.writeROM232",
+                                            "this.writeSRAM32"
                                             ]);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryReadDispatch = function (readCalls) {
@@ -156,121 +406,91 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryReadDispatch = func
     var readROM2 = readCalls[9];
     var readSRAM = readCalls[10];
     var readBIOS = readCalls[11];
+    var code = "address = address | 0;var data = 0;switch (address >> 24) {";
     /*
      Decoder for the nibble at bits 24-27
-     (Top 4 bits of the address is not used,
+     (Top 4 bits of the address falls through to default (unused),
      so the next nibble down is used for dispatch.):
      */
-    var memoryReader = [
-                        /*
-                         BIOS Area (00000000-00003FFF)
-                         Unused (00004000-01FFFFFF)
-                         */
-                        readBIOS,
-                        /*
-                         Unused (00004000-01FFFFFF)
-                         */
-                        readUnused,
-                        /*
-                         WRAM - On-board Work RAM (02000000-0203FFFF)
-                         Unused (02040000-02FFFFFF)
-                         */
-                        readExternalWRAM,
-                        /*
-                         WRAM - In-Chip Work RAM (03000000-03007FFF)
-                         Unused (03008000-03FFFFFF)
-                         */
-                        readInternalWRAM,
-                        /*
-                         I/O Registers (04000000-040003FE)
-                         Unused (04000400-04FFFFFF)
-                         */
-                        readIODispatch,
-                        /*
-                         BG/OBJ Palette RAM (05000000-050003FF)
-                         Unused (05000400-05FFFFFF)
-                         */
-                        readPalette,
-                        /*
-                         VRAM - Video RAM (06000000-06017FFF)
-                         Unused (06018000-06FFFFFF)
-                         */
-                        readVRAM,
-                        /*
-                         OAM - OBJ Attributes (07000000-070003FF)
-                         Unused (07000400-07FFFFFF)
-                         */
-                        readOAM,
-                        /*
-                         Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
-                         */
-                        readROM0,
-                        /*
-                         Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
-                         */
-                        readROM0,
-                        /*
-                         Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
-                         */
-                        readROM1,
-                        /*
-                         Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
-                         */
-                        readROM1,
-                        /*
-                         Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
-                         */
-                        readROM2,
-                        /*
-                         Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
-                         */
-                        readROM2,
-                        /*
-                         Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
-                         */
-                        readSRAM,
-                        /*
-                         Unused (0E010000-FFFFFFFF)
-                         */
-                        readSRAM,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused,
-                        readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused, readUnused
-                        ];
-    try {
-        Object.defineProperty(memoryReader, "length", {writable: false});
-    }
-    catch (error) {
-        //Some browsers throw here....
-    }
-    return memoryReader;
+    /*
+     BIOS Area (00000000-00003FFF)
+     Unused (00004000-01FFFFFF)
+     */
+    code += "case 0:{data = " + readBIOS + "(address | 0) | 0;break};";
+    /*
+     Unused (00004000-01FFFFFF)
+     */
+    code += "case 0x1:{data = " + readUnused + "(address | 0) | 0;break};";
+    /*
+     WRAM - On-board Work RAM (02000000-0203FFFF)
+     Unused (02040000-02FFFFFF)
+     */
+    code += "case 0x2:{data = " + readExternalWRAM + "(address | 0) | 0;break};";
+    /*
+     WRAM - In-Chip Work RAM (03000000-03007FFF)
+     Unused (03008000-03FFFFFF)
+     */
+    code += "case 0x3:{data = " + readInternalWRAM + "(address | 0) | 0;break};";
+    /*
+     I/O Registers (04000000-040003FE)
+     Unused (04000400-04FFFFFF)
+     */
+    code += "case 0x4:{data = " + readIODispatch + "(address | 0) | 0;break};";
+    /*
+     BG/OBJ Palette RAM (05000000-050003FF)
+     Unused (05000400-05FFFFFF)
+     */
+    code += "case 0x5:{data = " + readPalette + "(address | 0) | 0;break};";
+    /*
+     VRAM - Video RAM (06000000-06017FFF)
+     Unused (06018000-06FFFFFF)
+     */
+    code += "case 0x6:{data = " + readVRAM + "(address | 0) | 0;break};";
+    /*
+     OAM - OBJ Attributes (07000000-070003FF)
+     Unused (07000400-07FFFFFF)
+     */
+    code += "case 0x7:{data = " + readOAM + "(address | 0) | 0;break};";
+    /*
+     Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
+     */
+    code += "case 0x8:{data = " + readROM0 + "(address | 0) | 0;break};";
+    /*
+     Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
+     */
+    code += "case 0x9:{data = " + readROM0 + "(address | 0) | 0;break};";
+    /*
+     Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
+     */
+    code += "case 0xA:{data = " + readROM1 + "(address | 0) | 0;break};";
+    /*
+     Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
+     */
+    code += "case 0xB:{data = " + readROM1 + "(address | 0) | 0;break};";
+    /*
+     Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
+     */
+    code += "case 0xC:{data = " + readROM2 + "(address | 0) | 0;break};";
+    /*
+     Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
+     */
+    code += "case 0xD:{data = " + readROM2 + "(address | 0) | 0;break};";
+    /*
+     Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+     */
+    code += "case 0xE:{data = " + readSRAM + "(address | 0) | 0;break};";
+    /*
+     Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+     --UNDOCUMENTED MIRROR--
+     */
+    code += "case 0xF:{data = " + readSRAM + "(address | 0) | 0;break};";
+    /*
+     Unused (0F000000-FFFFFFFF)
+     */
+    code += "default:{data = " + readUnused + "(address | 0) | 0};";
+    //Generate the function:
+    code += "}return data | 0;";
+    return Function("address", code);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = function (writeCalls) {
     var writeUnused = writeCalls[0];
@@ -284,121 +504,91 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = fun
     var writeROM1 = writeCalls[8];
     var writeROM2 = writeCalls[9];
     var writeSRAM = writeCalls[10];
+    var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
     /*
      Decoder for the nibble at bits 24-27
-     (Top 4 bits of the address is not used,
+     (Top 4 bits of the address falls through to default (unused),
      so the next nibble down is used for dispatch.):
      */
-    var memoryWriter = [
-                        /*
-                         BIOS Area (00000000-00003FFF)
-                         Unused (00004000-01FFFFFF)
-                         */
-                        writeUnused,
-                        /*
-                         Unused (00004000-01FFFFFF)
-                         */
-                        writeUnused,
-                        /*
-                         WRAM - On-board Work RAM (02000000-0203FFFF)
-                         Unused (02040000-02FFFFFF)
-                         */
-                        writeExternalWRAM,
-                        /*
-                         WRAM - In-Chip Work RAM (03000000-03007FFF)
-                         Unused (03008000-03FFFFFF)
-                         */
-                        writeInternalWRAM,
-                        /*
-                         I/O Registers (04000000-040003FE)
-                         Unused (04000400-04FFFFFF)
-                         */
-                        writeIODispatch,
-                        /*
-                         BG/OBJ Palette RAM (05000000-050003FF)
-                         Unused (05000400-05FFFFFF)
-                         */
-                        writePalette,
-                        /*
-                         VRAM - Video RAM (06000000-06017FFF)
-                         Unused (06018000-06FFFFFF)
-                         */
-                        writeVRAM,
-                        /*
-                         OAM - OBJ Attributes (07000000-070003FF)
-                         Unused (07000400-07FFFFFF)
-                         */
-                        writeOAM,
-                        /*
-                         Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
-                         */
-                        writeROM0,
-                        /*
-                         Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
-                         */
-                        writeROM0,
-                        /*
-                         Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
-                         */
-                        writeROM1,
-                        /*
-                         Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
-                         */
-                        writeROM1,
-                        /*
-                         Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
-                         */
-                        writeROM2,
-                        /*
-                         Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
-                         */
-                        writeROM2,
-                        /*
-                         Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
-                         */
-                        writeSRAM,
-                        /*
-                         Unused (0E010000-FFFFFFFF)
-                         */
-                        writeSRAM,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused,
-                        writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused, writeUnused
-                        ];
-    try {
-        Object.defineProperty(memoryWriter, "length", {writable: false});
-    }
-    catch (error) {
-        //Some browsers throw here....
-    }
-    return memoryWriter;
+    /*
+     BIOS Area (00000000-00003FFF)
+     Unused (00004000-01FFFFFF)
+     */
+    code += "case 0:{" + writeUnused + "(address | 0, data | 0);break};";
+    /*
+     Unused (00004000-01FFFFFF)
+     */
+    code += "case 0x1:{" + writeUnused + "(address | 0, data | 0);break};";
+    /*
+     WRAM - On-board Work RAM (02000000-0203FFFF)
+     Unused (02040000-02FFFFFF)
+     */
+    code += "case 0x2:{" + writeExternalWRAM + "(address | 0, data | 0);break};";
+    /*
+     WRAM - In-Chip Work RAM (03000000-03007FFF)
+     Unused (03008000-03FFFFFF)
+     */
+    code += "case 0x3:{" + writeInternalWRAM + "(address | 0, data | 0);break};";
+    /*
+     I/O Registers (04000000-040003FE)
+     Unused (04000400-04FFFFFF)
+     */
+    code += "case 0x4:{" + writeIODispatch + "(address | 0, data | 0);break};";
+    /*
+     BG/OBJ Palette RAM (05000000-050003FF)
+     Unused (05000400-05FFFFFF)
+     */
+    code += "case 0x5:{" + writePalette + "(address | 0, data | 0);break};";
+    /*
+     VRAM - Video RAM (06000000-06017FFF)
+     Unused (06018000-06FFFFFF)
+     */
+    code += "case 0x6:{" + writeVRAM + "(address | 0, data | 0);break};";
+    /*
+     OAM - OBJ Attributes (07000000-070003FF)
+     Unused (07000400-07FFFFFF)
+     */
+    code += "case 0x7:{" + writeOAM + "(address | 0, data | 0);break};";
+    /*
+     Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
+     */
+    code += "case 0x8:{" + writeROM0 + "(address | 0, data | 0);break};";
+    /*
+     Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
+     */
+    code += "case 0x9:{" + writeROM0 + "(address | 0, data | 0);break};";
+    /*
+     Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
+     */
+    code += "case 0xA:{" + writeROM1 + "(address | 0, data | 0);break};";
+    /*
+     Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
+     */
+    code += "case 0xB:{" + writeROM1 + "(address | 0, data | 0);break};";
+    /*
+     Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
+     */
+    code += "case 0xC:{" + writeROM2 + "(address | 0, data | 0);break};";
+    /*
+     Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
+     */
+    code += "case 0xD:{" + writeROM2 + "(address | 0, data | 0);break};";
+    /*
+     Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+     */
+    code += "case 0xE:{" + writeSRAM + "(address | 0, data | 0);break};";
+    /*
+     Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+     --UNDOCUMENTED MIRROR--
+     */
+    code += "case 0xF:{" + writeSRAM + "(address | 0, data | 0);break};";
+    /*
+     Unused (0F000000-FFFFFFFF)
+     */
+    code += "default:{" + writeUnused + "(address | 0, data | 0)}";
+    //Generate the function:
+    code += "}";
+    return Function("address", "data", code);
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO8 = function () {
     var readIO = [];
@@ -484,13 +674,13 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO8 = function
         return parentObj.gfx.readWINOUT1() | 0;
     }
     //400004Ch - MOSAIC - Mosaic Size (W)
-    readIO[0x4C] = this.encapsulateUnusedIORead(this.memory.readUnused0, 0x4C);
+    readIO[0x4C] = this.memory.readUnused0;
     //400004Dh - MOSAIC - Mosaic Size (W)
-    readIO[0x4D] = this.encapsulateUnusedIORead(this.memory.readUnused1, 0x4D);
+    readIO[0x4D] = this.memory.readUnused1;
     //400004Eh - NOT USED - ZERO
-    readIO[0x4E] = this.encapsulateUnusedIORead(this.memory.readUnused2, 0x4E);
+    readIO[0x4E] = this.memory.readUnused2;
     //400004Fh - NOT USED - ZERO
-    readIO[0x4F] = this.encapsulateUnusedIORead(this.memory.readUnused3, 0x4F);
+    readIO[0x4F] = this.memory.readUnused3;
     //4000050h - BLDCNT - Color Special Effects Selection (R/W)
     readIO[0x50] = function (parentObj) {
         return parentObj.gfx.readBLDCNT0() | 0;
@@ -654,13 +844,13 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO8 = function
     //400008Bh - NOT USED - ZERO
     readIO[0x8B] = this.memory.readZero;
     //400008Ch - NOT USED - GLITCHED
-    readIO[0x8C] = this.encapsulateUnusedIORead(this.memory.readUnused0, 0x8C);
+    readIO[0x8C] = this.memory.readUnused0;
     //400008Dh - NOT USED - GLITCHED
-    readIO[0x8D] = this.encapsulateUnusedIORead(this.memory.readUnused1, 0x8D);
+    readIO[0x8D] = this.memory.readUnused1;
     //400008Eh - NOT USED - GLITCHED
-    readIO[0x8E] = this.encapsulateUnusedIORead(this.memory.readUnused2, 0x8E);
+    readIO[0x8E] = this.memory.readUnused2;
     //400008Fh - NOT USED - GLITCHED
-    readIO[0x8F] = this.encapsulateUnusedIORead(this.memory.readUnused3, 0x8F);
+    readIO[0x8F] = this.memory.readUnused3;
     //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
     readIO[0x90] = function (parentObj) {
         parentObj.IOCore.updateTimerClocking();
@@ -1110,9 +1300,9 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO16 = functio
         return parentObj.gfx.readWINOUT0() | (parentObj.gfx.readWINOUT1() << 8);
     }
     //400004Ch - MOSAIC - Mosaic Size (W)
-    readIO[0x4C >> 1] = this.encapsulateUnusedIORead(this.memory.readUnused16, 0x4C >> 1);
+    readIO[0x4C >> 1] = this.memory.readUnused16IO;
     //400004Eh - NOT USED - ZERO
-    readIO[0x4E >> 1] = this.encapsulateUnusedIORead(this.memory.readUnused16, 0x4E >> 1);
+    readIO[0x4E >> 1] = this.memory.readUnused16IO;
     //4000050h - BLDCNT - Color Special Effects Selection (R/W)
     readIO[0x50 >> 1] = function (parentObj) {
         return parentObj.gfx.readBLDCNT0() | (parentObj.gfx.readBLDCNT1() << 8);
@@ -1212,9 +1402,9 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO16 = functio
     //400008Ah - NOT USED - ZERO
     readIO[0x8A >> 1] = this.memory.readZero;
     //400008Ch - NOT USED - GLITCHED
-    readIO[0x8C >> 1] = this.encapsulateUnusedIORead(this.memory.readUnused16, 0x8C >> 1);
+    readIO[0x8C >> 1] = this.memory.readUnused16IO;
     //400008Eh - NOT USED - GLITCHED
-    readIO[0x8E >> 1] = this.encapsulateUnusedIORead(this.memory.readUnused16, 0x8E >> 1);
+    readIO[0x8E >> 1] = this.memory.readUnused16IO;
     //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
     readIO[0x90 >> 1] = function (parentObj) {
         parentObj.IOCore.updateTimerClocking();
@@ -1481,7 +1671,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO32 = functio
         (parentObj.gfx.readWINOUT1() << 24);
     }
     //400004Ch - MOSAIC - Mosaic Size (W)
-    readIO[0x4C >> 2] = this.encapsulateUnusedIORead(this.memory.readUnused32, 0x4C >> 2);
+    readIO[0x4C >> 2] = this.memory.readUnused32IO;
     //4000050h - BLDCNT - Color Special Effects Selection (R/W)
     //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
     readIO[0x50 >> 2] = function (parentObj) {
@@ -1570,7 +1760,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO32 = functio
     }
     //400008Ch - NOT USED - GLITCHED
     //400008Eh - NOT USED - GLITCHED
-    readIO[0x8C >> 2] = this.encapsulateUnusedIORead(this.memory.readUnused32, 0x8C >> 2);
+    readIO[0x8C >> 2] = this.memory.readUnused32IO;
     //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
     //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
     readIO[0x90 >> 2] = function (parentObj) {
@@ -1777,28 +1967,22 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryReadIO32 = functio
 GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused8 = function (readIO, from, to) {
     //Fill in slots of the i/o read table:
     while (from <= to) {
-        readIO[from++] = this.encapsulateUnusedIORead(this.memory.readUnused0, from);
-        readIO[from++] = this.encapsulateUnusedIORead(this.memory.readUnused1, from);
-        readIO[from++] = this.encapsulateUnusedIORead(this.memory.readUnused2, from);
-        readIO[from++] = this.encapsulateUnusedIORead(this.memory.readUnused3, from);
+        readIO[from++] = this.memory.readUnused0;
+        readIO[from++] = this.memory.readUnused1;
+        readIO[from++] = this.memory.readUnused2;
+        readIO[from++] = this.memory.readUnused3;
     }
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused16 = function (readIO, from, to) {
     //Fill in slots of the i/o read table:
     while (from <= to) {
-        readIO[from++] = this.encapsulateUnusedIORead(this.memory.readUnused16, from);
+        readIO[from++] = this.memory.readUnused16IO;
     }
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.fillReadTableUnused32 = function (readIO, from, to) {
     //Fill in slots of the i/o read table:
     while (from <= to) {
-        readIO[from++] = this.encapsulateUnusedIORead(this.memory.readUnused32, from);
-    }
-}
-GameBoyAdvanceMemoryDispatchGenerator.prototype.encapsulateUnusedIORead = function (unusedFunc, address) {
-    address = address | 0x4000000;
-    return function (parentObj) {
-        return unusedFunc(parentObj, address | 0) | 0;
+        readIO[from++] = this.memory.readUnused32IO;
     }
 }
 GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWriteIO8 = function () {
