@@ -27,8 +27,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead80 = function 
                                                "this.readPalette8",
                                                "this.readVRAM8",
                                                "this.readOAM8",
-                                               "this.readROM08",
-                                               "this.readROM18",
+                                               "this.readROM8",
                                                "this.readROM28",
                                                "this.readSRAM8",
                                                (this.memory.IOCore.BIOSFound) ? "this.readBIOS8" : "this.readUnused8"
@@ -43,8 +42,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead81 = function 
                                            "this.readPalette8",
                                            "this.readVRAM8",
                                            "this.readOAM8",
-                                           "this.readROM08",
-                                           "this.readROM18",
+                                           "this.readROM8",
                                            "this.readROM28",
                                            "this.readSRAM8",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS8" : "this.readUnused8"
@@ -59,8 +57,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead82 = function 
                                            "this.readPalette8",
                                            "this.readVRAM8",
                                            "this.readOAM8",
-                                           "this.readROM08",
-                                           "this.readROM18",
+                                           "this.readROM8",
                                            "this.readROM28",
                                            "this.readSRAM8",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS8" : "this.readUnused8"
@@ -75,9 +72,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite80 = function
                                             "this.writePalette8",
                                             "this.writeVRAM8",
                                             "this.writeOAM8",
-                                            "this.writeROM08",
-                                            "this.writeROM18",
-                                            "this.writeROM28",
+                                            "this.writeROM8",
                                             "this.writeSRAM8"
                                             ]);
 }
@@ -90,9 +85,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite81 = function
                                             "this.writePalette8",
                                             "this.writeVRAM8",
                                             "this.writeOAM8",
-                                            "this.writeROM08",
-                                            "this.writeROM18",
-                                            "this.writeROM28",
+                                            "this.writeROM8",
                                             "this.writeSRAM8"
                                             ]);
 }
@@ -105,9 +98,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite82 = function
                                             "this.writePalette8",
                                             "this.writeVRAM8",
                                             "this.writeOAM8",
-                                            "this.writeROM08",
-                                            "this.writeROM18",
-                                            "this.writeROM28",
+                                            "this.writeROM8",
                                             "this.writeSRAM8"
                                             ]);
 }
@@ -120,8 +111,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead160 = function
                                        "this.readPalette16",
                                        "this.readVRAM16",
                                        "this.readOAM16",
-                                       "this.readROM016",
-                                       "this.readROM116",
+                                       "this.readROM16",
                                        "this.readROM216",
                                        "this.readSRAM16",
                                        (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
@@ -136,8 +126,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead161 = function
                                            "this.readPalette16",
                                            "this.readVRAM16",
                                            "this.readOAM16",
-                                           "this.readROM016",
-                                           "this.readROM116",
+                                           "this.readROM16",
                                            "this.readROM216",
                                            "this.readSRAM16",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
@@ -152,8 +141,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead162 = function
                                            "this.readPalette16",
                                            "this.readVRAM16",
                                            "this.readOAM16",
-                                           "this.readROM016",
-                                           "this.readROM116",
+                                           "this.readROM16",
                                            "this.readROM216",
                                            "this.readSRAM16",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS16" : "this.readUnused16"
@@ -168,8 +156,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead160
                                            "this.readPalette16CPU",
                                            "this.readVRAM16CPU",
                                            "this.readOAM16CPU",
-                                           "this.readROM016CPU",
-                                           "this.readROM116CPU",
+                                           "this.readROM16CPU",
                                            "this.readROM216CPU",
                                            "this.readSRAM16CPU",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS16CPU" : "this.readUnused16CPU"
@@ -184,8 +171,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead161
                                            "this.readPalette16CPU",
                                            "this.readVRAM16CPU",
                                            "this.readOAM16CPU",
-                                           "this.readROM016CPU",
-                                           "this.readROM116CPU",
+                                           "this.readROM16CPU",
                                            "this.readROM216CPU",
                                            "this.readSRAM16CPU",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS16CPU" : "this.readUnused16CPU"
@@ -200,8 +186,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead162
                                            "this.readPalette16CPU",
                                            "this.readVRAM16CPU",
                                            "this.readOAM16CPU",
-                                           "this.readROM016CPU",
-                                           "this.readROM116CPU",
+                                           "this.readROM16CPU",
                                            "this.readROM216CPU",
                                            "this.readSRAM16CPU",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS16CPU" : "this.readUnused16CPU"
@@ -216,9 +201,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite160 = functio
                                        "this.writePalette16",
                                        "this.writeVRAM16",
                                        "this.writeOAM16",
-                                       "this.writeROM016",
-                                       "this.writeROM116",
-                                       "this.writeROM216",
+                                       "this.writeROM16",
                                        "this.writeSRAM16"
                                        ]);
 }
@@ -231,9 +214,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite161 = functio
                                             "this.writePalette16",
                                             "this.writeVRAM16",
                                             "this.writeOAM16",
-                                            "this.writeROM016",
-                                            "this.writeROM116",
-                                            "this.writeROM216",
+                                            "this.writeROM16",
                                             "this.writeSRAM16"
                                             ]);
 }
@@ -246,9 +227,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite162 = functio
                                             "this.writePalette16",
                                             "this.writeVRAM16",
                                             "this.writeOAM16",
-                                            "this.writeROM016",
-                                            "this.writeROM116",
-                                            "this.writeROM216",
+                                            "this.writeROM16",
                                             "this.writeSRAM16"
                                             ]);
 }
@@ -261,8 +240,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead320 = function
                                            "this.readPalette32",
                                            "this.readVRAM32",
                                            "this.readOAM32",
-                                           "this.readROM032",
-                                           "this.readROM132",
+                                           "this.readROM32",
                                            "this.readROM232",
                                            "this.readSRAM32",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
@@ -277,8 +255,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead321 = function
                                            "this.readPalette32",
                                            "this.readVRAM32",
                                            "this.readOAM32",
-                                           "this.readROM032",
-                                           "this.readROM132",
+                                           "this.readROM32",
                                            "this.readROM232",
                                            "this.readSRAM32",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
@@ -293,8 +270,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryRead322 = function
                                            "this.readPalette32",
                                            "this.readVRAM32",
                                            "this.readOAM32",
-                                           "this.readROM032",
-                                           "this.readROM132",
+                                           "this.readROM32",
                                            "this.readROM232",
                                            "this.readSRAM32",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS32" : "this.readUnused32"
@@ -309,8 +285,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead320
                                            "this.readPalette32CPU",
                                            "this.readVRAM32CPU",
                                            "this.readOAM32CPU",
-                                           "this.readROM032CPU",
-                                           "this.readROM132CPU",
+                                           "this.readROM32CPU",
                                            "this.readROM232CPU",
                                            "this.readSRAM32CPU",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS32CPU" : "this.readUnused32CPU"
@@ -325,8 +300,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead321
                                            "this.readPalette32CPU",
                                            "this.readVRAM32CPU",
                                            "this.readOAM32CPU",
-                                           "this.readROM032CPU",
-                                           "this.readROM132CPU",
+                                           "this.readROM32CPU",
                                            "this.readROM232CPU",
                                            "this.readSRAM32CPU",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS32CPU" : "this.readUnused32CPU"
@@ -341,8 +315,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryInstructionRead322
                                            "this.readPalette32CPU",
                                            "this.readVRAM32CPU",
                                            "this.readOAM32CPU",
-                                           "this.readROM032CPU",
-                                           "this.readROM132CPU",
+                                           "this.readROM32CPU",
                                            "this.readROM232CPU",
                                            "this.readSRAM32CPU",
                                            (this.memory.IOCore.BIOSFound) ? "this.readBIOS32CPU" : "this.readUnused32CPU"
@@ -357,9 +330,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite320 = functio
                                             "this.writePalette32",
                                             "this.writeVRAM32",
                                             "this.writeOAM32",
-                                            "this.writeROM032",
-                                            "this.writeROM132",
-                                            "this.writeROM232",
+                                            "this.writeROM32",
                                             "this.writeSRAM32"
                                             ]);
 }
@@ -372,9 +343,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite321 = functio
                                             "this.writePalette32",
                                             "this.writeVRAM32",
                                             "this.writeOAM32",
-                                            "this.writeROM032",
-                                            "this.writeROM132",
-                                            "this.writeROM232",
+                                            "this.writeROM32",
                                             "this.writeSRAM32"
                                             ]);
 }
@@ -387,9 +356,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.generateMemoryWrite322 = functio
                                             "this.writePalette32",
                                             "this.writeVRAM32",
                                             "this.writeOAM32",
-                                            "this.writeROM032",
-                                            "this.writeROM132",
-                                            "this.writeROM232",
+                                            "this.writeROM32",
                                             "this.writeSRAM32"
                                             ]);
 }
@@ -401,11 +368,10 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryReadDispatch = func
     var readPalette = readCalls[4];
     var readVRAM = readCalls[5];
     var readOAM = readCalls[6];
-    var readROM0 = readCalls[7];
-    var readROM1 = readCalls[8];
-    var readROM2 = readCalls[9];
-    var readSRAM = readCalls[10];
-    var readBIOS = readCalls[11];
+    var readROM = readCalls[7];
+    var readROM2 = readCalls[8];
+    var readSRAM = readCalls[9];
+    var readBIOS = readCalls[10];
     var code = "address = address | 0;var data = 0;switch (address >> 24) {";
     /*
      Decoder for the nibble at bits 24-27
@@ -454,23 +420,23 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryReadDispatch = func
     /*
      Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
      */
-    code += "case 0x8:{data = " + readROM0 + "(address | 0) | 0;break};";
+    code += "case 0x8:";
     /*
      Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
      */
-    code += "case 0x9:{data = " + readROM0 + "(address | 0) | 0;break};";
+    code += "case 0x9:";
     /*
      Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
      */
-    code += "case 0xA:{data = " + readROM1 + "(address | 0) | 0;break};";
+    code += "case 0xA:";
     /*
      Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
      */
-    code += "case 0xB:{data = " + readROM1 + "(address | 0) | 0;break};";
+    code += "case 0xB:{data = " + readROM + "(address | 0) | 0;break};";
     /*
      Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
      */
-    code += "case 0xC:{data = " + readROM2 + "(address | 0) | 0;break};";
+    code += "case 0xC:";
     /*
      Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
      */
@@ -500,10 +466,8 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = fun
     var writePalette = writeCalls[4];
     var writeVRAM = writeCalls[5];
     var writeOAM = writeCalls[6];
-    var writeROM0 = writeCalls[7];
-    var writeROM1 = writeCalls[8];
-    var writeROM2 = writeCalls[9];
-    var writeSRAM = writeCalls[10];
+    var writeROM = writeCalls[7];
+    var writeSRAM = writeCalls[8];
     var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
     /*
      Decoder for the nibble at bits 24-27
@@ -514,7 +478,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = fun
      BIOS Area (00000000-00003FFF)
      Unused (00004000-01FFFFFF)
      */
-    code += "case 0:{" + writeUnused + "(address | 0, data | 0);break};";
+    code += "case 0:";
     /*
      Unused (00004000-01FFFFFF)
      */
@@ -552,27 +516,27 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = fun
     /*
      Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
      */
-    code += "case 0x8:{" + writeROM0 + "(address | 0, data | 0);break};";
+    code += "case 0x8:";
     /*
      Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
      */
-    code += "case 0x9:{" + writeROM0 + "(address | 0, data | 0);break};";
+    code += "case 0x9:";
     /*
      Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
      */
-    code += "case 0xA:{" + writeROM1 + "(address | 0, data | 0);break};";
+    code += "case 0xA:";
     /*
      Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
      */
-    code += "case 0xB:{" + writeROM1 + "(address | 0, data | 0);break};";
+    code += "case 0xB:";
     /*
      Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
      */
-    code += "case 0xC:{" + writeROM2 + "(address | 0, data | 0);break};";
+    code += "case 0xC:";
     /*
      Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
      */
-    code += "case 0xD:{" + writeROM2 + "(address | 0, data | 0);break};";
+    code += "case 0xD:{" + writeROM + "(address | 0, data | 0);break};";
     /*
      Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
      */

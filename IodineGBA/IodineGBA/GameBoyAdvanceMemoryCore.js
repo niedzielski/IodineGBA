@@ -378,55 +378,19 @@ GameBoyAdvanceMemory.prototype.writePalette32 = function (address, data) {
     this.wait.VRAMAccess32();
     this.gfx.writePalette32(address & 0x3FC, data | 0);
 }
-GameBoyAdvanceMemory.prototype.writeROM08 = function (address, data) {
+GameBoyAdvanceMemory.prototype.writeROM8 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.ROMAccess8(address | 0);
     this.cartridge.writeROM8(address & 0x1FFFFFF, data | 0);
 }
-GameBoyAdvanceMemory.prototype.writeROM016 = function (address, data) {
+GameBoyAdvanceMemory.prototype.writeROM16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.ROMAccess16(address | 0);
     this.cartridge.writeROM16(address & 0x1FFFFFE, data | 0);
 }
-GameBoyAdvanceMemory.prototype.writeROM032 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.wait.ROMAccess32(address | 0);
-    this.cartridge.writeROM32(address & 0x1FFFFFC, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeROM18 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.wait.ROMAccess8(address | 0);
-    this.cartridge.writeROM8(address & 0x1FFFFFF, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeROM116 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.wait.ROMAccess16(address | 0);
-    this.cartridge.writeROM16(address & 0x1FFFFFE, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeROM132 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.wait.ROMAccess32(address | 0);
-    this.cartridge.writeROM32(address & 0x1FFFFFC, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeROM28 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.wait.ROMAccess8(address | 0);
-    this.cartridge.writeROM8(address & 0x1FFFFFF, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeROM216 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.wait.ROMAccess16(address | 0);
-    this.cartridge.writeROM16(address & 0x1FFFFFE, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeROM232 = function (address, data) {
+GameBoyAdvanceMemory.prototype.writeROM32 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.ROMAccess32(address | 0);
@@ -957,52 +921,27 @@ GameBoyAdvanceMemory.prototype.readPalette32CPU = function (address) {
     this.wait.VRAMAccess32CPU();
     return this.gfx.readPalette32(address & 0x3FC);
 }
-GameBoyAdvanceMemory.prototype.readROM08 = function (address) {
+GameBoyAdvanceMemory.prototype.readROM8 = function (address) {
     address = address | 0;
     this.wait.ROMAccess8(address | 0);
     return this.cartridge.readROM8(address & 0x1FFFFFF) | 0;
 }
-GameBoyAdvanceMemory.prototype.readROM016 = function (address) {
+GameBoyAdvanceMemory.prototype.readROM16 = function (address) {
     address = address | 0;
     this.wait.ROMAccess16(address | 0);
     return this.cartridge.readROM16(address & 0x1FFFFFE) | 0;
 }
-GameBoyAdvanceMemory.prototype.readROM016CPU = function (address) {
+GameBoyAdvanceMemory.prototype.readROM16CPU = function (address) {
     address = address | 0;
     this.wait.ROMAccess16CPU(address | 0);
     return this.cartridge.readROM16(address & 0x1FFFFFE) | 0;
 }
-GameBoyAdvanceMemory.prototype.readROM032 = function (address) {
+GameBoyAdvanceMemory.prototype.readROM32 = function (address) {
     address = address | 0;
     this.wait.ROMAccess32(address | 0);
     return this.cartridge.readROM32(address & 0x1FFFFFC) | 0;
 }
-GameBoyAdvanceMemory.prototype.readROM032CPU = function (address) {
-    address = address | 0;
-    this.wait.ROMAccess32CPU(address | 0);
-    return this.cartridge.readROM32(address & 0x1FFFFFC) | 0;
-}
-GameBoyAdvanceMemory.prototype.readROM18 = function (address) {
-    address = address | 0;
-    this.wait.ROMAccess8(address | 0);
-    return this.cartridge.readROM8(address & 0x1FFFFFF) | 0;
-}
-GameBoyAdvanceMemory.prototype.readROM116 = function (address) {
-    address = address | 0;
-    this.wait.ROMAccess16(address | 0);
-    return this.cartridge.readROM16(address & 0x1FFFFFE) | 0;
-}
-GameBoyAdvanceMemory.prototype.readROM116CPU = function (address) {
-    address = address | 0;
-    this.wait.ROMAccess16CPU(address | 0);
-    return this.cartridge.readROM16(address & 0x1FFFFFE) | 0;
-}
-GameBoyAdvanceMemory.prototype.readROM132 = function (address) {
-    address = address | 0;
-    this.wait.ROMAccess32(address | 0);
-    return this.cartridge.readROM32(address & 0x1FFFFFC) | 0;
-}
-GameBoyAdvanceMemory.prototype.readROM132CPU = function (address) {
+GameBoyAdvanceMemory.prototype.readROM32CPU = function (address) {
     address = address | 0;
     this.wait.ROMAccess32CPU(address | 0);
     return this.cartridge.readROM32(address & 0x1FFFFFC) | 0;
