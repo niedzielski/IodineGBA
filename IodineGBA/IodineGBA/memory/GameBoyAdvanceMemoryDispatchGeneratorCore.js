@@ -386,7 +386,6 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryReadDispatch = func
     /*
      Unused (00004000-01FFFFFF)
      */
-    code += "case 0x1:{data = " + readUnused + "(address | 0) | 0;break};";
     /*
      WRAM - On-board Work RAM (02000000-0203FFFF)
      Unused (02040000-02FFFFFF)
@@ -478,11 +477,9 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = fun
      BIOS Area (00000000-00003FFF)
      Unused (00004000-01FFFFFF)
      */
-    code += "case 0:";
     /*
      Unused (00004000-01FFFFFF)
      */
-    code += "case 0x1:{" + writeUnused + "(address | 0, data | 0);break};";
     /*
      WRAM - On-board Work RAM (02000000-0203FFFF)
      Unused (02040000-02FFFFFF)
