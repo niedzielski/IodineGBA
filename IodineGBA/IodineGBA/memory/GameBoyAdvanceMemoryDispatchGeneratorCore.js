@@ -444,7 +444,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryReadDispatch = func
     /*
      Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
      */
-    code += "case 0xE:{data = " + readSRAM + "(address | 0) | 0;break};";
+    code += "case 0xE:";
     /*
      Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
      --UNDOCUMENTED MIRROR--
@@ -540,7 +540,7 @@ GameBoyAdvanceMemoryDispatchGenerator.prototype.compileMemoryWriteDispatch = fun
     /*
      Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
      */
-    code += "case 0xE:{" + writeSRAM + "(address | 0, data | 0);break};";
+    code += "case 0xE:";
     /*
      Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
      --UNDOCUMENTED MIRROR--
