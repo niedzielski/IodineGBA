@@ -115,6 +115,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
         this.getROMRead32 = this.getROMRead32Prefetch;
         this.CPUInternalCyclePrefetch = this.CPUInternalCycleDoPrefetch;
         this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleDoPrefetch;
+        this.nonSequentialROM = 0;
     }
     this.WAITCNT1 = data & 0x5F;
 }
@@ -128,8 +129,9 @@ GameBoyAdvanceWait.prototype.readPOSTBOOT = function () {
     return this.POSTBOOT | 0;
 }
 GameBoyAdvanceWait.prototype.writeHALTCNT = function (data) {
+    data = data | 0;
     //HALT/STOP mode entrance:
-    this.IOCore.flagStepper((data < 0x80) ? 2 : 4);
+    this.IOCore.flagStepper(((data | 0) < 0x80) ? 2 : 4);
 }
 GameBoyAdvanceWait.prototype.writeConfigureWRAM8 = function (address, data) {
     address = address | 0;
@@ -145,7 +147,7 @@ GameBoyAdvanceWait.prototype.writeConfigureWRAM8 = function (address, data) {
         case 2:
             this.WRAMConfiguration = (this.WRAMConfiguration & 0xFF00FFFF) | (data << 16);
             break;
-        case 3:
+        default:
             this.WRAMWaitState = (0x10 - (data & 0xF)) | 0;
             this.WRAMConfiguration = (this.WRAMConfiguration & 0xFFFFFF) | (data << 24);
     }
@@ -293,10 +295,6 @@ GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
     this.nonSequential = 0x100;
     this.ROMPrebuffer = 0;
 }
-GameBoyAdvanceWait.prototype.resetPrebuffer = function () {
-    this.ROMPrebuffer = 0;
-    this.nonSequential = 0x100;
-}
 GameBoyAdvanceWait.prototype.WRAMAccess8 = function () {
     this.IOCore.updateCore(this.WRAMWaitState | 0);
 }
@@ -304,14 +302,14 @@ GameBoyAdvanceWait.prototype.WRAMAccess16 = function () {
     this.IOCore.updateCore(this.WRAMWaitState | 0);
 }
 GameBoyAdvanceWait.prototype.WRAMAccess16CPU = function () {
-    this.resetPrebuffer();
+    this.NonSequentialBroadcast();
     this.WRAMAccess16();
 }
 GameBoyAdvanceWait.prototype.WRAMAccess32 = function () {
     this.IOCore.updateCore(this.WRAMWaitState << 1);
 }
 GameBoyAdvanceWait.prototype.WRAMAccess32CPU = function () {
-    this.resetPrebuffer();
+    this.NonSequentialBroadcast();
     this.WRAMAccess32();
 }
 GameBoyAdvanceWait.prototype.ROM0Access8 = function () {
@@ -372,7 +370,7 @@ GameBoyAdvanceWait.prototype.SRAMAccess = function () {
     this.IOCore.updateCore(this.SRAMWaitState | 0);
 }
 GameBoyAdvanceWait.prototype.SRAMAccessCPU = function () {
-    this.resetPrebuffer();
+    this.NonSequentialBroadcast();
     this.SRAMAccess();
 }
 GameBoyAdvanceWait.prototype.VRAMAccess8 = function () {
@@ -392,7 +390,7 @@ GameBoyAdvanceWait.prototype.VRAMAccess16 = function () {
     }
 }
 GameBoyAdvanceWait.prototype.VRAMAccess16CPU = function () {
-    this.resetPrebuffer();
+    this.NonSequentialBroadcast();
     this.VRAMAccess16();
 }
 GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
@@ -404,7 +402,7 @@ GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
     }
 }
 GameBoyAdvanceWait.prototype.VRAMAccess32CPU = function () {
-    this.resetPrebuffer();
+    this.NonSequentialBroadcast();
     this.VRAMAccess32();
 }
 GameBoyAdvanceWait.prototype.OAMAccess8 = function () {
@@ -424,7 +422,7 @@ GameBoyAdvanceWait.prototype.OAMAccess16 = function () {
     }
 }
 GameBoyAdvanceWait.prototype.OAMAccess16CPU = function () {
-    this.resetPrebuffer();
+    this.NonSequentialBroadcast();
     this.OAMAccess16();
 }
 GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
@@ -436,10 +434,10 @@ GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
     }
 }
 GameBoyAdvanceWait.prototype.OAMAccess32CPU = function () {
-    this.resetPrebuffer();
+    this.NonSequentialBroadcast();
     this.OAMAccess32();
 }
 GameBoyAdvanceWait.prototype.singleClockCPU = function () {
-    this.resetPrebuffer();
+    this.NonSequentialBroadcast();
     this.IOCore.updateCoreSingle();
 }
