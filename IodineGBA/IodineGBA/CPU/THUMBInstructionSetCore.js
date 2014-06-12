@@ -39,7 +39,7 @@ THUMBInstructionSet.prototype.executeIteration = function () {
     this.decode = this.fetch | 0;
 }
 THUMBInstructionSet.prototype.executeDecoded = function () {
-    switch (this.instructionMap[this.execute >> 6] & 0x7F) {
+    switch (this.instructionMap[this.execute >> 6] & 0xFF) {
         case 0:
             this.CMPimm8();
             break;

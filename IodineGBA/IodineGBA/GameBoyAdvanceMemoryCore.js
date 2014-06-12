@@ -41,53 +41,13 @@ function GameBoyAdvanceMemory(IOCore) {
     this.writeIO8 = generator.generateMemoryWriteIO8();
     this.writeIO16 = generator.generateMemoryWriteIO16();
     this.writeIO32 = generator.generateMemoryWriteIO32();
-    this.memoryReader8Generated = [
-                                   generator.generateMemoryRead80(),
-                                   generator.generateMemoryRead81(),
-                                   generator.generateMemoryRead82()
-                                   ];
     this.memoryReader8 = this.memoryReader8Generated[1];
-    this.memoryWriter8Generated = [
-                                   generator.generateMemoryWrite80(),
-                                   generator.generateMemoryWrite81(),
-                                   generator.generateMemoryWrite82()
-                                   ];
     this.memoryWriter8 = this.memoryWriter8Generated[1];
-    this.memoryReader16Generated = [
-                                   generator.generateMemoryRead160(),
-                                   generator.generateMemoryRead161(),
-                                   generator.generateMemoryRead162()
-                                   ];
     this.memoryReader16 = this.memoryReader16Generated[1];
-    this.memoryReader16CPUGenerated = [
-                                    generator.generateMemoryInstructionRead160(),
-                                    generator.generateMemoryInstructionRead161(),
-                                    generator.generateMemoryInstructionRead162()
-                                    ];
     this.memoryReader16CPU = this.memoryReader16CPUGenerated[1];
-    this.memoryWriter16Generated = [
-                                   generator.generateMemoryWrite160(),
-                                   generator.generateMemoryWrite161(),
-                                   generator.generateMemoryWrite162()
-                                   ];
     this.memoryWriter16 = this.memoryWriter16Generated[1];
-    this.memoryReader32Generated = [
-                                       generator.generateMemoryRead320(),
-                                       generator.generateMemoryRead321(),
-                                       generator.generateMemoryRead322()
-                                       ];
     this.memoryReader32 = this.memoryReader32Generated[1];
-    this.memoryReader32CPUGenerated = [
-                                       generator.generateMemoryInstructionRead320(),
-                                       generator.generateMemoryInstructionRead321(),
-                                       generator.generateMemoryInstructionRead322()
-                                       ];
     this.memoryReader32CPU = this.memoryReader32CPUGenerated[1];
-    this.memoryWriter32Generated = [
-                                    generator.generateMemoryWrite320(),
-                                    generator.generateMemoryWrite321(),
-                                    generator.generateMemoryWrite322()
-                                    ];
     this.memoryWriter32 = this.memoryWriter32Generated[1];
 }
 GameBoyAdvanceMemory.prototype.loadReferences = function () {
@@ -1072,3 +1032,507 @@ GameBoyAdvanceMemory.prototype.loadBIOS = function () {
         this.IOCore.BIOSFound = false;
     }
 }
+function generateMemoryTopLevelDispatch() {
+    function compileMemoryReadDispatch(readCalls) {
+        var readUnused = readCalls[0];
+        var readExternalWRAM = readCalls[1];
+        var readInternalWRAM = readCalls[2];
+        var readIODispatch = readCalls[3];
+        var readPalette = readCalls[4];
+        var readVRAM = readCalls[5];
+        var readOAM = readCalls[6];
+        var readROM = readCalls[7];
+        var readROM2 = readCalls[8];
+        var readSRAM = readCalls[9];
+        var readBIOS = readCalls[10];
+        var code = "address = address | 0;var data = 0;switch (address >> 24) {";
+        /*
+         Decoder for the nibble at bits 24-27
+         (Top 4 bits of the address falls through to default (unused),
+         so the next nibble down is used for dispatch.):
+         */
+        /*
+         BIOS Area (00000000-00003FFF)
+         Unused (00004000-01FFFFFF)
+         */
+        code += "case 0:{data = this." + readBIOS + "(address | 0) | 0;break};";
+        /*
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         WRAM - On-board Work RAM (02000000-0203FFFF)
+         Unused (02040000-02FFFFFF)
+         */
+        code += "case 0x2:{data = this." + readExternalWRAM + "(address | 0) | 0;break};";
+        /*
+         WRAM - In-Chip Work RAM (03000000-03007FFF)
+         Unused (03008000-03FFFFFF)
+         */
+        code += "case 0x3:{data = this." + readInternalWRAM + "(address | 0) | 0;break};";
+        /*
+         I/O Registers (04000000-040003FE)
+         Unused (04000400-04FFFFFF)
+         */
+        code += "case 0x4:{data = this." + readIODispatch + "(address | 0) | 0;break};";
+        /*
+         BG/OBJ Palette RAM (05000000-050003FF)
+         Unused (05000400-05FFFFFF)
+         */
+        code += "case 0x5:{data = this." + readPalette + "(address | 0) | 0;break};";
+        /*
+         VRAM - Video RAM (06000000-06017FFF)
+         Unused (06018000-06FFFFFF)
+         */
+        code += "case 0x6:{data = this." + readVRAM + "(address | 0) | 0;break};";
+        /*
+         OAM - OBJ Attributes (07000000-070003FF)
+         Unused (07000400-07FFFFFF)
+         */
+        code += "case 0x7:{data = this." + readOAM + "(address | 0) | 0;break};";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
+         */
+        code += "case 0x8:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
+         */
+        code += "case 0x9:";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
+         */
+        code += "case 0xA:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
+         */
+        code += "case 0xB:{data = this." + readROM + "(address | 0) | 0;break};";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
+         */
+        code += "case 0xC:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
+         */
+        code += "case 0xD:{data = this." + readROM2 + "(address | 0) | 0;break};";
+        /*
+         Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+         */
+        code += "case 0xE:";
+        /*
+         Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+         --UNDOCUMENTED MIRROR--
+         */
+        code += "case 0xF:{data = this." + readSRAM + "(address | 0) | 0;break};";
+        /*
+         Unused (0F000000-FFFFFFFF)
+         */
+        code += "default:{data = this." + readUnused + "(address | 0) | 0};";
+        //Generate the function:
+        code += "}return data | 0;";
+        return Function("address", code);
+    }
+    function compileMemoryWriteDispatch(writeCalls) {
+        var writeUnused = writeCalls[0];
+        var writeExternalWRAM = writeCalls[1];
+        var writeInternalWRAM = writeCalls[2];
+        var writeIODispatch = writeCalls[3];
+        var writePalette = writeCalls[4];
+        var writeVRAM = writeCalls[5];
+        var writeOAM = writeCalls[6];
+        var writeROM = writeCalls[7];
+        var writeSRAM = writeCalls[8];
+        var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
+        /*
+         Decoder for the nibble at bits 24-27
+         (Top 4 bits of the address falls through to default (unused),
+         so the next nibble down is used for dispatch.):
+         */
+        /*
+         BIOS Area (00000000-00003FFF)
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         WRAM - On-board Work RAM (02000000-0203FFFF)
+         Unused (02040000-02FFFFFF)
+         */
+        code += "case 0x2:{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+        /*
+         WRAM - In-Chip Work RAM (03000000-03007FFF)
+         Unused (03008000-03FFFFFF)
+         */
+        code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        /*
+         I/O Registers (04000000-040003FE)
+         Unused (04000400-04FFFFFF)
+         */
+        code += "case 0x4:{this." + writeIODispatch + "(address | 0, data | 0);break};";
+        /*
+         BG/OBJ Palette RAM (05000000-050003FF)
+         Unused (05000400-05FFFFFF)
+         */
+        code += "case 0x5:{this." + writePalette + "(address | 0, data | 0);break};";
+        /*
+         VRAM - Video RAM (06000000-06017FFF)
+         Unused (06018000-06FFFFFF)
+         */
+        code += "case 0x6:{this." + writeVRAM + "(address | 0, data | 0);break};";
+        /*
+         OAM - OBJ Attributes (07000000-070003FF)
+         Unused (07000400-07FFFFFF)
+         */
+        code += "case 0x7:{this." + writeOAM + "(address | 0, data | 0);break};";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
+         */
+        code += "case 0x8:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
+         */
+        code += "case 0x9:";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
+         */
+        code += "case 0xA:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
+         */
+        code += "case 0xB:";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
+         */
+        code += "case 0xC:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
+         */
+        code += "case 0xD:{this." + writeROM + "(address | 0, data | 0);break};";
+        /*
+         Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+         */
+        code += "case 0xE:";
+        /*
+         Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+         --UNDOCUMENTED MIRROR--
+         */
+        code += "case 0xF:{this." + writeSRAM + "(address | 0, data | 0);break};";
+        /*
+         Unused (0F000000-FFFFFFFF)
+         */
+        code += "default:{this." + writeUnused + "(address | 0, data | 0)}";
+        //Generate the function:
+        code += "}";
+        return Function("address", "data", code);
+    }
+    GameBoyAdvanceMemory.prototype.memoryReader8Generated = [
+                                                             compileMemoryReadDispatch([
+                                                                                        "readUnused8",
+                                                                                        "readInternalWRAM8",
+                                                                                        "readInternalWRAM8",
+                                                                                        "readIODispatch8",
+                                                                                        "readPalette8",
+                                                                                        "readVRAM8",
+                                                                                        "readOAM8",
+                                                                                        "readROM8",
+                                                                                        "readROM28",
+                                                                                        "readSRAM8",
+                                                                                        "readBIOS8"
+                                                                                        ]),
+                                                             compileMemoryReadDispatch([
+                                                                                        "readUnused8",
+                                                                                        "readExternalWRAM8",
+                                                                                        "readInternalWRAM8",
+                                                                                        "readIODispatch8",
+                                                                                        "readPalette8",
+                                                                                        "readVRAM8",
+                                                                                        "readOAM8",
+                                                                                        "readROM8",
+                                                                                        "readROM28",
+                                                                                        "readSRAM8",
+                                                                                        "readBIOS8"
+                                                                                        ]),
+                                                             compileMemoryReadDispatch([
+                                                                                        "readUnused8",
+                                                                                        "readUnused8",
+                                                                                        "readUnused8",
+                                                                                        "readIODispatch8",
+                                                                                        "readPalette8",
+                                                                                        "readVRAM8",
+                                                                                        "readOAM8",
+                                                                                        "readROM8",
+                                                                                        "readROM28",
+                                                                                        "readSRAM8",
+                                                                                        "readBIOS8"
+                                                                                        ])
+                                                             ];
+    GameBoyAdvanceMemory.prototype.memoryWriter8Generated = [
+                                                             compileMemoryWriteDispatch([
+                                                                                         "writeUnused8",
+                                                                                         "writeInternalWRAM8",
+                                                                                         "writeInternalWRAM8",
+                                                                                         "writeIODispatch8",
+                                                                                         "writePalette8",
+                                                                                         "writeVRAM8",
+                                                                                         "writeOAM8",
+                                                                                         "writeROM8",
+                                                                                         "writeSRAM8"
+                                                                                         ]),
+                                                             compileMemoryWriteDispatch([
+                                                                                         "writeUnused8",
+                                                                                         "writeExternalWRAM8",
+                                                                                         "writeInternalWRAM8",
+                                                                                         "writeIODispatch8",
+                                                                                         "writePalette8",
+                                                                                         "writeVRAM8",
+                                                                                         "writeOAM8",
+                                                                                         "writeROM8",
+                                                                                         "writeSRAM8"
+                                                                                         ]),
+                                                             compileMemoryWriteDispatch([
+                                                                                         "writeUnused8",
+                                                                                         "writeUnused8",
+                                                                                         "writeUnused8",
+                                                                                         "writeIODispatch8",
+                                                                                         "writePalette8",
+                                                                                         "writeVRAM8",
+                                                                                         "writeOAM8",
+                                                                                         "writeROM8",
+                                                                                         "writeSRAM8"
+                                                                                         ])
+                                                             ];
+    GameBoyAdvanceMemory.prototype.memoryReader16Generated = [
+                                                                               compileMemoryReadDispatch([
+                                                                                                          "readUnused16",
+                                                                                                          "readInternalWRAM16",
+                                                                                                          "readInternalWRAM16",
+                                                                                                          "readIODispatch16",
+                                                                                                          "readPalette16",
+                                                                                                          "readVRAM16",
+                                                                                                          "readOAM16",
+                                                                                                          "readROM16",
+                                                                                                          "readROM216",
+                                                                                                          "readSRAM16",
+                                                                                                          "readBIOS16"
+                                                                                                          ]),
+                                                                               compileMemoryReadDispatch([
+                                                                                                          "readUnused16",
+                                                                                                          "readExternalWRAM16",
+                                                                                                          "readInternalWRAM16",
+                                                                                                          "readIODispatch16",
+                                                                                                          "readPalette16",
+                                                                                                          "readVRAM16",
+                                                                                                          "readOAM16",
+                                                                                                          "readROM16",
+                                                                                                          "readROM216",
+                                                                                                          "readSRAM16",
+                                                                                                          "readBIOS16"
+                                                                                                          ]),
+                                                                               compileMemoryReadDispatch([
+                                                                                                          "readUnused16",
+                                                                                                          "readUnused16",
+                                                                                                          "readUnused16",
+                                                                                                          "readIODispatch16",
+                                                                                                          "readPalette16",
+                                                                                                          "readVRAM16",
+                                                                                                          "readOAM16",
+                                                                                                          "readROM16",
+                                                                                                          "readROM216",
+                                                                                                          "readSRAM16",
+                                                                                                          "readBIOS16"
+                                                                                                          ])
+                                                                               ];
+    GameBoyAdvanceMemory.prototype.memoryReader16CPUGenerated = [
+                                                                                  compileMemoryReadDispatch([
+                                                                                                             "readUnused16CPU",
+                                                                                                             "readInternalWRAM16CPU",
+                                                                                                             "readInternalWRAM16CPU",
+                                                                                                             "readIODispatch16CPU",
+                                                                                                             "readPalette16CPU",
+                                                                                                             "readVRAM16CPU",
+                                                                                                             "readOAM16CPU",
+                                                                                                             "readROM16CPU",
+                                                                                                             "readROM216CPU",
+                                                                                                             "readSRAM16CPU",
+                                                                                                             "readBIOS16CPU"
+                                                                                                             ]),
+                                                                                  compileMemoryReadDispatch([
+                                                                                                             "readUnused16CPU",
+                                                                                                             "readExternalWRAM16CPU",
+                                                                                                             "readInternalWRAM16CPU",
+                                                                                                             "readIODispatch16CPU",
+                                                                                                             "readPalette16CPU",
+                                                                                                             "readVRAM16CPU",
+                                                                                                             "readOAM16CPU",
+                                                                                                             "readROM16CPU",
+                                                                                                             "readROM216CPU",
+                                                                                                             "readSRAM16CPU",
+                                                                                                             "readBIOS16CPU"
+                                                                                                             ]),
+                                                                                  compileMemoryReadDispatch([
+                                                                                                             "readUnused16CPU",
+                                                                                                             "readUnused16CPU",
+                                                                                                             "readUnused16CPU",
+                                                                                                             "readIODispatch16CPU",
+                                                                                                             "readPalette16CPU",
+                                                                                                             "readVRAM16CPU",
+                                                                                                             "readOAM16CPU",
+                                                                                                             "readROM16CPU",
+                                                                                                             "readROM216CPU",
+                                                                                                             "readSRAM16CPU",
+                                                                                                             "readBIOS16CPU"
+                                                                                                             ])
+                                                                                  ];
+    GameBoyAdvanceMemory.prototype.memoryWriter16Generated = [
+                                                                               compileMemoryWriteDispatch([
+                                                                                                           "writeUnused16",
+                                                                                                           "writeInternalWRAM16",
+                                                                                                           "writeInternalWRAM16",
+                                                                                                           "writeIODispatch16",
+                                                                                                           "writePalette16",
+                                                                                                           "writeVRAM16",
+                                                                                                           "writeOAM16",
+                                                                                                           "writeROM16",
+                                                                                                           "writeSRAM16"
+                                                                                                           ]),
+                                                                               compileMemoryWriteDispatch([
+                                                                                                           "writeUnused16",
+                                                                                                           "writeExternalWRAM16",
+                                                                                                           "writeInternalWRAM16",
+                                                                                                           "writeIODispatch16",
+                                                                                                           "writePalette16",
+                                                                                                           "writeVRAM16",
+                                                                                                           "writeOAM16",
+                                                                                                           "writeROM16",
+                                                                                                           "writeSRAM16"
+                                                                                                           ]),
+                                                                               compileMemoryWriteDispatch([
+                                                                                                           "writeUnused16",
+                                                                                                           "writeUnused16",
+                                                                                                           "writeUnused16",
+                                                                                                           "writeIODispatch16",
+                                                                                                           "writePalette16",
+                                                                                                           "writeVRAM16",
+                                                                                                           "writeOAM16",
+                                                                                                           "writeROM16",
+                                                                                                           "writeSRAM16"
+                                                                                                           ])
+                                                                               ];
+    GameBoyAdvanceMemory.prototype.memoryReader32Generated = [
+                                                                               compileMemoryReadDispatch([
+                                                                                                          "readUnused32",
+                                                                                                          "readInternalWRAM32",
+                                                                                                          "readInternalWRAM32",
+                                                                                                          "readIODispatch32",
+                                                                                                          "readPalette32",
+                                                                                                          "readVRAM32",
+                                                                                                          "readOAM32",
+                                                                                                          "readROM32",
+                                                                                                          "readROM232",
+                                                                                                          "readSRAM32",
+                                                                                                          "readBIOS32"
+                                                                                                          ]),
+                                                                               compileMemoryReadDispatch([
+                                                                                                          "readUnused32",
+                                                                                                          "readExternalWRAM32",
+                                                                                                          "readInternalWRAM32",
+                                                                                                          "readIODispatch32",
+                                                                                                          "readPalette32",
+                                                                                                          "readVRAM32",
+                                                                                                          "readOAM32",
+                                                                                                          "readROM32",
+                                                                                                          "readROM232",
+                                                                                                          "readSRAM32",
+                                                                                                          "readBIOS32"
+                                                                                                          ]),
+                                                                               compileMemoryReadDispatch([
+                                                                                                          "readUnused32",
+                                                                                                          "readUnused32",
+                                                                                                          "readUnused32",
+                                                                                                          "readIODispatch32",
+                                                                                                          "readPalette32",
+                                                                                                          "readVRAM32",
+                                                                                                          "readOAM32",
+                                                                                                          "readROM32",
+                                                                                                          "readROM232",
+                                                                                                          "readSRAM32",
+                                                                                                          "readBIOS32"
+                                                                                                          ])
+                                                                               ];
+    GameBoyAdvanceMemory.prototype.memoryReader32CPUGenerated = [
+                                                                                  compileMemoryReadDispatch([
+                                                                                                             "readUnused32CPU",
+                                                                                                             "readInternalWRAM32CPU",
+                                                                                                             "readInternalWRAM32CPU",
+                                                                                                             "readIODispatch32CPU",
+                                                                                                             "readPalette32CPU",
+                                                                                                             "readVRAM32CPU",
+                                                                                                             "readOAM32CPU",
+                                                                                                             "readROM32CPU",
+                                                                                                             "readROM232CPU",
+                                                                                                             "readSRAM32CPU",
+                                                                                                             "readBIOS32CPU"
+                                                                                                             ]),
+                                                                                  compileMemoryReadDispatch([
+                                                                                                             "readUnused32CPU",
+                                                                                                             "readExternalWRAM32CPU",
+                                                                                                             "readInternalWRAM32CPU",
+                                                                                                             "readIODispatch32CPU",
+                                                                                                             "readPalette32CPU",
+                                                                                                             "readVRAM32CPU",
+                                                                                                             "readOAM32CPU",
+                                                                                                             "readROM32CPU",
+                                                                                                             "readROM232CPU",
+                                                                                                             "readSRAM32CPU",
+                                                                                                             "readBIOS32CPU"
+                                                                                                             ]),
+                                                                                  compileMemoryReadDispatch([
+                                                                                                             "readUnused32CPU",
+                                                                                                             "readUnused32CPU",
+                                                                                                             "readUnused32CPU",
+                                                                                                             "readIODispatch32CPU",
+                                                                                                             "readPalette32CPU",
+                                                                                                             "readVRAM32CPU",
+                                                                                                             "readOAM32CPU",
+                                                                                                             "readROM32CPU",
+                                                                                                             "readROM232CPU",
+                                                                                                             "readSRAM32CPU",
+                                                                                                             "readBIOS32CPU"
+                                                                                                             ])
+                                                                                  ];
+    GameBoyAdvanceMemory.prototype.memoryWriter32Generated = [
+                                                                               compileMemoryWriteDispatch([
+                                                                                                           "writeUnused32",
+                                                                                                           "writeInternalWRAM32",
+                                                                                                           "writeInternalWRAM32",
+                                                                                                           "writeIODispatch32",
+                                                                                                           "writePalette32",
+                                                                                                           "writeVRAM32",
+                                                                                                           "writeOAM32",
+                                                                                                           "writeROM32",
+                                                                                                           "writeSRAM32"
+                                                                                                           ]),
+                                                                               compileMemoryWriteDispatch([
+                                                                                                           "writeUnused32",
+                                                                                                           "writeExternalWRAM32",
+                                                                                                           "writeInternalWRAM32",
+                                                                                                           "writeIODispatch32",
+                                                                                                           "writePalette32",
+                                                                                                           "writeVRAM32",
+                                                                                                           "writeOAM32",
+                                                                                                           "writeROM32",
+                                                                                                           "writeSRAM32"
+                                                                                                           ]),
+                                                                               compileMemoryWriteDispatch([
+                                                                                                           "writeUnused32",
+                                                                                                           "writeUnused32",
+                                                                                                           "writeUnused32",
+                                                                                                           "writeIODispatch32",
+                                                                                                           "writePalette32",
+                                                                                                           "writeVRAM32",
+                                                                                                           "writeOAM32",
+                                                                                                           "writeROM32",
+                                                                                                           "writeSRAM32"
+                                                                                                           ])
+                                                                               ];
+}
+generateMemoryTopLevelDispatch();
