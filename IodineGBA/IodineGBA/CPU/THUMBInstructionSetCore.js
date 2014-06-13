@@ -27,7 +27,6 @@ THUMBInstructionSet.prototype.initialize = function () {
     this.decode = 0;
     this.execute = 0;
     this.memory = this.CPUCore.memory;
-    this.compileInstructionMap();
 }
 THUMBInstructionSet.prototype.executeIteration = function () {
     //Push the new fetch access:
@@ -39,7 +38,18 @@ THUMBInstructionSet.prototype.executeIteration = function () {
     this.decode = this.fetch | 0;
 }
 THUMBInstructionSet.prototype.executeDecoded = function () {
-    switch (this.instructionMap[this.execute >> 6] & 0xFF) {
+    /*
+     Instruction Decode Pattern:
+      X = Possible opcode bit; N = Data Bit, definitely not an opcode bit
+     OPCODE: XXXXXXXXXXNNNNNN
+     
+     Since many of those "X"s are redundant and possibly data, we can "process"
+     it and use a table to further decide what unique opcode it is, leaving us with
+     a dense switch statement. Not "processing" the opcode beforehand would leave us
+     with a 10 bit wide switch, which is slow in JS, and using a function in array computed
+     goto trick is not optimal in JavaScript.
+     */
+    switch (this.instructionMap[this.execute >> 6] & 0xFF) {    //Leave the "& 0xFF" there, it's a uint8 type guard.
         case 0:
             this.CMPimm8();
             break;
@@ -1112,28 +1122,29 @@ THUMBInstructionSet.prototype.UNDEFINED = function () {
     //Undefined Exception:
     this.CPUCore.UNDEFINED();
 }
-THUMBInstructionSet.prototype.compileInstructionMap = function () {
-    var instructionMap = [];
+function compileTHUMBInstructionDecodeMap() {
+    var opcodeIndice = 0;
+    var instructionMap = getUint8Array(1024);
     function generateLowMap(instruction) {
         for (var index = 0; index < 0x20; ++index) {
-            instructionMap.push(instruction);
+            instructionMap[opcodeIndice++] = instruction;
         }
     }
     function generateLowMap2(instruction) {
         for (var index = 0; index < 0x8; ++index) {
-            instructionMap.push(instruction);
+            instructionMap[opcodeIndice++] = instruction;
         }
     }
     function generateLowMap3(instruction) {
         for (var index = 0; index < 0x4; ++index) {
-            instructionMap.push(instruction);
+            instructionMap[opcodeIndice++] = instruction;
         }
     }
     function generateLowMap4(instruction1, instruction2, instruction3, instruction4) {
-        instructionMap.push(instruction1);
-        instructionMap.push(instruction2);
-        instructionMap.push(instruction3);
-        instructionMap.push(instruction4);
+        instructionMap[opcodeIndice++] = instruction1;
+        instructionMap[opcodeIndice++] = instruction2;
+        instructionMap[opcodeIndice++] = instruction3;
+        instructionMap[opcodeIndice++] = instruction4;
     }
     //0-7
     generateLowMap(6);
@@ -1287,9 +1298,7 @@ THUMBInstructionSet.prototype.compileInstructionMap = function () {
     generateLowMap(32);
     //F8-FF
     generateLowMap(33);
-    //Copy to typed array buffer:
-    this.instructionMap = getUint8Array(1024);
-    for (var copyTo = 0; copyTo < 1024; ++copyTo) {
-        this.instructionMap[copyTo] = instructionMap[copyTo] | 0;
-    }
+    //Set to prototype:
+    THUMBInstructionSet.prototype.instructionMap = instructionMap;
 }
+compileTHUMBInstructionDecodeMap();
