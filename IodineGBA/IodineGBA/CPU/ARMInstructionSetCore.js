@@ -1255,26 +1255,6 @@ ARMInstructionSet.prototype.SWI = function (parentObj, operand2OP) {
     //Software Interrupt:
     parentObj.CPUCore.SWI();
 }
-ARMInstructionSet.prototype.CDP = function (parentObj, operand2OP) {
-    //No co-processor on GBA, but we really should do the bail properly:
-    parentObj.CPUCore.UNDEFINED();
-}
-ARMInstructionSet.prototype.LDC = function (parentObj, operand2OP) {
-    //No co-processor on GBA, but we really should do the bail properly:
-    parentObj.CPUCore.UNDEFINED();
-}
-ARMInstructionSet.prototype.STC = function (parentObj, operand2OP) {
-    //No co-processor on GBA, but we really should do the bail properly:
-    parentObj.CPUCore.UNDEFINED();
-}
-ARMInstructionSet.prototype.MRC = function (parentObj, operand2OP) {
-    //No co-processor on GBA, but we really should do the bail properly:
-    parentObj.CPUCore.UNDEFINED();
-}
-ARMInstructionSet.prototype.MCR = function (parentObj, operand2OP) {
-    //No co-processor on GBA, but we really should do the bail properly:
-    parentObj.CPUCore.UNDEFINED();
-}
 ARMInstructionSet.prototype.UNDEFINED = function (parentObj, operand2OP) {
     //Undefined Exception:
     parentObj.CPUCore.UNDEFINED();
@@ -1955,10 +1935,6 @@ ARMInstructionSet.prototype.prrprr = function (parentObj, operand, userMode) {
     var offset = parentObj.rri2(operand | 0) | 0;
     return parentObj.updateBasePreIncrement(operand | 0, offset | 0) | 0;
 }
-ARMInstructionSet.prototype.ofm = ARMInstructionSet.prototype.prm =
-ARMInstructionSet.prototype.ofp = ARMInstructionSet.prototype.prp =
-ARMInstructionSet.prototype.unm = ARMInstructionSet.prototype.unp =
-ARMInstructionSet.prototype.ptm = ARMInstructionSet.prototype.ptp =
 ARMInstructionSet.prototype.NOP = function (parentObj, operand) {
     //nothing...
 }
@@ -4371,101 +4347,101 @@ ARMInstructionSet.prototype.compileInstructionMap = function () {
         //BF
         this.generateLowMap(this.BL, this.NOP),
         //C0
-        this.generateLowMap(this.STC, this.ofm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C1
-        this.generateLowMap(this.LDC, this.ofm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C2
-        this.generateLowMap(this.STC, this.prm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C3
-        this.generateLowMap(this.LDC, this.prm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C4
-        this.generateLowMap(this.STC, this.ofm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C5
-        this.generateLowMap(this.LDC, this.ofm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C6
-        this.generateLowMap(this.STC, this.prm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C7
-        this.generateLowMap(this.LDC, this.prm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C8
-        this.generateLowMap(this.STC, this.ofp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //C9
-        this.generateLowMap(this.LDC, this.ofp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //CA
-        this.generateLowMap(this.STC, this.prp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //CB
-        this.generateLowMap(this.LDC, this.prp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //CC
-        this.generateLowMap(this.STC, this.ofp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //CD
-        this.generateLowMap(this.LDC, this.ofp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //CE
-        this.generateLowMap(this.STC, this.prp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //CF
-        this.generateLowMap(this.LDC, this.prp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D0
-        this.generateLowMap(this.STC, this.unm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D1
-        this.generateLowMap(this.LDC, this.unm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D2
-        this.generateLowMap(this.STC, this.ptm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D3
-        this.generateLowMap(this.LDC, this.ptm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D4
-        this.generateLowMap(this.STC, this.unm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D5
-        this.generateLowMap(this.LDC, this.unm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D6
-        this.generateLowMap(this.STC, this.ptm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D7
-        this.generateLowMap(this.LDC, this.ptm),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D8
-        this.generateLowMap(this.STC, this.unp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //D9
-        this.generateLowMap(this.LDC, this.unp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //DA
-        this.generateLowMap(this.STC, this.ptp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //DB
-        this.generateLowMap(this.LDC, this.ptp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //DC
-        this.generateLowMap(this.STC, this.unp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //DD
-        this.generateLowMap(this.LDC, this.unp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //DE
-        this.generateLowMap(this.STC, this.ptp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //DF
-        this.generateLowMap(this.LDC, this.ptp),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E0
-        this.generateLowMap2(this.CDP, this.MCR),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E1
-        this.generateLowMap2(this.CDP, this.MRC),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E2
-        this.generateLowMap2(this.CDP, this.MCR),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E3
-        this.generateLowMap2(this.CDP, this.MRC),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E4
-        this.generateLowMap2(this.CDP, this.MCR),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E5
-        this.generateLowMap2(this.CDP, this.MRC),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E6
-        this.generateLowMap2(this.CDP, this.MCR),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E7
-        this.generateLowMap2(this.CDP, this.MRC),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E8
-        this.generateLowMap2(this.CDP, this.MCR),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //E9
-        this.generateLowMap2(this.CDP, this.MRC),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //EA
-        this.generateLowMap2(this.CDP, this.MCR),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //EB
-        this.generateLowMap2(this.CDP, this.MRC),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //EC
-        this.generateLowMap2(this.CDP, this.MCR),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //ED
-        this.generateLowMap2(this.CDP, this.MRC),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //EE
-        this.generateLowMap2(this.CDP, this.MCR),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //EF
-        this.generateLowMap2(this.CDP, this.MRC),
+        this.generateLowMap(this.UNDEFINED, this.NOP),
         //F0
         this.generateLowMap(this.SWI, this.NOP),
         //F1

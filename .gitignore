@@ -10,10 +10,5 @@ IodineGBA/includes/.DS_Store
 user_scripts/.DS_Store
 
 user_css/.DS_Store
-IodineGBA/IodineGBA/memory/GameBoyAdvanceDMAMemoryCacheCore.js
 
-IodineGBA/IodineGBA/memory/GameBoyAdvanceDMAMemoryCacheCore.js
-
-IodineGBA/IodineGBA/memory/GameBoyAdvanceDMAMemoryCacheCore.js
-
-IodineGBA/IodineGBA/memory/GameBoyAdvanceDMAMemoryCacheCore.js
+IodineGBA/IodineGBA/CPU/ARMInstructionSetCoreNew.js
