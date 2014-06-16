@@ -495,13 +495,13 @@ ARMInstructionSet.prototype.ADD2 = function (parentObj, operand2OP) {
 }
 ARMInstructionSet.prototype.ADDS = function (parentObj, operand2OP) {
     var operand1 = parentObj.read16OffsetRegister() | 0;
-    var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
     parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADDS2 = function (parentObj, operand2OP) {
     var operand1 = parentObj.readGuarded16OffsetRegister() | 0;
-    var operand2 = operand2OP(parentObj, parentObj.execute) | 0;
+    var operand2 = operand2OP(parentObj, parentObj.execute | 0) | 0;
     //Update destination register:
     parentObj.guard12OffsetRegisterWriteCPSR(parentObj.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
