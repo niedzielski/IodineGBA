@@ -1594,7 +1594,7 @@ ARMInstructionSet.prototype.imms = function (parentObj, operand) {
     var shifter = (operand >> 7) & 0x1E;
     if (shifter > 0) {
         immediate = (immediate << (0x20 - shifter)) | (immediate >>> shifter);
-        parentObj.CPSRCarry = (immediate < 0);
+        parentObj.CPSR.setCarry(immediate < 0);
     }
     return immediate | 0;
 }
