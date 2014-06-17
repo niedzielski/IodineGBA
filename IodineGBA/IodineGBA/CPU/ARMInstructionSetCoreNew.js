@@ -535,6 +535,18 @@ ARMInstructionSet.prototype.executeDecoded = function () {
         case 131:
             this.LDRB3();
             break;
+        case 132:
+            this.MOV2();
+            break;
+        case 133:
+            this.MOVS2();
+            break;
+        case 134:
+            this.MVN2();
+            break;
+        case 135:
+            this.MVNS2();
+            break;
         default:
             this.UNDEFINED();
     }
@@ -1168,8 +1180,21 @@ ARMInstructionSet.prototype.MOV = function () {
     //Update destination register:
     this.guard12OffsetRegisterWrite(this.operand2OP_DataProcessing1() | 0);
 }
+ARMInstructionSet.prototype.MOV2 = function () {
+    //Perform move:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(this.operand2OP_DataProcessing3() | 0);
+}
 ARMInstructionSet.prototype.MOVS = function () {
     var operand2 = this.operand2OP_DataProcessing2() | 0;
+    //Perform move:
+    this.CPSR.setNegativeInt(operand2 | 0);
+    this.CPSR.setZeroInt(operand2 | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(operand2 | 0);
+}
+ARMInstructionSet.prototype.MOVS2 = function () {
+    var operand2 = this.operand2OP_DataProcessing4() | 0;
     //Perform move:
     this.CPSR.setNegativeInt(operand2 | 0);
     this.CPSR.setZeroInt(operand2 | 0);
@@ -1219,8 +1244,21 @@ ARMInstructionSet.prototype.MVN = function () {
     //Update destination register:
     this.guard12OffsetRegisterWrite(~this.operand2OP_DataProcessing1());
 }
+ARMInstructionSet.prototype.MVN2 = function () {
+    //Perform move negative:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(~this.operand2OP_DataProcessing3());
+}
 ARMInstructionSet.prototype.MVNS = function () {
     var operand2 = ~this.operand2OP_DataProcessing2();
+    //Perform move negative:
+    this.CPSR.setNegativeInt(operand2 | 0);
+    this.CPSR.setZeroInt(operand2 | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(operand2 | 0);
+}
+ARMInstructionSet.prototype.MVNS2 = function () {
+    var operand2 = ~this.operand2OP_DataProcessing4();
     //Perform move negative:
     this.CPSR.setNegativeInt(operand2 | 0);
     this.CPSR.setZeroInt(operand2 | 0);
@@ -2980,7 +3018,11 @@ function compileARMInstructionDecodeMap() {
             "LDR3":129,
             "STRB3":130,
             "LDRB3":131,
-            "UNDEFINED":132
+            "MOV2":132,
+            "MOVS2":133,
+            "MVN2":134,
+            "MVNS2":135,
+            "UNDEFINED":136
         }
         function generateMap1(instruction) {
             for (var index = 0; index < 0x10; ++index) {
@@ -3542,13 +3584,13 @@ function compileARMInstructionDecodeMap() {
         //1A
         generateMap1([
                       "MOV",
+                      "MOV2",
                       "MOV",
+                      "MOV2",
                       "MOV",
+                      "MOV2",
                       "MOV",
-                      "MOV",
-                      "MOV",
-                      "MOV",
-                      "MOV",
+                      "MOV2",
                       "MOV",
                       "UNDEFINED",
                       "MOV",
@@ -3561,13 +3603,13 @@ function compileARMInstructionDecodeMap() {
         //1B
         generateMap1([
                       "MOVS",
+                      "MOVS2",
                       "MOVS",
+                      "MOVS2",
                       "MOVS",
+                      "MOVS2",
                       "MOVS",
-                      "MOVS",
-                      "MOVS",
-                      "MOVS",
-                      "MOVS",
+                      "MOVS2",
                       "MOVS",
                       "UNDEFINED",
                       "MOVS",
@@ -3618,13 +3660,13 @@ function compileARMInstructionDecodeMap() {
         //1E
         generateMap1([
                       "MVN",
+                      "MVN2",
                       "MVN",
+                      "MVN2",
                       "MVN",
+                      "MVN2",
                       "MVN",
-                      "MVN",
-                      "MVN",
-                      "MVN",
-                      "MVN",
+                      "MVN2",
                       "MVN",
                       "UNDEFINED",
                       "MVN",
@@ -3637,13 +3679,13 @@ function compileARMInstructionDecodeMap() {
         //1F
         generateMap1([
                       "MVNS",
+                      "MVNS2",
                       "MVNS",
+                      "MVNS2",
                       "MVNS",
+                      "MVNS2",
                       "MVNS",
-                      "MVNS",
-                      "MVNS",
-                      "MVNS",
-                      "MVNS",
+                      "MVNS2",
                       "MVNS",
                       "UNDEFINED",
                       "MVNS",
