@@ -2319,18 +2319,18 @@ ARMInstructionSet.prototype.operand2OP_LoadStore2 = function (userMode) {
             break;
         case 8:
         case 0xA:
-            data = this.sofim(userMode) | 0;
+            data = this.sofim() | 0;
             break;
         case 0x9:
         case 0xB:
-            data = this.sprim(userMode) | 0;
+            data = this.sprim() | 0;
             break;
         case 0xC:
         case 0xE:
-            data = this.sofip(userMode) | 0;
+            data = this.sofip() | 0;
             break;
         default:
-            data = this.sprip(userMode) | 0;
+            data = this.sprip() | 0;
     }
     return data | 0;
 }
@@ -2865,19 +2865,19 @@ ARMInstructionSet.prototype.sptip = function (userMode) {
     var offset = this.execute & 0xFFF;
     return this.updateBasePostIncrement(offset | 0, userMode) | 0;
 }
-ARMInstructionSet.prototype.sofim = function (userMode) {
+ARMInstructionSet.prototype.sofim = function () {
     var offset = this.execute & 0xFFF;
     return this.updateNoBaseDecrement(offset | 0) | 0;
 }
-ARMInstructionSet.prototype.sprim = function (userMode) {
+ARMInstructionSet.prototype.sprim = function () {
     var offset = this.execute & 0xFFF;
     return this.updateBasePreDecrement(offset | 0) | 0;
 }
-ARMInstructionSet.prototype.sofip = function (userMode) {
+ARMInstructionSet.prototype.sofip = function () {
     var offset = this.execute & 0xFFF;
     return this.updateNoBaseIncrement(offset | 0) | 0;
 }
-ARMInstructionSet.prototype.sprip = function (userMode) {
+ARMInstructionSet.prototype.sprip = function () {
     var offset = this.execute & 0xFFF;
     return this.updateBasePreIncrement(offset | 0) | 0;
 }
