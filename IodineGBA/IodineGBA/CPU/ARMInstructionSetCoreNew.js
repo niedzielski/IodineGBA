@@ -1,0 +1,3865 @@
+"use strict";
+/*
+ * This file is part of IodineGBA
+ *
+ * Copyright (C) 2012-2014 Grant Galitz
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ * The full license is available at http://www.gnu.org/licenses/gpl.html
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ */
+function ARMInstructionSet(CPUCore) {
+    this.CPUCore = CPUCore;
+    this.initialize();
+}
+ARMInstructionSet.prototype.initialize = function () {
+    this.wait = this.CPUCore.wait;
+    this.registers = this.CPUCore.registers;
+    this.registersUSR = this.CPUCore.registersUSR;
+    this.CPSR = this.CPUCore.CPSR;
+    this.fetch = 0;
+    this.decode = 0;
+    this.execute = 0;
+    this.memory = this.CPUCore.memory;
+}
+ARMInstructionSet.prototype.executeIteration = function () {
+    //Push the new fetch access:
+    this.fetch = this.memory.memoryReadCPU32(this.readPC() | 0) | 0;
+    //Execute Conditional Instruction:
+    this.executeConditionalCode();
+    //Update the pipelining state:
+    this.execute = this.decode | 0;
+    this.decode = this.fetch | 0;
+}
+ARMInstructionSet.prototype.executeConditionalCode = function () {
+    /*
+     Instruction Decode Pattern:
+     C = Conditional Code Bit;
+     X = Possible opcode bit;
+     N = Data Bit, definitely not an opcode bit
+     OPCODE: CCCCXXXXXXXXXXXXNNNNNNNNXXXXNNNN
+     
+     For this function, we decode the top 4 bits for the conditional code test:
+     */
+    switch (this.execute >>> 28) {
+        case 0x0:        //EQ (equal)
+            if (this.CPSR.getZero()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0x1:        //NE (not equal)
+            if (!this.CPSR.getZero()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0x2:        //CS (unsigned higher or same)
+            if (this.CPSR.getCarry()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0x3:        //CC (unsigned lower)
+            if (!this.CPSR.getCarry()) {
+                this.executeDecoded();
+            }
+        case 0x4:        //MI (negative)
+            if (this.CPSR.getNegative()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0x5:        //PL (positive or zero)
+            if (!this.CPSR.getNegative()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0x6:        //VS (overflow)
+            if (this.CPSR.getOverflow()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0x7:        //VC (no overflow)
+            if (!this.CPSR.getOverflow()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0x8:        //HI (unsigned higher)
+            if (this.CPSR.getCarry() && !this.CPSR.getZero()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0x9:        //LS (unsigned lower or same)
+            if (!this.CPSR.getCarry() || this.CPSR.getZero()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0xA:        //GE (greater or equal)
+            if (this.CPSR.getNegative() == this.CPSR.getOverflow()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0xB:        //LT (less than)
+            if (this.CPSR.getNegative() != this.CPSR.getOverflow()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0xC:        //GT (greater than)
+            if (!this.CPSR.getZero() && this.CPSR.getNegative() == this.CPSR.getOverflow()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0xD:        //LE (less than or equal)
+            if (this.CPSR.getZero() || this.CPSR.getNegative() != this.CPSR.getOverflow()) {
+                this.executeDecoded();
+            }
+            break;
+        case 0xE:        //AL (always)
+            this.executeDecoded();
+    }
+}
+ARMInstructionSet.prototype.executeDecoded = function () {
+    /*
+     Instruction Decode Pattern:
+     C = Conditional Code Bit;
+     X = Possible opcode bit;
+     N = Data Bit, definitely not an opcode bit
+     OPCODE: CCCCXXXXXXXXXXXXNNNNNNNNXXXXNNNN
+     
+     Since many of those "X"s are redundant and possibly data, we can "process"
+     it and use a table to further decide what unique opcode it is, leaving us with
+     a dense switch statement. Not "processing" the opcode beforehand would leave us
+     with a 12 or 16 (condition code baked in) bit wide switch, which is slow in JS,
+     and using a function in array computed goto trick is not optimal in JavaScript.
+     
+     For this function, we decode the bottom 28 bits for the opcode:
+     */
+    switch (this.instructionMap[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)] & 0xFF) {
+        case 0:
+            this.BX();
+            break;
+        case 1:
+            this.B();
+            break;
+        case 2:
+            this.BL();
+            break;
+        case 3:
+            this.AND();
+            break;
+        case 4:
+            this.AND2();
+            break;
+        case 5:
+            this.ANDS();
+            break;
+        case 6:
+            this.ANDS2();
+            break;
+        case 7:
+            this.EOR();
+            break;
+        case 8:
+            this.EOR2();
+            break;
+        case 9:
+            this.EORS();
+            break;
+        case 10:
+            this.EORS2();
+            break;
+        case 11:
+            this.SUB();
+            break;
+        case 12:
+            this.SUB2();
+            break;
+        case 13:
+            this.SUBS();
+            break;
+        case 14:
+            this.SUBS2();
+            break;
+        case 15:
+            this.RSB();
+            break;
+        case 16:
+            this.RSB2();
+            break;
+        case 17:
+            this.RSBS();
+            break;
+        case 18:
+            this.RSBS2();
+            break;
+        case 19:
+            this.ADD();
+            break;
+        case 20:
+            this.ADD2();
+            break;
+        case 21:
+            this.ADDS();
+            break;
+        case 22:
+            this.ADDS2();
+            break;
+        case 23:
+            this.ADC();
+            break;
+        case 24:
+            this.ADC2();
+            break;
+        case 25:
+            this.ADCS();
+            break;
+        case 26:
+            this.ADCS2();
+            break;
+        case 27:
+            this.SBC();
+            break;
+        case 28:
+            this.SBC2();
+            break;
+        case 29:
+            this.SBCS();
+            break;
+        case 30:
+            this.SBCS2();
+            break;
+        case 31:
+            this.RSC();
+            break;
+        case 32:
+            this.RSC2();
+            break;
+        case 33:
+            this.RSCS();
+            break;
+        case 34:
+            this.RSCS2();
+            break;
+        case 35:
+            this.TSTS();
+            break;
+        case 36:
+            this.TSTS2();
+            break;
+        case 37:
+            this.TEQS();
+            break;
+        case 38:
+            this.TEQS2();
+            break;
+        case 39:
+            this.CMPS();
+            break;
+        case 40:
+            this.CMPS2();
+            break;
+        case 41:
+            this.CMNS();
+            break;
+        case 42:
+            this.CMNS2();
+            break;
+        case 43:
+            this.ORR();
+            break;
+        case 44:
+            this.ORR2();
+            break;
+        case 45:
+            this.ORRS();
+            break;
+        case 46:
+            this.ORRS2();
+            break;
+        case 47:
+            this.MOV();
+            break;
+        case 48:
+            this.MOVS();
+            break;
+        case 49:
+            this.BIC();
+            break;
+        case 50:
+            this.BIC2();
+            break;
+        case 51:
+            this.BICS();
+            break;
+        case 52:
+            this.BICS2();
+            break;
+        case 53:
+            this.MVN();
+            break;
+        case 54:
+            this.MVNS();
+            break;
+        case 55:
+            this.MRS1();
+            break;
+        case 56:
+            this.rcs();
+            break;
+        case 57:
+            this.MUL();
+            break;
+        case 58:
+            this.MULS();
+            break;
+        case 59:
+            this.MLA();
+            break;
+        case 60:
+            this.MLAS();
+            break;
+        case 61:
+            this.UMULL();
+            break;
+        case 62:
+            this.UMULLS();
+            break;
+        case 63:
+            this.UMLAL();
+            break;
+        case 64:
+            this.UMLALS();
+            break;
+        case 65:
+            this.SMULL();
+            break;
+        case 66:
+            this.SMULLS();
+            break;
+        case 67:
+            this.SMLAL();
+            break;
+        case 68:
+            this.SMLALS();
+            break;
+        case 69:
+            this.STRH();
+            break;
+        case 70:
+            this.LDRH();
+            break;
+        case 71:
+            this.LDRSH();
+            break;
+        case 72:
+            this.LDRSB();
+            break;
+        case 73:
+            this.STR();
+            break;
+        case 74:
+            this.LDR();
+            break;
+        case 75:
+            this.STRB();
+            break;
+        case 76:
+            this.LDRB();
+            break;
+        case 77:
+            this.STRT();
+            break;
+        case 78:
+            this.LDRT();
+            break;
+        case 79:
+            this.STRBT();
+            break;
+        case 80:
+            this.LDRBT();
+            break;
+        case 81:
+            this.STMIA();
+            break;
+        case 82:
+            this.STMIAW();
+            break;
+        case 83:
+            this.STMDA();
+            break;
+        case 84:
+            this.STMDAW();
+            break;
+        case 85:
+            this.STMIB();
+            break;
+        case 86:
+            this.STMIBW();
+            break;
+        case 87:
+            this.STMDB();
+            break;
+        case 88:
+            this.STMDBW();
+            break;
+        case 89:
+            this.LDMIA();
+            break;
+        case 90:
+            this.LDMIAW();
+            break;
+        case 91:
+            this.LDMDA();
+            break;
+        case 92:
+            this.LDMDAW();
+            break;
+        case 93:
+            this.LDMIB();
+            break;
+        case 94:
+            this.LDMIBW();
+            break;
+        case 95:
+            this.LDMDB();
+            break;
+        case 96:
+            this.LDMDBW();
+            break;
+        case 97:
+            this.SWP();
+            break;
+        case 98:
+            this.SWPB();
+            break;
+        case 99:
+            this.SWI();
+            break;
+        case 100:
+            this.MRS2();
+            break;
+        case 101:
+            this.rss();
+            break;
+        case 102:
+            this.ic();
+            break;
+        case 103:
+            this.is();
+            break;
+        case 104:
+            this.STMIAG();
+            break;
+        case 105:
+            this.STMIAWG();
+            break;
+        case 106:
+            this.STMDAG();
+            break;
+        case 107:
+            this.STMDAWG();
+            break;
+        case 108:
+            this.STMIBG();
+            break;
+        case 109:
+            this.STMIBWG();
+            break;
+        case 110:
+            this.STMDBG();
+            break;
+        case 111:
+            this.STMDBWG();
+            break;
+        case 112:
+            this.LDMIAG();
+            break;
+        case 113:
+            this.LDMIAWG();
+            break;
+        case 114:
+            this.LDMDAG();
+            break;
+        case 115:
+            this.LDMDAWG();
+            break;
+        case 116:
+            this.LDMIBG();
+            break;
+        case 117:
+            this.LDMIBWG();
+            break;
+        case 118:
+            this.LDMDBG();
+            break;
+        case 119:
+            this.LDMDBWG();
+            break;
+        case 120:
+            this.STR2();
+            break;
+        case 121:
+            this.LDR2();
+            break;
+        case 122:
+            this.STRB2();
+            break;
+        case 123:
+            this.LDRB2();
+            break;
+        case 124:
+            this.STRT2();
+            break;
+        case 125:
+            this.LDRT2();
+            break;
+        case 126:
+            this.STRBT2();
+            break;
+        case 127:
+            this.LDRBT2();
+            break;
+        case 128:
+            this.STR3();
+            break;
+        case 129:
+            this.LDR3();
+            break;
+        case 130:
+            this.STRB3();
+            break;
+        case 131:
+            this.LDRB3();
+            break;
+        default:
+            this.UNDEFINED();
+    }
+}
+ARMInstructionSet.prototype.executeBubble = function () {
+    //Push the new fetch access:
+    this.fetch = this.memory.memoryReadFast32(this.readPC() | 0) | 0;
+    //Update the pipelining state:
+    this.execute = this.decode | 0;
+    this.decode = this.fetch | 0;
+}
+ARMInstructionSet.prototype.incrementProgramCounter = function () {
+    //Increment The Program Counter:
+    this.registers[15] = ((this.registers[15] | 0) + 4) | 0;
+}
+ARMInstructionSet.prototype.getLR = function () {
+    return ((this.readPC() | 0) - 4) | 0;
+}
+ARMInstructionSet.prototype.getIRQLR = function () {
+    return this.getLR() | 0;
+}
+ARMInstructionSet.prototype.getCurrentFetchValue = function () {
+    return this.fetch | 0;
+}
+ARMInstructionSet.prototype.writeRegister = function (address, data) {
+    //Unguarded non-pc register write:
+    address = address | 0;
+    data = data | 0;
+    this.registers[address & 0xF] = data | 0;
+}
+ARMInstructionSet.prototype.writeUserRegister = function (address, data) {
+    //Unguarded non-pc user mode register write:
+    address = address | 0;
+    data = data | 0;
+    this.registersUSR[address & 0x7] = data | 0;
+}
+ARMInstructionSet.prototype.guardRegisterWrite = function (address, data) {
+    //Guarded register write:
+    address = address | 0;
+    data = data | 0;
+    if ((address | 0) < 0xF) {
+        //Non-PC Write:
+        this.writeRegister(address | 0, data | 0);
+    }
+    else {
+        //We performed a branch:
+        this.CPUCore.branch(data & -4);
+    }
+}
+ARMInstructionSet.prototype.guard12OffsetRegisterWrite = function (data) {
+    data = data | 0;
+    this.guardRegisterWrite((this.execute >> 0xC) & 0xF, data | 0);
+}
+ARMInstructionSet.prototype.guard16OffsetRegisterWrite = function (data) {
+    data = data | 0;
+    this.guardRegisterWrite((this.execute >> 0x10) & 0xF, data | 0);
+}
+ARMInstructionSet.prototype.guardProgramCounterRegisterWriteCPSR = function (data) {
+    data = data | 0;
+    //Restore SPSR to CPSR:
+    this.CPUCore.SPSRtoCPSR();
+    data &= (!this.CPUCore.InTHUMB) ? -4 : -2;
+    //We performed a branch:
+    this.CPUCore.branch(data | 0);
+}
+ARMInstructionSet.prototype.guardRegisterWriteCPSR = function (address, data) {
+    //Guard for possible pc write with cpsr update:
+    address = address | 0;
+    data = data | 0;
+    if ((address | 0) < 0xF) {
+        //Non-PC Write:
+        this.writeRegister(address | 0, data | 0);
+    }
+    else {
+        //Restore SPSR to CPSR:
+        this.guardProgramCounterRegisterWriteCPSR(data | 0);
+    }
+}
+ARMInstructionSet.prototype.guard12OffsetRegisterWriteCPSR = function (data) {
+    data = data | 0;
+    this.guardRegisterWriteCPSR((this.execute >> 0xC) & 0xF, data | 0);
+}
+ARMInstructionSet.prototype.guard16OffsetRegisterWriteCPSR = function (data) {
+    data = data | 0;
+    this.guardRegisterWriteCPSR((this.execute >> 0x10) & 0xF, data | 0);
+}
+ARMInstructionSet.prototype.guardUserRegisterWrite = function (address, data) {
+    //Guard only on user access, not PC!:
+    address = address | 0;
+    data = data | 0;
+    switch (this.CPUCore.MODEBits | 0) {
+        case 0x10:
+        case 0x1F:
+            this.writeRegister(address | 0, data | 0);
+            break;
+        case 0x11:
+            if ((address | 0) < 8) {
+                this.writeRegister(address | 0, data | 0);
+            }
+            else {
+                //User-Mode Register Write Inside Non-User-Mode:
+                this.writeUserRegister(address | 0, data | 0);
+            }
+            break;
+        default:
+            if ((address | 0) < 13) {
+                this.writeRegister(address | 0, data | 0);
+            }
+            else {
+                //User-Mode Register Write Inside Non-User-Mode:
+                this.writeUserRegister(address | 0, data | 0);
+            }
+    }
+}
+ARMInstructionSet.prototype.guardRegisterWriteLDM = function (address, data) {
+    //Proxy guarded register write for LDM:
+    address = address | 0;
+    data = data | 0;
+    this.guardRegisterWrite(address | 0, data | 0);
+}
+ARMInstructionSet.prototype.guardUserRegisterWriteLDM = function (address, data) {
+    //Proxy guarded user mode register write with PC guard for LDM:
+    address = address | 0;
+    data = data | 0;
+    if ((address | 0) < 0xF) {
+        if ((this.execute & 0x8000) == 0x8000) {
+            //PC is going to be loaded, don't do user-mode:
+            this.guardRegisterWrite(address | 0, data | 0);
+        }
+        else {
+            //PC isn't in the list, do user-mode:
+            this.guardUserRegisterWrite(address | 0, data | 0);
+        }
+    }
+    else {
+        this.guardProgramCounterRegisterWriteCPSR(data | 0);
+    }
+}
+ARMInstructionSet.prototype.baseRegisterWrite = function (address, data, userMode) {
+    //Update writeback for offset+base modes:
+    address = address | 0;
+    data = data | 0;
+    if (!userMode || (address | 0) == 0xF) {
+        this.guardRegisterWrite(address | 0, data | 0);
+    }
+    else {
+        this.guardUserRegisterWrite(address | 0, data | 0);
+    }
+}
+ARMInstructionSet.prototype.readPC = function () {
+    //PC register read:
+    return this.registers[0xF] | 0;
+}
+ARMInstructionSet.prototype.readRegister = function (address) {
+    //Unguarded register read:
+    address = address | 0;
+    return this.registers[address & 0xF] | 0;
+}
+ARMInstructionSet.prototype.readUserRegister = function (address) {
+    //Unguarded user mode register read:
+    address = address | 0;
+    return this.registersUSR[address & 0x7] | 0;
+}
+ARMInstructionSet.prototype.readDelayedPCRegister = function () {
+    //Get the PC register data clocked 4 exta:
+    var register = this.registers[0xF] | 0;
+    register = ((register | 0) + 4) | 0;
+    return register | 0;
+}
+ARMInstructionSet.prototype.read0OffsetRegister = function () {
+    //Unguarded register read at position 0:
+    return this.readRegister(this.execute | 0) | 0;
+}
+ARMInstructionSet.prototype.read8OffsetRegister = function () {
+    //Unguarded register read at position 0x8:
+    return this.readRegister(this.execute >> 0x8) | 0;
+}
+ARMInstructionSet.prototype.read12OffsetRegister = function () {
+    //Unguarded register read at position 0xC:
+    return this.readRegister(this.execute >> 0xC) | 0;
+}
+ARMInstructionSet.prototype.read16OffsetRegister = function () {
+    //Unguarded register read at position 0x10:
+    return this.readRegister(this.execute >> 0x10) | 0;
+}
+ARMInstructionSet.prototype.readGuarded16OffsetRegister = function () {
+    //Guarded register read at position 0x10:
+    return this.guardRegisterRead((this.execute >> 0x10) & 0xF) | 0;
+}
+ARMInstructionSet.prototype.guardRegisterRead = function (address) {
+    //Guarded register read:
+    address = address | 0;
+    if ((address | 0) < 0xF) {
+        return this.readRegister(address | 0) | 0;
+    }
+    //Get Special Case PC Read:
+    return this.readDelayedPCRegister() | 0;
+}
+ARMInstructionSet.prototype.guardUserRegisterRead = function (address) {
+    //Guard only on user access, not PC!:
+    address = address | 0;
+    switch (this.CPUCore.MODEBits | 0) {
+        case 0x10:
+        case 0x1F:
+            return this.readRegister(address | 0) | 0;
+        case 0x11:
+            if ((address | 0) < 8) {
+                return this.readRegister(address | 0) | 0;
+            }
+            else {
+                //User-Mode Register Read Inside Non-User-Mode:
+                return this.readUserRegister(address | 0) | 0;
+            }
+            break;
+        default:
+            if ((address | 0) < 13) {
+                return this.readRegister(address | 0) | 0;
+            }
+            else {
+                //User-Mode Register Read Inside Non-User-Mode:
+                return this.readUserRegister(address | 0) | 0;
+            }
+    }
+}
+ARMInstructionSet.prototype.guardRegisterReadSTM = function (address) {
+    //Proxy guarded register read (used by STM*):
+    address = address | 0;
+    return this.guardRegisterRead(address | 0) | 0;
+}
+ARMInstructionSet.prototype.guardUserRegisterReadSTM = function (address) {
+    //Proxy guarded user mode read (used by STM*):
+    address = address | 0;
+    if ((address | 0) < 0xF) {
+        return this.guardUserRegisterRead(address | 0) | 0;
+    }
+    else {
+        //Get Special Case PC Read:
+        return this.readDelayedPCRegister() | 0;
+    }
+}
+ARMInstructionSet.prototype.baseRegisterRead = function (address, userMode) {
+    //Read specially for offset+base modes:
+    address = address | 0;
+    if (!userMode || (address | 0) == 0xF) {
+        return this.readRegister(address | 0) | 0;
+    }
+    else {
+        return this.guardUserRegisterRead(address | 0) | 0;
+    }
+}
+ARMInstructionSet.prototype.updateBasePostDecrement = function (offset, userMode) {
+    offset = offset | 0;
+    var baseRegisterNumber = (this.execute >> 16) & 0xF;
+    var base = this.baseRegisterRead(baseRegisterNumber | 0, userMode) | 0;
+    var result = ((base | 0) - (offset | 0)) | 0;
+    this.baseRegisterWrite(baseRegisterNumber | 0, result | 0, userMode);
+    return base | 0;
+}
+ARMInstructionSet.prototype.updateBasePostIncrement = function (offset, userMode) {
+    offset = offset | 0;
+    var baseRegisterNumber = (this.execute >> 16) & 0xF;
+    var base = this.baseRegisterRead(baseRegisterNumber | 0, userMode) | 0;
+    var result = ((base | 0) + (offset | 0)) | 0;
+    this.baseRegisterWrite(baseRegisterNumber | 0, result | 0, userMode);
+    return base | 0;
+}
+ARMInstructionSet.prototype.updateNoBaseDecrement = function (offset) {
+    offset = offset | 0;
+    var baseRegisterNumber = (this.execute >> 16) & 0xF;
+    var base = this.registers[baseRegisterNumber | 0] | 0;
+    var result = ((base | 0) - (offset | 0)) | 0;
+    return result | 0;
+}
+ARMInstructionSet.prototype.updateNoBaseIncrement = function (offset) {
+    offset = offset | 0;
+    var baseRegisterNumber = (this.execute >> 16) & 0xF;
+    var base = this.registers[baseRegisterNumber | 0] | 0;
+    var result = ((base | 0) + (offset | 0)) | 0;
+    return result | 0;
+}
+ARMInstructionSet.prototype.updateBasePreDecrement = function (offset) {
+    offset = offset | 0;
+    var baseRegisterNumber = (this.execute >> 16) & 0xF;
+    var base = this.registers[baseRegisterNumber | 0] | 0;
+    var result = ((base | 0) - (offset | 0)) | 0;
+    this.guardRegisterWrite(baseRegisterNumber | 0, result | 0);
+    return result | 0;
+}
+ARMInstructionSet.prototype.updateBasePreIncrement = function (offset) {
+    offset = offset | 0;
+    var baseRegisterNumber = (this.execute >> 16) & 0xF;
+    var base = this.registers[baseRegisterNumber | 0] | 0;
+    var result = ((base | 0) + (offset | 0)) | 0;
+    this.guardRegisterWrite(baseRegisterNumber | 0, result | 0);
+    return result | 0;
+}
+ARMInstructionSet.prototype.BX = function () {
+    //Branch & eXchange:
+    var address = this.read0OffsetRegister() | 0;
+    if ((address & 0x1) == 0) {
+        //Stay in ARM mode:
+        this.CPUCore.branch(address & -4);
+    }
+    else {
+        //Enter THUMB mode:
+        this.CPUCore.enterTHUMB();
+        this.CPUCore.branch(address & -2);
+    }
+}
+ARMInstructionSet.prototype.B = function () {
+    //Branch:
+    this.CPUCore.branch(((this.readPC() | 0) + ((this.execute << 8) >> 6)) | 0);
+}
+ARMInstructionSet.prototype.BL = function () {
+    //Branch with Link:
+    this.writeRegister(0xE, this.getLR() | 0);
+    this.B();
+}
+ARMInstructionSet.prototype.AND = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform bitwise AND:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(operand1 & operand2);
+}
+ARMInstructionSet.prototype.AND2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform bitwise AND:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(operand1 & operand2);
+}
+ARMInstructionSet.prototype.ANDS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing2() | 0;
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(result | 0);
+}
+ARMInstructionSet.prototype.ANDS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing4() | 0;
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(result | 0);
+}
+ARMInstructionSet.prototype.EOR = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform bitwise EOR:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(operand1 ^ operand2);
+}
+ARMInstructionSet.prototype.EOR2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform bitwise EOR:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(operand1 ^ operand2);
+}
+ARMInstructionSet.prototype.EORS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing2() | 0;
+    //Perform bitwise EOR:
+    var result = operand1 ^ operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(result | 0);
+}
+ARMInstructionSet.prototype.EORS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing4() | 0;
+    //Perform bitwise EOR:
+    var result = operand1 ^ operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(result | 0);
+}
+ARMInstructionSet.prototype.SUB = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform Subtraction:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0)) | 0);
+}
+ARMInstructionSet.prototype.SUB2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform Subtraction:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0)) | 0);
+}
+ARMInstructionSet.prototype.SUBS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.SUBS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.RSB = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform Subtraction:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0)) | 0);
+}
+ARMInstructionSet.prototype.RSB2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform Subtraction:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0)) | 0);
+}
+ARMInstructionSet.prototype.RSBS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+}
+ARMInstructionSet.prototype.RSBS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+}
+ARMInstructionSet.prototype.ADD = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform Addition:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
+}
+ARMInstructionSet.prototype.ADD2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform Addition:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0)) | 0);
+}
+ARMInstructionSet.prototype.ADDS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.ADDS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.ADC = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform Addition w/ Carry:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0) + (this.CPSR.getCarryInt() | 0)) | 0);
+}
+ARMInstructionSet.prototype.ADC2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform Addition w/ Carry:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0) + (this.CPSR.getCarryInt() | 0)) | 0);
+}
+ARMInstructionSet.prototype.ADCS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.ADCS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.SBC = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform Subtraction w/ Carry:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0) - (this.CPSR.getCarryIntReverse() | 0)) | 0);
+}
+ARMInstructionSet.prototype.SBC2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform Subtraction w/ Carry:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0) - (this.CPSR.getCarryIntReverse() | 0)) | 0);
+}
+ARMInstructionSet.prototype.SBCS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.SBCS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+}
+ARMInstructionSet.prototype.RSC = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform Reverse Subtraction w/ Carry:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0) - (this.CPSR.getCarryIntReverse() | 0)) | 0);
+}
+ARMInstructionSet.prototype.RSC2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform Reverse Subtraction w/ Carry:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0) - (this.CPSR.getCarryIntReverse() | 0)) | 0);
+}
+ARMInstructionSet.prototype.RSCS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+}
+ARMInstructionSet.prototype.RSCS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Update destination register:
+    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+}
+ARMInstructionSet.prototype.TSTS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing2() | 0;
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+}
+ARMInstructionSet.prototype.TSTS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing4() | 0;
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+}
+ARMInstructionSet.prototype.TEQS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing2() | 0;
+    //Perform bitwise EOR:
+    var result = operand1 ^ operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+}
+ARMInstructionSet.prototype.TEQS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing4() | 0;
+    //Perform bitwise EOR:
+    var result = operand1 ^ operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+}
+ARMInstructionSet.prototype.CMPS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    this.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+}
+ARMInstructionSet.prototype.CMPS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    this.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+}
+ARMInstructionSet.prototype.CMNS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1();
+    this.CPSR.setCMNFlags(operand1 | 0, operand2 | 0);
+}
+ARMInstructionSet.prototype.CMNS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3();
+    this.CPSR.setCMNFlags(operand1 | 0, operand2 | 0);
+}
+ARMInstructionSet.prototype.ORR = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing1() | 0;
+    //Perform bitwise OR:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(operand1 | operand2);
+}
+ARMInstructionSet.prototype.ORR2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing3() | 0;
+    //Perform bitwise OR:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(operand1 | operand2);
+}
+ARMInstructionSet.prototype.ORRS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing2() | 0;
+    //Perform bitwise OR:
+    var result = operand1 | operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(result | 0);
+}
+ARMInstructionSet.prototype.ORRS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    var operand2 = this.operand2OP_DataProcessing4() | 0;
+    //Perform bitwise OR:
+    var result = operand1 | operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(result | 0);
+}
+ARMInstructionSet.prototype.MOV = function () {
+    //Perform move:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(this.operand2OP_DataProcessing1() | 0);
+}
+ARMInstructionSet.prototype.MOVS = function () {
+    var operand2 = this.operand2OP_DataProcessing2() | 0;
+    //Perform move:
+    this.CPSR.setNegativeInt(operand2 | 0);
+    this.CPSR.setZeroInt(operand2 | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(operand2 | 0);
+}
+ARMInstructionSet.prototype.BIC = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    //NOT operand 2:
+    var operand2 = ~this.operand2OP_DataProcessing1();
+    //Perform bitwise AND:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(operand1 & operand2);
+}
+ARMInstructionSet.prototype.BIC2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    //NOT operand 2:
+    var operand2 = ~this.operand2OP_DataProcessing3();
+    //Perform bitwise AND:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(operand1 & operand2);
+}
+ARMInstructionSet.prototype.BICS = function () {
+    var operand1 = this.read16OffsetRegister() | 0;
+    //NOT operand 2:
+    var operand2 = ~this.operand2OP_DataProcessing2();
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(result | 0);
+}
+ARMInstructionSet.prototype.BICS2 = function () {
+    var operand1 = this.readGuarded16OffsetRegister() | 0;
+    //NOT operand 2:
+    var operand2 = ~this.operand2OP_DataProcessing4();
+    //Perform bitwise AND:
+    var result = operand1 & operand2;
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(result | 0);
+}
+ARMInstructionSet.prototype.MVN = function () {
+    //Perform move negative:
+    //Update destination register:
+    this.guard12OffsetRegisterWrite(~this.operand2OP_DataProcessing1());
+}
+ARMInstructionSet.prototype.MVNS = function () {
+    var operand2 = ~this.operand2OP_DataProcessing2();
+    //Perform move negative:
+    this.CPSR.setNegativeInt(operand2 | 0);
+    this.CPSR.setZeroInt(operand2 | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard12OffsetRegisterWriteCPSR(operand2 | 0);
+}
+ARMInstructionSet.prototype.MRS1 = function () {
+    //Transfer PSR to Register
+    this.guard12OffsetRegisterWrite(this.rc() | 0);
+}
+ARMInstructionSet.prototype.MRS2 = function () {
+    //Transfer PSR to Register
+    this.guard12OffsetRegisterWrite(this.rs() | 0);
+}
+ARMInstructionSet.prototype.MUL = function () {
+    //Perform multiplication:
+    var result = this.CPUCore.performMUL32(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0) | 0;
+    //Update destination register:
+    this.guard16OffsetRegisterWrite(result | 0);
+}
+ARMInstructionSet.prototype.MULS = function () {
+    //Perform multiplication:
+    var result = this.CPUCore.performMUL32(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0) | 0;
+    this.CPSR.setCarryFalse();
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard16OffsetRegisterWrite(result | 0);
+}
+ARMInstructionSet.prototype.MLA = function () {
+    //Perform multiplication:
+    var result = this.CPUCore.performMUL32MLA(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0) | 0;
+    //Perform addition:
+    result = ((result | 0) + (this.read12OffsetRegister() | 0));
+    //Update destination register:
+    this.guard16OffsetRegisterWrite(result | 0);
+}
+ARMInstructionSet.prototype.MLAS = function () {
+    //Perform multiplication:
+    var result = this.CPUCore.performMUL32MLA(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0) | 0;
+    //Perform addition:
+    result = ((result | 0) + (this.read12OffsetRegister() | 0)) | 0;
+    this.CPSR.setCarryFalse();
+    this.CPSR.setNegativeInt(result | 0);
+    this.CPSR.setZeroInt(result | 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard16OffsetRegisterWrite(result | 0);
+}
+ARMInstructionSet.prototype.UMULL = function () {
+    //Perform multiplication:
+    this.CPUCore.performUMUL64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0);
+    //Update destination register:
+    this.guard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
+    this.guard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
+}
+ARMInstructionSet.prototype.UMULLS = function () {
+    //Perform multiplication:
+    this.CPUCore.performUMUL64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0);
+    this.CPSR.setCarryFalse();
+    this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
+    this.CPSR.setZero((this.CPUCore.mul64ResultHigh | 0) == 0 && (this.CPUCore.mul64ResultLow | 0) == 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
+    this.guard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
+}
+ARMInstructionSet.prototype.UMLAL = function () {
+    //Perform multiplication:
+    this.CPUCore.performUMLA64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0, this.read16OffsetRegister() | 0, this.read12OffsetRegister() | 0);
+    //Update destination register:
+    this.guard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
+    this.guard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
+}
+ARMInstructionSet.prototype.UMLALS = function () {
+    //Perform multiplication:
+    this.CPUCore.performUMLA64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0, this.read16OffsetRegister() | 0, this.read12OffsetRegister() | 0);
+    this.CPSR.setCarryFalse();
+    this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
+    this.CPSR.setZero((this.CPUCore.mul64ResultHigh | 0) == 0 && (this.CPUCore.mul64ResultLow | 0) == 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
+    this.guard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
+}
+ARMInstructionSet.prototype.SMULL = function () {
+    //Perform multiplication:
+    this.CPUCore.performMUL64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0);
+    //Update destination register:
+    this.guard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
+    this.guard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
+}
+ARMInstructionSet.prototype.SMULLS = function () {
+    //Perform multiplication:
+    this.CPUCore.performMUL64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0);
+    this.CPSR.setCarryFalse();
+    this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
+    this.CPSR.setZero((this.CPUCore.mul64ResultHigh | 0) == 0 && (this.CPUCore.mul64ResultLow | 0) == 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
+    this.guard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
+}
+ARMInstructionSet.prototype.SMLAL = function () {
+    //Perform multiplication:
+    this.CPUCore.performMLA64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0, this.read16OffsetRegister() | 0, this.read12OffsetRegister() | 0);
+    //Update destination register:
+    this.guard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
+    this.guard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
+}
+ARMInstructionSet.prototype.SMLALS = function () {
+    //Perform multiplication:
+    this.CPUCore.performMLA64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0, this.read16OffsetRegister() | 0, this.read12OffsetRegister() | 0);
+    this.CPSR.setCarryFalse();
+    this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
+    this.CPSR.setZero((this.CPUCore.mul64ResultHigh | 0) == 0 && (this.CPUCore.mul64ResultLow | 0) == 0);
+    //Update destination register and guard CPSR for PC:
+    this.guard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
+    this.guard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
+}
+ARMInstructionSet.prototype.STRH = function () {
+    //Perform halfword store calculations:
+    var address = this.operand2OP_LoadStore1() | 0;
+    //Write to memory location:
+    this.CPUCore.write16(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDRH = function () {
+    //Perform halfword load calculations:
+    var address = this.operand2OP_LoadStore1() | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read16(address | 0) | 0);
+}
+ARMInstructionSet.prototype.LDRSH = function () {
+    //Perform signed halfword load calculations:
+    var address = this.operand2OP_LoadStore1() | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite((this.CPUCore.read16(address | 0) << 16) >> 16);
+}
+ARMInstructionSet.prototype.LDRSB = function () {
+    //Perform signed byte load calculations:
+    var address = this.operand2OP_LoadStore1() | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite((this.CPUCore.read8(address | 0) << 24) >> 24);
+}
+ARMInstructionSet.prototype.STR = function () {
+    //Perform word store calculations:
+    var address = this.operand2OP_LoadStore2(false) | 0;
+    //Write to memory location:
+    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDR = function () {
+    //Perform word load calculations:
+    var address = this.operand2OP_LoadStore2(false) | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STRB = function () {
+    //Perform byte store calculations:
+    var address = this.operand2OP_LoadStore2(false) | 0;
+    //Write to memory location:
+    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDRB = function () {
+    //Perform byte store calculations:
+    var address = this.operand2OP_LoadStore2(false) | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STRT = function () {
+    //Perform word store calculations (forced user-mode):
+    var address = this.operand2OP_LoadStore2(true) | 0;
+    //Write to memory location:
+    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDRT = function () {
+    //Perform word load calculations (forced user-mode):
+    var address = this.operand2OP_LoadStore2(true) | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STRBT = function () {
+    //Perform byte store calculations (forced user-mode):
+    var address = this.operand2OP_LoadStore2(true) | 0;
+    //Write to memory location:
+    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDRBT = function () {
+    //Perform byte load calculations (forced user-mode):
+    var address = this.operand2OP_LoadStore2(true) | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STR2 = function () {
+    //Perform word store calculations:
+    var address = this.operand2OP_LoadStore3(false) | 0;
+    //Write to memory location:
+    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDR2 = function () {
+    //Perform word load calculations:
+    var address = this.operand2OP_LoadStore3(false) | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STRB2 = function () {
+    //Perform byte store calculations:
+    var address = this.operand2OP_LoadStore3(false) | 0;
+    //Write to memory location:
+    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDRB2 = function () {
+    //Perform byte store calculations:
+    var address = this.operand2OP_LoadStore3(false) | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STRT2 = function () {
+    //Perform word store calculations (forced user-mode):
+    var address = this.operand2OP_LoadStore3(true) | 0;
+    //Write to memory location:
+    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDRT2 = function () {
+    //Perform word load calculations (forced user-mode):
+    var address = this.operand2OP_LoadStore3(true) | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STRBT2 = function () {
+    //Perform byte store calculations (forced user-mode):
+    var address = this.operand2OP_LoadStore3(true) | 0;
+    //Write to memory location:
+    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDRBT2 = function () {
+    //Perform byte load calculations (forced user-mode):
+    var address = this.operand2OP_LoadStore3(true) | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STR3 = function () {
+    //Perform word store calculations:
+    var address = this.operand2OP_LoadStore4() | 0;
+    //Write to memory location:
+    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDR3 = function () {
+    //Perform word load calculations:
+    var address = this.operand2OP_LoadStore4() | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STRB3 = function () {
+    //Perform byte store calculations:
+    var address = this.operand2OP_LoadStore4() | 0;
+    //Write to memory location:
+    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+}
+ARMInstructionSet.prototype.LDRB3 = function () {
+    //Perform byte store calculations:
+    var address = this.operand2OP_LoadStore4() | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STMIA = function () {
+    //Only initialize the STMIA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0; rListPosition < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                this.memory.memoryWrite32(currentAddress | 0, this.guardRegisterReadSTM(rListPosition | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMIAW = function () {
+    //Only initialize the STMIA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0; rListPosition < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                this.memory.memoryWrite32(currentAddress | 0, this.guardRegisterReadSTM(rListPosition | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMDA = function () {
+    //Only initialize the STMDA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                this.memory.memoryWrite32(currentAddress | 0, this.guardRegisterReadSTM(rListPosition | 0) | 0);
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMDAW = function () {
+    //Only initialize the STMDA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                this.memory.memoryWrite32(currentAddress | 0, this.guardRegisterReadSTM(rListPosition | 0) | 0);
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMIB = function () {
+    //Only initialize the STMIB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.memory.memoryWrite32(currentAddress | 0, this.guardRegisterReadSTM(rListPosition | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMIBW = function () {
+    //Only initialize the STMIB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.memory.memoryWrite32(currentAddress | 0, this.guardRegisterReadSTM(rListPosition | 0) | 0);
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMDB = function () {
+    //Only initialize the STMDB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+                this.memory.memoryWrite32(currentAddress | 0, this.guardRegisterReadSTM(rListPosition | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMDBW = function () {
+    //Only initialize the STMDB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+                this.memory.memoryWrite32(currentAddress | 0, this.guardRegisterReadSTM(rListPosition | 0) | 0);
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMIAG = function () {
+    //Only initialize the STMIA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0; rListPosition < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMIAWG = function () {
+    //Only initialize the STMIA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0; rListPosition < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMDAG = function () {
+    //Only initialize the STMDA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMDAWG = function () {
+    //Only initialize the STMDA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMIBG = function () {
+    //Only initialize the STMIB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMIBWG = function () {
+    //Only initialize the STMIB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMDBG = function () {
+    //Only initialize the STMDB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+                this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.STMDBWG = function () {
+    //Only initialize the STMDB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Push register(s) into memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Push a register into memory:
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+                this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMIA = function () {
+    //Only initialize the LDMIA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMIAW = function () {
+    //Only initialize the LDMIA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMDA = function () {
+    //Only initialize the LDMDA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMDAW = function () {
+    //Only initialize the LDMDA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMIB = function () {
+    //Only initialize the LDMIB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMIBW = function () {
+    //Only initialize the LDMIB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMDB = function () {
+    //Only initialize the LDMDB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMDBW = function () {
+    //Only initialize the LDMDB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMIAG = function () {
+    //Only initialize the LDMIA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMIAWG = function () {
+    //Only initialize the LDMIA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMDAG = function () {
+    //Only initialize the LDMDA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMDAWG = function () {
+    //Only initialize the LDMDA sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMIBG = function () {
+    //Only initialize the LDMIB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMIBWG = function () {
+    //Only initialize the LDMIB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMDBG = function () {
+    //Only initialize the LDMDB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.LDMDBWG = function () {
+    //Only initialize the LDMDB sequence if the register list is non-empty:
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the base address:
+        var currentAddress = this.read16OffsetRegister() | 0;
+        //Updating the address bus away from PC fetch:
+        this.wait.NonSequentialBroadcast();
+        //Load register(s) from memory:
+        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) - 4) | 0;
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+}
+ARMInstructionSet.prototype.SWP = function () {
+    var base = this.read16OffsetRegister() | 0;
+    var data = this.CPUCore.read32(base | 0) | 0;
+    //Clock a cycle for the processing delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    this.CPUCore.write32(base | 0, this.readRegister(this.execute & 0xF) | 0);
+    this.guard12OffsetRegisterWrite(data | 0);
+}
+ARMInstructionSet.prototype.SWPB = function () {
+    var base = this.read16OffsetRegister() | 0;
+    var data = this.CPUCore.read8(base | 0) | 0;
+    //Clock a cycle for the processing delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    this.CPUCore.write8(base | 0, this.readRegister(this.execute & 0xF) | 0);
+    this.guard12OffsetRegisterWrite(data | 0);
+}
+ARMInstructionSet.prototype.SWI = function () {
+    //Software Interrupt:
+    this.CPUCore.SWI();
+}
+ARMInstructionSet.prototype.UNDEFINED = function () {
+    //Undefined Exception:
+    this.CPUCore.UNDEFINED();
+}
+ARMInstructionSet.prototype.operand2OP_DataProcessing1 = function () {
+    var data = 0;
+    switch (this.execute & 0x2000060) {
+        case 0:
+            data = this.lli() | 0;
+            break;
+        case 0x20:
+            data = this.lri() | 0;
+            break;
+        case 0x40:
+            data = this.ari() | 0;
+            break;
+        case 0x60:
+            data = this.rri() | 0;
+            break;
+        default:
+            data = this.imm() | 0;
+    }
+    return data | 0;
+}
+ARMInstructionSet.prototype.operand2OP_DataProcessing2 = function () {
+    var data = 0;
+    switch (this.execute & 0x2000060) {
+        case 0:
+            data = this.llis() | 0;
+            break;
+        case 0x20:
+            data = this.lris() | 0;
+            break;
+        case 0x40:
+            data = this.aris() | 0;
+            break;
+        case 0x60:
+            data = this.rris() | 0;
+            break;
+        default:
+            data = this.imms() | 0;
+    }
+    return data | 0;
+}
+ARMInstructionSet.prototype.operand2OP_DataProcessing3 = function () {
+    var data = 0;
+    switch ((this.execute >> 5) & 0x3) {
+        case 0:
+            data = this.llr() | 0;
+            break;
+        case 1:
+            data = this.lrr() | 0;
+            break;
+        case 2:
+            data = this.arr() | 0;
+            break;
+        default:
+            data = this.rrr() | 0;
+    }
+    return data | 0;
+}
+ARMInstructionSet.prototype.operand2OP_DataProcessing4 = function () {
+    var data = 0;
+    switch ((this.execute >> 5) & 0x3) {
+        case 0:
+            data = this.llrs() | 0;
+            break;
+        case 1:
+            data = this.lrrs() | 0;
+            break;
+        case 2:
+            data = this.arrs() | 0;
+            break;
+        default:
+            data = this.rrrs() | 0;
+    }
+    return data | 0;
+}
+ARMInstructionSet.prototype.operand2OP_LoadStore1 = function () {
+    var data = 0;
+    switch ((this.execute >> 21) & 0xF) {
+        case 0:
+        case 1:
+            data = this.ptrm() | 0;
+            break;
+        case 2:
+        case 3:
+            data = this.ptim() | 0;
+            break;
+        case 4:
+        case 5:
+            data = this.ptrp() | 0;
+            break;
+        case 6:
+        case 7:
+            data = this.ptip() | 0;
+            break;
+        case 8:
+            data = this.ofrm() | 0;
+            break;
+        case 9:
+            data = this.prrm() | 0;
+            break;
+        case 0xA:
+            data = this.ofim() | 0;
+            break;
+        case 0xB:
+            data = this.prim() | 0;
+            break;
+        case 0xC:
+            data = this.ofrp() | 0;
+            break;
+        case 0xD:
+            data = this.prrp() | 0;
+            break;
+        case 0xE:
+            data = this.ofip() | 0;
+            break;
+        default:
+            data = this.prip() | 0;
+    }
+    return data | 0;
+}
+ARMInstructionSet.prototype.operand2OP_LoadStore2 = function (userMode) {
+    var data = 0;
+    switch ((this.execute >> 21) & 0xF) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+            data = this.sptim(userMode) | 0;
+            break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            data = this.sptip(userMode) | 0;
+            break;
+        case 8:
+        case 0xA:
+            data = this.sofim(userMode) | 0;
+            break;
+        case 0x9:
+        case 0xB:
+            data = this.sprim(userMode) | 0;
+            break;
+        case 0xC:
+        case 0xE:
+            data = this.sofip(userMode) | 0;
+            break;
+        default:
+            data = this.sprip(userMode) | 0;
+    }
+    return data | 0;
+}
+ARMInstructionSet.prototype.operand2OP_LoadStoreOffsetGen = function () {
+    var data = 0;
+    switch ((this.execute >> 5) & 0x3) {
+        case 0:
+            data = this.lli() | 0;
+            break;
+        case 1:
+            data = this.lri() | 0;
+            break;
+        case 2:
+            data = this.ari() | 0;
+            break;
+        default:
+            data = this.rri() | 0;
+    }
+    return data | 0;
+}
+ARMInstructionSet.prototype.operand2OP_LoadStore3 = function (userMode) {
+    var offset = this.operand2OP_LoadStoreOffsetGen() | 0;
+    if ((this.execute & 0x800000) == 0) {
+        offset = this.updateBasePostDecrement(offset | 0, userMode) | 0;
+    }
+    else {
+        offset = this.updateBasePostIncrement(offset | 0, userMode) | 0;
+    }
+    return offset | 0;
+}
+ARMInstructionSet.prototype.operand2OP_LoadStore4 = function () {
+    var offset = this.operand2OP_LoadStoreOffsetGen() | 0;
+    switch (this.execute & 0xA00000) {
+        case 0:
+            offset = this.updateNoBaseDecrement(offset | 0) | 0;
+            break;
+        case 0x200000:
+            offset = this.updateBasePreDecrement(offset | 0) | 0;
+            break;
+        case 0x800000:
+            offset = this.updateNoBaseIncrement(offset | 0) | 0;
+            break;
+        default:
+            offset = this.updateBasePreIncrement(offset | 0) | 0;
+    }
+    return offset | 0;
+}
+ARMInstructionSet.prototype.lli = function () {
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.readRegister(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Shift the register data left:
+    var shifter = (this.execute >> 7) & 0x1F;
+    return register << shifter;
+}
+ARMInstructionSet.prototype.llis = function () {
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.readRegister(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Get the shift amount:
+    var shifter = (this.execute >> 7) & 0x1F;
+    //Check to see if we need to update CPSR:
+    if (shifter > 0) {
+        this.CPSR.setCarry((register << (shifter - 1)) < 0);
+    }
+    //Shift the register data left:
+    return register << shifter;
+}
+ARMInstructionSet.prototype.llr = function () {
+    //Logical Left Shift with Register:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Shift the register data left:
+    var shifter = this.guardRegisterRead((this.execute >> 8) & 0xF) & 0xFF;
+    return (shifter < 0x20) ? (register << shifter) : 0;
+}
+ARMInstructionSet.prototype.llrs = function () {
+    //Logical Left Shift with Register and CPSR:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Get the shift amount:
+    var shifter = this.guardRegisterRead((this.execute >> 8) & 0xF) & 0xFF;
+    //Check to see if we need to update CPSR:
+    if (shifter > 0) {
+        if (shifter < 0x20) {
+            //Shift the register data left:
+            this.CPSR.setCarry((register << ((shifter - 1) | 0)) < 0);
+            return register << shifter;
+        }
+        else if (shifter == 0x20) {
+            //Shift bit 0 into carry:
+            this.CPSR.setCarry((register & 0x1) == 0x1);
+        }
+        else {
+            //Everything Zero'd:
+            this.CPSR.setCarryFalse();
+        }
+        return 0;
+    }
+    //If shift is 0, just return the register without mod:
+    return register | 0;
+}
+ARMInstructionSet.prototype.lri = function () {
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.readRegister(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Shift the register data right logically:
+    var shifter = (this.execute >> 7) & 0x1F;
+    if (shifter == 0) {
+        //Return 0:
+        return 0;
+    }
+    return (register >>> shifter) | 0;
+}
+ARMInstructionSet.prototype.lris = function () {
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.readRegister(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Get the shift amount:
+    var shifter = (this.execute >> 7) & 0x1F;
+    //Check to see if we need to update CPSR:
+    if (shifter > 0) {
+        this.CPSR.setCarry(((register >>> (shifter - 1)) & 0x1) == 0x1);
+        //Shift the register data right logically:
+        return register >>> shifter;
+    }
+    else {
+        this.CPSR.setCarry(register < 0);
+        //Return 0:
+        return 0;
+    }
+}
+ARMInstructionSet.prototype.lrr = function () {
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Shift the register data right logically:
+    var shifter = this.guardRegisterRead((this.execute >> 8) & 0xF) & 0xFF;
+    return (shifter < 0x20) ? ((register >>> shifter) | 0) : 0;
+}
+ARMInstructionSet.prototype.lrrs = function () {
+    //Logical Right Shift with Register and CPSR:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Get the shift amount:
+    var shifter = this.guardRegisterRead((this.execute >> 8) & 0xF) & 0xFF;
+    //Check to see if we need to update CPSR:
+    if (shifter > 0) {
+        if (shifter < 0x20) {
+            //Shift the register data right logically:
+            this.CPSR.setCarry(((register >> ((shifter - 1) | 0)) & 0x1) == 0x1);
+            return (register >>> shifter) | 0;
+        }
+        else if (shifter == 0x20) {
+            //Shift bit 31 into carry:
+            this.CPSR.setCarry(register < 0);
+        }
+        else {
+            //Everything Zero'd:
+            this.CPSR.setCarryFalse();
+        }
+        return 0;
+    }
+    //If shift is 0, just return the register without mod:
+    return register | 0;
+}
+ARMInstructionSet.prototype.ari = function () {
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.readRegister(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Get the shift amount:
+    var shifter = (this.execute >> 7) & 0x1F;
+    if (shifter == 0) {
+        //Shift full length if shifter is zero:
+        shifter = 0x1F;
+    }
+    //Shift the register data right:
+    return register >> shifter;
+}
+ARMInstructionSet.prototype.aris = function () {
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.readRegister(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Get the shift amount:
+    var shifter = (this.execute >> 7) & 0x1F;
+    //Check to see if we need to update CPSR:
+    if (shifter > 0) {
+        this.CPSR.setCarry(((register >>> (shifter - 1)) & 0x1) == 0x1);
+    }
+    else {
+        //Shift full length if shifter is zero:
+        shifter = 0x1F;
+        this.CPSR.setCarry(register < 0);
+    }
+    //Shift the register data right:
+    return register >> shifter;
+}
+ARMInstructionSet.prototype.arr = function () {
+    //Arithmetic Right Shift with Register:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Shift the register data right:
+    return register >> Math.min(this.guardRegisterRead((this.execute >> 8) & 0xF) & 0xFF, 0x1F);
+}
+ARMInstructionSet.prototype.arrs = function () {
+    //Arithmetic Right Shift with Register and CPSR:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Get the shift amount:
+    var shifter = this.guardRegisterRead((this.execute >> 8) & 0xF) & 0xFF;
+    //Check to see if we need to update CPSR:
+    if (shifter > 0) {
+        if (shifter < 0x20) {
+            //Shift the register data right arithmetically:
+            this.CPSR.setCarry(((register >> ((shifter - 1) | 0)) & 0x1) == 0x1);
+            return register >> shifter;
+        }
+        else {
+            //Set all bits with bit 31:
+            this.CPSR.setCarry(register < 0);
+            return register >> 0x1F;
+        }
+    }
+    //If shift is 0, just return the register without mod:
+    return register | 0;
+}
+ARMInstructionSet.prototype.rri = function () {
+    //Rotate Right with Immediate:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.readRegister(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Rotate the register right:
+    var shifter = (this.execute >> 7) & 0x1F;
+    if (shifter > 0) {
+        //ROR
+        return (register << (0x20 - shifter)) | (register >>> shifter);
+    }
+    else {
+        //RRX
+        return ((this.CPSR.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
+    }
+}
+ARMInstructionSet.prototype.rris = function () {
+    //Rotate Right with Immediate and CPSR:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.readRegister(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Rotate the register right:
+    var shifter = (this.execute >> 7) & 0x1F;
+    if (shifter > 0) {
+        //ROR
+        this.CPSR.setCarry(((register >>> (shifter - 1)) & 0x1) == 0x1);
+        return (register << (0x20 - shifter)) | (register >>> shifter);
+    }
+    else {
+        //RRX
+        var rrxValue = ((this.CPSR.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
+        this.CPSR.setCarry((register & 0x1) != 0);
+        return rrxValue | 0;
+    }
+}
+ARMInstructionSet.prototype.rrr = function () {
+    //Rotate Right with Register:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Rotate the register right:
+    var shifter = this.guardRegisterRead((this.execute >> 8) & 0xF) & 0x1F;
+    if (shifter > 0) {
+        //ROR
+        return (register << (0x20 - shifter)) | (register >>> shifter);
+    }
+    //If shift is 0, just return the register without mod:
+    return register | 0;
+}
+ARMInstructionSet.prototype.rrrs = function () {
+    //Rotate Right with Register and CPSR:
+    var registerSelected = this.execute & 0xF;
+    //Get the register data to be shifted:
+    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    //Clock a cycle for the shift delaying the CPU:
+    this.wait.CPUInternalSingleCyclePrefetch();
+    //Rotate the register right:
+    var shifter = this.guardRegisterRead((this.execute >> 8) & 0xF) & 0xFF;
+    if (shifter > 0) {
+        shifter &= 0x1F;
+        if (shifter > 0) {
+            //ROR
+            this.CPSR.setCarry(((register >>> (shifter - 1)) & 0x1) == 0x1);
+            return (register << (0x20 - shifter)) | (register >>> shifter);
+        }
+        else {
+            //No shift, but make carry set to bit 31:
+            this.CPSR.setCarry(register < 0);
+        }
+    }
+    //If shift is 0, just return the register without mod:
+    return register | 0;
+}
+ARMInstructionSet.prototype.imm = function () {
+    //Get the immediate data to be shifted:
+    var immediate = this.execute & 0xFF;
+    //Rotate the immediate right:
+    var shifter = (this.execute >> 7) & 0x1E;
+    if (shifter > 0) {
+        immediate = (immediate << (0x20 - shifter)) | (immediate >>> shifter);
+    }
+    return immediate | 0;
+}
+ARMInstructionSet.prototype.imms = function () {
+    //Get the immediate data to be shifted:
+    var immediate = this.execute & 0xFF;
+    //Rotate the immediate right:
+    var shifter = (this.execute >> 7) & 0x1E;
+    if (shifter > 0) {
+        immediate = (immediate << (0x20 - shifter)) | (immediate >>> shifter);
+        this.CPSR.setCarry(immediate < 0);
+    }
+    return immediate | 0;
+}
+ARMInstructionSet.prototype.rc = function () {
+    return (
+            ((this.CPSR.getNegative()) ? 0x80000000 : 0) |
+            ((this.CPSR.getZero()) ? 0x40000000 : 0) |
+            ((this.CPSR.getCarry()) ? 0x20000000 : 0) |
+            ((this.CPSR.getOverflow()) ? 0x10000000 : 0) |
+            ((this.CPUCore.IRQDisabled) ? 0x80 : 0) |
+            ((this.CPUCore.FIQDisabled) ? 0x40 : 0) |
+            this.CPUCore.MODEBits
+            );
+}
+ARMInstructionSet.prototype.rcs = function () {
+    var newcpsr = this.readRegister(this.execute & 0xF) | 0;
+    this.CPSR.setNegativeInt(newcpsr | 0);
+    this.CPSR.setZero((newcpsr & 0x40000000) != 0);
+    this.CPSR.setCarry((newcpsr & 0x20000000) != 0);
+    this.CPSR.setOverflow((newcpsr & 0x10000000) != 0);
+    if ((this.execute & 0x10000) == 0x10000 && (this.CPUCore.MODEBits | 0) != 0x10) {
+        this.CPUCore.IRQDisabled = ((newcpsr & 0x80) != 0);
+        this.CPUCore.assertIRQ();
+        this.CPUCore.FIQDisabled = ((newcpsr & 0x40) != 0);
+        //this.CPUCore.THUMBBitModify((newcpsr & 0x20) != 0);
+        //ARMWrestler test rom triggers THUMB mode, but expects it to remain in ARM mode, so ignore.
+        this.CPUCore.switchRegisterBank(newcpsr & 0x1F);
+    }
+}
+ARMInstructionSet.prototype.rs = function () {
+    switch (this.CPUCore.MODEBits | 0) {
+        case 0x11:    //FIQ
+            var spsr = this.CPUCore.SPSRFIQ;
+            break;
+        case 0x12:    //IRQ
+            var spsr = this.CPUCore.SPSRIRQ;
+            break;
+        case 0x13:    //Supervisor
+            var spsr = this.CPUCore.SPSRSVC;
+            break;
+        case 0x17:    //Abort
+            var spsr = this.CPUCore.SPSRABT;
+            break;
+        case 0x1B:    //Undefined
+            var spsr = this.CPUCore.SPSRUND;
+            break;
+        default:
+            //Instruction hit an invalid SPSR request:
+            return this.rc() | 0;
+    }
+    return (
+            ((spsr[0]) ? 0x80000000 : 0) |
+            ((spsr[1]) ? 0x40000000 : 0) |
+            ((spsr[2]) ? 0x20000000 : 0) |
+            ((spsr[3]) ? 0x10000000 : 0) |
+            ((spsr[4]) ? 0x80 : 0) |
+            ((spsr[5]) ? 0x40 : 0) |
+            ((spsr[6]) ? 0x20 : 0) |
+            spsr[7]
+            );
+}
+ARMInstructionSet.prototype.rss = function () {
+    var newspsr = this.readRegister(this.execute & 0xF) | 0;
+    switch (this.CPUCore.MODEBits | 0) {
+        case 0x11:    //FIQ
+            var spsr = this.CPUCore.SPSRFIQ;
+            break;
+        case 0x12:    //IRQ
+            var spsr = this.CPUCore.SPSRIRQ;
+            break;
+        case 0x13:    //Supervisor
+            var spsr = this.CPUCore.SPSRSVC;
+            break;
+        case 0x17:    //Abort
+            var spsr = this.CPUCore.SPSRABT;
+            break;
+        case 0x1B:    //Undefined
+            var spsr = this.CPUCore.SPSRUND;
+            break;
+        default:
+            return;
+    }
+    spsr[0] = (newspsr < 0);
+    spsr[1] = ((newspsr & 0x40000000) != 0);
+    spsr[2] = ((newspsr & 0x20000000) != 0);
+    spsr[3] = ((newspsr & 0x10000000) != 0);
+    if ((this.execute & 0x10000) == 0x10000) {
+        spsr[4] = ((newspsr & 0x80) != 0);
+        spsr[5] = ((newspsr & 0x40) != 0);
+        spsr[6] = ((newspsr & 0x20) != 0);
+        spsr[7] = newspsr & 0x1F;
+    }
+}
+ARMInstructionSet.prototype.ic = function () {
+    var operand = this.imm() | 0;
+    this.CPSR.setNegativeInt(operand | 0);
+    this.CPSR.setZero((operand & 0x40000000) != 0);
+    this.CPSR.setCarry((operand & 0x20000000) != 0);
+    this.CPSR.setOverflow((operand & 0x10000000) != 0);
+}
+ARMInstructionSet.prototype.is = function () {
+    var operand = this.imm() | 0;
+    switch (this.CPUCore.MODEBits | 0) {
+        case 0x11:    //FIQ
+            var spsr = this.CPUCore.SPSRFIQ;
+            break;
+        case 0x12:    //IRQ
+            var spsr = this.CPUCore.SPSRIRQ;
+            break;
+        case 0x13:    //Supervisor
+            var spsr = this.CPUCore.SPSRSVC;
+            break;
+        case 0x17:    //Abort
+            var spsr = this.CPUCore.SPSRABT;
+            break;
+        case 0x1B:    //Undefined
+            var spsr = this.CPUCore.SPSRUND;
+            break;
+        default:
+            return;
+    }
+    spsr[0] = (operand < 0);
+    spsr[1] = ((operand & 0x40000000) != 0);
+    spsr[2] = ((operand & 0x20000000) != 0);
+    spsr[3] = ((operand & 0x10000000) != 0);
+}
+ARMInstructionSet.prototype.ptrm = function () {
+    var offset = this.readRegister(this.execute & 0xF) | 0;
+    return this.updateBasePostDecrement(offset | 0, false) | 0;
+}
+ARMInstructionSet.prototype.ptim = function () {
+    var offset = ((this.execute & 0xF00) >> 4) | (this.execute & 0xF);
+    return this.updateBasePostDecrement(offset | 0, false) | 0;
+}
+ARMInstructionSet.prototype.ptrp = function () {
+    var offset = this.readRegister(this.execute & 0xF) | 0;
+    return this.updateBasePostIncrement(offset | 0, false) | 0;
+}
+ARMInstructionSet.prototype.ptip = function () {
+    var offset = ((this.execute & 0xF00) >> 4) | (this.execute & 0xF);
+    return this.updateBasePostIncrement(offset | 0, false) | 0;
+}
+ARMInstructionSet.prototype.ofrm = function () {
+    var offset = this.readRegister(this.execute & 0xF) | 0;
+    return this.updateNoBaseDecrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.prrm = function () {
+    var offset = this.readRegister(this.execute & 0xF) | 0;
+    return this.updateBasePreDecrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.ofim = function () {
+    var offset = ((this.execute & 0xF00) >> 4) | (this.execute & 0xF);
+    return this.updateNoBaseDecrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.prim = function () {
+    var offset = ((this.execute & 0xF00) >> 4) | (this.execute & 0xF);
+    return this.updateBasePreDecrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.ofrp = function () {
+    var offset = this.readRegister(this.execute & 0xF) | 0;
+    return this.updateNoBaseIncrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.prrp = function () {
+    var offset = this.readRegister(this.execute & 0xF) | 0;
+    return this.updateBasePreIncrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.ofip = function () {
+    var offset = ((this.execute & 0xF00) >> 4) | (this.execute & 0xF);
+    return this.updateNoBaseIncrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.prip = function () {
+    var offset = ((this.execute & 0xF00) >> 4) | (this.execute & 0xF);
+    return this.updateBasePreIncrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.sptim = function (userMode) {
+    var offset = this.execute & 0xFFF;
+    return this.updateBasePostDecrement(offset | 0, userMode | 0);
+}
+ARMInstructionSet.prototype.sptip = function (userMode) {
+    var offset = this.execute & 0xFFF;
+    return this.updateBasePostIncrement(offset | 0, userMode) | 0;
+}
+ARMInstructionSet.prototype.sofim = function (userMode) {
+    var offset = this.execute & 0xFFF;
+    return this.updateNoBaseDecrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.sprim = function (userMode) {
+    var offset = this.execute & 0xFFF;
+    return this.updateBasePreDecrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.sofip = function (userMode) {
+    var offset = this.execute & 0xFFF;
+    return this.updateNoBaseIncrement(offset | 0) | 0;
+}
+ARMInstructionSet.prototype.sprip = function (userMode) {
+    var offset = this.execute & 0xFFF;
+    return this.updateBasePreIncrement(offset | 0) | 0;
+}
+function compileARMInstructionDecodeMap() {
+    function compileARMInstructionDecodeOpcodeMap() {
+        var opcodeIndice = 0;
+        var instructionMap = getUint8Array(4096);
+        var codeMap = {
+            "BX":0,
+            "B":1,
+            "BL":2,
+            "AND":3,
+            "AND2":4,
+            "ANDS":5,
+            "ANDS2":6,
+            "EOR":7,
+            "EOR2":8,
+            "EORS":9,
+            "EORS2":10,
+            "SUB":11,
+            "SUB2":12,
+            "SUBS":13,
+            "SUBS2":14,
+            "RSB":15,
+            "RSB2":16,
+            "RSBS":17,
+            "RSBS2":18,
+            "ADD":19,
+            "ADD2":20,
+            "ADDS":21,
+            "ADDS2":22,
+            "ADC":23,
+            "ADC2":24,
+            "ADCS":25,
+            "ADCS2":26,
+            "SBC":27,
+            "SBC2":28,
+            "SBCS":29,
+            "SBCS2":30,
+            "RSC":31,
+            "RSC2":32,
+            "RSCS":33,
+            "RSCS2":34,
+            "TSTS":35,
+            "TSTS2":36,
+            "TEQS":37,
+            "TEQS2":38,
+            "CMPS":39,
+            "CMPS2":40,
+            "CMNS":41,
+            "CMNS2":42,
+            "ORR":43,
+            "ORR2":44,
+            "ORRS":45,
+            "ORRS2":46,
+            "MOV":47,
+            "MOVS":48,
+            "BIC":49,
+            "BIC2":50,
+            "BICS":51,
+            "BICS2":52,
+            "MVN":53,
+            "MVNS":54,
+            "MRS1":55,
+            "MSR1":56,
+            "MUL":57,
+            "MULS":58,
+            "MLA":59,
+            "MLAS":60,
+            "UMULL":61,
+            "UMULLS":62,
+            "UMLAL":63,
+            "UMLALS":64,
+            "SMULL":65,
+            "SMULLS":66,
+            "SMLAL":67,
+            "SMLALS":68,
+            "STRH":69,
+            "LDRH":70,
+            "LDRSH":71,
+            "LDRSB":72,
+            "STR":73,
+            "LDR":74,
+            "STRB":75,
+            "LDRB":76,
+            "STRT":77,
+            "LDRT":78,
+            "STRBT":79,
+            "LDRBT":80,
+            "STMIA":81,
+            "STMIAW":82,
+            "STMDA":83,
+            "STMDAW":84,
+            "STMIB":85,
+            "STMIBW":86,
+            "STMDB":87,
+            "STMDBW":88,
+            "LDMIA":89,
+            "LDMIAW":90,
+            "LDMDA":91,
+            "LDMDAW":92,
+            "LDMIB":93,
+            "LDMIBW":94,
+            "LDMDB":95,
+            "LDMDBW":96,
+            "SWP":97,
+            "SWPB":98,
+            "SWI":99,
+            "MRS2":100,
+            "MSR2":101,
+            "MSR3":102,
+            "MSR4":103,
+            "STMIAG":104,
+            "STMIAWG":105,
+            "STMDAG":106,
+            "STMDAWG":107,
+            "STMIBG":108,
+            "STMIBWG":109,
+            "STMDBG":110,
+            "STMDBWG":111,
+            "LDMIAG":112,
+            "LDMIAWG":113,
+            "LDMDAG":114,
+            "LDMDAWG":115,
+            "LDMIBG":116,
+            "LDMIBWG":117,
+            "LDMDBG":118,
+            "LDMDBWG":119,
+            "STR2":120,
+            "LDR2":121,
+            "STRB2":122,
+            "LDRB2":123,
+            "STRT2":124,
+            "LDRT2":125,
+            "STRBT2":126,
+            "LDRBT2":127,
+            "STR3":128,
+            "LDR3":129,
+            "STRB3":130,
+            "LDRB3":131,
+            "UNDEFINED":132
+        }
+        function generateMap1(instruction) {
+            for (var index = 0; index < 0x10; ++index) {
+                instructionMap[opcodeIndice++] = codeMap[instruction[index]];
+            }
+        }
+        function generateMap2(instruction) {
+            var translatedOpcode = codeMap[instruction];
+            for (var index = 0; index < 0x10; ++index) {
+                instructionMap[opcodeIndice++] = translatedOpcode;
+            }
+        }
+        function generateMap3(instruction) {
+            var translatedOpcode = codeMap[instruction];
+            for (var index = 0; index < 0x100; ++index) {
+                instructionMap[opcodeIndice++] = translatedOpcode;
+            }
+        }
+        function generateMap4(instruction) {
+            var translatedOpcode = codeMap[instruction];
+            for (var index = 0; index < 0x300; ++index) {
+                instructionMap[opcodeIndice++] = translatedOpcode;
+            }
+        }
+        function generateStoreLoadInstructionSector1() {
+            var instrMap = [
+                            "STR2",
+                            "LDR2",
+                            "STRT2",
+                            "LDRT2",
+                            "STRB2",
+                            "LDRB2",
+                            "STRBT2",
+                            "LDRBT2"
+                            ];
+            for (var instrIndex = 0; instrIndex < 0x10; ++instrIndex) {
+                for (var dataIndex = 0; dataIndex < 0x10; ++dataIndex) {
+                    if ((dataIndex & 0x1) == 0) {
+                        instructionMap[opcodeIndice++] = codeMap[instrMap[instrIndex & 0x7]];
+                    }
+                    else {
+                        instructionMap[opcodeIndice++] = codeMap["UNDEFINED"];
+                    }
+                }
+            }
+        }
+        function generateStoreLoadInstructionSector2() {
+            var instrMap = [
+                            "STR3",
+                            "LDR3",
+                            "STRB3",
+                            "LDRB3"
+                            ];
+            for (var instrIndex = 0; instrIndex < 0x10; ++instrIndex) {
+                for (var dataIndex = 0; dataIndex < 0x10; ++dataIndex) {
+                    if ((dataIndex & 0x1) == 0) {
+                        instructionMap[opcodeIndice++] = codeMap[instrMap[((instrIndex >> 1) & 0x2) | (instrIndex & 0x1)]];
+                    }
+                    else {
+                        instructionMap[opcodeIndice++] = codeMap["UNDEFINED"];
+                    }
+                }
+            }
+        }
+        //0
+        generateMap1([
+                      "AND",
+                      "AND2",
+                      "AND",
+                      "AND2",
+                      "AND",
+                      "AND2",
+                      "AND",
+                      "AND2",
+                      "AND",
+                      "MUL",
+                      "AND",
+                      "STRH",
+                      "AND",
+                      "UNDEFINED",
+                      "AND",
+                      "UNDEFINED"
+                      ]);
+        //1
+        generateMap1([
+                      "ANDS",
+                      "ANDS2",
+                      "ANDS",
+                      "ANDS2",
+                      "ANDS",
+                      "ANDS2",
+                      "ANDS",
+                      "ANDS2",
+                      "ANDS",
+                      "MULS",
+                      "ANDS",
+                      "LDRH",
+                      "ANDS",
+                      "LDRSB",
+                      "ANDS",
+                      "LDRSH"
+                      ]);
+        //2
+        generateMap1([
+                      "EOR",
+                      "EOR2",
+                      "EOR",
+                      "EOR2",
+                      "EOR",
+                      "EOR2",
+                      "EOR",
+                      "EOR2",
+                      "EOR",
+                      "MLA",
+                      "EOR",
+                      "STRH",
+                      "EOR",
+                      "UNDEFINED",
+                      "EOR",
+                      "UNDEFINED"
+                      ]);
+        //3
+        generateMap1([
+                      "EORS",
+                      "EORS2",
+                      "EORS",
+                      "EORS2",
+                      "EORS",
+                      "EORS2",
+                      "EORS",
+                      "EORS2",
+                      "EORS",
+                      "MLAS",
+                      "EORS",
+                      "LDRH",
+                      "EORS",
+                      "LDRSB",
+                      "EORS",
+                      "LDRSH"
+                      ]);
+        //4
+        generateMap1([
+                      "SUB",
+                      "SUB2",
+                      "SUB",
+                      "SUB2",
+                      "SUB",
+                      "SUB2",
+                      "SUB",
+                      "SUB2",
+                      "SUB",
+                      "UNDEFINED",
+                      "SUB",
+                      "STRH",
+                      "SUB",
+                      "UNDEFINED",
+                      "SUB",
+                      "UNDEFINED"
+                      ]);
+        //5
+        generateMap1([
+                      "SUBS",
+                      "SUBS2",
+                      "SUBS",
+                      "SUBS2",
+                      "SUBS",
+                      "SUBS2",
+                      "SUBS",
+                      "SUBS2",
+                      "SUBS",
+                      "UNDEFINED",
+                      "SUBS",
+                      "LDRH",
+                      "SUBS",
+                      "LDRSB",
+                      "SUBS",
+                      "LDRSH"
+                      ]);
+        //6
+        generateMap1([
+                      "RSB",
+                      "RSB2",
+                      "RSB",
+                      "RSB2",
+                      "RSB",
+                      "RSB2",
+                      "RSB",
+                      "RSB2",
+                      "RSB",
+                      "UNDEFINED",
+                      "RSB",
+                      "STRH",
+                      "RSB",
+                      "UNDEFINED",
+                      "RSB",
+                      "UNDEFINED"
+                      ]);
+        //7
+        generateMap1([
+                      "RSBS",
+                      "RSBS2",
+                      "RSBS",
+                      "RSBS2",
+                      "RSBS",
+                      "RSBS2",
+                      "RSBS",
+                      "RSBS2",
+                      "RSBS",
+                      "UNDEFINED",
+                      "RSBS",
+                      "LDRH",
+                      "RSBS",
+                      "LDRSB",
+                      "RSBS",
+                      "LDRSH"
+                      ]);
+        //8
+        generateMap1([
+                      "ADD",
+                      "ADD2",
+                      "ADD",
+                      "ADD2",
+                      "ADD",
+                      "ADD2",
+                      "ADD",
+                      "ADD2",
+                      "ADD",
+                      "UMULL",
+                      "ADD",
+                      "STRH",
+                      "ADD",
+                      "UNDEFINED",
+                      "ADD",
+                      "UNDEFINED"
+                      ]);
+        //9
+        generateMap1([
+                      "ADDS",
+                      "ADDS2",
+                      "ADDS",
+                      "ADDS2",
+                      "ADDS",
+                      "ADDS2",
+                      "ADDS",
+                      "ADDS2",
+                      "ADDS",
+                      "UMULLS",
+                      "ADDS",
+                      "LDRH",
+                      "ADDS",
+                      "LDRSB",
+                      "ADDS",
+                      "LDRSH"
+                      ]);
+        //A
+        generateMap1([
+                      "ADC",
+                      "ADC2",
+                      "ADC",
+                      "ADC2",
+                      "ADC",
+                      "ADC2",
+                      "ADC",
+                      "ADC2",
+                      "ADC",
+                      "UMLAL",
+                      "ADC",
+                      "STRH",
+                      "ADC",
+                      "UNDEFINED",
+                      "ADC",
+                      "UNDEFINED"
+                      ]);
+        //B
+        generateMap1([
+                      "ADCS",
+                      "ADCS2",
+                      "ADCS",
+                      "ADCS2",
+                      "ADCS",
+                      "ADCS2",
+                      "ADCS",
+                      "ADCS2",
+                      "ADCS",
+                      "UMLALS",
+                      "ADCS",
+                      "LDRH",
+                      "ADCS",
+                      "LDRSB",
+                      "ADCS",
+                      "LDRSH"
+                      ]);
+        //C
+        generateMap1([
+                      "SBC",
+                      "SBC2",
+                      "SBC",
+                      "SBC2",
+                      "SBC",
+                      "SBC2",
+                      "SBC",
+                      "SBC2",
+                      "SBC",
+                      "SMULL",
+                      "SBC",
+                      "STRH",
+                      "SBC",
+                      "UNDEFINED",
+                      "SBC",
+                      "UNDEFINED"
+                      ]);
+        //D
+        generateMap1([
+                      "SBCS",
+                      "SBCS2",
+                      "SBCS",
+                      "SBCS2",
+                      "SBCS",
+                      "SBCS2",
+                      "SBCS",
+                      "SBCS2",
+                      "SBCS",
+                      "SMULLS",
+                      "SBCS",
+                      "LDRH",
+                      "SBCS",
+                      "LDRSB",
+                      "SBCS",
+                      "LDRSH"
+                      ]);
+        //E
+        generateMap1([
+                      "RSC",
+                      "RSC2",
+                      "RSC",
+                      "RSC2",
+                      "RSC",
+                      "RSC2",
+                      "RSC",
+                      "RSC2",
+                      "RSC",
+                      "SMLAL",
+                      "RSC",
+                      "STRH",
+                      "RSC",
+                      "UNDEFINED",
+                      "RSC",
+                      "UNDEFINED"
+                      ]);
+        //F
+        generateMap1([
+                      "RSCS",
+                      "RSCS2",
+                      "RSCS",
+                      "RSCS2",
+                      "RSCS",
+                      "RSCS2",
+                      "RSCS",
+                      "RSCS2",
+                      "RSCS",
+                      "SMLALS",
+                      "RSCS",
+                      "LDRH",
+                      "RSCS",
+                      "LDRSB",
+                      "RSCS",
+                      "LDRSH"
+                      ]);
+        //10
+        generateMap1([
+                      "MRS1",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "SWP",
+                      "UNDEFINED",
+                      "STRH",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED"
+                      ]);
+        //11
+        generateMap1([
+                      "TSTS",
+                      "TSTS2",
+                      "TSTS",
+                      "TSTS2",
+                      "TSTS",
+                      "TSTS2",
+                      "TSTS",
+                      "TSTS2",
+                      "TSTS",
+                      "UNDEFINED",
+                      "TSTS",
+                      "LDRH",
+                      "TSTS",
+                      "LDRSB",
+                      "TSTS",
+                      "LDRSH"
+                      ]);
+        //12
+        generateMap1([
+                      "MSR1",
+                      "BX",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "STRH",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED"
+                      ]);
+        //13
+        generateMap1([
+                      "TEQS",
+                      "TEQS2",
+                      "TEQS",
+                      "TEQS2",
+                      "TEQS",
+                      "TEQS2",
+                      "TEQS",
+                      "TEQS2",
+                      "TEQS",
+                      "UNDEFINED",
+                      "TEQS",
+                      "LDRH",
+                      "TEQS",
+                      "LDRSB",
+                      "TEQS",
+                      "LDRSH"
+                      ]);
+        //14
+        generateMap1([
+                      "MRS2",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "SWPB",
+                      "UNDEFINED",
+                      "STRH",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED"
+                      ]);
+        //15
+        generateMap1([
+                      "CMPS",
+                      "CMPS2",
+                      "CMPS",
+                      "CMPS2",
+                      "CMPS",
+                      "CMPS2",
+                      "CMPS",
+                      "CMPS2",
+                      "CMPS",
+                      "UNDEFINED",
+                      "CMPS",
+                      "LDRH",
+                      "CMPS",
+                      "LDRSB",
+                      "CMPS",
+                      "LDRSH"
+                      ]);
+        //16
+        generateMap1([
+                      "MSR2",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "STRH",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED",
+                      "UNDEFINED"
+                      ]);
+        //17
+        generateMap1([
+                      "CMNS",
+                      "CMNS2",
+                      "CMNS",
+                      "CMNS2",
+                      "CMNS",
+                      "CMNS2",
+                      "CMNS",
+                      "CMNS2",
+                      "CMNS",
+                      "UNDEFINED",
+                      "CMNS",
+                      "LDRH",
+                      "CMNS",
+                      "LDRSB",
+                      "CMNS",
+                      "LDRSH"
+                      ]);
+        //18
+        generateMap1([
+                      "ORR",
+                      "ORR2",
+                      "ORR",
+                      "ORR2",
+                      "ORR",
+                      "ORR2",
+                      "ORR",
+                      "ORR2",
+                      "ORR",
+                      "UNDEFINED",
+                      "ORR",
+                      "STRH",
+                      "ORR",
+                      "UNDEFINED",
+                      "ORR",
+                      "UNDEFINED"
+                      ]);
+        //19
+        generateMap1([
+                      "ORRS",
+                      "ORRS2",
+                      "ORRS",
+                      "ORRS2",
+                      "ORRS",
+                      "ORRS2",
+                      "ORRS",
+                      "ORRS2",
+                      "ORRS",
+                      "UNDEFINED",
+                      "ORRS",
+                      "LDRH",
+                      "ORRS",
+                      "LDRSB",
+                      "ORRS",
+                      "LDRSH"
+                      ]);
+        //1A
+        generateMap1([
+                      "MOV",
+                      "MOV",
+                      "MOV",
+                      "MOV",
+                      "MOV",
+                      "MOV",
+                      "MOV",
+                      "MOV",
+                      "MOV",
+                      "UNDEFINED",
+                      "MOV",
+                      "STRH",
+                      "MOV",
+                      "UNDEFINED",
+                      "MOV",
+                      "UNDEFINED"
+                      ]);
+        //1B
+        generateMap1([
+                      "MOVS",
+                      "MOVS",
+                      "MOVS",
+                      "MOVS",
+                      "MOVS",
+                      "MOVS",
+                      "MOVS",
+                      "MOVS",
+                      "MOVS",
+                      "UNDEFINED",
+                      "MOVS",
+                      "LDRH",
+                      "MOVS",
+                      "LDRSB",
+                      "MOVS",
+                      "LDRSH"
+                      ]);
+        //1C
+        generateMap1([
+                      "BIC",
+                      "BIC2",
+                      "BIC",
+                      "BIC2",
+                      "BIC",
+                      "BIC2",
+                      "BIC",
+                      "BIC2",
+                      "BIC",
+                      "UNDEFINED",
+                      "BIC",
+                      "STRH",
+                      "BIC",
+                      "UNDEFINED",
+                      "BIC",
+                      "UNDEFINED"
+                      ]);
+        //1D
+        generateMap1([
+                      "BICS",
+                      "BICS2",
+                      "BICS",
+                      "BICS2",
+                      "BICS",
+                      "BICS2",
+                      "BICS",
+                      "BICS2",
+                      "BICS",
+                      "UNDEFINED",
+                      "BICS",
+                      "LDRH",
+                      "BICS",
+                      "LDRSB",
+                      "BICS",
+                      "LDRSH"
+                      ]);
+        //1E
+        generateMap1([
+                      "MVN",
+                      "MVN",
+                      "MVN",
+                      "MVN",
+                      "MVN",
+                      "MVN",
+                      "MVN",
+                      "MVN",
+                      "MVN",
+                      "UNDEFINED",
+                      "MVN",
+                      "STRH",
+                      "MVN",
+                      "UNDEFINED",
+                      "MVN",
+                      "UNDEFINED"
+                      ]);
+        //1F
+        generateMap1([
+                      "MVNS",
+                      "MVNS",
+                      "MVNS",
+                      "MVNS",
+                      "MVNS",
+                      "MVNS",
+                      "MVNS",
+                      "MVNS",
+                      "MVNS",
+                      "UNDEFINED",
+                      "MVNS",
+                      "LDRH",
+                      "MVNS",
+                      "LDRSB",
+                      "MVNS",
+                      "LDRSH"
+                      ]);
+        //20
+        generateMap2("AND");
+        //21
+        generateMap2("ANDS");
+        //22
+        generateMap2("EOR");
+        //23
+        generateMap2("EORS");
+        //24
+        generateMap2("SUB");
+        //25
+        generateMap2("SUBS");
+        //26
+        generateMap2("RSB");
+        //27
+        generateMap2("RSBS");
+        //28
+        generateMap2("ADD");
+        //29
+        generateMap2("ADDS");
+        //2A
+        generateMap2("ADC");
+        //2B
+        generateMap2("ADCS");
+        //2C
+        generateMap2("SBC");
+        //2D
+        generateMap2("SBCS");
+        //2E
+        generateMap2("RSC");
+        //2F
+        generateMap2("RSCS");
+        //30
+        generateMap2("UNDEFINED");
+        //31
+        generateMap2("TSTS");
+        //32
+        generateMap2("MSR3");
+        //33
+        generateMap2("TEQS");
+        //34
+        generateMap2("UNDEFINED");
+        //35
+        generateMap2("CMPS");
+        //36
+        generateMap2("MSR4");
+        //37
+        generateMap2("CMNS");
+        //38
+        generateMap2("ORR");
+        //39
+        generateMap2("ORRS");
+        //3A
+        generateMap2("MOV");
+        //3B
+        generateMap2("MOVS");
+        //3C
+        generateMap2("BIC");
+        //3D
+        generateMap2("BICS");
+        //3E
+        generateMap2("MVN");
+        //3F
+        generateMap2("MVNS");
+        //40
+        generateMap2("STR");
+        //41
+        generateMap2("LDR");
+        //42
+        generateMap2("STRT");
+        //43
+        generateMap2("LDRT");
+        //44
+        generateMap2("STRB");
+        //45
+        generateMap2("LDRB");
+        //46
+        generateMap2("STRBT");
+        //47
+        generateMap2("LDRBT");
+        //48
+        generateMap2("STR");
+        //49
+        generateMap2("LDR");
+        //4A
+        generateMap2("STRT");
+        //4B
+        generateMap2("LDRT");
+        //4C
+        generateMap2("STRB");
+        //4D
+        generateMap2("LDRB");
+        //4E
+        generateMap2("STRBT");
+        //4F
+        generateMap2("LDRBT");
+        //50
+        generateMap2("STR");
+        //51
+        generateMap2("LDR");
+        //52
+        generateMap2("STR");
+        //53
+        generateMap2("LDR");
+        //54
+        generateMap2("STRB");
+        //55
+        generateMap2("LDRB");
+        //56
+        generateMap2("STRB");
+        //57
+        generateMap2("LDRB");
+        //58
+        generateMap2("STR");
+        //59
+        generateMap2("LDR");
+        //5A
+        generateMap2("STR");
+        //5B
+        generateMap2("LDR");
+        //5C
+        generateMap2("STRB");
+        //5D
+        generateMap2("LDRB");
+        //5E
+        generateMap2("STRB");
+        //5F
+        generateMap2("LDRB");
+        //60-6F
+        generateStoreLoadInstructionSector1();
+        //70-7F
+        generateStoreLoadInstructionSector2();
+        //80
+        generateMap2("STMDA");
+        //81
+        generateMap2("LDMDA");
+        //82
+        generateMap2("STMDAW");
+        //83
+        generateMap2("LDMDAW");
+        //84
+        generateMap2("STMDAG");
+        //85
+        generateMap2("LDMDAG");
+        //86
+        generateMap2("STMDAWG");
+        //87
+        generateMap2("LDMDAWG");
+        //88
+        generateMap2("STMIA");
+        //89
+        generateMap2("LDMIA");
+        //8A
+        generateMap2("STMIAW");
+        //8B
+        generateMap2("LDMIAW");
+        //8C
+        generateMap2("STMIAG");
+        //8D
+        generateMap2("LDMIAG");
+        //8E
+        generateMap2("STMIAWG");
+        //8F
+        generateMap2("LDMIAWG");
+        //90
+        generateMap2("STMDB");
+        //91
+        generateMap2("LDMDB");
+        //92
+        generateMap2("STMDBW");
+        //93
+        generateMap2("LDMDBW");
+        //94
+        generateMap2("STMDBG");
+        //95
+        generateMap2("LDMDBG");
+        //96
+        generateMap2("STMDBWG");
+        //97
+        generateMap2("LDMDBWG");
+        //98
+        generateMap2("STMIB");
+        //99
+        generateMap2("LDMIB");
+        //9A
+        generateMap2("STMIBW");
+        //9B
+        generateMap2("LDMIBW");
+        //9C
+        generateMap2("STMIBG");
+        //9D
+        generateMap2("LDMIBG");
+        //9E
+        generateMap2("STMIBWG");
+        //9F
+        generateMap2("LDMIBWG");
+        //A0-AF
+        generateMap3("B");
+        //B0-BF
+        generateMap3("BL");
+        //C0-EF
+        generateMap4("UNDEFINED");
+        //F0-FF
+        generateMap3("SWI");
+        //Set to prototype:
+        ARMInstructionSet.prototype.instructionMap = instructionMap;
+    }
+    compileARMInstructionDecodeOpcodeMap();
+}
+compileARMInstructionDecodeMap();
