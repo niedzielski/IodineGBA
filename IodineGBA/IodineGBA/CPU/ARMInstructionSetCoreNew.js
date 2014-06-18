@@ -122,435 +122,6 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             this.executeDecoded();
     }
 }
-ARMInstructionSet.prototype.executeDecoded = function () {
-    /*
-     Instruction Decode Pattern:
-     C = Conditional Code Bit;
-     X = Possible opcode bit;
-     N = Data Bit, definitely not an opcode bit
-     OPCODE: CCCCXXXXXXXXXXXXNNNNNNNNXXXXNNNN
-     
-     Since many of those "X"s are redundant and possibly data, we can "process"
-     it and use a table to further decide what unique opcode it is, leaving us with
-     a dense switch statement. Not "processing" the opcode beforehand would leave us
-     with a 12 or 16 (condition code baked in) bit wide switch, which is slow in JS,
-     and using a function in array computed goto trick is not optimal in JavaScript.
-     
-     For this function, we decode the bottom 28 bits for the opcode:
-     */
-    switch (this.instructionMap[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)] & 0xFF) {
-        case 0:
-            this.BX();
-            break;
-        case 1:
-            this.B();
-            break;
-        case 2:
-            this.BL();
-            break;
-        case 3:
-            this.AND();
-            break;
-        case 4:
-            this.AND2();
-            break;
-        case 5:
-            this.ANDS();
-            break;
-        case 6:
-            this.ANDS2();
-            break;
-        case 7:
-            this.EOR();
-            break;
-        case 8:
-            this.EOR2();
-            break;
-        case 9:
-            this.EORS();
-            break;
-        case 10:
-            this.EORS2();
-            break;
-        case 11:
-            this.SUB();
-            break;
-        case 12:
-            this.SUB2();
-            break;
-        case 13:
-            this.SUBS();
-            break;
-        case 14:
-            this.SUBS2();
-            break;
-        case 15:
-            this.RSB();
-            break;
-        case 16:
-            this.RSB2();
-            break;
-        case 17:
-            this.RSBS();
-            break;
-        case 18:
-            this.RSBS2();
-            break;
-        case 19:
-            this.ADD();
-            break;
-        case 20:
-            this.ADD2();
-            break;
-        case 21:
-            this.ADDS();
-            break;
-        case 22:
-            this.ADDS2();
-            break;
-        case 23:
-            this.ADC();
-            break;
-        case 24:
-            this.ADC2();
-            break;
-        case 25:
-            this.ADCS();
-            break;
-        case 26:
-            this.ADCS2();
-            break;
-        case 27:
-            this.SBC();
-            break;
-        case 28:
-            this.SBC2();
-            break;
-        case 29:
-            this.SBCS();
-            break;
-        case 30:
-            this.SBCS2();
-            break;
-        case 31:
-            this.RSC();
-            break;
-        case 32:
-            this.RSC2();
-            break;
-        case 33:
-            this.RSCS();
-            break;
-        case 34:
-            this.RSCS2();
-            break;
-        case 35:
-            this.TSTS();
-            break;
-        case 36:
-            this.TSTS2();
-            break;
-        case 37:
-            this.TEQS();
-            break;
-        case 38:
-            this.TEQS2();
-            break;
-        case 39:
-            this.CMPS();
-            break;
-        case 40:
-            this.CMPS2();
-            break;
-        case 41:
-            this.CMNS();
-            break;
-        case 42:
-            this.CMNS2();
-            break;
-        case 43:
-            this.ORR();
-            break;
-        case 44:
-            this.ORR2();
-            break;
-        case 45:
-            this.ORRS();
-            break;
-        case 46:
-            this.ORRS2();
-            break;
-        case 47:
-            this.MOV();
-            break;
-        case 48:
-            this.MOVS();
-            break;
-        case 49:
-            this.BIC();
-            break;
-        case 50:
-            this.BIC2();
-            break;
-        case 51:
-            this.BICS();
-            break;
-        case 52:
-            this.BICS2();
-            break;
-        case 53:
-            this.MVN();
-            break;
-        case 54:
-            this.MVNS();
-            break;
-        case 55:
-            this.MRS1();
-            break;
-        case 56:
-            this.rcs();
-            break;
-        case 57:
-            this.MUL();
-            break;
-        case 58:
-            this.MULS();
-            break;
-        case 59:
-            this.MLA();
-            break;
-        case 60:
-            this.MLAS();
-            break;
-        case 61:
-            this.UMULL();
-            break;
-        case 62:
-            this.UMULLS();
-            break;
-        case 63:
-            this.UMLAL();
-            break;
-        case 64:
-            this.UMLALS();
-            break;
-        case 65:
-            this.SMULL();
-            break;
-        case 66:
-            this.SMULLS();
-            break;
-        case 67:
-            this.SMLAL();
-            break;
-        case 68:
-            this.SMLALS();
-            break;
-        case 69:
-            this.STRH();
-            break;
-        case 70:
-            this.LDRH();
-            break;
-        case 71:
-            this.LDRSH();
-            break;
-        case 72:
-            this.LDRSB();
-            break;
-        case 73:
-            this.STR();
-            break;
-        case 74:
-            this.LDR();
-            break;
-        case 75:
-            this.STRB();
-            break;
-        case 76:
-            this.LDRB();
-            break;
-        case 77:
-            this.STRT();
-            break;
-        case 78:
-            this.LDRT();
-            break;
-        case 79:
-            this.STRBT();
-            break;
-        case 80:
-            this.LDRBT();
-            break;
-        case 81:
-            this.STMIA();
-            break;
-        case 82:
-            this.STMIAW();
-            break;
-        case 83:
-            this.STMDA();
-            break;
-        case 84:
-            this.STMDAW();
-            break;
-        case 85:
-            this.STMIB();
-            break;
-        case 86:
-            this.STMIBW();
-            break;
-        case 87:
-            this.STMDB();
-            break;
-        case 88:
-            this.STMDBW();
-            break;
-        case 89:
-            this.LDMIA();
-            break;
-        case 90:
-            this.LDMIAW();
-            break;
-        case 91:
-            this.LDMDA();
-            break;
-        case 92:
-            this.LDMDAW();
-            break;
-        case 93:
-            this.LDMIB();
-            break;
-        case 94:
-            this.LDMIBW();
-            break;
-        case 95:
-            this.LDMDB();
-            break;
-        case 96:
-            this.LDMDBW();
-            break;
-        case 97:
-            this.SWP();
-            break;
-        case 98:
-            this.SWPB();
-            break;
-        case 99:
-            this.SWI();
-            break;
-        case 100:
-            this.MRS2();
-            break;
-        case 101:
-            this.rss();
-            break;
-        case 102:
-            this.ic();
-            break;
-        case 103:
-            this.is();
-            break;
-        case 104:
-            this.STMIAG();
-            break;
-        case 105:
-            this.STMIAWG();
-            break;
-        case 106:
-            this.STMDAG();
-            break;
-        case 107:
-            this.STMDAWG();
-            break;
-        case 108:
-            this.STMIBG();
-            break;
-        case 109:
-            this.STMIBWG();
-            break;
-        case 110:
-            this.STMDBG();
-            break;
-        case 111:
-            this.STMDBWG();
-            break;
-        case 112:
-            this.LDMIAG();
-            break;
-        case 113:
-            this.LDMIAWG();
-            break;
-        case 114:
-            this.LDMDAG();
-            break;
-        case 115:
-            this.LDMDAWG();
-            break;
-        case 116:
-            this.LDMIBG();
-            break;
-        case 117:
-            this.LDMIBWG();
-            break;
-        case 118:
-            this.LDMDBG();
-            break;
-        case 119:
-            this.LDMDBWG();
-            break;
-        case 120:
-            this.STR2();
-            break;
-        case 121:
-            this.LDR2();
-            break;
-        case 122:
-            this.STRB2();
-            break;
-        case 123:
-            this.LDRB2();
-            break;
-        case 124:
-            this.STRT2();
-            break;
-        case 125:
-            this.LDRT2();
-            break;
-        case 126:
-            this.STRBT2();
-            break;
-        case 127:
-            this.LDRBT2();
-            break;
-        case 128:
-            this.STR3();
-            break;
-        case 129:
-            this.LDR3();
-            break;
-        case 130:
-            this.STRB3();
-            break;
-        case 131:
-            this.LDRB3();
-            break;
-        case 132:
-            this.MOV2();
-            break;
-        case 133:
-            this.MOVS2();
-            break;
-        case 134:
-            this.MVN2();
-            break;
-        case 135:
-            this.MVNS2();
-            break;
-        default:
-            this.UNDEFINED();
-    }
-}
 ARMInstructionSet.prototype.executeBubble = function () {
     //Push the new fetch access:
     this.fetch = this.memory.memoryReadFast32(this.readPC() | 0) | 0;
@@ -2697,7 +2268,7 @@ ARMInstructionSet.prototype.rc = function () {
             this.CPUCore.MODEBits
             );
 }
-ARMInstructionSet.prototype.rcs = function () {
+ARMInstructionSet.prototype.MSR1 = function () {
     var newcpsr = this.readRegister(this.execute & 0xF) | 0;
     this.CPSR.setNegativeInt(newcpsr | 0);
     this.CPSR.setZero((newcpsr & 0x40000000) != 0);
@@ -2744,7 +2315,7 @@ ARMInstructionSet.prototype.rs = function () {
             spsr[7]
             );
 }
-ARMInstructionSet.prototype.rss = function () {
+ARMInstructionSet.prototype.MSR2 = function () {
     var newspsr = this.readRegister(this.execute & 0xF) | 0;
     switch (this.CPUCore.MODEBits | 0) {
         case 0x11:    //FIQ
@@ -2776,14 +2347,14 @@ ARMInstructionSet.prototype.rss = function () {
         spsr[7] = newspsr & 0x1F;
     }
 }
-ARMInstructionSet.prototype.ic = function () {
+ARMInstructionSet.prototype.MSR3 = function () {
     var operand = this.imm() | 0;
     this.CPSR.setNegativeInt(operand | 0);
     this.CPSR.setZero((operand & 0x40000000) != 0);
     this.CPSR.setCarry((operand & 0x20000000) != 0);
     this.CPSR.setOverflow((operand & 0x10000000) != 0);
 }
-ARMInstructionSet.prototype.is = function () {
+ARMInstructionSet.prototype.MSR4 = function () {
     var operand = this.imm() | 0;
     switch (this.CPUCore.MODEBits | 0) {
         case 0x11:    //FIQ
@@ -2882,148 +2453,147 @@ ARMInstructionSet.prototype.sprip = function () {
     return this.updateBasePreIncrement(offset | 0) | 0;
 }
 function compileARMInstructionDecodeMap() {
-    function compileARMInstructionDecodeOpcodeMap() {
+    var pseudoCodes = [
+                       "BX",
+                       "B",
+                       "BL",
+                       "AND",
+                       "AND2",
+                       "ANDS",
+                       "ANDS2",
+                       "EOR",
+                       "EOR2",
+                       "EORS",
+                       "EORS2",
+                       "SUB",
+                       "SUB2",
+                       "SUBS",
+                       "SUBS2",
+                       "RSB",
+                       "RSB2",
+                       "RSBS",
+                       "RSBS2",
+                       "ADD",
+                       "ADD2",
+                       "ADDS",
+                       "ADDS2",
+                       "ADC",
+                       "ADC2",
+                       "ADCS",
+                       "ADCS2",
+                       "SBC",
+                       "SBC2",
+                       "SBCS",
+                       "SBCS2",
+                       "RSC",
+                       "RSC2",
+                       "RSCS",
+                       "RSCS2",
+                       "TSTS",
+                       "TSTS2",
+                       "TEQS",
+                       "TEQS2",
+                       "CMPS",
+                       "CMPS2",
+                       "CMNS",
+                       "CMNS2",
+                       "ORR",
+                       "ORR2",
+                       "ORRS",
+                       "ORRS2",
+                       "MOV",
+                       "MOV2",
+                       "MOVS",
+                       "MOVS2",
+                       "BIC",
+                       "BIC2",
+                       "BICS",
+                       "BICS2",
+                       "MVN",
+                       "MVN2",
+                       "MVNS",
+                       "MVNS2",
+                       "MRS1",
+                       "MRS2",
+                       "MSR1",
+                       "MSR2",
+                       "MSR3",
+                       "MSR4",
+                       "MUL",
+                       "MULS",
+                       "MLA",
+                       "MLAS",
+                       "UMULL",
+                       "UMULLS",
+                       "UMLAL",
+                       "UMLALS",
+                       "SMULL",
+                       "SMULLS",
+                       "SMLAL",
+                       "SMLALS",
+                       "STRH",
+                       "LDRH",
+                       "LDRSH",
+                       "LDRSB",
+                       "STR",
+                       "LDR",
+                       "STRB",
+                       "LDRB",
+                       "STRT",
+                       "LDRT",
+                       "STRBT",
+                       "LDRBT",
+                       "STR2",
+                       "LDR2",
+                       "STRB2",
+                       "LDRB2",
+                       "STRT2",
+                       "LDRT2",
+                       "STRBT2",
+                       "LDRBT2",
+                       "STR3",
+                       "LDR3",
+                       "STRB3",
+                       "LDRB3",
+                       "STMIA",
+                       "STMIAW",
+                       "STMDA",
+                       "STMDAW",
+                       "STMIB",
+                       "STMIBW",
+                       "STMDB",
+                       "STMDBW",
+                       "LDMIA",
+                       "LDMIAW",
+                       "LDMDA",
+                       "LDMDAW",
+                       "LDMIB",
+                       "LDMIBW",
+                       "LDMDB",
+                       "LDMDBW",
+                       "STMIAG",
+                       "STMIAWG",
+                       "STMDAG",
+                       "STMDAWG",
+                       "STMIBG",
+                       "STMIBWG",
+                       "STMDBG",
+                       "STMDBWG",
+                       "LDMIAG",
+                       "LDMIAWG",
+                       "LDMDAG",
+                       "LDMDAWG",
+                       "LDMIBG",
+                       "LDMIBWG",
+                       "LDMDBG",
+                       "LDMDBWG",
+                       "SWP",
+                       "SWPB",
+                       "SWI"
+                       ];
+    function compileARMInstructionDecodeOpcodeMap(codeMap) {
         var opcodeIndice = 0;
         var instructionMap = getUint8Array(4096);
-        var codeMap = {
-            "BX":0,
-            "B":1,
-            "BL":2,
-            "AND":3,
-            "AND2":4,
-            "ANDS":5,
-            "ANDS2":6,
-            "EOR":7,
-            "EOR2":8,
-            "EORS":9,
-            "EORS2":10,
-            "SUB":11,
-            "SUB2":12,
-            "SUBS":13,
-            "SUBS2":14,
-            "RSB":15,
-            "RSB2":16,
-            "RSBS":17,
-            "RSBS2":18,
-            "ADD":19,
-            "ADD2":20,
-            "ADDS":21,
-            "ADDS2":22,
-            "ADC":23,
-            "ADC2":24,
-            "ADCS":25,
-            "ADCS2":26,
-            "SBC":27,
-            "SBC2":28,
-            "SBCS":29,
-            "SBCS2":30,
-            "RSC":31,
-            "RSC2":32,
-            "RSCS":33,
-            "RSCS2":34,
-            "TSTS":35,
-            "TSTS2":36,
-            "TEQS":37,
-            "TEQS2":38,
-            "CMPS":39,
-            "CMPS2":40,
-            "CMNS":41,
-            "CMNS2":42,
-            "ORR":43,
-            "ORR2":44,
-            "ORRS":45,
-            "ORRS2":46,
-            "MOV":47,
-            "MOVS":48,
-            "BIC":49,
-            "BIC2":50,
-            "BICS":51,
-            "BICS2":52,
-            "MVN":53,
-            "MVNS":54,
-            "MRS1":55,
-            "MSR1":56,
-            "MUL":57,
-            "MULS":58,
-            "MLA":59,
-            "MLAS":60,
-            "UMULL":61,
-            "UMULLS":62,
-            "UMLAL":63,
-            "UMLALS":64,
-            "SMULL":65,
-            "SMULLS":66,
-            "SMLAL":67,
-            "SMLALS":68,
-            "STRH":69,
-            "LDRH":70,
-            "LDRSH":71,
-            "LDRSB":72,
-            "STR":73,
-            "LDR":74,
-            "STRB":75,
-            "LDRB":76,
-            "STRT":77,
-            "LDRT":78,
-            "STRBT":79,
-            "LDRBT":80,
-            "STMIA":81,
-            "STMIAW":82,
-            "STMDA":83,
-            "STMDAW":84,
-            "STMIB":85,
-            "STMIBW":86,
-            "STMDB":87,
-            "STMDBW":88,
-            "LDMIA":89,
-            "LDMIAW":90,
-            "LDMDA":91,
-            "LDMDAW":92,
-            "LDMIB":93,
-            "LDMIBW":94,
-            "LDMDB":95,
-            "LDMDBW":96,
-            "SWP":97,
-            "SWPB":98,
-            "SWI":99,
-            "MRS2":100,
-            "MSR2":101,
-            "MSR3":102,
-            "MSR4":103,
-            "STMIAG":104,
-            "STMIAWG":105,
-            "STMDAG":106,
-            "STMDAWG":107,
-            "STMIBG":108,
-            "STMIBWG":109,
-            "STMDBG":110,
-            "STMDBWG":111,
-            "LDMIAG":112,
-            "LDMIAWG":113,
-            "LDMDAG":114,
-            "LDMDAWG":115,
-            "LDMIBG":116,
-            "LDMIBWG":117,
-            "LDMDBG":118,
-            "LDMDBWG":119,
-            "STR2":120,
-            "LDR2":121,
-            "STRB2":122,
-            "LDRB2":123,
-            "STRT2":124,
-            "LDRT2":125,
-            "STRBT2":126,
-            "LDRBT2":127,
-            "STR3":128,
-            "LDR3":129,
-            "STRB3":130,
-            "LDRB3":131,
-            "MOV2":132,
-            "MOVS2":133,
-            "MVN2":134,
-            "MVNS2":135,
-            "UNDEFINED":136
-        }
         function generateMap1(instruction) {
             for (var index = 0; index < 0x10; ++index) {
                 instructionMap[opcodeIndice++] = codeMap[instruction[index]];
@@ -3902,6 +3472,19 @@ function compileARMInstructionDecodeMap() {
         //Set to prototype:
         ARMInstructionSet.prototype.instructionMap = instructionMap;
     }
-    compileARMInstructionDecodeOpcodeMap();
+    function compileARMInstructionDecodeOpcodeSwitch() {
+        var opcodeNameMap = {};
+        var code = "switch (this.instructionMap[((this.execute >> 16) & 0xFF0) | ((this.execute >> 4) & 0xF)] & 0xFF) {";
+        for (var opcodeNumber = 0; opcodeNumber < pseudoCodes.length; ++opcodeNumber) {
+            var opcodeName = pseudoCodes[opcodeNumber];
+            opcodeNameMap[opcodeName] = opcodeNumber;
+            code += "case " + opcodeNumber + ":{this." + opcodeName + "();break};";
+        }
+        code += "default:{this.UNDEFINED()}}";
+        opcodeNameMap["UNDEFINED"] = opcodeNumber;
+        ARMInstructionSet.prototype.executeDecoded = Function(code);
+        return opcodeNameMap;
+    }
+    compileARMInstructionDecodeOpcodeMap(compileARMInstructionDecodeOpcodeSwitch());
 }
 compileARMInstructionDecodeMap();
