@@ -835,13 +835,115 @@ ARMInstructionSet.prototype.MVNS2 = function () {
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR(operand2 | 0);
 }
-ARMInstructionSet.prototype.MRS1 = function () {
+ARMInstructionSet.prototype.MRS = function () {
     //Transfer PSR to Register
-    this.guard12OffsetRegisterWrite(this.rc() | 0);
+    if ((this.execute & 0x400000) == 0) {
+        //CPSR->Register
+        this.guard12OffsetRegisterWrite(this.rc() | 0);
+    }
+    else {
+        //SPSR->Register
+        this.guard12OffsetRegisterWrite(this.rs() | 0);
+    }
 }
-ARMInstructionSet.prototype.MRS2 = function () {
-    //Transfer PSR to Register
-    this.guard12OffsetRegisterWrite(this.rs() | 0);
+ARMInstructionSet.prototype.MSR = function () {
+    switch (this.execute & 0x2400000) {
+        case 0:
+            //Reg->CPSR
+            this.MSR1();
+            break;
+        case 0x400000:
+            //Reg->SPSR
+            this.MSR2();
+            break;
+        case 0x2000000:
+            //Immediate->CPSR
+            this.MSR3();
+            break;
+        default:
+            //Immediate->SPSR
+            this.MSR4();
+    }
+}
+ARMInstructionSet.prototype.MSR1 = function () {
+    var newcpsr = this.readRegister(this.execute & 0xF) | 0;
+    this.CPSR.setNegativeInt(newcpsr | 0);
+    this.CPSR.setZero((newcpsr & 0x40000000) != 0);
+    this.CPSR.setCarry((newcpsr & 0x20000000) != 0);
+    this.CPSR.setOverflow((newcpsr & 0x10000000) != 0);
+    if ((this.execute & 0x10000) == 0x10000 && (this.CPUCore.MODEBits | 0) != 0x10) {
+        this.CPUCore.IRQDisabled = ((newcpsr & 0x80) != 0);
+        this.CPUCore.assertIRQ();
+        this.CPUCore.FIQDisabled = ((newcpsr & 0x40) != 0);
+        //this.CPUCore.THUMBBitModify((newcpsr & 0x20) != 0);
+        //ARMWrestler test rom triggers THUMB mode, but expects it to remain in ARM mode, so ignore.
+        this.CPUCore.switchRegisterBank(newcpsr & 0x1F);
+    }
+}
+ARMInstructionSet.prototype.MSR2 = function () {
+    var newspsr = this.readRegister(this.execute & 0xF) | 0;
+    switch (this.CPUCore.MODEBits | 0) {
+        case 0x11:    //FIQ
+            var spsr = this.CPUCore.SPSRFIQ;
+            break;
+        case 0x12:    //IRQ
+            var spsr = this.CPUCore.SPSRIRQ;
+            break;
+        case 0x13:    //Supervisor
+            var spsr = this.CPUCore.SPSRSVC;
+            break;
+        case 0x17:    //Abort
+            var spsr = this.CPUCore.SPSRABT;
+            break;
+        case 0x1B:    //Undefined
+            var spsr = this.CPUCore.SPSRUND;
+            break;
+        default:
+            return;
+    }
+    spsr[0] = (newspsr < 0);
+    spsr[1] = ((newspsr & 0x40000000) != 0);
+    spsr[2] = ((newspsr & 0x20000000) != 0);
+    spsr[3] = ((newspsr & 0x10000000) != 0);
+    if ((this.execute & 0x10000) == 0x10000) {
+        spsr[4] = ((newspsr & 0x80) != 0);
+        spsr[5] = ((newspsr & 0x40) != 0);
+        spsr[6] = ((newspsr & 0x20) != 0);
+        spsr[7] = newspsr & 0x1F;
+    }
+}
+ARMInstructionSet.prototype.MSR3 = function () {
+    var operand = this.imm() | 0;
+    this.CPSR.setNegativeInt(operand | 0);
+    this.CPSR.setZero((operand & 0x40000000) != 0);
+    this.CPSR.setCarry((operand & 0x20000000) != 0);
+    this.CPSR.setOverflow((operand & 0x10000000) != 0);
+}
+ARMInstructionSet.prototype.MSR4 = function () {
+    var operand = this.imm() | 0;
+    switch (this.CPUCore.MODEBits | 0) {
+        case 0x11:    //FIQ
+            var spsr = this.CPUCore.SPSRFIQ;
+            break;
+        case 0x12:    //IRQ
+            var spsr = this.CPUCore.SPSRIRQ;
+            break;
+        case 0x13:    //Supervisor
+            var spsr = this.CPUCore.SPSRSVC;
+            break;
+        case 0x17:    //Abort
+            var spsr = this.CPUCore.SPSRABT;
+            break;
+        case 0x1B:    //Undefined
+            var spsr = this.CPUCore.SPSRUND;
+            break;
+        default:
+            return;
+    }
+    spsr[0] = (operand < 0);
+    spsr[1] = ((operand & 0x40000000) != 0);
+    spsr[2] = ((operand & 0x20000000) != 0);
+    spsr[3] = ((operand & 0x10000000) != 0);
 }
 ARMInstructionSet.prototype.MUL = function () {
     //Perform multiplication:
@@ -2267,21 +2369,6 @@ ARMInstructionSet.prototype.rc = function () {
             this.CPUCore.MODEBits
             );
 }
-ARMInstructionSet.prototype.MSR1 = function () {
-    var newcpsr = this.readRegister(this.execute & 0xF) | 0;
-    this.CPSR.setNegativeInt(newcpsr | 0);
-    this.CPSR.setZero((newcpsr & 0x40000000) != 0);
-    this.CPSR.setCarry((newcpsr & 0x20000000) != 0);
-    this.CPSR.setOverflow((newcpsr & 0x10000000) != 0);
-    if ((this.execute & 0x10000) == 0x10000 && (this.CPUCore.MODEBits | 0) != 0x10) {
-        this.CPUCore.IRQDisabled = ((newcpsr & 0x80) != 0);
-        this.CPUCore.assertIRQ();
-        this.CPUCore.FIQDisabled = ((newcpsr & 0x40) != 0);
-        //this.CPUCore.THUMBBitModify((newcpsr & 0x20) != 0);
-        //ARMWrestler test rom triggers THUMB mode, but expects it to remain in ARM mode, so ignore.
-        this.CPUCore.switchRegisterBank(newcpsr & 0x1F);
-    }
-}
 ARMInstructionSet.prototype.rs = function () {
     switch (this.CPUCore.MODEBits | 0) {
         case 0x11:    //FIQ
@@ -2313,71 +2400,6 @@ ARMInstructionSet.prototype.rs = function () {
             ((spsr[6]) ? 0x20 : 0) |
             spsr[7]
             );
-}
-ARMInstructionSet.prototype.MSR2 = function () {
-    var newspsr = this.readRegister(this.execute & 0xF) | 0;
-    switch (this.CPUCore.MODEBits | 0) {
-        case 0x11:    //FIQ
-            var spsr = this.CPUCore.SPSRFIQ;
-            break;
-        case 0x12:    //IRQ
-            var spsr = this.CPUCore.SPSRIRQ;
-            break;
-        case 0x13:    //Supervisor
-            var spsr = this.CPUCore.SPSRSVC;
-            break;
-        case 0x17:    //Abort
-            var spsr = this.CPUCore.SPSRABT;
-            break;
-        case 0x1B:    //Undefined
-            var spsr = this.CPUCore.SPSRUND;
-            break;
-        default:
-            return;
-    }
-    spsr[0] = (newspsr < 0);
-    spsr[1] = ((newspsr & 0x40000000) != 0);
-    spsr[2] = ((newspsr & 0x20000000) != 0);
-    spsr[3] = ((newspsr & 0x10000000) != 0);
-    if ((this.execute & 0x10000) == 0x10000) {
-        spsr[4] = ((newspsr & 0x80) != 0);
-        spsr[5] = ((newspsr & 0x40) != 0);
-        spsr[6] = ((newspsr & 0x20) != 0);
-        spsr[7] = newspsr & 0x1F;
-    }
-}
-ARMInstructionSet.prototype.MSR3 = function () {
-    var operand = this.imm() | 0;
-    this.CPSR.setNegativeInt(operand | 0);
-    this.CPSR.setZero((operand & 0x40000000) != 0);
-    this.CPSR.setCarry((operand & 0x20000000) != 0);
-    this.CPSR.setOverflow((operand & 0x10000000) != 0);
-}
-ARMInstructionSet.prototype.MSR4 = function () {
-    var operand = this.imm() | 0;
-    switch (this.CPUCore.MODEBits | 0) {
-        case 0x11:    //FIQ
-            var spsr = this.CPUCore.SPSRFIQ;
-            break;
-        case 0x12:    //IRQ
-            var spsr = this.CPUCore.SPSRIRQ;
-            break;
-        case 0x13:    //Supervisor
-            var spsr = this.CPUCore.SPSRSVC;
-            break;
-        case 0x17:    //Abort
-            var spsr = this.CPUCore.SPSRABT;
-            break;
-        case 0x1B:    //Undefined
-            var spsr = this.CPUCore.SPSRUND;
-            break;
-        default:
-            return;
-    }
-    spsr[0] = (operand < 0);
-    spsr[1] = ((operand & 0x40000000) != 0);
-    spsr[2] = ((operand & 0x20000000) != 0);
-    spsr[3] = ((operand & 0x10000000) != 0);
 }
 ARMInstructionSet.prototype.ptrm = function () {
     var offset = this.readRegister(this.execute & 0xF) | 0;
@@ -2512,12 +2534,8 @@ function compileARMInstructionDecodeMap() {
                        "MVN2",
                        "MVNS",
                        "MVNS2",
-                       "MRS1",
-                       "MRS2",
-                       "MSR1",
-                       "MSR2",
-                       "MSR3",
-                       "MSR4",
+                       "MRS",
+                       "MSR",
                        "MUL",
                        "MULS",
                        "MLA",
@@ -2962,7 +2980,7 @@ function compileARMInstructionDecodeMap() {
                       ]);
         //10
         generateMap1([
-                      "MRS1",
+                      "MRS",
                       "UNDEFINED",
                       "UNDEFINED",
                       "UNDEFINED",
@@ -3000,7 +3018,7 @@ function compileARMInstructionDecodeMap() {
                       ]);
         //12
         generateMap1([
-                      "MSR1",
+                      "MSR",
                       "BX",
                       "UNDEFINED",
                       "UNDEFINED",
@@ -3038,7 +3056,7 @@ function compileARMInstructionDecodeMap() {
                       ]);
         //14
         generateMap1([
-                      "MRS2",
+                      "MRS",
                       "UNDEFINED",
                       "UNDEFINED",
                       "UNDEFINED",
@@ -3076,7 +3094,7 @@ function compileARMInstructionDecodeMap() {
                       ]);
         //16
         generateMap1([
-                      "MSR2",
+                      "MSR",
                       "UNDEFINED",
                       "UNDEFINED",
                       "UNDEFINED",
@@ -3301,7 +3319,7 @@ function compileARMInstructionDecodeMap() {
         //31
         generateMap2("TSTS");
         //32
-        generateMap2("MSR3");
+        generateMap2("MSR");
         //33
         generateMap2("TEQS");
         //34
@@ -3309,7 +3327,7 @@ function compileARMInstructionDecodeMap() {
         //35
         generateMap2("CMPS");
         //36
-        generateMap2("MSR4");
+        generateMap2("MSR");
         //37
         generateMap2("CMNS");
         //38
