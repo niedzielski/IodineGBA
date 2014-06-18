@@ -315,6 +315,9 @@ ARMInstructionSet.prototype.guardRegisterRead = function (address) {
     //Get Special Case PC Read:
     return this.readDelayedPCRegister() | 0;
 }
+ARMInstructionSet.prototype.guard12OffsetRegisterRead = function () {
+    return this.guardRegisterRead((this.execute >> 12) & 0xF) | 0;
+}
 ARMInstructionSet.prototype.guardUserRegisterRead = function (address) {
     //Guard only on user access, not PC!:
     address = address | 0;
@@ -964,7 +967,7 @@ ARMInstructionSet.prototype.MLA = function () {
     //Perform multiplication:
     var result = this.CPUCore.performMUL32MLA(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0) | 0;
     //Perform addition:
-    result = ((result | 0) + (this.read12OffsetRegister() | 0));
+    result = ((result | 0) + (this.read12OffsetRegister() | 0)) | 0;
     //Update destination register:
     this.guard16OffsetRegisterWrite(result | 0);
 }
@@ -1051,7 +1054,7 @@ ARMInstructionSet.prototype.STRH = function () {
     //Perform halfword store calculations:
     var address = this.operand2OP_LoadStore1() | 0;
     //Write to memory location:
-    this.CPUCore.write16(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write16(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRH = function () {
     //Perform halfword load calculations:
@@ -1075,7 +1078,7 @@ ARMInstructionSet.prototype.STR = function () {
     //Perform word store calculations:
     var address = this.operand2OP_LoadStore2(false) | 0;
     //Write to memory location:
-    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDR = function () {
     //Perform word load calculations:
@@ -1087,7 +1090,7 @@ ARMInstructionSet.prototype.STRB = function () {
     //Perform byte store calculations:
     var address = this.operand2OP_LoadStore2(false) | 0;
     //Write to memory location:
-    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRB = function () {
     //Perform byte store calculations:
@@ -1099,7 +1102,7 @@ ARMInstructionSet.prototype.STRT = function () {
     //Perform word store calculations (forced user-mode):
     var address = this.operand2OP_LoadStore2(true) | 0;
     //Write to memory location:
-    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRT = function () {
     //Perform word load calculations (forced user-mode):
@@ -1111,7 +1114,7 @@ ARMInstructionSet.prototype.STRBT = function () {
     //Perform byte store calculations (forced user-mode):
     var address = this.operand2OP_LoadStore2(true) | 0;
     //Write to memory location:
-    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRBT = function () {
     //Perform byte load calculations (forced user-mode):
@@ -1123,7 +1126,7 @@ ARMInstructionSet.prototype.STR2 = function () {
     //Perform word store calculations:
     var address = this.operand2OP_LoadStore3(false) | 0;
     //Write to memory location:
-    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDR2 = function () {
     //Perform word load calculations:
@@ -1135,7 +1138,7 @@ ARMInstructionSet.prototype.STRB2 = function () {
     //Perform byte store calculations:
     var address = this.operand2OP_LoadStore3(false) | 0;
     //Write to memory location:
-    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRB2 = function () {
     //Perform byte store calculations:
@@ -1147,7 +1150,7 @@ ARMInstructionSet.prototype.STRT2 = function () {
     //Perform word store calculations (forced user-mode):
     var address = this.operand2OP_LoadStore3(true) | 0;
     //Write to memory location:
-    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRT2 = function () {
     //Perform word load calculations (forced user-mode):
@@ -1159,7 +1162,7 @@ ARMInstructionSet.prototype.STRBT2 = function () {
     //Perform byte store calculations (forced user-mode):
     var address = this.operand2OP_LoadStore3(true) | 0;
     //Write to memory location:
-    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRBT2 = function () {
     //Perform byte load calculations (forced user-mode):
@@ -1171,7 +1174,7 @@ ARMInstructionSet.prototype.STR3 = function () {
     //Perform word store calculations:
     var address = this.operand2OP_LoadStore4() | 0;
     //Write to memory location:
-    this.CPUCore.write32(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDR3 = function () {
     //Perform word load calculations:
@@ -1183,7 +1186,7 @@ ARMInstructionSet.prototype.STRB3 = function () {
     //Perform byte store calculations:
     var address = this.operand2OP_LoadStore4() | 0;
     //Write to memory location:
-    this.CPUCore.write8(address | 0, this.guardRegisterRead((this.execute >> 12) & 0xF) | 0);
+    this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRB3 = function () {
     //Perform byte store calculations:
