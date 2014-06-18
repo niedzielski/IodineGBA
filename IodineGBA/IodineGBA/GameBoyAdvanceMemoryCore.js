@@ -1005,11 +1005,11 @@ GameBoyAdvanceMemory.prototype.readUnused32CPU = function (address) {
     return controller.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.readUnused0 = function (parentObj) {
-    var controller = ((this.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
     return controller.getCurrentFetchValue() & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused1 = function (parentObj) {
-    var controller = ((this.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
+    var controller = ((parentObj.IOCore.systemStatus | 0) == 0) ? parentObj.cpu : parentObj.dma;
     return (controller.getCurrentFetchValue() >> 8) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused2 = function (parentObj) {
