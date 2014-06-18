@@ -68,6 +68,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             if (!this.CPSR.getCarry()) {
                 this.executeDecoded();
             }
+            break;
         case 0x4:        //MI (negative)
             if (this.CPSR.getNegative()) {
                 this.executeDecoded();
@@ -283,9 +284,7 @@ ARMInstructionSet.prototype.readUserRegister = function (address) {
 }
 ARMInstructionSet.prototype.readDelayedPCRegister = function () {
     //Get the PC register data clocked 4 exta:
-    var register = this.registers[0xF] | 0;
-    register = ((register | 0) + 4) | 0;
-    return register | 0;
+    return ((this.registers[0xF] | 0) + 4) | 0;
 }
 ARMInstructionSet.prototype.read0OffsetRegister = function () {
     //Unguarded register read at position 0:
