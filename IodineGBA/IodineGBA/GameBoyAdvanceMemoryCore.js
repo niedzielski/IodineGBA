@@ -435,7 +435,6 @@ GameBoyAdvanceMemory.prototype.readBIOS8 = function (address) {
         this.IOCore.updateCoreSingle();
         if ((this.cpu.registers[15] | 0) < 0x4000) {
             //If reading from BIOS while executing it:
-            this.lastBIOSREAD = this.cpu.getCurrentFetchValue() | 0;
             data = this.BIOS[address & 0x3FFF] | 0;
         }
         else {
@@ -457,7 +456,6 @@ if (__LITTLE_ENDIAN__) {
             this.IOCore.updateCoreSingle();
             if ((this.cpu.registers[15] | 0) < 0x4000) {
                 //If reading from BIOS while executing it:
-                this.lastBIOSREAD = this.cpu.getCurrentFetchValue() | 0;
                 data = this.BIOS16[address & 0x1FFF] | 0;
             }
             else {
@@ -477,8 +475,8 @@ if (__LITTLE_ENDIAN__) {
             address >>= 1;
             this.wait.singleClockCPU();
             //If reading from BIOS while executing it:
-            this.lastBIOSREAD = this.cpu.getCurrentFetchValue() | 0;
             data = this.BIOS16[address & 0x1FFF] | 0;
+            this.lastBIOSREAD = data | 0;
         }
         else {
             data = this.readUnused16CPU(address | 0) | 0;
@@ -493,7 +491,6 @@ if (__LITTLE_ENDIAN__) {
             this.IOCore.updateCoreSingle();
             if ((this.cpu.registers[15] | 0) < 0x4000) {
                 //If reading from BIOS while executing it:
-                this.lastBIOSREAD = this.cpu.getCurrentFetchValue() | 0;
                 data = this.BIOS32[address & 0xFFF] | 0;
             }
             else {
@@ -513,8 +510,8 @@ if (__LITTLE_ENDIAN__) {
             address >>= 2;
             this.wait.singleClockCPU();
             //If reading from BIOS while executing it:
-            this.lastBIOSREAD = this.cpu.getCurrentFetchValue() | 0;
             data = this.BIOS32[address & 0xFFF] | 0;
+            this.lastBIOSREAD = data | 0;
         }
         else {
             data = this.readUnused32CPU(address | 0) | 0;
@@ -529,12 +526,11 @@ else {
             this.IOCore.updateCoreSingle();
             if (this.cpu.registers[15] < 0x4000) {
                 //If reading from BIOS while executing it:
-                this.lastBIOSREAD = this.cpu.getCurrentFetchValue();
                 return this.BIOS[address] | (this.BIOS[address | 1] << 8);
             }
             else {
                 //Not allowed to read from BIOS while executing outside of it:
-                return (this.lastBIOSREAD >> ((address & 0x1) << 4)) & 0xFFFF;
+                return (this.lastBIOSREAD >> ((address & 0x2) << 3)) & 0xFFFF;
             }
         }
         else {
@@ -546,8 +542,9 @@ else {
         if ((address | 0) < 0x4000) {
             this.wait.singleClockCPU();
             //If reading from BIOS while executing it:
-            this.lastBIOSREAD = this.cpu.getCurrentFetchValue();
-            return this.BIOS[address] | (this.BIOS[address | 1] << 8);
+            var data = this.BIOS[address] | (this.BIOS[address | 1] << 8);
+            this.lastBIOSREAD = data;
+            return data;
         }
         else {
             return this.readUnused16CPU(address);
@@ -559,7 +556,6 @@ else {
             this.IOCore.updateCoreSingle();
             if (this.cpu.registers[15] < 0x4000) {
                 //If reading from BIOS while executing it:
-                this.lastBIOSREAD = this.cpu.getCurrentFetchValue();
                 return this.BIOS[address] | (this.BIOS[address | 1] << 8) | (this.BIOS[address | 2] << 16)  | (this.BIOS[address | 3] << 24);
             }
             else {
@@ -576,8 +572,9 @@ else {
         if ((address | 0) < 0x4000) {
             this.wait.singleClockCPU();
             //If reading from BIOS while executing it:
-            this.lastBIOSREAD = this.cpu.getCurrentFetchValue();
-            return this.BIOS[address] | (this.BIOS[address | 1] << 8) | (this.BIOS[address | 2] << 16)  | (this.BIOS[address | 3] << 24);
+            var data = this.BIOS[address] | (this.BIOS[address | 1] << 8) | (this.BIOS[address | 2] << 16)  | (this.BIOS[address | 3] << 24);
+            this.lastBIOSREAD = data;
+            return data;
         }
         else {
             return this.readUnused32CPU(address);
