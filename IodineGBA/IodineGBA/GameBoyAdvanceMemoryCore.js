@@ -936,25 +936,51 @@ GameBoyAdvanceMemory.prototype.readSRAM8 = function (address) {
     this.wait.SRAMAccess();
     return this.saves.readSRAM(address & 0xFFFF) | 0;
 }
-GameBoyAdvanceMemory.prototype.readSRAM16 = function (address) {
-    address = address | 0;
-    this.wait.SRAMAccess();
-    return ((this.saves.readSRAM(address & 0xFFFE) | 0) * 0x101) | 0;
+if (!!Math.imul) {
+    //Math.imul found, insert the optimized path in:
+    GameBoyAdvanceMemory.prototype.readSRAM16 = function (address) {
+        address = address | 0;
+        this.wait.SRAMAccess();
+        return Math.imul(this.saves.readSRAM(address & 0xFFFE) | 0, 0x101) | 0;
+    }
+    GameBoyAdvanceMemory.prototype.readSRAM16CPU = function (address) {
+        address = address | 0;
+        this.wait.SRAMAccessCPU();
+        return Math.imul(this.saves.readSRAM(address & 0xFFFE) | 0, 0x101) | 0;
+    }
+    GameBoyAdvanceMemory.prototype.readSRAM32 = function (address) {
+        address = address | 0;
+        this.wait.SRAMAccess();
+        return Math.imul(this.saves.readSRAM(address & 0xFFFC) | 0, 0x1010101) | 0;
+    }
+    GameBoyAdvanceMemory.prototype.readSRAM32CPU = function (address) {
+        address = address | 0;
+        this.wait.SRAMAccessCPU();
+        return Math.imul(this.saves.readSRAM(address & 0xFFFC) | 0, 0x1010101) | 0;
+    }
 }
-GameBoyAdvanceMemory.prototype.readSRAM16CPU = function (address) {
-    address = address | 0;
-    this.wait.SRAMAccessCPU();
-    return ((this.saves.readSRAM(address & 0xFFFE) | 0) * 0x101) | 0;
-}
-GameBoyAdvanceMemory.prototype.readSRAM32 = function (address) {
-    address = address | 0;
-    this.wait.SRAMAccess();
-    return ((this.saves.readSRAM(address & 0xFFFC) | 0) * 0x1010101) | 0;
-}
-GameBoyAdvanceMemory.prototype.readSRAM32CPU = function (address) {
-    address = address | 0;
-    this.wait.SRAMAccessCPU();
-    return ((this.saves.readSRAM(address & 0xFFFC) | 0) * 0x1010101) | 0;
+else {
+    //Math.imul not found, use the compatibility method:
+    GameBoyAdvanceMemory.prototype.readSRAM16 = function (address) {
+        address = address | 0;
+        this.wait.SRAMAccess();
+        return ((this.saves.readSRAM(address & 0xFFFE) | 0) * 0x101) | 0;
+    }
+    GameBoyAdvanceMemory.prototype.readSRAM16CPU = function (address) {
+        address = address | 0;
+        this.wait.SRAMAccessCPU();
+        return ((this.saves.readSRAM(address & 0xFFFE) | 0) * 0x101) | 0;
+    }
+    GameBoyAdvanceMemory.prototype.readSRAM32 = function (address) {
+        address = address | 0;
+        this.wait.SRAMAccess();
+        return ((this.saves.readSRAM(address & 0xFFFC) | 0) * 0x1010101) | 0;
+    }
+    GameBoyAdvanceMemory.prototype.readSRAM32CPU = function (address) {
+        address = address | 0;
+        this.wait.SRAMAccessCPU();
+        return ((this.saves.readSRAM(address & 0xFFFC) | 0) * 0x1010101) | 0;
+    }
 }
 GameBoyAdvanceMemory.prototype.readZero = function (parentObj) {
     return 0;
