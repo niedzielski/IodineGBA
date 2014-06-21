@@ -1834,6 +1834,105 @@ ARMInstructionSet.prototype.LDMDBWG = function () {
         this.wait.NonSequentialBroadcast();
     }
 }
+ARMInstructionSet.prototype.LoadStoreMultiple = function () {
+    switch ((this.execute >> 20) & 0x1F) {
+        case 0:
+            this.STMDA();
+            break;
+        case 0x1:
+            this.LDMDA();
+            break;
+        case 0x2:
+            this.STMDAW();
+            break;
+        case 0x3:
+            this.LDMDAW();
+            break;
+        case 0x4:
+            this.STMDAG();
+            break;
+        case 0x5:
+            this.LDMDAG();
+            break;
+        case 0x6:
+            this.STMDAWG();
+            break;
+        case 0x7:
+            this.LDMDAWG();
+            break;
+        case 0x8:
+            this.STMIA();
+            break;
+        case 0x9:
+            this.LDMIA();
+            break;
+        case 0xA:
+            this.STMIAW();
+            break;
+        case 0xB:
+            this.LDMIAW();
+            break;
+        case 0xC:
+            this.STMIAG();
+            break;
+        case 0xD:
+            this.LDMIAG();
+            break;
+        case 0xE:
+            this.STMIAWG();
+            break;
+        case 0xF:
+            this.LDMIAWG();
+            break;
+        case 0x10:
+            this.STMDB();
+            break;
+        case 0x11:
+            this.LDMDB();
+            break;
+        case 0x12:
+            this.STMDBW();
+            break;
+        case 0x13:
+            this.LDMDBW();
+            break;
+        case 0x14:
+            this.STMDBG();
+            break;
+        case 0x15:
+            this.LDMDBG();
+            break;
+        case 0x16:
+            this.STMDBWG();
+            break;
+        case 0x17:
+            this.LDMDBWG();
+            break;
+        case 0x18:
+            this.STMIB();
+            break;
+        case 0x19:
+            this.LDMIB();
+            break;
+        case 0x1A:
+            this.STMIBW();
+            break;
+        case 0x1B:
+            this.LDMIBW();
+            break;
+        case 0x1C:
+            this.STMIBG();
+            break;
+        case 0x1D:
+            this.LDMIBG();
+            break;
+        case 0x1E:
+            this.STMIBWG();
+            break;
+        default:
+            this.LDMIBWG();
+    }
+}
 ARMInstructionSet.prototype.SWP = function () {
     var base = this.read16OffsetRegister() | 0;
     var data = this.CPUCore.read32(base | 0) | 0;
@@ -2575,38 +2674,7 @@ function compileARMInstructionDecodeMap() {
                        "LDR3",
                        "STRB3",
                        "LDRB3",
-                       "STMIA",
-                       "STMIAW",
-                       "STMDA",
-                       "STMDAW",
-                       "STMIB",
-                       "STMIBW",
-                       "STMDB",
-                       "STMDBW",
-                       "LDMIA",
-                       "LDMIAW",
-                       "LDMDA",
-                       "LDMDAW",
-                       "LDMIB",
-                       "LDMIBW",
-                       "LDMDB",
-                       "LDMDBW",
-                       "STMIAG",
-                       "STMIAWG",
-                       "STMDAG",
-                       "STMDAWG",
-                       "STMIBG",
-                       "STMIBWG",
-                       "STMDBG",
-                       "STMDBWG",
-                       "LDMIAG",
-                       "LDMIAWG",
-                       "LDMDAG",
-                       "LDMDAWG",
-                       "LDMIBG",
-                       "LDMIBWG",
-                       "LDMDBG",
-                       "LDMDBWG",
+                       "LoadStoreMultiple",
                        "SWP",
                        "SWPB",
                        "SWI"
@@ -2632,6 +2700,12 @@ function compileARMInstructionDecodeMap() {
             }
         }
         function generateMap4(instruction) {
+            var translatedOpcode = codeMap[instruction];
+            for (var index = 0; index < 0x200; ++index) {
+                instructionMap[opcodeIndice++] = translatedOpcode;
+            }
+        }
+        function generateMap5(instruction) {
             var translatedOpcode = codeMap[instruction];
             for (var index = 0; index < 0x300; ++index) {
                 instructionMap[opcodeIndice++] = translatedOpcode;
@@ -3417,76 +3491,14 @@ function compileARMInstructionDecodeMap() {
         generateStoreLoadInstructionSector1();
         //70-7F
         generateStoreLoadInstructionSector2();
-        //80
-        generateMap2("STMDA");
-        //81
-        generateMap2("LDMDA");
-        //82
-        generateMap2("STMDAW");
-        //83
-        generateMap2("LDMDAW");
-        //84
-        generateMap2("STMDAG");
-        //85
-        generateMap2("LDMDAG");
-        //86
-        generateMap2("STMDAWG");
-        //87
-        generateMap2("LDMDAWG");
-        //88
-        generateMap2("STMIA");
-        //89
-        generateMap2("LDMIA");
-        //8A
-        generateMap2("STMIAW");
-        //8B
-        generateMap2("LDMIAW");
-        //8C
-        generateMap2("STMIAG");
-        //8D
-        generateMap2("LDMIAG");
-        //8E
-        generateMap2("STMIAWG");
-        //8F
-        generateMap2("LDMIAWG");
-        //90
-        generateMap2("STMDB");
-        //91
-        generateMap2("LDMDB");
-        //92
-        generateMap2("STMDBW");
-        //93
-        generateMap2("LDMDBW");
-        //94
-        generateMap2("STMDBG");
-        //95
-        generateMap2("LDMDBG");
-        //96
-        generateMap2("STMDBWG");
-        //97
-        generateMap2("LDMDBWG");
-        //98
-        generateMap2("STMIB");
-        //99
-        generateMap2("LDMIB");
-        //9A
-        generateMap2("STMIBW");
-        //9B
-        generateMap2("LDMIBW");
-        //9C
-        generateMap2("STMIBG");
-        //9D
-        generateMap2("LDMIBG");
-        //9E
-        generateMap2("STMIBWG");
-        //9F
-        generateMap2("LDMIBWG");
+        //80-9F
+        generateMap4("LoadStoreMultiple");
         //A0-AF
         generateMap3("B");
         //B0-BF
         generateMap3("BL");
         //C0-EF
-        generateMap4("UNDEFINED");
+        generateMap5("UNDEFINED");
         //F0-FF
         generateMap3("SWI");
         //Set to prototype:
