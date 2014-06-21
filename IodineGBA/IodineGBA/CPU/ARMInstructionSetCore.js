@@ -302,6 +302,10 @@ ARMInstructionSet.prototype.read16OffsetRegister = function () {
     //Unguarded register read at position 0x10:
     return this.readRegister(this.execute >> 0x10) | 0;
 }
+ARMInstructionSet.prototype.readGuarded0OffsetRegister = function () {
+    //Guarded register read at position 0:
+    return this.guardRegisterRead((this.execute >> 0) & 0xF) | 0;
+}
 ARMInstructionSet.prototype.readGuarded16OffsetRegister = function () {
     //Guarded register read at position 0x10:
     return this.guardRegisterRead((this.execute >> 0x10) & 0xF) | 0;
@@ -2153,9 +2157,8 @@ ARMInstructionSet.prototype.operand2OP_LoadStore4 = function () {
     return offset | 0;
 }
 ARMInstructionSet.prototype.lli = function () {
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.readRegister(registerSelected | 0) | 0;
+    var register = this.read0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Shift the register data left:
@@ -2163,9 +2166,8 @@ ARMInstructionSet.prototype.lli = function () {
     return register << shifter;
 }
 ARMInstructionSet.prototype.llis = function () {
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.readRegister(registerSelected | 0) | 0;
+    var register = this.read0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
@@ -2179,9 +2181,8 @@ ARMInstructionSet.prototype.llis = function () {
 }
 ARMInstructionSet.prototype.llr = function () {
     //Logical Left Shift with Register:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    var register = this.readGuarded0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Shift the register data left:
@@ -2190,9 +2191,8 @@ ARMInstructionSet.prototype.llr = function () {
 }
 ARMInstructionSet.prototype.llrs = function () {
     //Logical Left Shift with Register and CPSR:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    var register = this.readGuarded0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
@@ -2218,9 +2218,8 @@ ARMInstructionSet.prototype.llrs = function () {
     return register | 0;
 }
 ARMInstructionSet.prototype.lri = function () {
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.readRegister(registerSelected | 0) | 0;
+    var register = this.read0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Shift the register data right logically:
@@ -2232,9 +2231,8 @@ ARMInstructionSet.prototype.lri = function () {
     return (register >>> shifter) | 0;
 }
 ARMInstructionSet.prototype.lris = function () {
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.readRegister(registerSelected | 0) | 0;
+    var register = this.read0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
@@ -2252,9 +2250,8 @@ ARMInstructionSet.prototype.lris = function () {
     }
 }
 ARMInstructionSet.prototype.lrr = function () {
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    var register = this.readGuarded0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Shift the register data right logically:
@@ -2263,9 +2260,8 @@ ARMInstructionSet.prototype.lrr = function () {
 }
 ARMInstructionSet.prototype.lrrs = function () {
     //Logical Right Shift with Register and CPSR:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    var register = this.readGuarded0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
@@ -2291,9 +2287,8 @@ ARMInstructionSet.prototype.lrrs = function () {
     return register | 0;
 }
 ARMInstructionSet.prototype.ari = function () {
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.readRegister(registerSelected | 0) | 0;
+    var register = this.read0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
@@ -2306,9 +2301,8 @@ ARMInstructionSet.prototype.ari = function () {
     return register >> shifter;
 }
 ARMInstructionSet.prototype.aris = function () {
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.readRegister(registerSelected | 0) | 0;
+    var register = this.read0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
@@ -2327,9 +2321,8 @@ ARMInstructionSet.prototype.aris = function () {
 }
 ARMInstructionSet.prototype.arr = function () {
     //Arithmetic Right Shift with Register:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    var register = this.readGuarded0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Shift the register data right:
@@ -2337,9 +2330,8 @@ ARMInstructionSet.prototype.arr = function () {
 }
 ARMInstructionSet.prototype.arrs = function () {
     //Arithmetic Right Shift with Register and CPSR:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    var register = this.readGuarded0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
@@ -2362,9 +2354,8 @@ ARMInstructionSet.prototype.arrs = function () {
 }
 ARMInstructionSet.prototype.rri = function () {
     //Rotate Right with Immediate:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.readRegister(registerSelected | 0) | 0;
+    var register = this.read0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Rotate the register right:
@@ -2380,9 +2371,8 @@ ARMInstructionSet.prototype.rri = function () {
 }
 ARMInstructionSet.prototype.rris = function () {
     //Rotate Right with Immediate and CPSR:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.readRegister(registerSelected | 0) | 0;
+    var register = this.read0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Rotate the register right:
@@ -2401,9 +2391,8 @@ ARMInstructionSet.prototype.rris = function () {
 }
 ARMInstructionSet.prototype.rrr = function () {
     //Rotate Right with Register:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    var register = this.readGuarded0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Rotate the register right:
@@ -2417,9 +2406,8 @@ ARMInstructionSet.prototype.rrr = function () {
 }
 ARMInstructionSet.prototype.rrrs = function () {
     //Rotate Right with Register and CPSR:
-    var registerSelected = this.execute & 0xF;
     //Get the register data to be shifted:
-    var register = this.guardRegisterRead(registerSelected | 0) | 0;
+    var register = this.readGuarded0OffsetRegister() | 0;
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Rotate the register right:
