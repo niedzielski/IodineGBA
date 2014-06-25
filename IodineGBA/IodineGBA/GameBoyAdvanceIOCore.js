@@ -17,14 +17,7 @@
  */
 function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     //State Machine Tracking:
-    this.systemStatus = 0;
-    this.cyclesToIterate = 0;
-    this.cyclesOveriteratedPreviously = 0;
-    this.accumulatedClocks = 0;
-    this.graphicsClocks = 0;
-    this.timerClocks = 0;
-    this.serialClocks = 0;
-    this.nextEventClocks = 0;
+    this.tracking = getInt32Array(8);
     this.BIOSFound = false;
     //References passed to us:
     this.settings = settings;
@@ -50,9 +43,9 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
 }
 GameBoyAdvanceIO.prototype.iterate = function (CPUCyclesTotal) {
     //Find out how many clocks to iterate through this run:
-    this.cyclesToIterate = ((CPUCyclesTotal | 0) + (this.cyclesOveriteratedPreviously | 0)) | 0;
+    this.tracking[1] = ((CPUCyclesTotal | 0) + (this.tracking[2] | 0)) | 0;
     //An extra check to make sure we don't do stuff if we did too much last run:
-    if ((this.cyclesToIterate | 0) > 0) {
+    if ((this.tracking[1] | 0) > 0) {
         //Update our core event prediction:
         this.updateCoreEventTime();
         //If clocks remaining, run iterator:
@@ -63,11 +56,11 @@ GameBoyAdvanceIO.prototype.iterate = function (CPUCyclesTotal) {
         this.sound.audioJIT();
     }
     //If we clocked just a little too much, subtract the extra from the next run:
-    this.cyclesOveriteratedPreviously = this.cyclesToIterate | 0;
+    this.tracking[2] = this.tracking[1] | 0;
 }
 GameBoyAdvanceIO.prototype.runIterator = function () {
     //Clock through the state machine:
-    while ((this.cyclesToIterate | 0) > 0) {
+    while ((this.tracking[1] | 0) > 0) {
         //Handle the current system state selected:
         this.stepHandle();
     }
@@ -75,22 +68,22 @@ GameBoyAdvanceIO.prototype.runIterator = function () {
 GameBoyAdvanceIO.prototype.updateCore = function (clocks) {
     clocks = clocks | 0;
     //This is used during normal/dma modes of operation:
-    this.accumulatedClocks = ((this.accumulatedClocks | 0) + (clocks | 0)) | 0;
-    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
+    this.tracking[3] = ((this.tracking[3] | 0) + (clocks | 0)) | 0;
+    if ((this.tracking[3] | 0) >= (this.tracking[7] | 0)) {
         this.updateCoreSpill();
     }
 }
 GameBoyAdvanceIO.prototype.updateCoreSingle = function () {
     //This is used during normal/dma modes of operation:
-    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 1) | 0;
-    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
+    this.tracking[3] = ((this.tracking[3] | 0) + 1) | 0;
+    if ((this.tracking[3] | 0) >= (this.tracking[7] | 0)) {
         this.updateCoreSpill();
     }
 }
 GameBoyAdvanceIO.prototype.updateCoreTwice = function () {
     //This is used during normal/dma modes of operation:
-    this.accumulatedClocks = ((this.accumulatedClocks | 0) + 2) | 0;
-    if ((this.accumulatedClocks | 0) >= (this.nextEventClocks | 0)) {
+    this.tracking[3] = ((this.tracking[3] | 0) + 2) | 0;
+    if ((this.tracking[3] | 0) >= (this.tracking[7] | 0)) {
         this.updateCoreSpill();
     }
 }
@@ -100,51 +93,51 @@ GameBoyAdvanceIO.prototype.updateCoreSpill = function () {
 }
 GameBoyAdvanceIO.prototype.updateCoreSpillRetain = function () {
     //Keep the last prediction, just decrement it out, as it's still valid:
-    this.nextEventClocks = ((this.nextEventClocks | 0) - (this.accumulatedClocks | 0)) | 0;
+    this.tracking[7] = ((this.tracking[7] | 0) - (this.tracking[3] | 0)) | 0;
     this.updateCoreClocking();
 }
 GameBoyAdvanceIO.prototype.updateCoreClocking = function () {
-    var clocks = this.accumulatedClocks | 0;
+    var clocks = this.tracking[3] | 0;
     //Decrement the clocks per iteration counter:
-    this.cyclesToIterate = ((this.cyclesToIterate | 0) - (clocks | 0)) | 0;
+    this.tracking[1] = ((this.tracking[1] | 0) - (clocks | 0)) | 0;
     //Clock all components:
-    this.gfx.addClocks(((clocks | 0) - (this.graphicsClocks | 0)) | 0);
-    this.timer.addClocks(((clocks | 0) - (this.timerClocks | 0)) | 0);
-    this.serial.addClocks(((clocks | 0) - (this.serialClocks | 0)) | 0);
-    this.accumulatedClocks = 0;
-    this.graphicsClocks = 0;
-    this.timerClocks = 0;
-    this.serialClocks = 0;
+    this.gfx.addClocks(((clocks | 0) - (this.tracking[4] | 0)) | 0);
+    this.timer.addClocks(((clocks | 0) - (this.tracking[5] | 0)) | 0);
+    this.serial.addClocks(((clocks | 0) - (this.tracking[6] | 0)) | 0);
+    this.tracking[3] = 0;
+    this.tracking[4] = 0;
+    this.tracking[5] = 0;
+    this.tracking[6] = 0;
 }
 GameBoyAdvanceIO.prototype.updateGraphicsClocking = function () {
     //Clock gfx component:
-    this.gfx.addClocks(((this.accumulatedClocks | 0)  - (this.graphicsClocks | 0)) | 0);
-    this.graphicsClocks = this.accumulatedClocks | 0;
+    this.gfx.addClocks(((this.tracking[3] | 0)  - (this.tracking[4] | 0)) | 0);
+    this.tracking[4] = this.tracking[3] | 0;
 }
 GameBoyAdvanceIO.prototype.updateTimerClocking = function () {
     //Clock timer component:
-    this.timer.addClocks(((this.accumulatedClocks | 0)  - (this.timerClocks | 0)) | 0);
-    this.timerClocks = this.accumulatedClocks | 0;
+    this.timer.addClocks(((this.tracking[3] | 0)  - (this.tracking[5] | 0)) | 0);
+    this.tracking[5] = this.tracking[3] | 0;
 }
 GameBoyAdvanceIO.prototype.updateSerialClocking = function () {
     //Clock serial component:
-    this.serial.addClocks(((this.accumulatedClocks | 0)  - (this.serialClocks | 0)) | 0);
-    this.serialClocks = this.accumulatedClocks | 0;
+    this.serial.addClocks(((this.tracking[3] | 0)  - (this.tracking[6] | 0)) | 0);
+    this.tracking[6] = this.tracking[3] | 0;
 }
 GameBoyAdvanceIO.prototype.updateCoreEventTime = function () {
     //Predict how many clocks until the next DMA or IRQ event:
-    this.nextEventClocks = this.cyclesUntilNextEvent() | 0;
+    this.tracking[7] = this.cyclesUntilNextEvent() | 0;
 }
 GameBoyAdvanceIO.prototype.getRemainingCycles = function () {
     //Return the number of cycles left until iteration end:
-    return Math.max(this.cyclesToIterate | 0, 0) | 0;
+    return Math.max(this.tracking[1] | 0, 0) | 0;
 }
 GameBoyAdvanceIO.prototype.preprocessSystemStepper = function () {
-    switch (this.systemStatus | 0) {
+    switch (this.tracking[0] | 0) {
         case 0: //CPU Handle State
             this.stepHandle = this.handleCPUInterpreter;
             break;
-        case 1:    //DMA Handle State
+        case 1: //DMA Handle State
             this.stepHandle = this.handleDMA;
             break;
         case 2: //Handle Halt State
@@ -178,7 +171,7 @@ GameBoyAdvanceIO.prototype.handleHalt = function () {
 GameBoyAdvanceIO.prototype.handleStop = function () {
     //Update sound system to add silence to buffer:
     this.sound.addClocks(this.getRemainingCycles() | 0);
-    this.cyclesToIterate = 0;
+    this.tracking[1] = 0;
     //Exits when user presses joypad or from an external irq outside of GBA internal.
 }
 GameBoyAdvanceIO.prototype.cyclesUntilNextHALTEvent = function () {
@@ -214,12 +207,12 @@ GameBoyAdvanceIO.prototype.solveClosestTime = function (clocks1, clocks2) {
 GameBoyAdvanceIO.prototype.deflagStepper = function (statusFlag) {
     statusFlag = statusFlag | 0;
     //Deflag a system event to step through:
-    this.systemStatus = this.systemStatus & (~statusFlag);
+    this.tracking[0] = this.tracking[0] & (~statusFlag);
     this.preprocessSystemStepper();
 }
 GameBoyAdvanceIO.prototype.flagStepper = function (statusFlag) {
     statusFlag = statusFlag | 0;
     //Flag a system event to step through:
-    this.systemStatus = this.systemStatus | statusFlag;
+    this.tracking[0] = this.tracking[0] | statusFlag;
     this.preprocessSystemStepper();
 }
