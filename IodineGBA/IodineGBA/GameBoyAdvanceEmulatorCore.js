@@ -18,7 +18,6 @@
 function GameBoyAdvanceEmulator() {
     this.settings = {
         "SKIPBoot":false,                   //Skip the BIOS boot screen.
-        "lineSkip":false,                   //Skip every other line draw.
         "useWorkers":true,                  //Enable Web Workers for compiling.
         "audioVolume":1,                    //Starting audio volume.
         "audioBufferUnderrunLimit":4,       //Audio buffer minimum span amount over x interpreter iterations.
@@ -378,7 +377,4 @@ GameBoyAdvanceEmulator.prototype.toggleDynamicSpeed = function (dynamicSpeed) {
     if (!this.settings.dynamicSpeed) {
         this.setSpeed(1);
     }
-}
-GameBoyAdvanceEmulator.prototype.toggleLineSkip = function (lineSkip) {
-    this.settings.lineSkip = !!lineSkip;
 }

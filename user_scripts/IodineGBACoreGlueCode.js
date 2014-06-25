@@ -76,10 +76,6 @@ function registerGUIEvents() {
     addEvent("click", document.getElementById("skip_boot"), function () {
              Iodine.toggleSkipBootROM(this.checked);
     });
-    document.getElementById("lineskip").checked = false;
-    addEvent("click", document.getElementById("lineskip"), function () {
-             Iodine.toggleLineSkip(this.checked);
-    });
     document.getElementById("toggleSmoothScaling").checked = true;
     addEvent("click", document.getElementById("toggleSmoothScaling"), function () {
              if (Blitter) {
