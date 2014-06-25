@@ -1102,6 +1102,30 @@ ARMInstructionSet.prototype.LDRB = function () {
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
 }
+ARMInstructionSet.prototype.STR4 = function () {
+    //Perform word store calculations:
+    var address = this.operand2OP_LoadStore3() | 0;
+    //Write to memory location:
+    this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
+}
+ARMInstructionSet.prototype.LDR4 = function () {
+    //Perform word load calculations:
+    var address = this.operand2OP_LoadStore3() | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+}
+ARMInstructionSet.prototype.STRB4 = function () {
+    //Perform byte store calculations:
+    var address = this.operand2OP_LoadStore3() | 0;
+    //Write to memory location:
+    this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
+}
+ARMInstructionSet.prototype.LDRB4 = function () {
+    //Perform byte store calculations:
+    var address = this.operand2OP_LoadStore3() | 0;
+    //Read from memory location:
+    this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+}
 ARMInstructionSet.prototype.STRT = function () {
     //Perform word store calculations (forced user-mode):
     var address = this.operand2OP_LoadStore2(true) | 0;
@@ -1128,73 +1152,73 @@ ARMInstructionSet.prototype.LDRBT = function () {
 }
 ARMInstructionSet.prototype.STR2 = function () {
     //Perform word store calculations:
-    var address = this.operand2OP_LoadStore3(false) | 0;
+    var address = this.operand2OP_LoadStore4(false) | 0;
     //Write to memory location:
     this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDR2 = function () {
     //Perform word load calculations:
-    var address = this.operand2OP_LoadStore3(false) | 0;
+    var address = this.operand2OP_LoadStore4(false) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STRB2 = function () {
     //Perform byte store calculations:
-    var address = this.operand2OP_LoadStore3(false) | 0;
+    var address = this.operand2OP_LoadStore4(false) | 0;
     //Write to memory location:
     this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRB2 = function () {
     //Perform byte store calculations:
-    var address = this.operand2OP_LoadStore3(false) | 0;
+    var address = this.operand2OP_LoadStore4(false) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STRT2 = function () {
     //Perform word store calculations (forced user-mode):
-    var address = this.operand2OP_LoadStore3(true) | 0;
+    var address = this.operand2OP_LoadStore4(true) | 0;
     //Write to memory location:
     this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRT2 = function () {
     //Perform word load calculations (forced user-mode):
-    var address = this.operand2OP_LoadStore3(true) | 0;
+    var address = this.operand2OP_LoadStore4(true) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STRBT2 = function () {
     //Perform byte store calculations (forced user-mode):
-    var address = this.operand2OP_LoadStore3(true) | 0;
+    var address = this.operand2OP_LoadStore4(true) | 0;
     //Write to memory location:
     this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRBT2 = function () {
     //Perform byte load calculations (forced user-mode):
-    var address = this.operand2OP_LoadStore3(true) | 0;
+    var address = this.operand2OP_LoadStore4(true) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STR3 = function () {
     //Perform word store calculations:
-    var address = this.operand2OP_LoadStore4() | 0;
+    var address = this.operand2OP_LoadStore5() | 0;
     //Write to memory location:
     this.CPUCore.write32(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDR3 = function () {
     //Perform word load calculations:
-    var address = this.operand2OP_LoadStore4() | 0;
+    var address = this.operand2OP_LoadStore5() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
 }
 ARMInstructionSet.prototype.STRB3 = function () {
     //Perform byte store calculations:
-    var address = this.operand2OP_LoadStore4() | 0;
+    var address = this.operand2OP_LoadStore5() | 0;
     //Write to memory location:
     this.CPUCore.write8(address | 0, this.guard12OffsetRegisterRead() | 0);
 }
 ARMInstructionSet.prototype.LDRB3 = function () {
     //Perform byte store calculations:
-    var address = this.operand2OP_LoadStore4() | 0;
+    var address = this.operand2OP_LoadStore5() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
 }
@@ -2035,6 +2059,33 @@ ARMInstructionSet.prototype.operand2OP_DataProcessing4 = function () {
     }
     return data | 0;
 }
+ARMInstructionSet.prototype.operand2OP_LoadStoreOffsetGen = function () {
+    var data = 0;
+    switch ((this.execute >> 5) & 0x3) {
+        case 0:
+            data = this.lli() | 0;
+            break;
+        case 1:
+            data = this.lri() | 0;
+            break;
+        case 2:
+            data = this.ari() | 0;
+            break;
+        default:
+            data = this.rri() | 0;
+    }
+    return data | 0;
+}
+ARMInstructionSet.prototype.operand2OP_LoadStorePostT = function (offset, userMode) {
+    offset = offset | 0;
+    if ((this.execute & 0x800000) == 0) {
+        offset = this.updateBasePostDecrement(offset | 0, userMode) | 0;
+    }
+    else {
+        offset = this.updateBasePostIncrement(offset | 0, userMode) | 0;
+    }
+    return offset | 0;
+}
 ARMInstructionSet.prototype.operand2OP_LoadStore1 = function () {
     var data = 0;
     switch ((this.execute >> 21) & 0xF) {
@@ -2081,30 +2132,21 @@ ARMInstructionSet.prototype.operand2OP_LoadStore1 = function () {
     return data | 0;
 }
 ARMInstructionSet.prototype.operand2OP_LoadStore2 = function (userMode) {
+    return this.operand2OP_LoadStorePostT(this.execute & 0xFFF, userMode) | 0;
+}
+ARMInstructionSet.prototype.operand2OP_LoadStore3 = function () {
     var data = 0;
-    switch ((this.execute >> 21) & 0xF) {
+    switch ((this.execute >> 21) & 0x7) {
         case 0:
-        case 1:
-        case 2:
-        case 3:
-            data = this.sptim(userMode) | 0;
-            break;
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-            data = this.sptip(userMode) | 0;
-            break;
-        case 8:
-        case 0xA:
+        case 0x2:
             data = this.sofim() | 0;
             break;
-        case 0x9:
-        case 0xB:
+        case 0x1:
+        case 0x3:
             data = this.sprim() | 0;
             break;
-        case 0xC:
-        case 0xE:
+        case 0x4:
+        case 0x6:
             data = this.sofip() | 0;
             break;
         default:
@@ -2112,34 +2154,10 @@ ARMInstructionSet.prototype.operand2OP_LoadStore2 = function (userMode) {
     }
     return data | 0;
 }
-ARMInstructionSet.prototype.operand2OP_LoadStoreOffsetGen = function () {
-    var data = 0;
-    switch ((this.execute >> 5) & 0x3) {
-        case 0:
-            data = this.lli() | 0;
-            break;
-        case 1:
-            data = this.lri() | 0;
-            break;
-        case 2:
-            data = this.ari() | 0;
-            break;
-        default:
-            data = this.rri() | 0;
-    }
-    return data | 0;
+ARMInstructionSet.prototype.operand2OP_LoadStore4 = function (userMode) {
+    return this.operand2OP_LoadStorePostT(this.operand2OP_LoadStoreOffsetGen() | 0, userMode) | 0;
 }
-ARMInstructionSet.prototype.operand2OP_LoadStore3 = function (userMode) {
-    var offset = this.operand2OP_LoadStoreOffsetGen() | 0;
-    if ((this.execute & 0x800000) == 0) {
-        offset = this.updateBasePostDecrement(offset | 0, userMode) | 0;
-    }
-    else {
-        offset = this.updateBasePostIncrement(offset | 0, userMode) | 0;
-    }
-    return offset | 0;
-}
-ARMInstructionSet.prototype.operand2OP_LoadStore4 = function () {
+ARMInstructionSet.prototype.operand2OP_LoadStore5 = function () {
     var offset = this.operand2OP_LoadStoreOffsetGen() | 0;
     switch (this.execute & 0xA00000) {
         case 0:
@@ -2539,14 +2557,6 @@ ARMInstructionSet.prototype.prip = function () {
     var offset = ((this.execute & 0xF00) >> 4) | (this.execute & 0xF);
     return this.updateBasePreIncrement(offset | 0) | 0;
 }
-ARMInstructionSet.prototype.sptim = function (userMode) {
-    var offset = this.execute & 0xFFF;
-    return this.updateBasePostDecrement(offset | 0, userMode | 0);
-}
-ARMInstructionSet.prototype.sptip = function (userMode) {
-    var offset = this.execute & 0xFFF;
-    return this.updateBasePostIncrement(offset | 0, userMode) | 0;
-}
 ARMInstructionSet.prototype.sofim = function () {
     var offset = this.execute & 0xFFF;
     return this.updateNoBaseDecrement(offset | 0) | 0;
@@ -2662,6 +2672,10 @@ function compileARMInstructionDecodeMap() {
                        "LDR3",
                        "STRB3",
                        "LDRB3",
+                       "STR4",
+                       "LDR4",
+                       "STRB4",
+                       "LDRB4",
                        "LoadStoreMultiple",
                        "SWP",
                        "SWPB",
@@ -3444,37 +3458,37 @@ function compileARMInstructionDecodeMap() {
         //4F
         generateMap2("LDRBT");
         //50
-        generateMap2("STR");
+        generateMap2("STR4");
         //51
-        generateMap2("LDR");
+        generateMap2("LDR4");
         //52
-        generateMap2("STR");
+        generateMap2("STR4");
         //53
-        generateMap2("LDR");
+        generateMap2("LDR4");
         //54
-        generateMap2("STRB");
+        generateMap2("STRB4");
         //55
-        generateMap2("LDRB");
+        generateMap2("LDRB4");
         //56
-        generateMap2("STRB");
+        generateMap2("STRB4");
         //57
-        generateMap2("LDRB");
+        generateMap2("LDRB4");
         //58
-        generateMap2("STR");
+        generateMap2("STR4");
         //59
-        generateMap2("LDR");
+        generateMap2("LDR4");
         //5A
-        generateMap2("STR");
+        generateMap2("STR4");
         //5B
-        generateMap2("LDR");
+        generateMap2("LDR4");
         //5C
-        generateMap2("STRB");
+        generateMap2("STRB4");
         //5D
-        generateMap2("LDRB");
+        generateMap2("LDRB4");
         //5E
-        generateMap2("STRB");
+        generateMap2("STRB4");
         //5F
-        generateMap2("LDRB");
+        generateMap2("LDRB4");
         //60-6F
         generateStoreLoadInstructionSector1();
         //70-7F
