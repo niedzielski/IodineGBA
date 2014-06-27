@@ -71,14 +71,7 @@ if (__VIEWS_SUPPORTED__) {
             //Get 8 pixels of data:
             this.processVRAM(this.fetchTile(yTileStart | 0, xTileStart | 0) | 0, yTileOffset | 0);
             //Copy the buffered tile to line:
-            this.scratchBuffer[position | 0] = this.tileFetched[0] | 0;
-            this.scratchBuffer[((position | 0) + 1) | 0] = this.tileFetched[1] | 0;
-            this.scratchBuffer[((position | 0) + 2) | 0] = this.tileFetched[2] | 0;
-            this.scratchBuffer[((position | 0) + 3) | 0] = this.tileFetched[3] | 0;
-            this.scratchBuffer[((position | 0) + 4) | 0] = this.tileFetched[4] | 0;
-            this.scratchBuffer[((position | 0) + 5) | 0] = this.tileFetched[5] | 0;
-            this.scratchBuffer[((position | 0) + 6) | 0] = this.tileFetched[6] | 0;
-            this.scratchBuffer[((position | 0) + 7) | 0] = this.tileFetched[7] | 0;
+            this.scratchBuffer.set(this.tileFetched, position | 0);
             //Increment a tile counter:
             xTileStart = ((xTileStart | 0) + 1) | 0;
         }
