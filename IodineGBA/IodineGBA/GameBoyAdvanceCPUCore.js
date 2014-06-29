@@ -111,10 +111,6 @@ GameBoyAdvanceCPU.prototype.executeBubble = function () {
 GameBoyAdvanceCPU.prototype.executeIterationRegular = function () {
     //Tick the pipeline of the selected instruction set:
     this.instructionHandle.executeIteration();
-    //Increment the program counter if we didn't just branch:
-    if ((this.pipelineInvalid | 0) < 0x4) {
-        this.instructionHandle.incrementProgramCounter();
-    }
 }
 GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
     branchTo = branchTo | 0;
