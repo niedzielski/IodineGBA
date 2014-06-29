@@ -203,6 +203,9 @@ ARMInstructionSet.prototype.getIRQLR = function () {
 ARMInstructionSet.prototype.getCurrentFetchValue = function () {
     return this.fetch | 0;
 }
+ARMInstructionSet.prototype.getSWICode = function () {
+    return (this.execute >> 16) & 0xFF;
+}
 ARMInstructionSet.prototype.writeRegister = function (address, data) {
     //Unguarded non-pc register write:
     address = address | 0;
