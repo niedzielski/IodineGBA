@@ -197,13 +197,13 @@ GameBoyAdvanceIO.prototype.cyclesUntilNextHALTEvent = function () {
     //Find the clocks to the next HALT leave or DMA event:
     var haltClocks = this.irq.nextEventTime() | 0;
     var dmaClocks = this.dma.nextEventTime() | 0;
-    return this.solveClosestTime(haltClocks, dmaClocks) | 0;
+    return this.solveClosestTime(haltClocks | 0, dmaClocks | 0) | 0;
 }
 GameBoyAdvanceIO.prototype.cyclesUntilNextEvent = function () {
     //Find the clocks to the next IRQ or DMA event:
     var irqClocks = this.irq.nextIRQEventTime() | 0;
     var dmaClocks = this.dma.nextEventTime() | 0;
-    return this.solveClosestTime(irqClocks, dmaClocks) | 0;
+    return this.solveClosestTime(irqClocks | 0, dmaClocks | 0) | 0;
 }
 GameBoyAdvanceIO.prototype.solveClosestTime = function (clocks1, clocks2) {
     clocks1 = clocks1 | 0;
