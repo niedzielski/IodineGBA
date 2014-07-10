@@ -91,12 +91,13 @@ GameBoyAdvanceCPU.prototype.executeIRQ = function () {
 GameBoyAdvanceCPU.prototype.executeBubble = function () {
     //Tick the pipeline and bubble out invalidity:
     this.pipelineInvalid >>= 1;
-    //Tick the pipeline of the selected instruction set:
-    this.instructionHandle.executeBubble();
+    //If on the second bubble, kick ourselves out of the bubble mode:
     if ((this.pipelineInvalid | 0) == 0) {
         //Change state to normal execution:
         this.IOCore.deflagStepper(1);
     }
+    //Tick the pipeline of the selected instruction set:
+    this.instructionHandle.executeBubble();
 }
 GameBoyAdvanceCPU.prototype.executeIterationRegular = function () {
     //Tick the pipeline of the selected instruction set:
