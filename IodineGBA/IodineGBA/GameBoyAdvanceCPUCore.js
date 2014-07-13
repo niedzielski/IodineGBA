@@ -512,7 +512,7 @@ GameBoyAdvanceCPU.prototype.performMUL32 = function (rs, rd) {
     rd = rd | 0;
     //Predict the internal cycle time:
     if ((rd >>> 8) == 0 || (rd >>> 8) == 0xFFFFFF) {
-        this.IOCore.wait.CPUInternalCyclePrefetch(1);
+        this.IOCore.wait.CPUInternalSingleCyclePrefetch();
     }
     else if ((rd >>> 16) == 0 || (rd >>> 16) == 0xFFFF) {
         this.IOCore.wait.CPUInternalCyclePrefetch(2);

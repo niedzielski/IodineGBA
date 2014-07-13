@@ -103,7 +103,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
     this.waitStateClocks[0xC] = this.waitStateClocks[0xD] =  ((data & 0x4) == 0x4) ? 0x1 : 0x8;
     this.waitStateClocksFull[0xC] = this.waitStateClocksFull[0xD] = this.waitStateClocks[0xC] << 1;
     this.waitStateClocksFull[0x10C] = this.waitStateClocksFull[0x10D] = ((this.waitStateClocks[0x10C] | 0) + (this.waitStateClocks[0xC] | 0)) | 0;
-    if (((data & 0x40) == 0)) {
+    if ((data & 0x40) == 0) {
         this.ROMPrebuffer = 0;
         this.getROMRead16 = this.getROMRead16NoPrefetch;
         this.getROMRead32 = this.getROMRead32NoPrefetch;
@@ -204,8 +204,10 @@ GameBoyAdvanceWait.prototype.CPUInternalCycleDoPrefetch = function (clocks) {
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
     var waitClocks = this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0;
-    waitClocks = Math.floor((clocks | 0) / Math.max(waitClocks, 1));
-    this.ROMPrebuffer = Math.min((this.ROMPrebuffer | 0) + waitClocks, 8) | 0;
+    while ((clocks | 0) >= (waitClocks | 0) && (this.ROMPrebuffer | 0) < 8) {
+        clocks = ((clocks | 0) - (waitClocks | 0)) | 0;
+        this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+    }
 }
 GameBoyAdvanceWait.prototype.CPUInternalCycleNoPrefetch = function (clocks) {
     clocks = clocks | 0;
@@ -220,8 +222,8 @@ GameBoyAdvanceWait.prototype.CPUInternalSingleCycleDoPrefetch = function () {
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-        this.ROMPrebuffer = Math.min((this.ROMPrebuffer | 0) + 1, 8) | 0;
+    if ((this.ROMPrebuffer | 0) < 8 && (this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
+        this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
     }
 }
 GameBoyAdvanceWait.prototype.CPUInternalSingleCycleNoPrefetch = function () {
@@ -244,12 +246,25 @@ GameBoyAdvanceWait.prototype.check128kAlignmentBug = function (address) {
         this.NonSequentialBroadcast();
     }
 }
-GameBoyAdvanceWait.prototype.doPrefetchBuffering = function (clocks) {
+GameBoyAdvanceWait.prototype.doPrefetchBuffering16 = function (clocks) {
     clocks = clocks | 0;
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    this.ROMPrebuffer = Math.max(((this.ROMPrebuffer | 0) - (((clocks | 0) - 1) | 0)) | 0, 0) | 0;
+    if ((clocks | 0) > 1) {
+        this.ROMPrebuffer = ((this.ROMPrebuffer | 0) - 1) | 0;
+    }
+    //Clock for fetch time:
+    this.IOCore.updateCoreSingle();
+}
+GameBoyAdvanceWait.prototype.doPrefetchBuffering32 = function (clocks) {
+    clocks = clocks | 0;
+    //Check for ROM prefetching:
+    //We were already in ROM, so if prefetch do so as sequential:
+    //Only case for non-sequential ROM prefetch is invalid anyways:
+    if ((clocks | 0) > 1) {
+        this.ROMPrebuffer = ((this.ROMPrebuffer | 0) - 2) | 0;
+    }
     //Clock for fetch time:
     this.IOCore.updateCoreSingle();
 }
@@ -258,7 +273,7 @@ GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     address = address | 0;
     if ((this.ROMPrebuffer | 0) > 0) {
         //Cache hit:
-        this.doPrefetchBuffering(this.waitStateClocks[address & 0xFF] | 0);
+        this.doPrefetchBuffering16(this.waitStateClocks[address & 0xFF] | 0);
     }
     else {
         //Cache is empty:
@@ -288,7 +303,7 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
             break;
         default:
             //Cache hit:
-            this.doPrefetchBuffering(this.waitStateClocksFull[address & 0xFF] | 0);
+            this.doPrefetchBuffering32(this.waitStateClocksFull[address & 0xFF] | 0);
     }
 }
 GameBoyAdvanceWait.prototype.getROMRead32NoPrefetch = function (address) {
