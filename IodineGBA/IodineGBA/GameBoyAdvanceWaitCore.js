@@ -106,6 +106,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
     this.waitStateClocksFull[0x10C] = this.waitStateClocksFull[0x10D] = ((this.waitStateClocks[0x10C] | 0) + (this.waitStateClocks[0xC] | 0)) | 0;
     if ((data & 0x40) == 0) {
         this.ROMPrebuffer = 0;
+        this.prebufferClocks = 0;
         this.getROMRead16 = this.getROMRead16NoPrefetch;
         this.getROMRead32 = this.getROMRead32NoPrefetch;
         this.CPUInternalCyclePrefetch = this.CPUInternalCycleNoPrefetch;
@@ -204,9 +205,7 @@ GameBoyAdvanceWait.prototype.CPUInternalCycleDoPrefetch = function (clocks) {
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-        this.prebufferClocks = ((this.prebufferClocks | 0) + (clocks | 0)) | 0;
-    }
+    this.prefetchActiveCheck(clocks | 0);
 }
 GameBoyAdvanceWait.prototype.CPUInternalCycleNoPrefetch = function (clocks) {
     clocks = clocks | 0;
@@ -221,9 +220,7 @@ GameBoyAdvanceWait.prototype.CPUInternalSingleCycleDoPrefetch = function () {
     //Check for ROM prefetching:
     //We were already in ROM, so if prefetch do so as sequential:
     //Only case for non-sequential ROM prefetch is invalid anyways:
-    if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-        this.prebufferClocks = ((this.prebufferClocks | 0) + 1) | 0;
-    }
+    this.prefetchActiveCheck(1);
 }
 GameBoyAdvanceWait.prototype.CPUInternalSingleCycleNoPrefetch = function () {
     //Clock for idle CPU time:
@@ -257,6 +254,17 @@ GameBoyAdvanceWait.prototype.prefetchROMInRAM = function (address) {
             this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
             this.nonSequential = 0;
         }
+    }
+}
+GameBoyAdvanceWait.prototype.prefetchActiveCheck = function (clocks) {
+    clocks = clocks | 0;
+    var address = this.IOCore.cpu.registers[15] | 0;
+    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
+        this.prebufferClocks = ((this.prebufferClocks | 0) + (clocks | 0)) | 0;
+    }
+    else {
+        this.ROMPrebuffer = 0;
+        this.prebufferClocks = 0;
     }
 }
 GameBoyAdvanceWait.prototype.doZeroWait16 = function () {
@@ -330,23 +338,17 @@ GameBoyAdvanceWait.prototype.NonSequentialBroadcastClear = function () {
     this.prebufferClocks = 0;
 }
 GameBoyAdvanceWait.prototype.WRAMAccess8 = GameBoyAdvanceWait.prototype.WRAMAccess16 = function () {
-    if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-        this.prebufferClocks = ((this.prebufferClocks | 0) + (this.WRAMWaitState | 0)) | 0;
-    }
+    this.prefetchActiveCheck(this.WRAMWaitState | 0);
     this.IOCore.updateCore(this.WRAMWaitState | 0);
 }
 GameBoyAdvanceWait.prototype.WRAMAccess16CPU = function () {
-    this.NonSequentialBroadcastClear();
     this.IOCore.updateCore(this.WRAMWaitState | 0);
 }
 GameBoyAdvanceWait.prototype.WRAMAccess32 = function () {
-    if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-        this.prebufferClocks = ((this.prebufferClocks | 0) + (this.WRAMWaitState << 1)) | 0;
-    }
+    this.prefetchActiveCheck(this.WRAMWaitState << 1);
     this.IOCore.updateCore(this.WRAMWaitState << 1);
 }
 GameBoyAdvanceWait.prototype.WRAMAccess32CPU = function () {
-    this.NonSequentialBroadcastClear();
     this.IOCore.updateCore(this.WRAMWaitState << 1);
 }
 GameBoyAdvanceWait.prototype.ROMAccess16 = GameBoyAdvanceWait.prototype.ROMAccess8 = function (address) {
@@ -372,28 +374,23 @@ GameBoyAdvanceWait.prototype.ROMAccess32CPU = function (address) {
     this.getROMRead32(address >> 24);
 }
 GameBoyAdvanceWait.prototype.SRAMAccess = function () {
+    this.prefetchActiveCheck(this.SRAMWaitState | 0);
     this.IOCore.updateCore(this.SRAMWaitState | 0);
 }
 GameBoyAdvanceWait.prototype.SRAMAccessCPU = function () {
-    this.NonSequentialBroadcastClear();
-    this.SRAMAccess();
+    this.IOCore.updateCore(this.SRAMWaitState | 0);
 }
 GameBoyAdvanceWait.prototype.VRAMAccess8 = GameBoyAdvanceWait.prototype.VRAMAccess16 = function () {
     if (!this.IOCore.gfx.isRendering) {
-        if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-            this.prebufferClocks = ((this.prebufferClocks | 0) + 1) | 0;
-        }
+        this.prefetchActiveCheck(1);
         this.IOCore.updateCoreSingle();
     }
     else {
-        if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-            this.prebufferClocks = ((this.prebufferClocks | 0) + 2) | 0;
-        }
+        this.prefetchActiveCheck(2);
         this.IOCore.updateCoreTwice();
     }
 }
 GameBoyAdvanceWait.prototype.VRAMAccess16CPU = function () {
-    this.NonSequentialBroadcastClear();
     if (!this.IOCore.gfx.isRendering) {
         this.IOCore.updateCoreSingle();
     }
@@ -403,20 +400,15 @@ GameBoyAdvanceWait.prototype.VRAMAccess16CPU = function () {
 }
 GameBoyAdvanceWait.prototype.VRAMAccess32 = function () {
     if (!this.IOCore.gfx.isRendering) {
-        if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-            this.prebufferClocks = ((this.prebufferClocks | 0) + 2) | 0;
-        }
+        this.prefetchActiveCheck(2);
         this.IOCore.updateCoreTwice();
     }
     else {
-        if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-            this.prebufferClocks = ((this.prebufferClocks | 0) + 4) | 0;
-        }
+        this.prefetchActiveCheck(4);
         this.IOCore.updateCore(4);
     }
 }
 GameBoyAdvanceWait.prototype.VRAMAccess32CPU = function () {
-    this.NonSequentialBroadcastClear();
     if (!this.IOCore.gfx.isRendering) {
         this.IOCore.updateCoreTwice();
     }
@@ -426,20 +418,15 @@ GameBoyAdvanceWait.prototype.VRAMAccess32CPU = function () {
 }
 GameBoyAdvanceWait.prototype.OAMAccess8 = GameBoyAdvanceWait.prototype.OAMAccess16 = GameBoyAdvanceWait.prototype.OAMAccess32 = function () {
     if (!this.IOCore.gfx.isOAMRendering) {
-        if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-            this.prebufferClocks = ((this.prebufferClocks | 0) + 1) | 0;
-        }
+        this.prefetchActiveCheck(1);
         this.IOCore.updateCoreSingle();
     }
     else {
-        if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-            this.prebufferClocks = ((this.prebufferClocks | 0) + 2) | 0;
-        }
+        this.prefetchActiveCheck(2);
         this.IOCore.updateCoreTwice();
     }
 }
 GameBoyAdvanceWait.prototype.OAMAccess16CPU = GameBoyAdvanceWait.prototype.OAMAccess32CPU = function () {
-    this.NonSequentialBroadcastClear();
     if (!this.IOCore.gfx.isOAMRendering) {
         this.IOCore.updateCoreSingle();
     }
@@ -448,12 +435,6 @@ GameBoyAdvanceWait.prototype.OAMAccess16CPU = GameBoyAdvanceWait.prototype.OAMAc
     }
 }
 GameBoyAdvanceWait.prototype.singleClock = function () {
-    if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
-        this.prebufferClocks = ((this.prebufferClocks | 0) + 1) | 0;
-    }
-    this.IOCore.updateCoreSingle();
-}
-GameBoyAdvanceWait.prototype.singleClockCPU = function () {
-    this.NonSequentialBroadcastClear();
+    this.prefetchActiveCheck(1);
     this.IOCore.updateCoreSingle();
 }
