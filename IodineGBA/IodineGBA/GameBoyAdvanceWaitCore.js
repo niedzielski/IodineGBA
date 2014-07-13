@@ -311,12 +311,12 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
             break;
         case 1:
             //Partial miss if only 16 bits out of 32 bits stored:
-            this.IOCore.updateCore(((this.waitStateClocks[address & 0xFF] | 0) - (this.prebufferClocks | 0) + 1) | 0);
+            this.IOCore.updateCore(((this.waitStateClocks[address & 0xFF] | 0) - (this.prebufferClocks | 0)) | 0);
             this.prebufferClocks = this.ROMPrebuffer = 0;
             break;
         default:
             //Cache hit:
-            this.doZeroWait16();
+            this.doZeroWait32();
     }
 }
 GameBoyAdvanceWait.prototype.getROMRead32NoPrefetch = function (address) {
