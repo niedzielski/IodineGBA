@@ -126,7 +126,7 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
         this.pipelineInvalid = 0x2;
         this.IOCore.flagStepper(1);
         //Next PC fetch has to update the address bus:
-        this.wait.NonSequentialBroadcast();
+        this.wait.NonSequentialBroadcastClear();
     }
     else {
         //We're branching into BIOS, handle specially:

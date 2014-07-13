@@ -30,6 +30,7 @@ GameBoyAdvanceWait.prototype.initialize = function () {
     this.nonSequential = 0x100;             //Non-sequential access bit-flag.
     this.nonSequentialROM = 0;              //Non-sequential access bit-flag for ROM prebuffer bug emulation.
     this.ROMPrebuffer = 0;                  //Tracking of the size of the prebuffer cache.
+    this.prebufferClocks = 0;               //Tracking clocks for prebuffer cache.
     this.WAITCNT0 = 0;                      //WAITCNT0 control register data.
     this.WAITCNT1 = 0;                      //WAITCNT1 control register data.
     this.POSTBOOT = 0;                      //POSTBOOT control register data.
@@ -247,9 +248,15 @@ GameBoyAdvanceWait.prototype.check128kAlignmentBug = function (address) {
 GameBoyAdvanceWait.prototype.prefetchROMInRAM = function (address) {
     address = address | 0;
     while ((this.prebufferClocks | 0) >= (this.waitStateClocks[address | this.nonSequential] | 0)) {
-        this.prebufferClocks = ((this.prebufferClocks | 0) - (this.waitStateClocks[address | this.nonSequential] | 0)) | 0;
-        this.ROMPrebuffer = Math.min(((this.ROMPrebuffer | 0) + 1) | 0, 8) | 0;
-        this.nonSequential = 0;
+        if ((this.ROMPrebuffer | 0) == 8) {
+            this.prebufferClocks = 0;
+            break;
+        }
+        else {
+            this.prebufferClocks = ((this.prebufferClocks | 0) - (this.waitStateClocks[address | this.nonSequential] | 0)) | 0;
+            this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
+            this.nonSequential = 0;
+        }
     }
 }
 GameBoyAdvanceWait.prototype.doZeroWait16 = function () {
@@ -320,6 +327,7 @@ GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
 GameBoyAdvanceWait.prototype.NonSequentialBroadcastClear = function () {
     this.nonSequential = 0x100;
     this.ROMPrebuffer = 0;
+    this.prebufferClocks = 0;
 }
 GameBoyAdvanceWait.prototype.WRAMAccess8 = GameBoyAdvanceWait.prototype.WRAMAccess16 = function () {
     if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
@@ -438,6 +446,12 @@ GameBoyAdvanceWait.prototype.OAMAccess16CPU = GameBoyAdvanceWait.prototype.OAMAc
     else {
         this.IOCore.updateCoreTwice();
     }
+}
+GameBoyAdvanceWait.prototype.singleClock = function () {
+    if ((this.waitStateClocks[this.IOCore.cpu.registers[15] >>> 24] | 0) > 0) {
+        this.prebufferClocks = ((this.prebufferClocks | 0) + 1) | 0;
+    }
+    this.IOCore.updateCoreSingle();
 }
 GameBoyAdvanceWait.prototype.singleClockCPU = function () {
     this.NonSequentialBroadcastClear();
