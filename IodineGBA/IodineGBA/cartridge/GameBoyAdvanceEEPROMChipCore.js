@@ -174,6 +174,7 @@ GameBoyAdvanceEEPROMChip.prototype.addressModeForRead = function (data) {
             else {
                 this.largestSizePossible = 0x2000;
                 this.allocate();
+                this.bitsProcessed = ((this.bitsProcessed | 0) + 1) | 0;
             }
             break;
         case 0xE:
