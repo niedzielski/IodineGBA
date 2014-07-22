@@ -127,9 +127,9 @@ GameBoyAdvanceDMA2.prototype.writeDMAControl1 = function (data) {
     else {
         this.enabled = 0;
         //this.pending = 0;
+        //Assert the FIFO B DMA request signal:
+        //this.DMACore.IOCore.sound.checkFIFOBPendingSignal();
         this.DMACore.update();
-        //Assert the FIFO A DMA request signal:
-        this.DMACore.IOCore.sound.checkFIFOBPendingSignal();
     }
 }
 GameBoyAdvanceDMA2.prototype.readDMAControl1 = function () {
@@ -149,7 +149,7 @@ GameBoyAdvanceDMA2.prototype.requestDMA = function (DMAType) {
 }
 GameBoyAdvanceDMA2.prototype.enableDMAChannel = function () {
     if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
-        //Assert the FIFO A DMA request signal:
+        //Assert the FIFO B DMA request signal:
         this.DMACore.IOCore.sound.checkFIFOBPendingSignal();
         //Direct Sound DMA Hardwired To Wordcount Of 4:
         this.wordCountShadow = 0x4;
@@ -224,8 +224,6 @@ GameBoyAdvanceDMA2.prototype.finalizeDMA = function (source, destination, transf
     else {
         //Repeating the dma:
         if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
-            //Assert the FIFO A DMA request signal:
-            this.DMACore.IOCore.sound.checkFIFOBPendingSignal();
             //Direct Sound DMA Hardwired To Wordcount Of 4:
             wordCountShadow = 0x4;
         }
@@ -234,6 +232,8 @@ GameBoyAdvanceDMA2.prototype.finalizeDMA = function (source, destination, transf
             wordCountShadow = this.wordCount | 0;
         }
     }
+    //Assert the FIFO B DMA request signal:
+    this.DMACore.IOCore.sound.checkFIFOBPendingSignal();
     //Run the DMA channel checks:
     this.DMACore.update();
     //Check to see if we should flag for IRQ:
