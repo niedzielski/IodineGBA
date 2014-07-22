@@ -128,6 +128,8 @@ GameBoyAdvanceDMA2.prototype.writeDMAControl1 = function (data) {
         this.enabled = 0;
         //this.pending = 0;
         this.DMACore.update();
+        //Assert the FIFO A DMA request signal:
+        this.DMACore.IOCore.sound.checkFIFOBPendingSignal();
     }
 }
 GameBoyAdvanceDMA2.prototype.readDMAControl1 = function () {
