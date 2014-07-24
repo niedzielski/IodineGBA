@@ -469,7 +469,7 @@ GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function () {
         timer0 = 0x7FFFFFFF;
     }
     var timer1 = this.nextTimer1OverflowSingle();
-    if (timer1 < 0) {
+    if (timer1 == -1) {
         timer1 = 0x7FFFFFFF;
     }
     return Math.min(timer0 | 0, timer1, 0x7FFFFFFF) | 0;

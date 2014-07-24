@@ -155,8 +155,6 @@ GameBoyAdvanceDMA1.prototype.enableDMAChannel = function () {
         this.wordCountShadow = 0x4;
         //Destination Hardwired to 0x40000A0:
         this.destination = 0x40000A0;
-        //Bit-mode Hardwired to 32-bit:
-        this.is32Bit = 0x4;
     }
     else {
         if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
@@ -178,7 +176,7 @@ GameBoyAdvanceDMA1.prototype.handleDMACopy = function () {
     var source = this.sourceShadow | 0;
     var destination = this.destinationShadow | 0;
     //Transfer Data:
-    if ((this.is32Bit | 0) == 4) {
+    if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.FIFO_A | 0) || (this.is32Bit | 0) == 4) {
         //32-bit Transfer:
         this.DMACore.fetch = this.memory.memoryRead32(source | 0) | 0;
         this.memory.memoryWrite32(destination | 0, this.DMACore.fetch | 0);
