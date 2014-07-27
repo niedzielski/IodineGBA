@@ -981,63 +981,51 @@ GameBoyAdvanceMemory.prototype.readZero = function (parentObj) {
 GameBoyAdvanceMemory.prototype.readUnused8 = function (address) {
     address = address | 0;
     this.wait.singleClock();
-    var controller = ((this.IOCore.systemStatus & 0x8) == 0) ? this.cpu : this.dma;
-    return (controller.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
+    return (this.IOCore.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused16IO1 = function (parentObj) {
     parentObj.IOCore.updateCoreSingle();
-    var controller = ((parentObj.IOCore.systemStatus & 0x8) == 0) ? parentObj.cpu : parentObj.dma;
-    return controller.getCurrentFetchValue() & 0xFFFF;
+    return parentObj.IOCore.getCurrentFetchValue() & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused16IO2 = function (parentObj) {
     parentObj.IOCore.updateCoreSingle();
-    var controller = ((parentObj.IOCore.systemStatus & 0x8) == 0) ? parentObj.cpu : parentObj.dma;
-    return (controller.getCurrentFetchValue() >> 16) & 0xFFFF;
+    return (parentObj.IOCore.getCurrentFetchValue() >> 16) & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused16 = function (address) {
     address = address | 0;
     this.wait.singleClock();
-    var controller = ((this.IOCore.systemStatus & 0x8) == 0) ? this.cpu : this.dma;
-    return (controller.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+    return (this.IOCore.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused16CPU = function (address) {
     address = address | 0;
     this.IOCore.updateCoreSingle();
-    var controller = ((this.IOCore.systemStatus & 0x8) == 0) ? this.cpu : this.dma;
-    return (controller.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+    return (this.IOCore.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused32IO = function (parentObj) {
     parentObj.IOCore.updateCoreSingle();
-    var controller = ((parentObj.IOCore.systemStatus & 0x8) == 0) ? parentObj.cpu : parentObj.dma;
-    return controller.getCurrentFetchValue() | 0;
+    return parentObj.IOCore.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.readUnused32 = function (address) {
     address = address | 0;
     this.wait.singleClock();
-    var controller = ((this.IOCore.systemStatus & 0x8) == 0) ? this.cpu : this.dma;
-    return controller.getCurrentFetchValue() | 0;
+    return this.IOCore.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.readUnused32CPU = function (address) {
     address = address | 0;
     this.IOCore.updateCoreSingle();
-    var controller = ((this.IOCore.systemStatus & 0x8) == 0) ? this.cpu : this.dma;
-    return controller.getCurrentFetchValue() | 0;
+    return this.IOCore.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.readUnused0 = function (parentObj) {
-    var controller = ((parentObj.IOCore.systemStatus & 0x8) == 0) ? parentObj.cpu : parentObj.dma;
-    return controller.getCurrentFetchValue() & 0xFF;
+    return parentObj.IOCore.getCurrentFetchValue() & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused1 = function (parentObj) {
-    var controller = ((parentObj.IOCore.systemStatus & 0x8) == 0) ? parentObj.cpu : parentObj.dma;
-    return (controller.getCurrentFetchValue() >> 8) & 0xFF;
+    return (parentObj.IOCore.getCurrentFetchValue() >> 8) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused2 = function (parentObj) {
-    var controller = ((parentObj.IOCore.systemStatus & 0x8) == 0) ? parentObj.cpu : parentObj.dma;
-    return (controller.getCurrentFetchValue() >> 16) & 0xFF;
+    return (parentObj.IOCore.getCurrentFetchValue() >> 16) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused3 = function (parentObj) {
-    var controller = ((parentObj.IOCore.systemStatus & 0x8) == 0) ? parentObj.cpu : parentObj.dma;
-    return controller.getCurrentFetchValue() >>> 24;
+    return parentObj.IOCore.getCurrentFetchValue() >>> 24;
 }
 GameBoyAdvanceMemory.prototype.loadBIOS = function () {
     //Ensure BIOS is of correct length:

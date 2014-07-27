@@ -253,3 +253,19 @@ GameBoyAdvanceIO.prototype.flagStepper = function (statusFlag) {
     //Flag a system event to step through:
     this.systemStatus = this.systemStatus | statusFlag;
 }
+GameBoyAdvanceIO.prototype.isStopped = function () {
+    return ((this.systemStatus & 0x40) == 0x40);
+}
+GameBoyAdvanceIO.prototype.inDMA = function () {
+    return ((this.systemStatus & 0x8) == 0x8);
+}
+GameBoyAdvanceIO.prototype.getCurrentFetchValue = function () {
+    var fetch = 0;
+    if ((this.systemStatus & 0x8) == 0) {
+        fetch = this.cpu.getCurrentFetchValue() | 0;
+    }
+    else {
+        fetch = this.dma.getCurrentFetchValue() | 0;
+    }
+    return fetch | 0;
+}
