@@ -984,7 +984,7 @@ ARMInstructionSet.prototype.MSR = function () {
 ARMInstructionSet.prototype.MSR1 = function () {
     var newcpsr = this.readRegister(this.execute & 0xF) | 0;
     this.CPSR.setNegativeInt(newcpsr | 0);
-    this.CPSR.setZero((newcpsr & 0x40000000) != 0);
+    this.CPSR.setZeroInt(newcpsr & 0x40000000);
     this.CPSR.setCarryInt((newcpsr & 0x20000000) << 2);
     this.CPSR.setOverflow((newcpsr & 0x10000000) != 0);
     if ((this.execute & 0x10000) == 0x10000 && (this.CPUCore.MODEBits | 0) != 0x10) {
@@ -1031,7 +1031,7 @@ ARMInstructionSet.prototype.MSR2 = function () {
 ARMInstructionSet.prototype.MSR3 = function () {
     var operand = this.imm() | 0;
     this.CPSR.setNegativeInt(operand | 0);
-    this.CPSR.setZero((operand & 0x40000000) != 0);
+    this.CPSR.setZeroInt(operand & 0x40000000);
     this.CPSR.setCarryInt((operand & 0x20000000) << 2);
     this.CPSR.setOverflow((operand & 0x10000000) != 0);
 }
@@ -1105,7 +1105,7 @@ ARMInstructionSet.prototype.UMULLS = function () {
     this.CPUCore.performUMUL64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0);
     this.CPSR.setCarryFalse();
     this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
-    this.CPSR.setZero((this.CPUCore.mul64ResultHigh | 0) == 0 && (this.CPUCore.mul64ResultLow | 0) == 0);
+    this.CPSR.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
     this.multiplyGuard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
@@ -1122,7 +1122,7 @@ ARMInstructionSet.prototype.UMLALS = function () {
     this.CPUCore.performUMLA64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0, this.read16OffsetRegister() | 0, this.read12OffsetRegister() | 0);
     this.CPSR.setCarryFalse();
     this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
-    this.CPSR.setZero((this.CPUCore.mul64ResultHigh | 0) == 0 && (this.CPUCore.mul64ResultLow | 0) == 0);
+    this.CPSR.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
     this.multiplyGuard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
@@ -1139,7 +1139,7 @@ ARMInstructionSet.prototype.SMULLS = function () {
     this.CPUCore.performMUL64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0);
     this.CPSR.setCarryFalse();
     this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
-    this.CPSR.setZero((this.CPUCore.mul64ResultHigh | 0) == 0 && (this.CPUCore.mul64ResultLow | 0) == 0);
+    this.CPSR.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
     this.multiplyGuard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
@@ -1156,7 +1156,7 @@ ARMInstructionSet.prototype.SMLALS = function () {
     this.CPUCore.performMLA64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0, this.read16OffsetRegister() | 0, this.read12OffsetRegister() | 0);
     this.CPSR.setCarryFalse();
     this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
-    this.CPSR.setZero((this.CPUCore.mul64ResultHigh | 0) == 0 && (this.CPUCore.mul64ResultLow | 0) == 0);
+    this.CPSR.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
     this.multiplyGuard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
