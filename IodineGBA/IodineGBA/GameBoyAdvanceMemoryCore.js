@@ -1093,7 +1093,7 @@ if (__LITTLE_ENDIAN__) {
             }
         }
         else {
-            data = this.readUnused32IO(address | 0) | 0;
+            data = this.IOCore.getCurrentFetchValue() | 0;
         }
         return data | 0;
     }
@@ -1108,7 +1108,7 @@ if (__LITTLE_ENDIAN__) {
             this.lastBIOSREAD = data | 0;
         }
         else {
-            data = this.readUnused32IO(address | 0) | 0;
+            data = this.IOCore.getCurrentFetchValue() | 0;
         }
         return data | 0;
     }
@@ -1155,7 +1155,7 @@ else {
             }
         }
         else {
-            return this.readUnused32IO(address);
+            return this.IOCore.getCurrentFetchValue();
         }
     }
     GameBoyAdvanceMemory.prototype.readBIOS32CPU = function (address) {
@@ -1167,7 +1167,7 @@ else {
             return data;
         }
         else {
-            return this.readUnused32IO(address);
+            return this.IOCore.getCurrentFetchValue();
         }
     }
 }
@@ -1345,7 +1345,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch32 = function (address) {
         data = this.wait.readConfigureWRAM32() | 0;
     }
     else {
-        data = this.readUnused32IO(address | 0) | 0;
+        data = this.IOCore.getCurrentFetchValue() | 0;
     }
     return data | 0;
 }
@@ -1362,7 +1362,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch32CPU = function (address) {
         data = this.wait.readConfigureWRAM32() | 0;
     }
     else {
-        data = this.readUnused32IO(address | 0) | 0;
+        data = this.IOCore.getCurrentFetchValue() | 0;
     }
     return data | 0;
 }
@@ -1690,7 +1690,7 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
             break;
         //UNDEFINED / ILLEGAL:
         default:
-            data = this.readUnused32IO(address & 0xFF) | 0;
+            data = this.IOCore.getCurrentFetchValue() | 0;
     }
     return data | 0;
 }
@@ -1932,10 +1932,6 @@ GameBoyAdvanceMemory.prototype.readUnused32 = function (address) {
 GameBoyAdvanceMemory.prototype.readUnused32CPU = function (address) {
     address = address | 0;
     this.IOCore.updateCoreSingle();
-    return this.IOCore.getCurrentFetchValue() | 0;
-}
-GameBoyAdvanceMemory.prototype.readUnused32IO = function (address) {
-    address = address | 0;
     return this.IOCore.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.readUnused0 = function (parentObj) {
