@@ -18,6 +18,9 @@
 function GameBoyAdvanceOBJRenderer(gfx) {
     this.gfx = gfx;
     this.transparency = this.gfx.transparency;
+    this.paletteOBJ256 = this.gfx.paletteOBJ256;
+    this.paletteOBJ16 = this.gfx.paletteOBJ16;
+    this.VRAM = this.gfx.VRAM;
     this.initialize();
 }
 GameBoyAdvanceOBJRenderer.prototype.lookupXSize = [
@@ -38,6 +41,7 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
 ];
 if (__VIEWS_SUPPORTED__) {
     GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
+        this.VRAM32 = this.gfx.VRAM32;
         this.OAMRAM = getUint8Array(0x400);
         this.OAMRAM16 = getUint16View(this.OAMRAM);
         this.OAMRAM32 = getInt32View(this.OAMRAM);
@@ -62,8 +66,6 @@ if (__VIEWS_SUPPORTED__) {
 else {
     GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
         this.OAMRAM = getUint8Array(0x400);
-        this.OAMRAM16 = getUint16View(this.OAMRAM);
-        this.OAMRAM32 = getInt32View(this.OAMRAM);
         this.scratchBuffer = getInt32Array(240);
         this.scratchWindowBuffer = getInt32Array(240);
         this.scratchOBJBuffer = getInt32Array(128);
@@ -223,16 +225,16 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, tileNum
     if (sprite.monolithicPalette) {
         //256 Colors / 1 Palette:
         address = ((address | 0) + (this.tileRelativeAddressOffset(x | 0, y | 0) | 0)) | 0;
-        return this.gfx.paletteOBJ256[this.gfx.VRAM[address | 0] | 0] | 0;
+        return this.paletteOBJ256[this.VRAM[address | 0] | 0] | 0;
     }
     else {
         //16 Colors / 16 palettes:
         address = ((address | 0) + ((this.tileRelativeAddressOffset(x | 0, y | 0) >> 1) | 0)) | 0;
         if ((x & 0x1) == 0) {
-            return this.gfx.paletteOBJ16[sprite.paletteNumber | 0][this.gfx.VRAM[address | 0] & 0xF] | 0;
+            return this.paletteOBJ16[sprite.paletteNumber | this.VRAM[address | 0] & 0xF] | 0;
         }
         else {
-            return this.gfx.paletteOBJ16[sprite.paletteNumber | 0][this.gfx.VRAM[address | 0] >> 4] | 0;
+            return this.paletteOBJ16[sprite.paletteNumber | this.VRAM[address | 0] >> 4] | 0;
         }
     }
 }
@@ -247,46 +249,88 @@ GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize
     yOffset = yOffset | 0;
     if (sprite.verticalFlip) {
         //Flip y-coordinate offset:
-        yOffset = (ySize - yOffset) | 0;
+        yOffset = ((ySize | 0) - (yOffset | 0)) | 0;
     }
-    var address = this.tileNumberToAddress(sprite, sprite.tileNumber, xSize, yOffset) | 0;
-    var vram = this.gfx.VRAM;
-    var data = 0;
-    var objBufferPosition = 0;
+    var address = this.tileNumberToAddress(sprite, sprite.tileNumber | 0, xSize | 0, yOffset | 0) | 0;
     if (sprite.monolithicPalette) {
         //256 Colors / 1 Palette:
-        address += (yOffset & 7) << 3;
-        var palette = this.gfx.paletteOBJ256;
-        while (objBufferPosition < xSize) {
-            this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address++] | 0] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[vram[address] | 0] | 0;
-            address += 0x39;
-        }
+        address = ((address | 0) + ((yOffset & 7) << 3)) | 0;
+        this.render256ColorPaletteSprite(address | 0, xSize | 0);
     }
     else {
         //16 Colors / 16 palettes:
-        address += (yOffset & 7) << 2;
-        var palette = this.gfx.paletteOBJ16[sprite.paletteNumber];
-        while (objBufferPosition < xSize) {
-            data = vram[address++];
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4] | 0;
-            data = vram[address++];
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4] | 0;
-            data = vram[address++];
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4] | 0;
-            data = vram[address];
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data & 0xF] | 0;
-            this.scratchOBJBuffer[objBufferPosition++] = palette[data >> 4] | 0;
-            address += 0x1D;
+        address = ((address | 0) + ((yOffset & 7) << 2)) | 0;
+        this.render16ColorPaletteSprite(address | 0, xSize | 0, sprite.paletteNumber | 0);
+    }
+}
+if (__LITTLE_ENDIAN__) {
+    GameBoyAdvanceOBJRenderer.prototype.render256ColorPaletteSprite = function (address, xSize) {
+        address = address >> 2;
+        xSize = xSize | 0;
+        var data = 0;
+        for (var objBufferPos = 0; (objBufferPos | 0) < (xSize | 0); objBufferPos = ((objBufferPos | 0) + 8) | 0) {
+            data = this.VRAM32[address | 0] | 0;
+            this.scratchOBJBuffer[objBufferPos | 0] = this.paletteOBJ256[data & 0xFF] | 0;
+            this.scratchOBJBuffer[objBufferPos | 1] = this.paletteOBJ256[(data >> 8) & 0xFF] | 0;
+            this.scratchOBJBuffer[objBufferPos | 2] = this.paletteOBJ256[(data >> 16) & 0xFF] | 0;
+            this.scratchOBJBuffer[objBufferPos | 3] = this.paletteOBJ256[data >>> 24] | 0;
+            data = this.VRAM32[address | 1] | 0;
+            this.scratchOBJBuffer[objBufferPos | 4] = this.paletteOBJ256[data & 0xFF] | 0;
+            this.scratchOBJBuffer[objBufferPos | 5] = this.paletteOBJ256[(data >> 8) & 0xFF] | 0;
+            this.scratchOBJBuffer[objBufferPos | 6] = this.paletteOBJ256[(data >> 16) & 0xFF] | 0;
+            this.scratchOBJBuffer[objBufferPos | 7] = this.paletteOBJ256[data >>> 24] | 0;
+            address = ((address | 0) + 0x10) | 0;
+        }
+    }
+    GameBoyAdvanceOBJRenderer.prototype.render16ColorPaletteSprite = function (address, xSize, paletteOffset) {
+        address = address >> 2;
+        xSize = xSize | 0;
+        paletteOffset = paletteOffset | 0;
+        var data = 0;
+        for (var objBufferPos = 0; (objBufferPos | 0) < (xSize | 0); objBufferPos = ((objBufferPos | 0) + 8) | 0) {
+            data = this.VRAM32[address | 0] | 0;
+            this.scratchOBJBuffer[objBufferPos | 0] = this.paletteOBJ16[paletteOffset | (data & 0xF)] | 0;
+            this.scratchOBJBuffer[objBufferPos | 1] = this.paletteOBJ16[paletteOffset | ((data >> 4) & 0xF)] | 0;
+            this.scratchOBJBuffer[objBufferPos | 2] = this.paletteOBJ16[paletteOffset | ((data >> 8) & 0xF)] | 0;
+            this.scratchOBJBuffer[objBufferPos | 3] = this.paletteOBJ16[paletteOffset | ((data >> 12) & 0xF)] | 0;
+            this.scratchOBJBuffer[objBufferPos | 4] = this.paletteOBJ16[paletteOffset | ((data >> 16) & 0xF)] | 0;
+            this.scratchOBJBuffer[objBufferPos | 5] = this.paletteOBJ16[paletteOffset | ((data >> 20) & 0xF)] | 0;
+            this.scratchOBJBuffer[objBufferPos | 6] = this.paletteOBJ16[paletteOffset | ((data >> 24) & 0xF)] | 0;
+            this.scratchOBJBuffer[objBufferPos | 7] = this.paletteOBJ16[paletteOffset | (data >>> 28)] | 0;
+            address = ((address | 0) + 0x8) | 0;
+        }
+    }
+}
+else {
+    GameBoyAdvanceOBJRenderer.prototype.render256ColorPaletteSprite = function (address, xSize) {
+        for (var objBufferPos = 0; objBufferPos < xSize;) {
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address]];
+            address = ((address | 0) + 0x39) | 0;
+        }
+    }
+    GameBoyAdvanceOBJRenderer.prototype.render16ColorPaletteSprite = function (address, xSize, paletteOffset) {
+        var data = 0;
+        for (var objBufferPos = 0; objBufferPos < xSize;) {
+            data = this.VRAM[address++];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data & 0xF)];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data >> 4)];
+            data = this.VRAM[address++];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data & 0xF)];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data >> 4)];
+            data = this.VRAM[address++];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data & 0xF)];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data >> 4)];
+            data = this.VRAM[address];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data & 0xF)];
+            this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data >> 4)];
+            address = ((address | 0) + 0x1D) | 0;
         }
     }
 }
@@ -395,7 +439,7 @@ if (__LITTLE_ENDIAN__) {
             case 2:
                 OAMTable.tileNumber = data & 0x3FF;
                 OAMTable.priority = (data >> 10) & 0x3;
-                OAMTable.paletteNumber = data >> 12;
+                OAMTable.paletteNumber = (data >> 8) & 0xF0;
                 break;
                 //Scaling/Rotation Parameter:
             default:
@@ -427,7 +471,7 @@ if (__LITTLE_ENDIAN__) {
             //Attrib 2:
             OAMTable.tileNumber = data & 0x3FF;
             OAMTable.priority = (data >> 10) & 0x3;
-            OAMTable.paletteNumber = (data >> 12) & 0xF;
+            OAMTable.paletteNumber = (data >> 8) & 0xF0;
             //Scaling/Rotation Parameter:
             this.OBJMatrixParameters[address >> 3][(address >> 1) & 0x3] = data >> 16;
         }
@@ -470,7 +514,7 @@ else {
             case 2:
                 OAMTable.tileNumber = data & 0x3FF;
                 OAMTable.priority = (data >> 10) & 0x3;
-                OAMTable.paletteNumber = data >> 12;
+                OAMTable.paletteNumber = (data >> 8) & 0xF0;
                 break;
                 //Scaling/Rotation Parameter:
             default:
@@ -504,7 +548,7 @@ else {
             //Attrib 2:
             OAMTable.tileNumber = data & 0x3FF;
             OAMTable.priority = (data >> 10) & 0x3;
-            OAMTable.paletteNumber = (data >> 12) & 0xF;
+            OAMTable.paletteNumber = (data >> 8) & 0xF0;
             //Scaling/Rotation Parameter:
             this.OBJMatrixParameters[address >> 3][(address >> 1) & 0x3] = data >> 16;
         }

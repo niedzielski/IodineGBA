@@ -101,15 +101,14 @@ GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
     //Both BG and OAM in unified storage:
     this.palette256 = getInt32Array(0x100);
-    this.palette256[0] |= this.transparency;
+    this.palette256[0] = this.transparency;
     this.paletteOBJ256 = getInt32Array(0x100);
-    this.paletteOBJ256[0] |= this.transparency;
+    this.paletteOBJ256[0] = this.transparency;
     this.palette16 = getInt32Array(0x100);
-    this.paletteOBJ16 = [];
+    this.paletteOBJ16 = getInt32Array(0x100);
     for (var index = 0; index < 0x10; ++index) {
         this.palette16[index << 4] = this.transparency;
-        this.paletteOBJ16[index] = getInt32Array(0x10);
-        this.paletteOBJ16[index][0] = this.transparency;
+        this.paletteOBJ16[index << 4] = this.transparency;
     }
 }
 GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {
@@ -1118,10 +1117,12 @@ GameBoyAdvanceGraphics.prototype.writePalette16Color = function (address, palett
         palette = this.transparency | palette;
     }
     if ((address | 0) < 0x100) {
+        //BG Layer Palette:
         this.palette16[address & 0xFF] = palette | 0;
     }
     else {
-        this.paletteOBJ16[(address >> 4) & 0xF][address & 0xF] = palette | 0;
+        //OBJ Layer Palette:
+        this.paletteOBJ16[address & 0xFF] = palette | 0;
     }
 }
 GameBoyAdvanceGraphics.prototype.readPalette = function (address) {

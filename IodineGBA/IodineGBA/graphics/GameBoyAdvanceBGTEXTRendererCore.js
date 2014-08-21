@@ -166,11 +166,11 @@ if (__LITTLE_ENDIAN__) {
                 this.tileFetched[4] = this.palette16[paletteOffset | ((data >> 16) & 0xF)] | this.priorityFlag;
                 this.tileFetched[5] = this.palette16[paletteOffset | ((data >> 20) & 0xF)] | this.priorityFlag;
                 this.tileFetched[6] = this.palette16[paletteOffset | ((data >> 24) & 0xF)] | this.priorityFlag;
-                this.tileFetched[7] = this.palette16[paletteOffset | ((data >> 28) & 0xF)] | this.priorityFlag;
+                this.tileFetched[7] = this.palette16[paletteOffset | (data >>> 28)] | this.priorityFlag;
             }
             else {
                 //Flipped Horizontally:
-                this.tileFetched[0] = this.palette16[paletteOffset | ((data >> 28) & 0xF)] | this.priorityFlag;
+                this.tileFetched[0] = this.palette16[paletteOffset | (data >>> 28)] | this.priorityFlag;
                 this.tileFetched[1] = this.palette16[paletteOffset | ((data >> 24) & 0xF)] | this.priorityFlag;
                 this.tileFetched[2] = this.palette16[paletteOffset | ((data >> 20) & 0xF)] | this.priorityFlag;
                 this.tileFetched[3] = this.palette16[paletteOffset | ((data >> 16) & 0xF)] | this.priorityFlag;
