@@ -312,7 +312,7 @@ else {
             this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
             this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address++]];
             this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ256[this.VRAM[address]];
-            address = ((address | 0) + 0x39) | 0;
+            address += 0x39;
         }
     }
     GameBoyAdvanceOBJRenderer.prototype.render16ColorPaletteSprite = function (address, xSize, paletteOffset) {
@@ -330,7 +330,7 @@ else {
             data = this.VRAM[address];
             this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data & 0xF)];
             this.scratchOBJBuffer[objBufferPos++] = this.paletteOBJ16[paletteOffset | (data >> 4)];
-            address = ((address | 0) + 0x1D) | 0;
+            address += 0x1D;
         }
     }
 }
