@@ -46,7 +46,7 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     this.cpu = new GameBoyAdvanceCPU(this);
     this.memory.loadReferences();
 }
-GameBoyAdvanceIO.prototype.iterate = function (CPUCyclesTotal) {
+GameBoyAdvanceIO.prototype.enter = function (CPUCyclesTotal) {
     //Find out how many clocks to iterate through this run:
     this.cyclesToIterate = ((CPUCyclesTotal | 0) + (this.cyclesOveriteratedPreviously | 0)) | 0;
     //An extra check to make sure we don't do stuff if we did too much last run:
@@ -54,7 +54,7 @@ GameBoyAdvanceIO.prototype.iterate = function (CPUCyclesTotal) {
         //Update our core event prediction:
         this.updateCoreEventTime();
         //If clocks remaining, run iterator:
-        this.runIterator();
+        this.run();
         //Spill our core event clocking:
         this.updateCoreClocking();
         //Ensure audio buffers at least once per iteration:
@@ -63,7 +63,7 @@ GameBoyAdvanceIO.prototype.iterate = function (CPUCyclesTotal) {
     //If we clocked just a little too much, subtract the extra from the next run:
     this.cyclesOveriteratedPreviously = this.cyclesToIterate | 0;
 }
-GameBoyAdvanceIO.prototype.runIterator = function () {
+GameBoyAdvanceIO.prototype.run = function () {
     //Clock through the state machine:
     while (true) {
         //Handle the current system state selected:

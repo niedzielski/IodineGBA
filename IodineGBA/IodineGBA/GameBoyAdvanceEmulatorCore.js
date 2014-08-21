@@ -111,7 +111,7 @@ GameBoyAdvanceEmulator.prototype.timerCallback = function () {
     if (!document.hidden && !document.msHidden && !document.mozHidden && !document.webkitHidden) {
         if (!this.faultFound && this.loaded) {                          //Any error pending or no ROM loaded is a show-stopper!
             this.iterationStartSequence();                              //Run start of iteration stuff.
-            this.IOCore.iterate(this.CPUCyclesTotal | 0);               //Step through the emulation core loop.
+            this.IOCore.enter(this.CPUCyclesTotal | 0);               //Step through the emulation core loop.
             this.iterationEndSequence();                                //Run end of iteration stuff.
         }
         else {
