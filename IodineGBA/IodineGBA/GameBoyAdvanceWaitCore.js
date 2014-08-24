@@ -37,8 +37,8 @@ GameBoyAdvanceWait.prototype.initialize = function () {
     this.WAITCNT1 = 0;                      //WAITCNT1 control register data.
     this.POSTBOOT = 0;                      //POSTBOOT control register data.
     //Create the wait state address translation cache:
-    this.waitStateClocks = new getUint8Array(0x200);
-    this.waitStateClocksFull = new getUint8Array(0x200);
+    this.waitStateClocks = getUint8Array(0x200);
+    this.waitStateClocksFull = getUint8Array(0x200);
     //Wait State 0:
     //Non-Synchronous:
     this.waitStateClocks[0x108] = 5;
