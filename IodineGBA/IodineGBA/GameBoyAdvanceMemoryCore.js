@@ -971,15 +971,7 @@ GameBoyAdvanceMemory.prototype.writeSRAM32 = function (address, data) {
 GameBoyAdvanceMemory.prototype.NOP = function (parentObj, data) {
     //Ignore the data write...
 }
-GameBoyAdvanceMemory.prototype.writeUnused8 = function (address, data) {
-    //Ignore the data write...
-    this.wait.singleClock();
-}
-GameBoyAdvanceMemory.prototype.writeUnused16 = function (address, data) {
-    //Ignore the data write...
-    this.wait.singleClock();
-}
-GameBoyAdvanceMemory.prototype.writeUnused32 = function (address, data) {
+GameBoyAdvanceMemory.prototype.writeUnused = function () {
     //Ignore the data write...
     this.wait.singleClock();
 }
@@ -1924,13 +1916,11 @@ GameBoyAdvanceMemory.prototype.readUnused16CPU = function (address) {
     this.IOCore.updateCoreSingle();
     return (this.IOCore.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
 }
-GameBoyAdvanceMemory.prototype.readUnused32 = function (address) {
-    address = address | 0;
+GameBoyAdvanceMemory.prototype.readUnused32 = function () {
     this.wait.singleClock();
     return this.IOCore.getCurrentFetchValue() | 0;
 }
-GameBoyAdvanceMemory.prototype.readUnused32CPU = function (address) {
-    address = address | 0;
+GameBoyAdvanceMemory.prototype.readUnused32CPU = function () {
     this.IOCore.updateCoreSingle();
     return this.IOCore.getCurrentFetchValue() | 0;
 }
@@ -2051,7 +2041,7 @@ function generateMemoryTopLevelDispatch() {
         /*
          Unused (0F000000-FFFFFFFF)
          */
-        code += "default:{data = this." + readUnused + "(address | 0) | 0};";
+        code += "default:{data = this." + readUnused + "(" + ((readUnused.slice(0, 12) == "readUnused32") ? "" : "address | 0") + ") | 0};";
         //Generate the function:
         code += "}return data | 0;";
         return Function("address", code);
@@ -2145,7 +2135,7 @@ function generateMemoryTopLevelDispatch() {
         /*
          Unused (0F000000-FFFFFFFF)
          */
-        code += "default:{this." + writeUnused + "(address | 0, data | 0)}";
+        code += "default:{this." + writeUnused + "()}";
         //Generate the function:
         code += "}";
         return Function("address", "data", code);
@@ -2193,7 +2183,7 @@ function generateMemoryTopLevelDispatch() {
                                                              ];
     GameBoyAdvanceMemory.prototype.memoryWriter8Generated = [
                                                              compileMemoryWriteDispatch([
-                                                                                         "writeUnused8",
+                                                                                         "writeUnused",
                                                                                          "writeInternalWRAM8",
                                                                                          "writeInternalWRAM8",
                                                                                          "writeIODispatch8",
@@ -2204,7 +2194,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeSRAM8"
                                                                                          ]),
                                                              compileMemoryWriteDispatch([
-                                                                                         "writeUnused8",
+                                                                                         "writeUnused",
                                                                                          "writeExternalWRAM8",
                                                                                          "writeInternalWRAM8",
                                                                                          "writeIODispatch8",
@@ -2215,9 +2205,9 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeSRAM8"
                                                                                          ]),
                                                              compileMemoryWriteDispatch([
-                                                                                         "writeUnused8",
-                                                                                         "writeUnused8",
-                                                                                         "writeUnused8",
+                                                                                         "writeUnused",
+                                                                                         "writeUnused",
+                                                                                         "writeUnused",
                                                                                          "writeIODispatch8",
                                                                                          "writePalette8",
                                                                                          "writeVRAM8",
@@ -2310,7 +2300,7 @@ function generateMemoryTopLevelDispatch() {
                                                                  ];
     GameBoyAdvanceMemory.prototype.memoryWriter16Generated = [
                                                               compileMemoryWriteDispatch([
-                                                                                          "writeUnused16",
+                                                                                          "writeUnused",
                                                                                           "writeInternalWRAM16",
                                                                                           "writeInternalWRAM16",
                                                                                           "writeIODispatch16",
@@ -2321,7 +2311,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeSRAM16"
                                                                                           ]),
                                                               compileMemoryWriteDispatch([
-                                                                                          "writeUnused16",
+                                                                                          "writeUnused",
                                                                                           "writeExternalWRAM16",
                                                                                           "writeInternalWRAM16",
                                                                                           "writeIODispatch16",
@@ -2332,9 +2322,9 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeSRAM16"
                                                                                           ]),
                                                               compileMemoryWriteDispatch([
-                                                                                          "writeUnused16",
-                                                                                          "writeUnused16",
-                                                                                          "writeUnused16",
+                                                                                          "writeUnused",
+                                                                                          "writeUnused",
+                                                                                          "writeUnused",
                                                                                           "writeIODispatch16",
                                                                                           "writePalette16",
                                                                                           "writeVRAM16",
@@ -2427,7 +2417,7 @@ function generateMemoryTopLevelDispatch() {
                                                                  ];
     GameBoyAdvanceMemory.prototype.memoryWriter32Generated = [
                                                               compileMemoryWriteDispatch([
-                                                                                          "writeUnused32",
+                                                                                          "writeUnused",
                                                                                           "writeInternalWRAM32",
                                                                                           "writeInternalWRAM32",
                                                                                           "writeIODispatch32",
@@ -2438,7 +2428,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeSRAM32"
                                                                                           ]),
                                                               compileMemoryWriteDispatch([
-                                                                                          "writeUnused32",
+                                                                                          "writeUnused",
                                                                                           "writeExternalWRAM32",
                                                                                           "writeInternalWRAM32",
                                                                                           "writeIODispatch32",
@@ -2449,9 +2439,9 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeSRAM32"
                                                                                           ]),
                                                               compileMemoryWriteDispatch([
-                                                                                          "writeUnused32",
-                                                                                          "writeUnused32",
-                                                                                          "writeUnused32",
+                                                                                          "writeUnused",
+                                                                                          "writeUnused",
+                                                                                          "writeUnused",
                                                                                           "writeIODispatch32",
                                                                                           "writePalette32",
                                                                                           "writeVRAM32",

@@ -334,24 +334,56 @@ else {
         }
     }
 }
-GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tileNumber, xSize, yOffset) {
-    tileNumber = tileNumber | 0;
-    xSize = xSize | 0;
-    yOffset = yOffset | 0;
-    if (!this.gfx.VRAMOneDimensional) {
-        //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
-        if (sprite.monolithicPalette) {
-            //Hardware ignores the LSB in this case:
-            tileNumber &= -2;
+if (!!Math.imul) {
+    //Math.imul found, insert the optimized path in:
+    GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tileNumber, xSize, yOffset) {
+        tileNumber = tileNumber | 0;
+        xSize = xSize | 0;
+        yOffset = yOffset | 0;
+        if (!this.gfx.VRAMOneDimensional) {
+            //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
+            if (sprite.monolithicPalette) {
+                //Hardware ignores the LSB in this case:
+                tileNumber = tileNumber & -2;
+            }
+            tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, 0x20) | 0)) | 0;
         }
-        tileNumber += (yOffset >> 3) * 0x20;
+        else {
+            //1D Mapping:
+            if (sprite.monolithicPalette) {
+                //256 Color Palette:
+                tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, xSize >> 2) | 0)) | 0;
+            }
+            else {
+                //16 Color Palette:
+                tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, xSize >> 3) | 0)) | 0;
+            }
+        }
+        //Starting address of currently drawing sprite line:
+        return ((tileNumber << 5) + 0x10000) | 0;
     }
-    else {
-        //1D Mapping:
-        tileNumber += (yOffset >> 3) * (xSize >> ((sprite.monolithicPalette) ? 2 : 3));
+}
+else {
+    //Math.imul not found, use the compatibility method:
+    GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, tileNumber, xSize, yOffset) {
+        tileNumber = tileNumber | 0;
+        xSize = xSize | 0;
+        yOffset = yOffset | 0;
+        if (!this.gfx.VRAMOneDimensional) {
+            //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
+            if (sprite.monolithicPalette) {
+                //Hardware ignores the LSB in this case:
+                tileNumber &= -2;
+            }
+            tileNumber += (yOffset >> 3) * 0x20;
+        }
+        else {
+            //1D Mapping:
+            tileNumber += (yOffset >> 3) * (xSize >> ((sprite.monolithicPalette) ? 2 : 3));
+        }
+        //Starting address of currently drawing sprite line:
+        return ((tileNumber << 5) + 0x10000) | 0;
     }
-    //Starting address of currently drawing sprite line:
-    return ((tileNumber << 5) + 0x10000) | 0;
 }
 GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
     //Mark sprite pixels as semi-transparent:
