@@ -458,7 +458,7 @@ GameBoyAdvanceSWI.prototype.BitUnPack = function () {
     unpackSource += 0x2;
     var widthSource = this.IOCore.memory.memoryRead16(unpackSource | 0);
     unpackSource += 0x1;
-    var widthDestination = this.IOCore.memory.memoryReadFast8(unpackSource | 0);
+    var widthDestination = this.IOCore.memory.memoryRead8(unpackSource | 0);
     unpackSource += 0x1;
     var offset = this.IOCore.memory.memoryRead32(unpackSource | 0);
     var dataOffset = offset & 0x7FFFFFFF;
@@ -468,7 +468,7 @@ GameBoyAdvanceSWI.prototype.BitUnPack = function () {
         var resultWidth = 0;
         while (length > 0) {
             var result = 0;
-            var readByte = this.IOCore.memory.memoryReadFast8((source++) | 0);
+            var readByte = this.IOCore.memory.memoryRead8((source++) | 0);
             for (var index = 0, widthIndex = 0; index < 8; index += widthSource, widthIndex += widthDestination) {
                 var temp = (readByte >> index) & ((widthSource << 1) - 1);
                 if (temp > 0 || zeroData) {
@@ -513,25 +513,25 @@ GameBoyAdvanceSWI.prototype.Diff8bitUnFilterWram = function () {
     var source = this.CPUCore.registers[0] & -4;
     var destination = this.CPUCore.registers[1] | 0;
     var descriptor = this.IOCore.memory.memoryRead32(source | 0) | 0;
-    var output = this.IOCore.memory.memoryReadFast8(destination | 0) | 0;
+    var output = this.IOCore.memory.memoryRead8(destination | 0) | 0;
     var wordSize = descriptor & 0x3;
     for (var size = descriptor >>> 8; (size | 0) > 0; size = ((size | 0) - (wordSize | 0)) | 0) {
         source = ((source | 0) + (wordSize | 0)) | 0;
-        var data = this.IOCore.memory.memoryReadFast8(source | 0) | 0;
+        var data = this.IOCore.memory.memoryRead8(source | 0) | 0;
         output = ((data & 0xFF) + (output & 0xFF)) & 0xFF;
         destination = ((destination | 0) + (wordSize | 0)) | 0;
-        this.IOCore.memory.memoryWriteFast8(destination | 0, output | 0);
+        this.IOCore.memory.memoryWrite8(destination | 0, output | 0);
     }
 }
 GameBoyAdvanceSWI.prototype.Diff8bitUnFilterVram = function () {
     var source = this.CPUCore.registers[0] & -4;
     var destination = this.CPUCore.registers[1] | 0;
     var descriptor = this.IOCore.memory.memoryRead32(source | 0) | 0;
-    var output = this.IOCore.memory.memoryReadFast8(destination | 0) | 0;
+    var output = this.IOCore.memory.memoryRead8(destination | 0) | 0;
     var wordSize = descriptor & 0x3;
     for (var size = descriptor >>> 8; (size | 0) > 0; size = ((size | 0) - (wordSize | 0)) | 0) {
         source = ((source | 0) + (wordSize | 0)) | 0;
-        var data = this.IOCore.memory.memoryReadFast8(source | 0) | 0;
+        var data = this.IOCore.memory.memoryRead8(source | 0) | 0;
         output = ((data & 0xFF) + (output & 0xFF)) & 0xFF;
         destination = ((destination | 0) + (wordSize | 0)) | 0;
         var output2 = output | 0;
@@ -545,11 +545,11 @@ GameBoyAdvanceSWI.prototype.Diff16bitUnFilter = function () {
     var source = this.CPUCore.registers[0] & -4;
     var destination = this.CPUCore.registers[1] | 0;
     var descriptor = this.IOCore.memory.memoryRead32(source | 0) | 0;
-    var output = this.IOCore.memory.memoryReadFast16(destination | 0) | 0;
+    var output = this.IOCore.memory.memoryRead16(destination | 0) | 0;
     var wordSize = descriptor & 0x3;
     for (var size = descriptor >>> 8; (size | 0) > 0; size = ((size | 0) - (wordSize | 0)) | 0) {
         source = ((source | 0) + (wordSize | 0)) | 0;
-        var data = this.IOCore.memory.memoryReadFast16(source | 0) | 0;
+        var data = this.IOCore.memory.memoryRead16(source | 0) | 0;
         output = ((data & 0xFFFF) + (output & 0xFFFF)) & 0xFFFF;
         destination = ((destination | 0) + (wordSize | 0)) | 0;
         this.IOCore.memory.memoryWrite16(destination | 0, output | 0);

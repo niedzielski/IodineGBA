@@ -185,7 +185,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
 }
 ARMInstructionSet.prototype.executeBubble = function () {
     //Push the new fetch access:
-    this.fetch = this.memory.memoryReadFast32(this.readPC() | 0) | 0;
+    this.fetch = this.memory.memoryReadCPU32(this.readPC() | 0) | 0;
     //Update the Program Counter:
     this.incrementProgramCounter();
     //Update the pipelining state:

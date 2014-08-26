@@ -62,7 +62,7 @@ GameBoyAdvanceMemory.prototype.loadReferences = function () {
     this.cpu = this.IOCore.cpu;
     this.saves = this.IOCore.saves;
 }
-GameBoyAdvanceMemory.prototype.memoryWriteFast8 = function (address, data) {
+GameBoyAdvanceMemory.prototype.memoryWrite8 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.memoryWriter8(address | 0, data & 0xFF);
@@ -70,44 +70,26 @@ GameBoyAdvanceMemory.prototype.memoryWriteFast8 = function (address, data) {
 GameBoyAdvanceMemory.prototype.memoryWrite16 = function (address, data) {
     address = address | 0;
     data = data | 0;
-    this.memoryWriter16(address & -2, data & 0xFFFF);
-}
-GameBoyAdvanceMemory.prototype.memoryWriteFast16 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
     this.memoryWriter16(address | 0, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.memoryWrite32 = function (address, data) {
     address = address | 0;
     data = data | 0;
-    this.memoryWriter32(address & -4, data | 0);
-}
-GameBoyAdvanceMemory.prototype.memoryWriteFast32 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
     this.memoryWriter32(address | 0, data | 0);
 }
-GameBoyAdvanceMemory.prototype.memoryReadFast8 = function (address) {
+GameBoyAdvanceMemory.prototype.memoryRead8 = function (address) {
     address = address | 0;
-    return this.memoryReader8(address | 0) & 0xFF;
+    return this.memoryReader8(address | 0) | 0;
 }
 GameBoyAdvanceMemory.prototype.memoryRead16 = function (address) {
     address = address | 0;
-    return this.memoryReader16(address & -2) & 0xFFFF;
-}
-GameBoyAdvanceMemory.prototype.memoryReadFast16 = function (address) {
-    address = address | 0;
-    return this.memoryReader16(address | 0) & 0xFFFF;
+    return this.memoryReader16(address | 0) | 0;
 }
 GameBoyAdvanceMemory.prototype.memoryReadCPU16 = function (address) {
     address = address | 0;
-    return this.memoryReader16CPU(address | 0) & 0xFFFF;
+    return this.memoryReader16CPU(address | 0) | 0;
 }
 GameBoyAdvanceMemory.prototype.memoryRead32 = function (address) {
-    address = address | 0;
-    return this.memoryReader32(address & -4) | 0;
-}
-GameBoyAdvanceMemory.prototype.memoryReadFast32 = function (address) {
     address = address | 0;
     return this.memoryReader32(address | 0) | 0;
 }
@@ -142,16 +124,18 @@ else {
     GameBoyAdvanceMemory.prototype.writeExternalWRAM16 = function (address, data) {
         //External WRAM:
         this.wait.WRAMAccess();
-        this.externalRAM[address & 0x3FFFF] = data & 0xFF;
-        this.externalRAM[(address + 1) & 0x3FFFF] = data >> 8;
+        address &= 0x3FFFE;
+        this.externalRAM[address++] = data & 0xFF;
+        this.externalRAM[address] = data >> 8;
     }
     GameBoyAdvanceMemory.prototype.writeExternalWRAM32 = function (address, data) {
         //External WRAM:
         this.wait.WRAMAccess32();
-        this.externalRAM[address & 0x3FFFF] = data & 0xFF;
-        this.externalRAM[(address + 1) & 0x3FFFF] = (data >> 8) & 0xFF;
-        this.externalRAM[(address + 2) & 0x3FFFF] = (data >> 16) & 0xFF;
-        this.externalRAM[(address + 3) & 0x3FFFF] = data >>> 24;
+        address &= 0x3FFFC;
+        this.externalRAM[address++] = data & 0xFF;
+        this.externalRAM[address++] = (data >> 8) & 0xFF;
+        this.externalRAM[address++] = (data >> 16) & 0xFF;
+        this.externalRAM[address] = data >>> 24;
     }
 }
 GameBoyAdvanceMemory.prototype.writeInternalWRAM8 = function (address, data) {
@@ -181,16 +165,18 @@ else {
     GameBoyAdvanceMemory.prototype.writeInternalWRAM16 = function (address, data) {
         //Internal WRAM:
         this.wait.singleClock();
-        this.internalRAM[address & 0x7FFF] = data & 0xFF;
-        this.internalRAM[(address + 1) & 0x7FFF] = data >> 8;
+        address &= 0x7FFE;
+        this.internalRAM[address++] = data & 0xFF;
+        this.internalRAM[address] = data >> 8;
     }
     GameBoyAdvanceMemory.prototype.writeInternalWRAM32 = function (address, data) {
         //Internal WRAM:
         this.wait.singleClock();
-        this.internalRAM[address & 0x7FFF] = data & 0xFF;
-        this.internalRAM[(address + 1) & 0x7FFF] = (data >> 8) & 0xFF;
-        this.internalRAM[(address + 2) & 0x7FFF] = (data >> 16) & 0xFF;
-        this.internalRAM[(address + 3) & 0x7FFF] = data >>> 24;
+        address &= 0x7FFC;
+        this.internalRAM[address++] = data & 0xFF;
+        this.internalRAM[address++] = (data >> 8) & 0xFF;
+        this.internalRAM[address++] = (data >> 16) & 0xFF;
+        this.internalRAM[address] = data >>> 24;
     }
 }
 GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
@@ -210,7 +196,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.singleClock();
-    if ((address | 0) < 0x4000301) {
+    if ((address | 0) < 0x4000302) {
         //IO Write:
         address = address >> 1;
         this.writeIO16[address & 0x1FF](this, data | 0);
@@ -224,7 +210,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.singleClock();
-    if ((address | 0) < 0x4000301) {
+    if ((address | 0) < 0x4000304) {
         //IO Write:
         switch ((address >> 2) & 0xFF) {
             //4000000h - DISPCNT - LCD Control (Read/Write)
@@ -1039,7 +1025,7 @@ if (__LITTLE_ENDIAN__) {
         var data = 0;
         this.wait.singleClock();
         if ((address | 0) < 0x4000) {
-            address >>= 1;
+            address = address >> 1;
             if ((this.cpu.registers[15] | 0) < 0x4000) {
                 //If reading from BIOS while executing it:
                 data = this.BIOS16[address & 0x1FFF] | 0;
@@ -1059,7 +1045,7 @@ if (__LITTLE_ENDIAN__) {
         var data = 0;
         this.IOCore.updateCoreSingle();
         if ((address | 0) < 0x4000) {
-            address >>= 1;
+            address = address >> 1;
             //If reading from BIOS while executing it:
             data = this.BIOS16[address & 0x1FFF] | 0;
             this.lastBIOSREAD = data | 0;
@@ -1074,7 +1060,7 @@ if (__LITTLE_ENDIAN__) {
         var data = 0;
         this.wait.singleClock();
         if ((address | 0) < 0x4000) {
-            address >>= 2;
+            address = address >> 2;
             if ((this.cpu.registers[15] | 0) < 0x4000) {
                 //If reading from BIOS while executing it:
                 data = this.BIOS32[address & 0xFFF] | 0;
@@ -1094,7 +1080,7 @@ if (__LITTLE_ENDIAN__) {
         var data = 0;
         this.IOCore.updateCoreSingle();
         if ((address | 0) < 0x4000) {
-            address >>= 2;
+            address = address >> 2;
             //If reading from BIOS while executing it:
             data = this.BIOS32[address & 0xFFF] | 0;
             this.lastBIOSREAD = data | 0;
@@ -1111,7 +1097,7 @@ else {
         if (address < 0x4000) {
             if (this.cpu.registers[15] < 0x4000) {
                 //If reading from BIOS while executing it:
-                return this.BIOS[address] | (this.BIOS[address | 1] << 8);
+                return this.BIOS[address & -2] | (this.BIOS[address | 1] << 8);
             }
             else {
                 //Not allowed to read from BIOS while executing outside of it:
@@ -1126,7 +1112,7 @@ else {
         this.IOCore.updateCoreSingle();
         if (address < 0x4000) {
             //If reading from BIOS while executing it:
-            var data = this.BIOS[address] | (this.BIOS[address | 1] << 8);
+            var data = this.BIOS[address & -2] | (this.BIOS[address | 1] << 8);
             this.lastBIOSREAD = data;
             return data;
         }
@@ -1139,7 +1125,8 @@ else {
         if (address < 0x4000) {
             if (this.cpu.registers[15] < 0x4000) {
                 //If reading from BIOS while executing it:
-                return this.BIOS[address] | (this.BIOS[address | 1] << 8) | (this.BIOS[address | 2] << 16)  | (this.BIOS[address | 3] << 24);
+                address &= -4;
+                return this.BIOS[address] | (this.BIOS[address + 1] << 8) | (this.BIOS[address + 2] << 16)  | (this.BIOS[address + 3] << 24);
             }
             else {
                 //Not allowed to read from BIOS while executing outside of it:
@@ -1154,7 +1141,8 @@ else {
         this.IOCore.updateCoreSingle();
         if (address < 0x4000) {
             //If reading from BIOS while executing it:
-            var data = this.BIOS[address] | (this.BIOS[address | 1] << 8) | (this.BIOS[address | 2] << 16)  | (this.BIOS[address | 3] << 24);
+            address &= -4;
+            var data = this.BIOS[address] | (this.BIOS[address + 1] << 8) | (this.BIOS[address + 2] << 16)  | (this.BIOS[address + 3] << 24);
             this.lastBIOSREAD = data;
             return data;
         }
@@ -1199,22 +1187,26 @@ else {
     GameBoyAdvanceMemory.prototype.readExternalWRAM16 = function (address) {
         //External WRAM:
         this.wait.WRAMAccess();
-        return this.externalRAM[address & 0x3FFFE] | (this.externalRAM[(address | 1) & 0x3FFFF] << 8);
+        address &= 0x3FFFE;
+        return this.externalRAM[address] | (this.externalRAM[address + 1] << 8);
     }
     GameBoyAdvanceMemory.prototype.readExternalWRAM16CPU = function (address) {
         //External WRAM:
         this.wait.WRAMAccess16CPU();
-        return this.externalRAM[address & 0x3FFFE] | (this.externalRAM[(address | 1) & 0x3FFFF] << 8);
+        address &= 0x3FFFE;
+        return this.externalRAM[address] | (this.externalRAM[address + 1] << 8);
     }
     GameBoyAdvanceMemory.prototype.readExternalWRAM32 = function (address) {
         //External WRAM:
         this.wait.WRAMAccess32();
-        return this.externalRAM[address & 0x3FFFC] | (this.externalRAM[(address | 1) & 0x3FFFD] << 8) | (this.externalRAM[(address | 2) & 0x3FFFE] << 16) | (this.externalRAM[(address | 3) & 0x3FFFF] << 24);
+        address &= 0x3FFFC;
+        return this.externalRAM[address] | (this.externalRAM[address + 1] << 8) | (this.externalRAM[address + 2] << 16) | (this.externalRAM[address + 3] << 24);
     }
     GameBoyAdvanceMemory.prototype.readExternalWRAM32CPU = function (address) {
         //External WRAM:
         this.wait.WRAMAccess32CPU();
-        return this.externalRAM[address & 0x3FFFC] | (this.externalRAM[(address | 1) & 0x3FFFD] << 8) | (this.externalRAM[(address | 2) & 0x3FFFE] << 16) | (this.externalRAM[(address | 3) & 0x3FFFF] << 24);
+        address &= 0x3FFFC;
+        return this.externalRAM[address] | (this.externalRAM[address + 1] << 8) | (this.externalRAM[address + 2] << 16) | (this.externalRAM[address + 3] << 24);
     }
 }
 GameBoyAdvanceMemory.prototype.readInternalWRAM8 = function (address) {
@@ -1253,22 +1245,26 @@ else {
     GameBoyAdvanceMemory.prototype.readInternalWRAM16 = function (address) {
         //Internal WRAM:
         this.wait.singleClock();
-        return this.internalRAM[address & 0x7FFE] | (this.internalRAM[(address | 1) & 0x7FFF] << 8);
+        address &= 0x7FFE;
+        return this.internalRAM[address] | (this.internalRAM[address + 1] << 8);
     }
     GameBoyAdvanceMemory.prototype.readInternalWRAM16CPU = function (address) {
         //Internal WRAM:
         this.IOCore.updateCoreSingle();
-        return this.internalRAM[address & 0x7FFE] | (this.internalRAM[(address | 1) & 0x7FFF] << 8);
+        address &= 0x7FFE;
+        return this.internalRAM[address] | (this.internalRAM[address + 1] << 8);
     }
     GameBoyAdvanceMemory.prototype.readInternalWRAM32 = function (address) {
         //Internal WRAM:
         this.wait.singleClock();
-        return this.internalRAM[address & 0x7FFC] | (this.internalRAM[(address | 1) & 0x7FFD] << 8) | (this.internalRAM[(address | 2) & 0x7FFE] << 16) | (this.internalRAM[(address | 3) & 0x7FFF] << 24);
+        address &= 0x7FFC;
+        return this.internalRAM[address] | (this.internalRAM[address + 1] << 8) | (this.internalRAM[address + 2] << 16) | (this.internalRAM[address + 3] << 24);
     }
     GameBoyAdvanceMemory.prototype.readInternalWRAM32CPU = function (address) {
         //Internal WRAM:
         this.IOCore.updateCoreSingle();
-        return this.internalRAM[address & 0x7FFC] | (this.internalRAM[(address | 1) & 0x7FFD] << 8) | (this.internalRAM[(address | 2) & 0x7FFE] << 16) | (this.internalRAM[(address | 3) & 0x7FFF] << 24);
+        address &= 0x7FFC;
+        return this.internalRAM[address] | (this.internalRAM[address + 1] << 8) | (this.internalRAM[address + 2] << 16) | (this.internalRAM[address + 3] << 24);
     }
 }
 GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
@@ -1292,9 +1288,9 @@ GameBoyAdvanceMemory.prototype.readIODispatch16 = function (address) {
     address = address | 0;
     var data = 0;
     this.wait.singleClock();
-    if ((address | 0) < 0x4000303) {
+    if ((address | 0) < 0x4000304) {
         //IO Read:
-        address >>= 1;
+        address = address >> 1;
         data = this.readIO16[address & 0x1FF](this) | 0;
     }
     else if ((address & 0x4000800) == 0x4000800) {
@@ -1310,9 +1306,9 @@ GameBoyAdvanceMemory.prototype.readIODispatch16CPU = function (address) {
     address = address | 0;
     var data = 0;
     this.IOCore.updateCoreSingle();
-    if ((address | 0) < 0x4000303) {
+    if ((address | 0) < 0x4000304) {
         //IO Read:
-        address >>= 1;
+        address = address >> 1;
         data = this.readIO16[address & 0x1FF](this) | 0;
     }
     else if ((address & 0x4000800) == 0x4000800) {
@@ -1328,7 +1324,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch32 = function (address) {
     address = address | 0;
     var data = 0;
     this.wait.singleClock();
-    if ((address | 0) < 0x4000301) {
+    if ((address | 0) < 0x4000304) {
         //IO Read:
         data = this.readIO32(address | 0) | 0;
     }
@@ -1345,7 +1341,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch32CPU = function (address) {
     address = address | 0;
     var data = 0;
     this.IOCore.updateCoreSingle();
-    if ((address | 0) < 0x4000301) {
+    if ((address | 0) < 0x4000304) {
         //IO Read:
         data = this.readIO32(address | 0) | 0;
     }
@@ -1755,31 +1751,31 @@ GameBoyAdvanceMemory.prototype.readPalette8 = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess();
-    return this.gfx.readPalette(address & 0x3FF);
+    return this.gfx.readPalette(address & 0x3FF) | 0;
 }
 GameBoyAdvanceMemory.prototype.readPalette16 = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess();
-    return this.gfx.readPalette16(address & 0x3FE);
+    return this.gfx.readPalette16(address & 0x3FE) | 0;
 }
 GameBoyAdvanceMemory.prototype.readPalette16CPU = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess16CPU();
-    return this.gfx.readPalette16(address & 0x3FE);
+    return this.gfx.readPalette16(address & 0x3FE) | 0;
 }
 GameBoyAdvanceMemory.prototype.readPalette32 = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess32();
-    return this.gfx.readPalette32(address & 0x3FC);
+    return this.gfx.readPalette32(address & 0x3FC) | 0;
 }
 GameBoyAdvanceMemory.prototype.readPalette32CPU = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess32CPU();
-    return this.gfx.readPalette32(address & 0x3FC);
+    return this.gfx.readPalette32(address & 0x3FC) | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM8 = function (address) {
     address = address | 0;
