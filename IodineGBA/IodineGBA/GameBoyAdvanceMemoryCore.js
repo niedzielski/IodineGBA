@@ -39,14 +39,14 @@ function GameBoyAdvanceMemory(IOCore) {
     this.readIO16 = generator.generateMemoryReadIO16();
     this.writeIO8 = generator.generateMemoryWriteIO8();
     this.writeIO16 = generator.generateMemoryWriteIO16();
-    this.memoryReader8 = this.memoryReader8Generated[1];
-    this.memoryWriter8 = this.memoryWriter8Generated[1];
-    this.memoryReader16 = this.memoryReader16Generated[1];
-    this.memoryReader16CPU = this.memoryReader16CPUGenerated[1];
-    this.memoryWriter16 = this.memoryWriter16Generated[1];
-    this.memoryReader32 = this.memoryReader32Generated[1];
-    this.memoryReader32CPU = this.memoryReader32CPUGenerated[1];
-    this.memoryWriter32 = this.memoryWriter32Generated[1];
+    this.memoryRead8 = this.memoryRead8Generated[1];
+    this.memoryWrite8 = this.memoryWrite8Generated[1];
+    this.memoryRead16 = this.memoryRead16Generated[1];
+    this.memoryReadCPU16 = this.memoryReadCPU16Generated[1];
+    this.memoryWrite16 = this.memoryWrite16Generated[1];
+    this.memoryRead32 = this.memoryRead32Generated[1];
+    this.memoryReadCPU32 = this.memoryReadCPU32Generated[1];
+    this.memoryWrite32 = this.memoryWrite32Generated[1];
 }
 GameBoyAdvanceMemory.prototype.loadReferences = function () {
     //Initialize the various handler objects:
@@ -62,47 +62,12 @@ GameBoyAdvanceMemory.prototype.loadReferences = function () {
     this.cpu = this.IOCore.cpu;
     this.saves = this.IOCore.saves;
 }
-GameBoyAdvanceMemory.prototype.memoryWrite8 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.memoryWriter8(address | 0, data & 0xFF);
-}
-GameBoyAdvanceMemory.prototype.memoryWrite16 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.memoryWriter16(address | 0, data & 0xFFFF);
-}
-GameBoyAdvanceMemory.prototype.memoryWrite32 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.memoryWriter32(address | 0, data | 0);
-}
-GameBoyAdvanceMemory.prototype.memoryRead8 = function (address) {
-    address = address | 0;
-    return this.memoryReader8(address | 0) | 0;
-}
-GameBoyAdvanceMemory.prototype.memoryRead16 = function (address) {
-    address = address | 0;
-    return this.memoryReader16(address | 0) | 0;
-}
-GameBoyAdvanceMemory.prototype.memoryReadCPU16 = function (address) {
-    address = address | 0;
-    return this.memoryReader16CPU(address | 0) | 0;
-}
-GameBoyAdvanceMemory.prototype.memoryRead32 = function (address) {
-    address = address | 0;
-    return this.memoryReader32(address | 0) | 0;
-}
-GameBoyAdvanceMemory.prototype.memoryReadCPU32 = function (address) {
-    address = address | 0;
-    return this.memoryReader32CPU(address | 0) | 0;
-}
 GameBoyAdvanceMemory.prototype.writeExternalWRAM8 = function (address, data) {
     address = address | 0;
     data = data | 0;
     //External WRAM:
     this.wait.WRAMAccess();
-    this.externalRAM[address & 0x3FFFF] = data | 0;
+    this.externalRAM[address & 0x3FFFF] = data & 0xFF;
 }
 if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceMemory.prototype.writeExternalWRAM16 = function (address, data) {
@@ -110,7 +75,7 @@ if (__LITTLE_ENDIAN__) {
         data = data | 0;
         //External WRAM:
         this.wait.WRAMAccess();
-        this.externalRAM16[(address >> 1) & 0x1FFFF] = data | 0;
+        this.externalRAM16[(address >> 1) & 0x1FFFF] = data & 0xFFFF;
     }
     GameBoyAdvanceMemory.prototype.writeExternalWRAM32 = function (address, data) {
         address = address | 0;
@@ -126,7 +91,7 @@ else {
         this.wait.WRAMAccess();
         address &= 0x3FFFE;
         this.externalRAM[address++] = data & 0xFF;
-        this.externalRAM[address] = data >> 8;
+        this.externalRAM[address] = (data >> 8) & 0xFF;
     }
     GameBoyAdvanceMemory.prototype.writeExternalWRAM32 = function (address, data) {
         //External WRAM:
@@ -143,7 +108,7 @@ GameBoyAdvanceMemory.prototype.writeInternalWRAM8 = function (address, data) {
     data = data | 0;
     //Internal WRAM:
     this.wait.singleClock();
-    this.internalRAM[address & 0x7FFF] = data | 0;
+    this.internalRAM[address & 0x7FFF] = data & 0xFF;
 }
 if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceMemory.prototype.writeInternalWRAM16 = function (address, data) {
@@ -151,7 +116,7 @@ if (__LITTLE_ENDIAN__) {
         data = data | 0;
         //Internal WRAM:
         this.wait.singleClock();
-        this.internalRAM16[(address >> 1) & 0x3FFF] = data | 0;
+        this.internalRAM16[(address >> 1) & 0x3FFF] = data & 0xFFFF;
     }
     GameBoyAdvanceMemory.prototype.writeInternalWRAM32 = function (address, data) {
         address = address | 0;
@@ -167,7 +132,7 @@ else {
         this.wait.singleClock();
         address &= 0x7FFE;
         this.internalRAM[address++] = data & 0xFF;
-        this.internalRAM[address] = data >> 8;
+        this.internalRAM[address] = (data >> 8) & 0xFF;
     }
     GameBoyAdvanceMemory.prototype.writeInternalWRAM32 = function (address, data) {
         //Internal WRAM:
@@ -185,11 +150,11 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
     this.wait.singleClock();
     if ((address | 0) < 0x4000302) {
         //IO Write:
-        this.writeIO8[address & 0x3FF](this, data | 0);
+        this.writeIO8[address & 0x3FF](this, data & 0xFF);
     }
     else if ((address & 0x4000800) == 0x4000800) {
         //WRAM wait state control:
-        this.wait.writeConfigureWRAM8(address | 0, data | 0);
+        this.wait.writeConfigureWRAM8(address | 0, data & 0xFF);
     }
 }
 GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
@@ -199,11 +164,11 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
     if ((address | 0) < 0x4000302) {
         //IO Write:
         address = address >> 1;
-        this.writeIO16[address & 0x1FF](this, data | 0);
+        this.writeIO16[address & 0x1FF](this, data & 0xFFFF);
     }
     else if ((address & 0x4000800) == 0x4000800) {
         //WRAM wait state control:
-        this.wait.writeConfigureWRAM16(address | 0, data | 0);
+        this.wait.writeConfigureWRAM16(address | 0, data & 0xFFFF);
     }
 }
 GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
@@ -825,11 +790,11 @@ if (!!Math.imul) {
         this.wait.VRAMAccess();
         if ((address & 0x10000) != 0) {
             if ((address & 0x17FFF) < 0x14000 && (this.gfx.BGMode | 0) >= 3) {
-                this.gfx.writeVRAM16(address & 0x17FFE, Math.imul(data | 0, 0x101) | 0);
+                this.gfx.writeVRAM16(address & 0x17FFE, Math.imul(data & 0xFF, 0x101) | 0);
             }
         }
         else {
-            this.gfx.writeVRAM16(address & 0xFFFE, Math.imul(data | 0, 0x101) | 0);
+            this.gfx.writeVRAM16(address & 0xFFFE, Math.imul(data & 0xFF, 0x101) | 0);
         }
     }
 }
@@ -837,7 +802,7 @@ else {
     //Math.imul not found, use the compatibility method:
     GameBoyAdvanceMemory.prototype.writeVRAM8 = function (address, data) {
         address = address | 0;
-        data = data | 0;
+        data = data & 0xFF;
         this.IOCore.updateGraphicsClocking();
         this.wait.VRAMAccess();
         if ((address & 0x10000) != 0) {
@@ -856,7 +821,7 @@ GameBoyAdvanceMemory.prototype.writeVRAM16 = function (address, data) {
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess();
     address = address & (((address & 0x10000) >> 1) ^ address);
-    this.gfx.writeVRAM16(address & 0x1FFFE, data | 0);
+    this.gfx.writeVRAM16(address & 0x1FFFE, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.writeVRAM32 = function (address, data) {
     address = address | 0;
@@ -875,7 +840,7 @@ GameBoyAdvanceMemory.prototype.writeOAM16 = function (address, data) {
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.OAMAccess();
-    this.gfx.writeOAM16(address & 0x3FE, data | 0);
+    this.gfx.writeOAM16(address & 0x3FE, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.writeOAM32 = function (address, data) {
     address = address | 0;
@@ -891,14 +856,13 @@ if (!!Math.imul) {
         data = data | 0;
         this.IOCore.updateGraphicsClocking();
         this.wait.VRAMAccess();
-        this.gfx.writePalette16(address & 0x3FE, Math.imul(data | 0, 0x101) | 0);
+        this.gfx.writePalette16(address & 0x3FE, Math.imul(data & 0xFF, 0x101) | 0);
     }
 }
 else {
     //Math.imul not found, use the compatibility method:
     GameBoyAdvanceMemory.prototype.writePalette8 = function (address, data) {
-        address = address | 0;
-        data = data | 0;
+        data = data & 0xFF;
         this.IOCore.updateGraphicsClocking();
         this.wait.VRAMAccess();
         this.gfx.writePalette16(address & 0x3FE, (data * 0x101) | 0);
@@ -909,7 +873,7 @@ GameBoyAdvanceMemory.prototype.writePalette16 = function (address, data) {
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess();
-    this.gfx.writePalette16(address & 0x3FE, data | 0);
+    this.gfx.writePalette16(address & 0x3FE, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.writePalette32 = function (address, data) {
     address = address | 0;
@@ -922,13 +886,13 @@ GameBoyAdvanceMemory.prototype.writeROM8 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.ROMAccess(address | 0);
-    this.cartridge.writeROM8(address & 0x1FFFFFF, data | 0);
+    this.cartridge.writeROM8(address & 0x1FFFFFF, data & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeROM16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.ROMAccess(address | 0);
-    this.cartridge.writeROM16(address & 0x1FFFFFE, data | 0);
+    this.cartridge.writeROM16(address & 0x1FFFFFE, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.writeROM32 = function (address, data) {
     address = address | 0;
@@ -940,19 +904,19 @@ GameBoyAdvanceMemory.prototype.writeSRAM8 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.SRAMAccess();
-    this.saves.writeSRAM(address & 0xFFFF, data | 0);
+    this.saves.writeSRAM(address & 0xFFFF, data & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeSRAM16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.SRAMAccess();
-    this.saves.writeSRAM(address & 0xFFFE, (data >> ((address & 0x1) << 3)) & 0xFF);
+    this.saves.writeSRAM(address & 0xFFFE, (data >> ((address & 0x2) << 3)) & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.writeSRAM32 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.SRAMAccess();
-    this.saves.writeSRAM(address & 0xFFFC, (data >> ((address & 0x3) << 3)) & 0xFF);
+    this.saves.writeSRAM(address & 0xFFFC, data & 0xFF);
 }
 GameBoyAdvanceMemory.prototype.NOP = function (parentObj, data) {
     //Ignore the data write...
@@ -967,35 +931,35 @@ GameBoyAdvanceMemory.prototype.remapWRAM = function (data) {
         switch (data | 0) {
             case 0:
                 //Mirror Internal RAM to External:
-                this.memoryWriter8 = this.memoryWriter8Generated[0];
-                this.memoryReader8 = this.memoryReader8Generated[0];
-                this.memoryWriter16 = this.memoryWriter16Generated[0];
-                this.memoryReader16 = this.memoryReader16Generated[0];
-                this.memoryReader16CPU = this.memoryReader16CPUGenerated[0];
-                this.memoryWriter32 = this.memoryWriter32Generated[0];
-                this.memoryReader32 = this.memoryReader32Generated[0];
-                this.memoryReader32CPU = this.memoryReader32CPUGenerated[0];
+                this.memoryWrite8 = this.memoryWrite8Generated[0];
+                this.memoryRead8 = this.memoryRead8Generated[0];
+                this.memoryWrite16 = this.memoryWrite16Generated[0];
+                this.memoryRead16 = this.memoryRead16Generated[0];
+                this.memoryReadCPU16 = this.memoryReadCPU16Generated[0];
+                this.memoryWrite32 = this.memoryWrite32Generated[0];
+                this.memoryRead32 = this.memoryRead32Generated[0];
+                this.memoryReadCPU32 = this.memoryReadCPU32Generated[0];
                 break;
             case 0x20:
                 //Use External RAM:
-                this.memoryWriter8 = this.memoryWriter8Generated[1];
-                this.memoryReader8 = this.memoryReader8Generated[1];
-                this.memoryWriter16 = this.memoryWriter16Generated[1];
-                this.memoryReader16 = this.memoryReader16Generated[1];
-                this.memoryReader16CPU = this.memoryReader16CPUGenerated[1];
-                this.memoryWriter32 = this.memoryWriter32Generated[1];
-                this.memoryReader32 = this.memoryReader32Generated[1];
-                this.memoryReader32CPU = this.memoryReader32CPUGenerated[1];
+                this.memoryWrite8 = this.memoryWrite8Generated[1];
+                this.memoryRead8 = this.memoryRead8Generated[1];
+                this.memoryWrite16 = this.memoryWrite16Generated[1];
+                this.memoryRead16 = this.memoryRead16Generated[1];
+                this.memoryReadCPU16 = this.memoryReadCPU16Generated[1];
+                this.memoryWrite32 = this.memoryWrite32Generated[1];
+                this.memoryRead32 = this.memoryRead32Generated[1];
+                this.memoryReadCPU32 = this.memoryReadCPU32Generated[1];
                 break;
             default:
-                this.memoryWriter8 = this.memoryWriter8Generated[2];
-                this.memoryReader8 = this.memoryReader8Generated[2];
-                this.memoryWriter16 = this.memoryWriter16Generated[2];
-                this.memoryReader16 = this.memoryReader16Generated[2];
-                this.memoryReader16CPU = this.memoryReader16CPUGenerated[2];
-                this.memoryWriter32 = this.memoryWriter32Generated[2];
-                this.memoryReader32 = this.memoryReader32Generated[2];
-                this.memoryReader32CPU = this.memoryReader32CPUGenerated[2];
+                this.memoryWrite8 = this.memoryWrite8Generated[2];
+                this.memoryRead8 = this.memoryRead8Generated[2];
+                this.memoryWrite16 = this.memoryWrite16Generated[2];
+                this.memoryRead16 = this.memoryRead16Generated[2];
+                this.memoryReadCPU16 = this.memoryReadCPU16Generated[2];
+                this.memoryWrite32 = this.memoryWrite32Generated[2];
+                this.memoryRead32 = this.memoryRead32Generated[2];
+                this.memoryReadCPU32 = this.memoryReadCPU32Generated[2];
         }
         this.WRAMControlFlags = data | 0;
     }
@@ -2136,7 +2100,7 @@ function generateMemoryTopLevelDispatch() {
         code += "}";
         return Function("address", "data", code);
     }
-    GameBoyAdvanceMemory.prototype.memoryReader8Generated = [
+    GameBoyAdvanceMemory.prototype.memoryRead8Generated = [
                                                              compileMemoryReadDispatch([
                                                                                         "readUnused8",
                                                                                         "readInternalWRAM8",
@@ -2177,7 +2141,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                         "readBIOS8"
                                                                                         ])
                                                              ];
-    GameBoyAdvanceMemory.prototype.memoryWriter8Generated = [
+    GameBoyAdvanceMemory.prototype.memoryWrite8Generated = [
                                                              compileMemoryWriteDispatch([
                                                                                          "writeUnused",
                                                                                          "writeInternalWRAM8",
@@ -2212,7 +2176,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeSRAM8"
                                                                                          ])
                                                              ];
-    GameBoyAdvanceMemory.prototype.memoryReader16Generated = [
+    GameBoyAdvanceMemory.prototype.memoryRead16Generated = [
                                                               compileMemoryReadDispatch([
                                                                                          "readUnused16",
                                                                                          "readInternalWRAM16",
@@ -2253,7 +2217,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readBIOS16"
                                                                                          ])
                                                               ];
-    GameBoyAdvanceMemory.prototype.memoryReader16CPUGenerated = [
+    GameBoyAdvanceMemory.prototype.memoryReadCPU16Generated = [
                                                                  compileMemoryReadDispatch([
                                                                                             "readUnused16CPU",
                                                                                             "readInternalWRAM16CPU",
@@ -2294,7 +2258,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readBIOS16CPU"
                                                                                             ])
                                                                  ];
-    GameBoyAdvanceMemory.prototype.memoryWriter16Generated = [
+    GameBoyAdvanceMemory.prototype.memoryWrite16Generated = [
                                                               compileMemoryWriteDispatch([
                                                                                           "writeUnused",
                                                                                           "writeInternalWRAM16",
@@ -2329,7 +2293,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeSRAM16"
                                                                                           ])
                                                               ];
-    GameBoyAdvanceMemory.prototype.memoryReader32Generated = [
+    GameBoyAdvanceMemory.prototype.memoryRead32Generated = [
                                                               compileMemoryReadDispatch([
                                                                                          "readUnused32",
                                                                                          "readInternalWRAM32",
@@ -2370,7 +2334,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readBIOS32"
                                                                                          ])
                                                               ];
-    GameBoyAdvanceMemory.prototype.memoryReader32CPUGenerated = [
+    GameBoyAdvanceMemory.prototype.memoryReadCPU32Generated = [
                                                                  compileMemoryReadDispatch([
                                                                                             "readUnused32CPU",
                                                                                             "readInternalWRAM32CPU",
@@ -2411,7 +2375,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readBIOS32CPU"
                                                                                             ])
                                                                  ];
-    GameBoyAdvanceMemory.prototype.memoryWriter32Generated = [
+    GameBoyAdvanceMemory.prototype.memoryWrite32Generated = [
                                                               compileMemoryWriteDispatch([
                                                                                           "writeUnused",
                                                                                           "writeInternalWRAM32",
