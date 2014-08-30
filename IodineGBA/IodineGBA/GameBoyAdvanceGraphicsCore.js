@@ -413,7 +413,7 @@ GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
     this.forcedBlank = ((data & 0x80) == 0x80);
     this.isRenderingCheckPreprocess();
     if ((this.BGMode | 0) > 2) {
-        this.renderer.preprocess(Math.min(this.BGMode | 0, 5) | 0);
+        this.modeFrameBufferRenderer.preprocess(Math.min(this.BGMode | 0, 5) | 0);
     }
 }
 GameBoyAdvanceGraphics.prototype.readDISPCNT0 = function () {
