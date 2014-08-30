@@ -95,7 +95,6 @@ GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
     this.mode2Renderer = new GameBoyAdvanceMode2Renderer(this);
     this.modeFrameBufferRenderer = new GameBoyAdvanceModeFrameBufferRenderer(this);
 
-    this.renderer = this.mode0Renderer;
     this.compositorPreprocess();
 }
 GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
@@ -294,7 +293,19 @@ GameBoyAdvanceGraphics.prototype.graphicsJITVBlank = function () {
     this.graphicsJITScanlineGroup();
 }
 GameBoyAdvanceGraphics.prototype.renderScanLine = function () {
-    this.renderer.renderScanLine(this.lastUnrenderedLine | 0);
+    switch (this.BGMode | 0) {
+        case 0:
+            this.mode0Renderer.renderScanLine(this.lastUnrenderedLine | 0);
+            break;
+        case 1:
+            this.mode1Renderer.renderScanLine(this.lastUnrenderedLine | 0);
+            break;
+        case 2:
+            this.mode2Renderer.renderScanLine(this.lastUnrenderedLine | 0);
+            break;
+        default:
+            this.modeFrameBufferRenderer.renderScanLine(this.lastUnrenderedLine | 0);
+    }
     //Update the affine bg counters:
     this.updateReferenceCounters();
 }
@@ -401,19 +412,8 @@ GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
     this.VRAMOneDimensional = ((data & 0x40) == 0x40);
     this.forcedBlank = ((data & 0x80) == 0x80);
     this.isRenderingCheckPreprocess();
-    switch (this.BGMode | 0) {
-        case 0:
-            this.renderer = this.mode0Renderer;
-            break;
-        case 1:
-            this.renderer = this.mode1Renderer;
-            break;
-        case 2:
-            this.renderer = this.mode2Renderer;
-            break;
-        default:
-            this.renderer = this.modeFrameBufferRenderer;
-            this.renderer.preprocess(Math.min(this.BGMode | 0, 5) | 0);
+    if ((this.BGMode | 0) > 2) {
+        this.renderer.preprocess(Math.min(this.BGMode | 0, 5) | 0);
     }
 }
 GameBoyAdvanceGraphics.prototype.readDISPCNT0 = function () {

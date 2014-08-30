@@ -108,6 +108,7 @@ GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line, isOBJWin
     }
 }
 GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJWindow) {
+    line = line | 0;
     if (this.isDrawable(sprite, isOBJWindow)) {
         if (sprite.mosaic) {
             //Correct line number for mosaic:
@@ -118,32 +119,33 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
         //Obtain vertical size info:
         var ySize = this.lookupYSize[(sprite.shape << 2) | sprite.size] << ((sprite.doubleSizeOrDisabled) ? 1 : 0);
         //Obtain some offsets:
-        var ycoord = sprite.ycoord;
-        var yOffset = line - ycoord;
+        var ycoord = sprite.ycoord | 0;
+        var yOffset = ((line | 0) - (ycoord | 0)) | 0;
         //Overflow Correction:
-        if (yOffset < 0 || (ycoord + ySize) > 0x100) {
+        if ((yOffset | 0) < 0 || (((ycoord | 0) + (ySize | 0)) | 0) > 0x100) {
             /*
              HW re-offsets any "negative" y-coord values to on-screen unsigned.
              Also a bug triggers this on 8-bit ending coordinate overflow from large sprites.
              */
-            yOffset += 0x100;
+            yOffset = ((yOffset | 0) + 0x100) | 0;
         }
         //Make a sprite line:
-        if ((yOffset & --ySize) == yOffset) {
+        ySize = ((ySize | 0) - 1) | 0;
+        if ((yOffset & ySize) == (yOffset | 0)) {
             if (sprite.matrix2D) {
                 //Scale & Rotation:
-                this.renderMatrixSprite(sprite, xSize, ySize + 1, yOffset);
+                this.renderMatrixSprite(sprite, xSize | 0, ((ySize | 0) + 1) | 0, yOffset | 0);
             }
             else {
                 //Regular Scrolling:
-                this.renderNormalSprite(sprite, xSize, ySize, yOffset);
+                this.renderNormalSprite(sprite, xSize | 0, ySize | 0, yOffset | 0);
             }
             //Mark for semi-transparent:
-            if (sprite.mode == 1) {
-                this.markSemiTransparent(xSize);
+            if ((sprite.mode | 0) == 1) {
+                this.markSemiTransparent(xSize | 0);
             }
             //Copy OBJ scratch buffer to scratch line buffer:
-            this.outputSpriteToScratch(sprite, xSize);
+            this.outputSpriteToScratch(sprite, xSize | 0);
         }
     }
 }
@@ -395,33 +397,33 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
     xSize = xSize | 0;
     //Simulate x-coord wrap around logic:
     var xcoord = sprite.xcoord | 0;
-    if (xcoord > (0x200 - xSize)) {
-        xcoord -= 0x200;
+    if ((xcoord | 0) > ((0x200 - (xSize | 0)) | 0)) {
+        xcoord = ((xcoord | 0) - 0x200) | 0;
     }
     //Perform the mosaic transform:
     if (sprite.mosaic) {
-        this.gfx.mosaicRenderer.renderOBJMosaicHorizontal(this.scratchOBJBuffer, xcoord, xSize);
+        this.gfx.mosaicRenderer.renderOBJMosaicHorizontal(this.scratchOBJBuffer, xcoord | 0, xSize | 0);
     }
     //Resolve end point:
-    var xcoordEnd = Math.min(xcoord + xSize, 240) | 0;
+    var xcoordEnd = Math.min(((xcoord | 0) + (xSize | 0)) | 0, 240) | 0;
     //Flag for compositor to ID the pixels as OBJ:
     var bitFlags = (sprite.priority << 23) | 0x100000;
     if (!sprite.horizontalFlip || sprite.matrix2D) {
         //Normal:
-        for (var xSource = 0; xcoord < xcoordEnd; ++xcoord, ++xSource) {
-            var pixel = (bitFlags | this.scratchOBJBuffer[xSource | 0]) | 0;
+        for (var xSource = 0; (xcoord | 0) < (xcoordEnd | 0); xcoord = ((xcoord | 0) + 1) | 0, xSource = ((xSource | 0) + 1) | 0) {
+            var pixel = bitFlags | this.scratchOBJBuffer[xSource | 0];
             //Overwrite by priority:
-            if (xcoord > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
+            if ((xcoord | 0) > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
                 this.targetBuffer[xcoord | 0] = pixel | 0;
             }
         }
     }
     else {
         //Flipped Horizontally:
-        for (var xSource = xSize - 1; xcoord < xcoordEnd; ++xcoord, --xSource) {
-            var pixel = (bitFlags | this.scratchOBJBuffer[xSource | 0]) | 0;
+        for (var xSource = ((xSize | 0) - 1) | 0; (xcoord | 0) < (xcoordEnd | 0); xcoord = ((xcoord | 0) + 1) | 0, xSource = ((xSource | 0) - 1) | 0) {
+            var pixel = bitFlags | this.scratchOBJBuffer[xSource | 0];
             //Overwrite by priority:
-            if (xcoord > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
+            if ((xcoord | 0) > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
                 this.targetBuffer[xcoord | 0] = pixel | 0;
             }
         }
@@ -429,10 +431,10 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
 }
 GameBoyAdvanceOBJRenderer.prototype.isDrawable = function (sprite, doWindowOBJ) {
     //Make sure we pass some checks that real hardware does:
-    if ((sprite.mode < 2 && !doWindowOBJ) || (doWindowOBJ && sprite.mode == 2)) {
+    if (((sprite.mode | 0) < 2 && !doWindowOBJ) || (doWindowOBJ && (sprite.mode | 0) == 2)) {
         if (!sprite.doubleSizeOrDisabled || sprite.matrix2D) {
-            if (sprite.shape < 3) {
-                if (this.gfx.BGMode < 3 || sprite.tileNumber >= 0x200) {
+            if ((sprite.shape | 0) < 3) {
+                if ((this.gfx.BGMode | 0) < 3 || (sprite.tileNumber | 0) >= 0x200) {
                     return true;
                 }
             }
