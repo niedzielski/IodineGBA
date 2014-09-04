@@ -16,8 +16,24 @@
  */
 (function () {
 	"use strict";
-	var files = [
-		"includes/TypedArrayShim.js",
+	
+	var appendPoint = document.getElementById('loader');
+	
+	function load(async, files) {
+		for (var i = 0; i < files.length; i++) {
+			var script = document.createElement('script');
+			script.src = 'IodineGBA/' + files[i];
+			script.async = async;
+		
+			appendPoint.parentNode.insertBefore(script, appendPoint.nextSibling);
+			appendPoint = script;
+		}
+	}
+	
+	load(false, [
+		"includes/TypedArrayShim.js"
+	]);
+	load(true, [
 		"IodineGBA/GameBoyAdvanceCartridgeCore.js",
 		"IodineGBA/GameBoyAdvanceDMACore.js",
 		"IodineGBA/GameBoyAdvanceEmulatorCore.js",
@@ -65,16 +81,5 @@
 		"IodineGBA/cartridge/GameBoyAdvanceSRAMChipCore.js",
 		"IodineGBA/cartridge/GameBoyAdvanceFLASHChipCore.js",
 		"IodineGBA/cartridge/GameBoyAdvanceEEPROMChipCore.js"
-	];
-	
-	var appendPoint = document.getElementById('loader');
-	
-	for (var i = 0; i < files.length; i++) {
-		var script = document.createElement('script');
-		script.src = 'IodineGBA/' + files[i];
-		script.async = false;
-		
-		appendPoint.parentNode.insertBefore(script, appendPoint.nextSibling);
-		appendPoint = script;
-	}
+	]);
 }());
