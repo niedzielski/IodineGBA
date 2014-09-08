@@ -60,40 +60,26 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
     }
     return this.scratchBuffer;
 }
-if (__VIEWS_SUPPORTED__ && navigator.userAgent.toLowerCase().indexOf('chrome') < 0) {
-    GameBoyAdvanceBGTEXTRenderer.prototype.renderWholeTiles = function (xTileStart, yTileStart, yTileOffset) {
-        xTileStart = xTileStart | 0;
-        yTileStart = yTileStart | 0;
-        yTileOffset = yTileOffset | 0;
-        //Process full 8 pixels at a time:
-        for (var position = (8 - (this.BGXCoord & 0x7)) | 0; (position | 0) < 240; position = ((position | 0) + 8) | 0) {
-            //Fetch tile attributes:
-            //Get 8 pixels of data:
-            this.processVRAM(this.fetchTile(yTileStart | 0, xTileStart | 0) | 0, yTileOffset | 0);
-            //Copy the buffered tile to line:
-            this.scratchBuffer.set(this.tileFetched, position | 0);
-            //Increment a tile counter:
-            xTileStart = ((xTileStart | 0) + 1) | 0;
-        }
-    }
-}
-else {
-    GameBoyAdvanceBGTEXTRenderer.prototype.renderWholeTiles = function (xTileStart, yTileStart, yTileOffset) {
-        //Process full 8 pixels at a time:
-        for (var position = 8 - (this.BGXCoord & 0x7); position < 240; position += 8) {
-            //Fetch tile attributes:
-            //Get 8 pixels of data:
-            this.processVRAM(this.fetchTile(yTileStart, xTileStart++), yTileOffset);
-            //Copy the buffered tile to line:
-            this.scratchBuffer[position] = this.tileFetched[0];
-            this.scratchBuffer[position + 1] = this.tileFetched[1];
-            this.scratchBuffer[position + 2] = this.tileFetched[2];
-            this.scratchBuffer[position + 3] = this.tileFetched[3];
-            this.scratchBuffer[position + 4] = this.tileFetched[4];
-            this.scratchBuffer[position + 5] = this.tileFetched[5];
-            this.scratchBuffer[position + 6] = this.tileFetched[6];
-            this.scratchBuffer[position + 7] = this.tileFetched[7];
-        }
+GameBoyAdvanceBGTEXTRenderer.prototype.renderWholeTiles = function (xTileStart, yTileStart, yTileOffset) {
+    xTileStart = xTileStart | 0;
+    yTileStart = yTileStart | 0;
+    yTileOffset = yTileOffset | 0;
+    //Process full 8 pixels at a time:
+    for (var position = (8 - (this.BGXCoord & 0x7)) | 0; (position | 0) < 240; position = ((position | 0) + 8) | 0) {
+        //Fetch tile attributes:
+        //Get 8 pixels of data:
+        this.processVRAM(this.fetchTile(yTileStart | 0, xTileStart | 0) | 0, yTileOffset | 0);
+        //Copy the buffered tile to line:
+        this.scratchBuffer[position | 0] = this.tileFetched[0] | 0;
+        this.scratchBuffer[((position | 0) + 1) | 0] = this.tileFetched[1] | 0;
+        this.scratchBuffer[((position | 0) + 2) | 0] = this.tileFetched[2] | 0;
+        this.scratchBuffer[((position | 0) + 3) | 0] = this.tileFetched[3] | 0;
+        this.scratchBuffer[((position | 0) + 4) | 0] = this.tileFetched[4] | 0;
+        this.scratchBuffer[((position | 0) + 5) | 0] = this.tileFetched[5] | 0;
+        this.scratchBuffer[((position | 0) + 6) | 0] = this.tileFetched[6] | 0;
+        this.scratchBuffer[((position | 0) + 7) | 0] = this.tileFetched[7] | 0;
+        //Increment a tile counter:
+        xTileStart = ((xTileStart | 0) + 1) | 0;
     }
 }
 if (__LITTLE_ENDIAN__) {
