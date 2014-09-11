@@ -984,7 +984,7 @@ ARMInstructionSet.prototype.MSR = function () {
 ARMInstructionSet.prototype.MSR1 = function () {
     var newcpsr = this.readRegister(this.execute & 0xF) | 0;
     this.CPSR.setNegativeInt(newcpsr | 0);
-    this.CPSR.setZeroInt(newcpsr & 0x40000000);
+    this.CPSR.setZeroInt((newcpsr & 0x40000000) ^ 0x40000000);
     this.CPSR.setCarryInt((newcpsr & 0x20000000) << 2);
     this.CPSR.setOverflow((newcpsr & 0x10000000) != 0);
     if ((this.execute & 0x10000) == 0x10000 && (this.CPUCore.MODEBits | 0) != 0x10) {
@@ -1031,7 +1031,7 @@ ARMInstructionSet.prototype.MSR2 = function () {
 ARMInstructionSet.prototype.MSR3 = function () {
     var operand = this.imm() | 0;
     this.CPSR.setNegativeInt(operand | 0);
-    this.CPSR.setZeroInt(operand & 0x40000000);
+    this.CPSR.setZeroInt((operand & 0x40000000) ^ 0x40000000);
     this.CPSR.setCarryInt((operand & 0x20000000) << 2);
     this.CPSR.setOverflow((operand & 0x10000000) != 0);
 }
