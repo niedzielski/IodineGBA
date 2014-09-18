@@ -1826,7 +1826,7 @@ GameBoyAdvanceMemory.prototype.readUnused16IO1 = function (parentObj) {
 }
 GameBoyAdvanceMemory.prototype.readUnused16IO2 = function (parentObj) {
     parentObj.IOCore.updateCoreSingle();
-    return (parentObj.IOCore.getCurrentFetchValue() >> 16) & 0xFFFF;
+    return parentObj.IOCore.getCurrentFetchValue() >>> 16;
 }
 GameBoyAdvanceMemory.prototype.readUnused16 = function (address) {
     address = address | 0;
