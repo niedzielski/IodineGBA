@@ -119,34 +119,28 @@ if (__VIEWS_SUPPORTED__) {
 else {
     GameBoyAdvanceBGMatrixRenderer.prototype.computeScreenAddress = function (x, y) {
         //Compute address for character VRAM to address:
-        x = x | 0;
-        y = y | 0;
         var address = this.fetchTile(x >> 3, y >> 3) << 6;
-        address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
-        address = ((address | 0) + ((y & 0x7) << 3)) | 0;
-        address = ((address | 0) + (x & 0x7)) | 0;
-        return address | 0;
+        address += this.BGCharacterBaseBlock;
+        address += (y & 0x7) << 3;
+        address += x & 0x7;
+        return address;
     }
     GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixelOverflow = function (x, y) {
         //Fetch the pixel:
-        x = x | 0;
-        y = y | 0;
         //Output pixel:
-        var address = this.computeScreenAddress(x & this.mapSizeComparer, y & this.mapSizeComparer) | 0;
-        return this.palette[this.VRAM[address & 0xFFFF] | 0] | 0;
+        var address = this.computeScreenAddress(x & this.mapSizeComparer, y & this.mapSizeComparer);
+        return this.palette[this.VRAM[address]];
     }
     GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixelNoOverflow = function (x, y) {
         //Fetch the pixel:
-        x = x | 0;
-        y = y | 0;
         //Output pixel:
-        if ((x | 0) != (x & this.mapSizeComparer) || (y | 0) != (y & this.mapSizeComparer)) {
+        if (x != (x & this.mapSizeComparer) || y != (y & this.mapSizeComparer)) {
             //Overflow Handling:
             //Out of bounds with no overflow allowed:
-            return this.transparency | 0;
+            return this.transparency;
         }
-        var address = this.computeScreenAddress(x | 0, y | 0) | 0;
-        return this.palette[this.VRAM[address & 0xFFFF] | 0] | 0;
+        var address = this.computeScreenAddress(x, y);
+        return this.palette[this.VRAM[address]];
     }
     GameBoyAdvanceBGMatrixRenderer.prototype.screenBaseBlockPreprocess = function () {
         this.BGScreenBaseBlock = this.gfx.BGScreenBaseBlock[this.BGLayer & 3] << 11;

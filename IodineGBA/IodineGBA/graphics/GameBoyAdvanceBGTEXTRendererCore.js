@@ -106,19 +106,19 @@ GameBoyAdvanceBGTEXTRenderer.prototype.computeTileNumber = function (yTile, xTil
     switch (this.tileMode | 0) {
         //1x1
         case 0:
-            tileNumber = (tileNumber | 0) | ((yTile & 0x1F) << 5);
+            tileNumber = tileNumber | ((yTile & 0x1F) << 5);
             break;
         //2x1
         case 1:
-            tileNumber = (tileNumber | 0) | (((xTile & 0x20) | (yTile & 0x1F)) << 5);
+            tileNumber = tileNumber | (((xTile & 0x20) | (yTile & 0x1F)) << 5);
             break;
         //1x2
         case 2:
-            tileNumber = (tileNumber | 0) | ((yTile & 0x3F) << 5);
+            tileNumber = tileNumber | ((yTile & 0x3F) << 5);
             break;
         //2x2
         case 3:
-            tileNumber = (tileNumber | 0) | (((xTile & 0x20) | (yTile & 0x1F)) << 5) | ((yTile & 0x20) << 6);
+            tileNumber = tileNumber | (((xTile & 0x20) | (yTile & 0x1F)) << 5) | ((yTile & 0x20) << 6);
     }
     return tileNumber | 0;
 }

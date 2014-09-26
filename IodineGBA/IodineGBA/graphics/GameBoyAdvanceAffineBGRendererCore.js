@@ -51,7 +51,7 @@ if (!!Math.imul) {
             x = ((x | 0) - Math.imul(this.actualBGdmx | 0, mosaicY | 0)) | 0;
             y = ((y | 0) - Math.imul(this.actualBGdmy | 0, mosaicY | 0)) | 0;
         }
-        for (var position = 0; position < 240; position = ((position | 0) + 1) | 0, x = ((x | 0) + (this.actualBGdx | 0)) | 0, y = ((y | 0) + (this.actualBGdy | 0)) | 0) {
+        for (var position = 0; (position | 0) < 240; position = ((position | 0) + 1) | 0, x = ((x | 0) + (this.actualBGdx | 0)) | 0, y = ((y | 0) + (this.actualBGdy | 0)) | 0) {
             //Fetch pixel:
             this.scratchBuffer[position | 0] = this.priorityFlag | BGObject.fetchPixel(x >> 8, y >> 8);
         }
