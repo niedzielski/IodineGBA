@@ -117,7 +117,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.computeTileNumber = function (yTile, xTil
             tileNumber = tileNumber | ((yTile & 0x3F) << 5);
             break;
         //2x2
-        case 3:
+        default:
             tileNumber = tileNumber | (((xTile & 0x20) | (yTile & 0x1F)) << 5) | ((yTile & 0x20) << 6);
     }
     return tileNumber | 0;
@@ -129,7 +129,15 @@ GameBoyAdvanceBGTEXTRenderer.prototype.process4BitVRAM = function (chrData, yOff
     //Parse flip attributes, grab palette, and then output pixel:
     var address = (chrData & 0x3FF) << 5;
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
-    address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 2));
+    if ((chrData & 0x800) == 0) {
+        //No vertical flip:
+        address = ((address | 0) + (yOffset << 2)) | 0;
+
+    }
+    else {
+        //Vertical flip:
+        address = ((address | 0) + ((0x7 - (yOffset | 0)) << 2)) | 0;
+    }
     //Copy out our pixels:
     this.render4BitVRAM(chrData >> 8, address | 0);
 }
@@ -137,12 +145,11 @@ if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceBGTEXTRenderer.prototype.render4BitVRAM = function (chrData, address) {
         chrData = chrData | 0;
         address = address | 0;
-        var paletteOffset = chrData & 0xF0;
-        var data = 0;
         //Unrolled data tile line fetch:
         if ((address | 0) < 0x10000) {
             //Tile address valid:
-            data = this.VRAM32[address >> 2] | 0;
+            var paletteOffset = chrData & 0xF0;
+            var data = this.VRAM32[address >> 2] | 0;
             if ((chrData & 0x4) == 0) {
                 //Normal Horizontal:
                 this.tileFetched[0] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
@@ -167,174 +174,176 @@ if (__LITTLE_ENDIAN__) {
             }
         }
         else {
-            //In GBA mode on NDS, we display transparency on invalid tiles:
-            data = this.gfx.transparency | this.priorityFlag;
-            this.tileFetched[0] = data | 0;
-            this.tileFetched[1] = data | 0;
-            this.tileFetched[2] = data | 0;
-            this.tileFetched[3] = data | 0;
-            this.tileFetched[4] = data | 0;
-            this.tileFetched[5] = data | 0;
-            this.tileFetched[6] = data | 0;
-            this.tileFetched[7] = data | 0;
+            //Tile address invalid:
+            this.addressInvalidRender();
         }
     }
 }
 else {
     GameBoyAdvanceBGTEXTRenderer.prototype.render4BitVRAM = function (chrData, address) {
-        chrData = chrData | 0;
-        address = address | 0;
-        var paletteOffset = chrData & 0xF0;
-        var data = 0;
         //Unrolled data tile line fetch:
-        if ((address | 0) < 0x10000) {
+        if (address < 0x10000) {
             //Tile address valid:
+            var paletteOffset = chrData & 0xF0;
+            var data = this.VRAM[address];
             if ((chrData & 0x4) == 0) {
                 //Normal Horizontal:
-                data = this.VRAM[address | 0] | 0;
                 this.tileFetched[0] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
                 this.tileFetched[1] = this.palette16[paletteOffset | (data >> 4)] | this.priorityFlag;
-                data = this.VRAM[address | 1] | 0;
+                data = this.VRAM[address | 1];
                 this.tileFetched[2] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
                 this.tileFetched[3] = this.palette16[paletteOffset | (data >> 4)] | this.priorityFlag;
-                data = this.VRAM[address | 2] | 0;
+                data = this.VRAM[address | 2];
                 this.tileFetched[4] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
                 this.tileFetched[5] = this.palette16[paletteOffset | (data >> 4)] | this.priorityFlag;
-                data = this.VRAM[address | 3] | 0;
+                data = this.VRAM[address | 3];
                 this.tileFetched[6] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
                 this.tileFetched[7] = this.palette16[paletteOffset | (data >> 4)] | this.priorityFlag;
             }
             else {
                 //Flipped Horizontally:
-                data = this.VRAM[address | 0] | 0;
                 this.tileFetched[7] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
                 this.tileFetched[6] = this.palette16[paletteOffset | (data >> 4)] | this.priorityFlag;
-                data = this.VRAM[address | 1] | 0;
+                data = this.VRAM[address | 1];
                 this.tileFetched[5] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
                 this.tileFetched[4] = this.palette16[paletteOffset | (data >> 4)] | this.priorityFlag;
-                data = this.VRAM[address | 2] | 0;
+                data = this.VRAM[address | 2];
                 this.tileFetched[3] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
                 this.tileFetched[2] = this.palette16[paletteOffset | (data >> 4)] | this.priorityFlag;
-                data = this.VRAM[address | 3] | 0;
+                data = this.VRAM[address | 3];
                 this.tileFetched[1] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
                 this.tileFetched[0] = this.palette16[paletteOffset | (data >> 4)] | this.priorityFlag;
             }
         }
         else {
-            //In GBA mode on NDS, we display transparency on invalid tiles:
-            data = this.gfx.transparency | this.priorityFlag;
-            this.tileFetched[0] = data | 0;
-            this.tileFetched[1] = data | 0;
-            this.tileFetched[2] = data | 0;
-            this.tileFetched[3] = data | 0;
-            this.tileFetched[4] = data | 0;
-            this.tileFetched[5] = data | 0;
-            this.tileFetched[6] = data | 0;
-            this.tileFetched[7] = data | 0;
+            //Tile address invalid:
+            this.addressInvalidRender();
         }
     }
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.process8BitVRAM = function (chrData, yOffset) {
-    //256 color tile mode:
+    //16 color tile mode:
     chrData = chrData | 0;
     yOffset = yOffset | 0;
-    //Parse flip attributes and output pixel:
+    //Parse flip attributes, grab palette, and then output pixel:
     var address = (chrData & 0x3FF) << 6;
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
-    address = ((address | 0) + ((((chrData & 0x800) == 0x800) ? (0x7 - (yOffset | 0)) : (yOffset | 0)) << 3)) | 0;
     //Copy out our pixels:
-    this.render8BitVRAM(chrData | 0, address | 0);
+    switch (chrData & 0xC00) {
+        //No Flip:
+        case 0:
+            address = ((address | 0) + (yOffset << 3)) | 0;
+            this.render8BitVRAMNormal(address | 0);
+            break;
+        //Horizontal Flip:
+        case 0x400:
+            address = ((address | 0) + (yOffset << 3)) | 0;
+            this.render8BitVRAMFlipped(address | 0);
+            break;
+        //Vertical Flip:
+        case 0x800:
+            address = ((address | 0) + ((0x7 - (yOffset | 0)) << 3)) | 0;
+            this.render8BitVRAMNormal(address | 0);
+            break;
+        //Horizontal & Vertical Flip:
+        default:
+            address = ((address | 0) + ((0x7 - (yOffset | 0)) << 3)) | 0;
+            this.render8BitVRAMFlipped(address | 0);
+    }
 }
 if (__LITTLE_ENDIAN__) {
-    GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAM = function (chrData, address) {
-        chrData = chrData | 0;
+    GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAMNormal = function (address) {
         address = address >> 2;
-        var data = 0;
         if ((address | 0) < 0x4000) {
             //Tile address valid:
-            if ((chrData & 0x400) == 0) {
-                //Normal Horizontal:
-                data = this.VRAM32[address | 0] | 0;
-                this.tileFetched[0] = this.palette256[data & 0xFF] | this.priorityFlag;
-                this.tileFetched[1] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
-                this.tileFetched[2] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
-                this.tileFetched[3] = this.palette256[data >>> 24] | this.priorityFlag;
-                data = this.VRAM32[address | 1] | 0;
-                this.tileFetched[4] = this.palette256[data & 0xFF] | this.priorityFlag;
-                this.tileFetched[5] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
-                this.tileFetched[6] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
-                this.tileFetched[7] = this.palette256[data >>> 24] | this.priorityFlag;
-            }
-            else {
-                //Flipped Horizontally:
-                data = this.VRAM32[address | 1] | 0;
-                this.tileFetched[0] = this.palette256[data >>> 24] | this.priorityFlag;
-                this.tileFetched[1] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
-                this.tileFetched[2] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
-                this.tileFetched[3] = this.palette256[data & 0xFF] | this.priorityFlag;
-                data = this.VRAM32[address | 0] | 0;
-                this.tileFetched[4] = this.palette256[data >>> 24] | this.priorityFlag;
-                this.tileFetched[5] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
-                this.tileFetched[6] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
-                this.tileFetched[7] = this.palette256[data & 0xFF] | this.priorityFlag;
-            }
+            //Normal Horizontal:
+            var data = this.VRAM32[address | 0] | 0;
+            this.tileFetched[0] = this.palette256[data & 0xFF] | this.priorityFlag;
+            this.tileFetched[1] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
+            this.tileFetched[2] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
+            this.tileFetched[3] = this.palette256[data >>> 24] | this.priorityFlag;
+            data = this.VRAM32[address | 1] | 0;
+            this.tileFetched[4] = this.palette256[data & 0xFF] | this.priorityFlag;
+            this.tileFetched[5] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
+            this.tileFetched[6] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
+            this.tileFetched[7] = this.palette256[data >>> 24] | this.priorityFlag;
         }
         else {
-            //In GBA mode on NDS, we display transparency on invalid tiles:
-            data = this.gfx.transparency | this.priorityFlag;
-            this.tileFetched[0] = data | 0;
-            this.tileFetched[1] = data | 0;
-            this.tileFetched[2] = data | 0;
-            this.tileFetched[3] = data | 0;
-            this.tileFetched[4] = data | 0;
-            this.tileFetched[5] = data | 0;
-            this.tileFetched[6] = data | 0;
-            this.tileFetched[7] = data | 0;
+            //Tile address invalid:
+            this.addressInvalidRender();
+        }
+    }
+    GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAMFlipped = function (address) {
+        address = address >> 2;
+        if ((address | 0) < 0x4000) {
+            //Tile address valid:
+            //Flipped Horizontally:
+            var data = this.VRAM32[address | 1] | 0;
+            this.tileFetched[0] = this.palette256[data >>> 24] | this.priorityFlag;
+            this.tileFetched[1] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
+            this.tileFetched[2] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
+            this.tileFetched[3] = this.palette256[data & 0xFF] | this.priorityFlag;
+            data = this.VRAM32[address | 0] | 0;
+            this.tileFetched[4] = this.palette256[data >>> 24] | this.priorityFlag;
+            this.tileFetched[5] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
+            this.tileFetched[6] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
+            this.tileFetched[7] = this.palette256[data & 0xFF] | this.priorityFlag;
+        }
+        else {
+            //Tile address invalid:
+            this.addressInvalidRender();
         }
     }
 }
 else {
-    GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAM = function (chrData, address) {
-        chrData = chrData | 0;
-        address = address | 0;
-        if ((address | 0) < 0x10000) {
+    GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAMNormal = function (address) {
+        if (address < 0x10000) {
             //Tile address valid:
-            if ((chrData & 0x400) == 0) {
-                //Normal Horizontal:
-                this.tileFetched[0] = this.palette256[this.VRAM[address | 0] & 0xFF] | this.priorityFlag;
-                this.tileFetched[1] = this.palette256[this.VRAM[address | 1] & 0xFF] | this.priorityFlag;
-                this.tileFetched[2] = this.palette256[this.VRAM[address | 2] & 0xFF] | this.priorityFlag;
-                this.tileFetched[3] = this.palette256[this.VRAM[address | 3] & 0xFF] | this.priorityFlag;
-                this.tileFetched[4] = this.palette256[this.VRAM[address | 4] & 0xFF] | this.priorityFlag;
-                this.tileFetched[5] = this.palette256[this.VRAM[address | 5] & 0xFF] | this.priorityFlag;
-                this.tileFetched[6] = this.palette256[this.VRAM[address | 6] & 0xFF] | this.priorityFlag;
-                this.tileFetched[7] = this.palette256[this.VRAM[address | 7] & 0xFF] | this.priorityFlag;
-            }
-            else {
-                //Flipped Horizontally:
-                this.tileFetched[7] = this.palette256[this.VRAM[address | 0] & 0xFF] | this.priorityFlag;
-                this.tileFetched[6] = this.palette256[this.VRAM[address | 1] & 0xFF] | this.priorityFlag;
-                this.tileFetched[5] = this.palette256[this.VRAM[address | 2] & 0xFF] | this.priorityFlag;
-                this.tileFetched[4] = this.palette256[this.VRAM[address | 3] & 0xFF] | this.priorityFlag;
-                this.tileFetched[3] = this.palette256[this.VRAM[address | 4] & 0xFF] | this.priorityFlag;
-                this.tileFetched[2] = this.palette256[this.VRAM[address | 5] & 0xFF] | this.priorityFlag;
-                this.tileFetched[1] = this.palette256[this.VRAM[address | 6] & 0xFF] | this.priorityFlag;
-                this.tileFetched[0] = this.palette256[this.VRAM[address | 7] & 0xFF] | this.priorityFlag;
-            }
+            //Normal Horizontal:
+            this.tileFetched[0] = this.palette256[this.VRAM[address]] | this.priorityFlag;
+            this.tileFetched[1] = this.palette256[this.VRAM[address | 1]] | this.priorityFlag;
+            this.tileFetched[2] = this.palette256[this.VRAM[address | 2]] | this.priorityFlag;
+            this.tileFetched[3] = this.palette256[this.VRAM[address | 3]] | this.priorityFlag;
+            this.tileFetched[4] = this.palette256[this.VRAM[address | 4]] | this.priorityFlag;
+            this.tileFetched[5] = this.palette256[this.VRAM[address | 5]] | this.priorityFlag;
+            this.tileFetched[6] = this.palette256[this.VRAM[address | 6]] | this.priorityFlag;
+            this.tileFetched[7] = this.palette256[this.VRAM[address | 7]] | this.priorityFlag;
         }
         else {
-            //In GBA mode on NDS, we display transparency on invalid tiles:
-            var data = this.gfx.transparency | this.priorityFlag;
-            this.tileFetched[0] = data | 0;
-            this.tileFetched[1] = data | 0;
-            this.tileFetched[2] = data | 0;
-            this.tileFetched[3] = data | 0;
-            this.tileFetched[4] = data | 0;
-            this.tileFetched[5] = data | 0;
-            this.tileFetched[6] = data | 0;
-            this.tileFetched[7] = data | 0;
+            //Tile address invalid:
+            this.addressInvalidRender();
         }
     }
+    GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAMFlipped = function (address) {
+        if (address < 0x10000) {
+            //Tile address valid:
+            //Flipped Horizontally:
+            this.tileFetched[7] = this.palette256[this.VRAM[address]] | this.priorityFlag;
+            this.tileFetched[6] = this.palette256[this.VRAM[address | 1]] | this.priorityFlag;
+            this.tileFetched[5] = this.palette256[this.VRAM[address | 2]] | this.priorityFlag;
+            this.tileFetched[4] = this.palette256[this.VRAM[address | 3]] | this.priorityFlag;
+            this.tileFetched[3] = this.palette256[this.VRAM[address | 4]] | this.priorityFlag;
+            this.tileFetched[2] = this.palette256[this.VRAM[address | 5]] | this.priorityFlag;
+            this.tileFetched[1] = this.palette256[this.VRAM[address | 6]] | this.priorityFlag;
+            this.tileFetched[0] = this.palette256[this.VRAM[address | 7]] | this.priorityFlag;
+        }
+        else {
+            //Tile address invalid:
+            this.addressInvalidRender();
+        }
+    }
+}
+GameBoyAdvanceBGTEXTRenderer.prototype.addressInvalidRender = function () {
+    //In GBA mode on NDS, we display transparency on invalid tiles:
+    var data = this.gfx.transparency | this.priorityFlag;
+    this.tileFetched[0] = data | 0;
+    this.tileFetched[1] = data | 0;
+    this.tileFetched[2] = data | 0;
+    this.tileFetched[3] = data | 0;
+    this.tileFetched[4] = data | 0;
+    this.tileFetched[5] = data | 0;
+    this.tileFetched[6] = data | 0;
+    this.tileFetched[7] = data | 0;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAMStart = function (pixelPipelinePosition) {
     //Handle the the first tile of the scan-line specially:
