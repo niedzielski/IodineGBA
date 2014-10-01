@@ -278,16 +278,16 @@ if (__LITTLE_ENDIAN__) {
         if ((address | 0) < 0x4000) {
             //Tile address valid:
             //Flipped Horizontally:
-            var data = this.VRAM32[address | 1] | 0;
-            this.tileFetched[0] = this.palette256[data >>> 24] | this.priorityFlag;
-            this.tileFetched[1] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
-            this.tileFetched[2] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
-            this.tileFetched[3] = this.palette256[data & 0xFF] | this.priorityFlag;
-            data = this.VRAM32[address | 0] | 0;
+            var data = this.VRAM32[address | 0] | 0;
             this.tileFetched[4] = this.palette256[data >>> 24] | this.priorityFlag;
             this.tileFetched[5] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
             this.tileFetched[6] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
             this.tileFetched[7] = this.palette256[data & 0xFF] | this.priorityFlag;
+            data = this.VRAM32[address | 1] | 0;
+            this.tileFetched[0] = this.palette256[data >>> 24] | this.priorityFlag;
+            this.tileFetched[1] = this.palette256[(data >> 16) & 0xFF] | this.priorityFlag;
+            this.tileFetched[2] = this.palette256[(data >> 8) & 0xFF] | this.priorityFlag;
+            this.tileFetched[3] = this.palette256[data & 0xFF] | this.priorityFlag;
         }
         else {
             //Tile address invalid:
