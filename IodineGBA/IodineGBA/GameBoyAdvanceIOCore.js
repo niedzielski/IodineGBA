@@ -44,6 +44,8 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     this.saves = new GameBoyAdvanceSaves(this);
     this.wait = new GameBoyAdvanceWait(this);
     this.cpu = new GameBoyAdvanceCPU(this);
+    this.ARM = this.cpu.ARM;
+    this.THUMB = this.cpu.THUMB;
     this.memory.loadReferences();
 }
 GameBoyAdvanceIO.prototype.enter = function (CPUCyclesTotal) {
@@ -69,14 +71,14 @@ GameBoyAdvanceIO.prototype.run = function () {
         //Handle the current system state selected:
         switch (this.systemStatus | 0) {
             case 0: //CPU Handle State (Normal ARM)
-                this.cpu.executeIterationRegularARM();
+                this.ARM.executeIteration();
                 break;
             case 1: //CPU Handle State (Bubble ARM)
             case 3:
                 this.cpu.executeBubbleARM();
                 break;
             case 4: //CPU Handle State (Normal THUMB)
-                this.cpu.executeIterationRegularTHUMB();
+                this.THUMB.executeIteration();
                 break;
             case 5: //CPU Handle State (Bubble THUMB)
             case 7:
@@ -84,7 +86,7 @@ GameBoyAdvanceIO.prototype.run = function () {
                 break;
             case 2: //CPU Handle State (IRQ)
             case 6:
-                this.cpu.executeIRQ();
+                this.cpu.IRQ();
                 break;
             case 0x8: //DMA Handle State
             case 0x9:

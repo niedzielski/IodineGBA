@@ -82,11 +82,6 @@ GameBoyAdvanceCPU.prototype.HLEReset = function () {
     this.registers[15] = 0x8000000;
     this.MODEBits = 0x1F;
 }
-GameBoyAdvanceCPU.prototype.executeIRQ = function () {
-    //Handle an IRQ:
-    this.IRQ();
-    this.IOCore.deflagIRQ();
-}
 GameBoyAdvanceCPU.prototype.executeBubbleARM = function () {
     //Tick the pipeline and bubble out invalidity:
     this.pipelineInvalid >>= 1;
@@ -98,10 +93,6 @@ GameBoyAdvanceCPU.prototype.executeBubbleARM = function () {
         this.IOCore.deflagBubble();
     }
 }
-GameBoyAdvanceCPU.prototype.executeIterationRegularARM = function () {
-    //Tick the pipeline of the selected instruction set:
-    this.ARM.executeIteration();
-}
 GameBoyAdvanceCPU.prototype.executeBubbleTHUMB = function () {
     //Tick the pipeline and bubble out invalidity:
     this.pipelineInvalid >>= 1;
@@ -112,10 +103,6 @@ GameBoyAdvanceCPU.prototype.executeBubbleTHUMB = function () {
         //Change state to normal execution:
         this.IOCore.deflagBubble();
     }
-}
-GameBoyAdvanceCPU.prototype.executeIterationRegularTHUMB = function () {
-    //Tick the pipeline of the selected instruction set:
-    this.THUMB.executeIteration();
 }
 GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
     branchTo = branchTo | 0;
@@ -204,6 +191,8 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
         //HLE the IRQ entrance:
         this.HLEIRQEnter();
     }
+    //Deflag IRQ from state:
+    this.IOCore.deflagIRQ();
 }
 GameBoyAdvanceCPU.prototype.HLEIRQEnter = function () {
     //Exception always enter ARM mode:
