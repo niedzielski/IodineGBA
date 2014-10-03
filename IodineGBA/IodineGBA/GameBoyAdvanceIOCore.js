@@ -154,9 +154,6 @@ GameBoyAdvanceIO.prototype.updateCoreSpill = function () {
 GameBoyAdvanceIO.prototype.updateCoreSpillRetain = function () {
     //Keep the last prediction, just decrement it out, as it's still valid:
     this.nextEventClocks = ((this.nextEventClocks | 0) - (this.accumulatedClocks | 0)) | 0;
-    if (this.nextEventClocks <= 0) {
-        alert(this.nextEventClocks);
-    }
     this.updateCoreClocking();
 }
 GameBoyAdvanceIO.prototype.updateCoreClocking = function () {
