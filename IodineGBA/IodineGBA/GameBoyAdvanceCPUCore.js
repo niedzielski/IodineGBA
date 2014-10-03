@@ -73,7 +73,7 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
         this.HLEReset();
     }
     //Start in fully bubbled pipeline mode:
-    this.IOCore.flagStepper(1);
+    this.IOCore.flagBubble();
 }
 GameBoyAdvanceCPU.prototype.HLEReset = function () {
     this.registersSVC[0] = 0x3007FE0;
@@ -85,7 +85,7 @@ GameBoyAdvanceCPU.prototype.HLEReset = function () {
 GameBoyAdvanceCPU.prototype.executeIRQ = function () {
     //Handle an IRQ:
     this.IRQ();
-    this.IOCore.deflagStepper(2);
+    this.IOCore.deflagIRQ();
 }
 GameBoyAdvanceCPU.prototype.executeBubbleARM = function () {
     //Tick the pipeline and bubble out invalidity:
@@ -95,7 +95,7 @@ GameBoyAdvanceCPU.prototype.executeBubbleARM = function () {
     //If on the second bubble, kick ourselves out of the bubble mode:
     if ((this.pipelineInvalid | 0) == 0) {
         //Change state to normal execution:
-        this.IOCore.deflagStepper(1);
+        this.IOCore.deflagBubble();
     }
 }
 GameBoyAdvanceCPU.prototype.executeIterationRegularARM = function () {
@@ -110,7 +110,7 @@ GameBoyAdvanceCPU.prototype.executeBubbleTHUMB = function () {
     //If on the second bubble, kick ourselves out of the bubble mode:
     if ((this.pipelineInvalid | 0) == 0) {
         //Change state to normal execution:
-        this.IOCore.deflagStepper(1);
+        this.IOCore.deflagBubble();
     }
 }
 GameBoyAdvanceCPU.prototype.executeIterationRegularTHUMB = function () {
@@ -124,7 +124,7 @@ GameBoyAdvanceCPU.prototype.branch = function (branchTo) {
         this.registers[15] = branchTo | 0;
         //Mark pipeline as invalid:
         this.pipelineInvalid = 0x2;
-        this.IOCore.flagStepper(1);
+        this.IOCore.flagBubble();
         //Next PC fetch has to update the address bus:
         this.wait.NonSequentialBroadcastClear();
     }
@@ -147,7 +147,7 @@ GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
 }
 GameBoyAdvanceCPU.prototype.assertIRQ = function () {
     if (this.triggeredIRQ && !this.IRQDisabled) {
-        this.IOCore.flagStepper(2);
+        this.IOCore.flagIRQ();
     }
 }
 GameBoyAdvanceCPU.prototype.getCurrentFetchValue = function () {
@@ -176,10 +176,10 @@ GameBoyAdvanceCPU.prototype.getLR = function () {
 GameBoyAdvanceCPU.prototype.THUMBBitModify = function (isThumb) {
     this.InTHUMB = isThumb;
     if (isThumb) {
-        this.IOCore.flagStepper(4);
+        this.IOCore.flagTHUMB();
     }
     else {
-        this.IOCore.deflagStepper(4);
+        this.IOCore.deflagTHUMB();
     }
 }
 GameBoyAdvanceCPU.prototype.IRQ = function () {

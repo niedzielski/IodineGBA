@@ -117,7 +117,7 @@ GameBoyAdvanceIO.prototype.run = function () {
             default: //Handle Stop State / End of stepping
                 if ((this.systemStatus & 0x40) == 0x40) {
                     //End of Stepping:
-                    this.deflagStepper(0x40);
+                    this.deflagIterationEnd();
                     return;
                 }
                 //Stop Mode:
@@ -154,6 +154,9 @@ GameBoyAdvanceIO.prototype.updateCoreSpill = function () {
 GameBoyAdvanceIO.prototype.updateCoreSpillRetain = function () {
     //Keep the last prediction, just decrement it out, as it's still valid:
     this.nextEventClocks = ((this.nextEventClocks | 0) - (this.accumulatedClocks | 0)) | 0;
+    if (this.nextEventClocks <= 0) {
+        alert(this.nextEventClocks);
+    }
     this.updateCoreClocking();
 }
 GameBoyAdvanceIO.prototype.updateCoreClocking = function () {
@@ -192,7 +195,7 @@ GameBoyAdvanceIO.prototype.getRemainingCycles = function () {
     //Return the number of cycles left until iteration end:
     if ((this.cyclesToIterate | 0) < 1) {
         //Change our stepper to our end sequence:
-        this.flagStepper(0x40);
+        this.flagIterationEnd();
         return 0;
     }
     return this.cyclesToIterate | 0;
@@ -204,7 +207,7 @@ GameBoyAdvanceIO.prototype.handleHalt = function () {
     }
     else {
         //Exit HALT promptly:
-        this.deflagStepper(0x10);
+        this.deflagHalt();
     }
 }
 GameBoyAdvanceIO.prototype.handleStop = function () {
@@ -243,15 +246,61 @@ GameBoyAdvanceIO.prototype.solveClosestTime = function (clocks1, clocks2) {
     }
     return clocks | 0;
 }
-GameBoyAdvanceIO.prototype.deflagStepper = function (statusFlag) {
-    statusFlag = statusFlag | 0;
-    //Deflag a system event to step through:
-    this.systemStatus = this.systemStatus & (~statusFlag);
+GameBoyAdvanceIO.prototype.flagBubble = function () {
+    //Flag a CPU pipeline bubble to step through:
+    this.systemStatus = this.systemStatus | 0x1;
 }
-GameBoyAdvanceIO.prototype.flagStepper = function (statusFlag) {
-    statusFlag = statusFlag | 0;
-    //Flag a system event to step through:
-    this.systemStatus = this.systemStatus | statusFlag;
+GameBoyAdvanceIO.prototype.deflagBubble = function () {
+    //Deflag a CPU pipeline bubble to step through:
+    this.systemStatus = this.systemStatus & 0x7E;
+}
+GameBoyAdvanceIO.prototype.flagIRQ = function () {
+    //Flag a CPU IRQ to step through:
+    this.systemStatus = this.systemStatus | 0x2;
+}
+GameBoyAdvanceIO.prototype.deflagIRQ = function () {
+    //Deflag a CPU IRQ to step through:
+    this.systemStatus = this.systemStatus & 0x7D;
+}
+GameBoyAdvanceIO.prototype.flagTHUMB = function () {
+    //Flag THUMB CPU mode to step through:
+    this.systemStatus = this.systemStatus | 0x4;
+}
+GameBoyAdvanceIO.prototype.deflagTHUMB = function () {
+    //Deflag THUMB CPU mode to step through:
+    this.systemStatus = this.systemStatus & 0x7B;
+}
+GameBoyAdvanceIO.prototype.flagDMA = function () {
+    //Flag a DMA event to step through:
+    this.systemStatus = this.systemStatus | 0x8;
+}
+GameBoyAdvanceIO.prototype.deflagDMA = function () {
+    //Deflag a DMA event to step through:
+    this.systemStatus = this.systemStatus & 0x77;
+}
+GameBoyAdvanceIO.prototype.flagHalt = function () {
+    //Flag a halt event to step through:
+    this.systemStatus = this.systemStatus | 0x10;
+}
+GameBoyAdvanceIO.prototype.deflagHalt = function () {
+    //Deflag a halt event to step through:
+    this.systemStatus = this.systemStatus & 0x6F;
+}
+GameBoyAdvanceIO.prototype.flagStop = function () {
+    //Flag a halt event to step through:
+    this.systemStatus = this.systemStatus | 0x20;
+}
+GameBoyAdvanceIO.prototype.deflagStop = function () {
+    //Deflag a halt event to step through:
+    this.systemStatus = this.systemStatus & 0x5F;
+}
+GameBoyAdvanceIO.prototype.flagIterationEnd = function () {
+    //Flag a run loop kill event to step through:
+    this.systemStatus = this.systemStatus | 0x40;
+}
+GameBoyAdvanceIO.prototype.deflagIterationEnd = function () {
+    //Deflag a run loop kill event to step through:
+    this.systemStatus = this.systemStatus & 0x3F;
 }
 GameBoyAdvanceIO.prototype.isStopped = function () {
     return ((this.systemStatus & 0x40) == 0x40);

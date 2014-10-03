@@ -137,7 +137,14 @@ GameBoyAdvanceWait.prototype.readPOSTBOOT = function () {
 GameBoyAdvanceWait.prototype.writeHALTCNT = function (data) {
     data = data | 0;
     //HALT/STOP mode entrance:
-    this.IOCore.flagStepper(0x10 << ((data & 0x80) >> 7));
+    if ((data & 0x80) == 0) {
+        //Halt:
+        this.IOCore.flagHalt();
+    }
+    else {
+        //Stop:
+        this.IOCore.flagStop();
+    }
 }
 GameBoyAdvanceWait.prototype.writeConfigureWRAM8 = function (address, data) {
     address = address | 0;

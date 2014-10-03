@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -247,10 +247,10 @@ GameBoyAdvanceSWI.prototype.RegisterRAMReset = function () {
     }
 }
 GameBoyAdvanceSWI.prototype.Halt = function () {
-    this.IOCore.flagStepper(0x10);
+    this.IOCore.flagHalt();
 }
 GameBoyAdvanceSWI.prototype.Stop = function () {
-    this.IOCore.flagStepper(0x20);
+    this.IOCore.flagStop();
 }
 GameBoyAdvanceSWI.prototype.IntrWait = function () {
     this.IOCore.irq.IME = true;

@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -63,7 +63,7 @@ GameBoyAdvanceJoyPad.prototype.keyPress = function (keyPressed) {
     if (this.keyIRQEnabled) {
         this.checkForIRQ();
     }
-    this.IOCore.deflagStepper(0x20);
+    this.IOCore.deflagStop();
 }
 GameBoyAdvanceJoyPad.prototype.keyRelease = function (keyReleased) {
     switch (keyReleased.toUpperCase()) {
