@@ -51,7 +51,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.renderScanLine = function (line) {
     //Get 8 pixels of data:
     this.processVRAM(chrData | 0, yTileOffset | 0);
     //Copy the buffered tile to line:
-    this.fetchVRAMStart(this.BGXCoord & 0x7);
+    this.fetchVRAMStart();
     //Render the rest of the tiles fast:
     this.renderWholeTiles(xTileStart | 0, yTileStart | 0, yTileOffset | 0);
     if (this.gfx.BGMosaic[this.BGLayer & 3]) {
@@ -127,16 +127,17 @@ GameBoyAdvanceBGTEXTRenderer.prototype.process4BitVRAM = function (chrData, yOff
     chrData = chrData | 0;
     yOffset = yOffset | 0;
     //Parse flip attributes, grab palette, and then output pixel:
-    var address = (chrData & 0x3FF) << 5;
+    var address = (chrData & 0x3FF) << 3;
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
     if ((chrData & 0x800) == 0) {
         //No vertical flip:
-        address = ((address | 0) + (yOffset << 2)) | 0;
+        address = ((address | 0) + (yOffset | 0)) | 0;
 
     }
     else {
         //Vertical flip:
-        address = ((address | 0) + ((0x7 - (yOffset | 0)) << 2)) | 0;
+        address = ((address | 0) + 7) | 0;
+        address = ((address | 0) - (yOffset | 0)) | 0;
     }
     //Copy out our pixels:
     this.render4BitVRAM(chrData >> 8, address | 0);
@@ -146,10 +147,10 @@ if (__LITTLE_ENDIAN__) {
         chrData = chrData | 0;
         address = address | 0;
         //Unrolled data tile line fetch:
-        if ((address | 0) < 0x10000) {
+        if ((address | 0) < 0x4000) {
             //Tile address valid:
             var paletteOffset = chrData & 0xF0;
-            var data = this.VRAM32[address >> 2] | 0;
+            var data = this.VRAM32[address | 0] | 0;
             if ((chrData & 0x4) == 0) {
                 //Normal Horizontal:
                 this.tileFetched[0] = this.palette16[paletteOffset | (data & 0xF)] | this.priorityFlag;
@@ -181,6 +182,7 @@ if (__LITTLE_ENDIAN__) {
 }
 else {
     GameBoyAdvanceBGTEXTRenderer.prototype.render4BitVRAM = function (chrData, address) {
+        address <<= 2;
         //Unrolled data tile line fetch:
         if (address < 0x10000) {
             //Tile address valid:
@@ -221,39 +223,48 @@ else {
         }
     }
 }
+/*
+ If there was 64 bit typed array support,
+ then process8BitVRAM, render8BitVRAMNormal,
+ and render8BitVRAMFlipped could be optimized further.
+ Namely make one fetch for tile data instead of two,
+ and cancel a y-offset shift.
+ */
 GameBoyAdvanceBGTEXTRenderer.prototype.process8BitVRAM = function (chrData, yOffset) {
     //16 color tile mode:
     chrData = chrData | 0;
     yOffset = yOffset | 0;
     //Parse flip attributes, grab palette, and then output pixel:
-    var address = (chrData & 0x3FF) << 6;
+    var address = (chrData & 0x3FF) << 4;
     address = ((address | 0) + (this.BGCharacterBaseBlock | 0)) | 0;
     //Copy out our pixels:
     switch (chrData & 0xC00) {
         //No Flip:
         case 0:
-            address = ((address | 0) + (yOffset << 3)) | 0;
+            address = ((address | 0) + (yOffset << 1)) | 0;
             this.render8BitVRAMNormal(address | 0);
             break;
         //Horizontal Flip:
         case 0x400:
-            address = ((address | 0) + (yOffset << 3)) | 0;
+            address = ((address | 0) + (yOffset << 1)) | 0;
             this.render8BitVRAMFlipped(address | 0);
             break;
         //Vertical Flip:
         case 0x800:
-            address = ((address | 0) + ((0x7 - (yOffset | 0)) << 3)) | 0;
+            address = ((address | 0) + 14) | 0;
+            address = ((address | 0) - (yOffset << 1)) | 0;
             this.render8BitVRAMNormal(address | 0);
             break;
         //Horizontal & Vertical Flip:
         default:
-            address = ((address | 0) + ((0x7 - (yOffset | 0)) << 3)) | 0;
+            address = ((address | 0) + 14) | 0;
+            address = ((address | 0) - (yOffset << 1)) | 0;
             this.render8BitVRAMFlipped(address | 0);
     }
 }
 if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAMNormal = function (address) {
-        address = address >> 2;
+        address = address | 0;
         if ((address | 0) < 0x4000) {
             //Tile address valid:
             //Normal Horizontal:
@@ -274,7 +285,7 @@ if (__LITTLE_ENDIAN__) {
         }
     }
     GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAMFlipped = function (address) {
-        address = address >> 2;
+        address = address | 0;
         if ((address | 0) < 0x4000) {
             //Tile address valid:
             //Flipped Horizontally:
@@ -297,6 +308,7 @@ if (__LITTLE_ENDIAN__) {
 }
 else {
     GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAMNormal = function (address) {
+        address <<= 2;
         if (address < 0x10000) {
             //Tile address valid:
             //Normal Horizontal:
@@ -315,6 +327,7 @@ else {
         }
     }
     GameBoyAdvanceBGTEXTRenderer.prototype.render8BitVRAMFlipped = function (address) {
+        address <<= 2;
         if (address < 0x10000) {
             //Tile address valid:
             //Flipped Horizontally:
@@ -345,9 +358,9 @@ GameBoyAdvanceBGTEXTRenderer.prototype.addressInvalidRender = function () {
     this.tileFetched[6] = data | 0;
     this.tileFetched[7] = data | 0;
 }
-GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAMStart = function (pixelPipelinePosition) {
+GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAMStart = function () {
     //Handle the the first tile of the scan-line specially:
-    pixelPipelinePosition = pixelPipelinePosition | 0;
+    var pixelPipelinePosition = this.BGXCoord & 0x7;
     switch (pixelPipelinePosition | 0) {
         case 0:
             this.scratchBuffer[0] = this.tileFetched[0] | 0;
@@ -363,7 +376,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.fetchVRAMStart = function (pixelPipelineP
             this.scratchBuffer[(5 - (pixelPipelinePosition | 0)) | 0] = this.tileFetched[5] | 0;
         case 6:
             this.scratchBuffer[(6 - (pixelPipelinePosition | 0)) | 0] = this.tileFetched[6] | 0;
-        case 7:
+        default:
             this.scratchBuffer[(7 - (pixelPipelinePosition | 0)) | 0] = this.tileFetched[7] | 0;
     }
 }
@@ -386,7 +399,7 @@ GameBoyAdvanceBGTEXTRenderer.prototype.screenBaseBlockPreprocess = function () {
     this.BGScreenBaseBlock = this.gfx.BGScreenBaseBlock[this.BGLayer & 3] << 10;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.characterBaseBlockPreprocess = function () {
-    this.BGCharacterBaseBlock = this.gfx.BGCharacterBaseBlock[this.BGLayer & 3] << 14;
+    this.BGCharacterBaseBlock = this.gfx.BGCharacterBaseBlock[this.BGLayer & 3] << 12;
 }
 GameBoyAdvanceBGTEXTRenderer.prototype.writeBGHOFS0 = function (data) {
     data = data | 0;
