@@ -58,7 +58,6 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     this.CPSR = new ARMCPSRAttributeTable();
     this.IRQDisabled = true;        //I Bit
     this.FIQDisabled = true;        //F Bit
-    this.InTHUMB = false;            //T Bit
     this.MODEBits = 0x13;            //M0 thru M4 Bits
     //Banked SPSR Registers:
     this.SPSRFIQ = [false, false, false, false, true, true, false, 0x13];    //FIQ
@@ -138,7 +137,7 @@ GameBoyAdvanceCPU.prototype.assertIRQ = function () {
     }
 }
 GameBoyAdvanceCPU.prototype.getCurrentFetchValue = function () {
-    if (this.InTHUMB) {
+    if (this.IOCore.inTHUMB()) {
         return this.THUMB.getCurrentFetchValue() | 0;
     }
     else {
@@ -153,7 +152,7 @@ GameBoyAdvanceCPU.prototype.enterTHUMB = function () {
 }
 GameBoyAdvanceCPU.prototype.getLR = function () {
     //Get the previous instruction address:
-    if (this.InTHUMB) {
+    if (this.IOCore.inTHUMB()) {
         return this.THUMB.getLR() | 0;
     }
     else {
@@ -161,7 +160,6 @@ GameBoyAdvanceCPU.prototype.getLR = function () {
     }
 }
 GameBoyAdvanceCPU.prototype.THUMBBitModify = function (isThumb) {
-    this.InTHUMB = isThumb;
     if (isThumb) {
         this.IOCore.flagTHUMB();
     }
@@ -173,7 +171,7 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
     //Mode bits are set to IRQ:
     this.switchMode(0x12);
     //Save link register:
-    if (this.InTHUMB) {
+    if (this.IOCore.inTHUMB()) {
         this.registers[14] = this.THUMB.getIRQLR() | 0;
     }
     else {
@@ -181,9 +179,9 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
     }
     //Disable IRQ:
     this.IRQDisabled = true;
+	//Exception always enter ARM mode:
+    this.enterARM();
     if (this.IOCore.BIOSFound) {
-        //Exception always enter ARM mode:
-        this.enterARM();
         //IRQ exception vector:
         this.branch(0x18);
     }
@@ -195,8 +193,6 @@ GameBoyAdvanceCPU.prototype.IRQ = function () {
     this.IOCore.deflagIRQ();
 }
 GameBoyAdvanceCPU.prototype.HLEIRQEnter = function () {
-    //Exception always enter ARM mode:
-    this.enterARM();
     //Get the base address:
     var currentAddress = this.registers[0xD] | 0;
     //Updating the address bus away from PC fetch:
@@ -240,7 +236,7 @@ GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
     var data = this.CPSR.setSUBFlags(this.registers[0xE] | 0, 4) | 0;
     //Restore SPSR to CPSR:
     this.SPSRtoCPSR();
-    data &= (!this.InTHUMB) ? -4 : -2;
+    data &= (!this.IOCore.inTHUMB()) ? -4 : -2;
     //We performed a branch:
     this.branch(data | 0);
 }
@@ -258,7 +254,7 @@ GameBoyAdvanceCPU.prototype.SWI = function () {
         this.branch(0x8);
     }
     else {
-        if (this.InTHUMB) {
+        if (this.IOCore.inTHUMB()) {
             this.THUMB.incrementProgramCounter();
             //HLE the SWI command:
             this.swi.execute(this.THUMB.getSWICode() | 0);
@@ -286,7 +282,7 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
     }
     else {
         //Pretend we didn't execute the bad instruction then:
-        if (this.InTHUMB) {
+        if (this.IOCore.inTHUMB()) {
             this.THUMB.incrementProgramCounter();
         }
         else {
@@ -356,7 +352,7 @@ GameBoyAdvanceCPU.prototype.CPSRtoSPSR = function (newMode) {
     spsr[3] = this.CPSR.getCarry();
     spsr[4] = this.IRQDisabled;
     spsr[5] = this.FIQDisabled;
-    spsr[6] = this.InTHUMB;
+    spsr[6] = this.IOCore.inTHUMB();
     spsr[7] = this.MODEBits;
 }
 GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {

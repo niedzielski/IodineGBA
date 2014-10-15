@@ -307,6 +307,9 @@ GameBoyAdvanceIO.prototype.isStopped = function () {
 GameBoyAdvanceIO.prototype.inDMA = function () {
     return ((this.systemStatus & 0x8) == 0x8);
 }
+GameBoyAdvanceIO.prototype.inTHUMB = function () {
+    return ((this.systemStatus & 0x4) == 0x4);
+}
 GameBoyAdvanceIO.prototype.getCurrentFetchValue = function () {
     var fetch = 0;
     if ((this.systemStatus & 0x8) == 0) {

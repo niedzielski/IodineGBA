@@ -303,7 +303,7 @@ ARMInstructionSet.prototype.guardProgramCounterRegisterWriteCPSR = function (dat
     data = data | 0;
     //Restore SPSR to CPSR:
     this.CPUCore.SPSRtoCPSR();
-    data &= (!this.CPUCore.InTHUMB) ? -4 : -2;
+    data &= (!this.CPUCore.IOCore.inTHUMB()) ? -4 : -2;
     //We performed a branch:
     this.CPUCore.branch(data | 0);
 }
