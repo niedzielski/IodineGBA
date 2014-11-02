@@ -198,6 +198,9 @@ GameBoyAdvanceEmulator.prototype.setSpeed = function (speed) {
         this.reinitializeAudio();
     }
 }
+GameBoyAdvanceEmulator.prototype.incrementSpeed = function (delta) {
+    this.setSpeed(parseFloat(delta) + this.settings.emulatorSpeed);
+}
 GameBoyAdvanceEmulator.prototype.getSpeed = function (speed) {
     return this.settings.emulatorSpeed;
 }
@@ -327,8 +330,8 @@ GameBoyAdvanceEmulator.prototype.changeVolume = function (newVolume) {
         this.audio.changeVolume(this.settings.audioVolume);
     }
 }
-GameBoyAdvanceEmulator.prototype.getVolume = function (newVolume) {
-    return this.settings.audioVolume;
+GameBoyAdvanceEmulator.prototype.incrementVolume = function (delta) {
+    this.changeVolume(parseFloat(delta) + this.settings.audioVolume);
 }
 GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInputLeft, downsampleInputRight) {
     downsampleInputLeft = downsampleInputLeft | 0;
@@ -370,12 +373,16 @@ GameBoyAdvanceEmulator.prototype.reinitializeAudio = function () {
         this.enableAudio();
     }
 }
-GameBoyAdvanceEmulator.prototype.toggleSkipBootROM = function (skipBoot) {
-    this.settings.SKIPBoot = !!skipBoot;
+GameBoyAdvanceEmulator.prototype.enableSkipBootROM = function () {
+    this.settings.SKIPBoot = true;
 }
-GameBoyAdvanceEmulator.prototype.toggleDynamicSpeed = function (dynamicSpeed) {
-    this.settings.dynamicSpeed = !!dynamicSpeed;
-    if (!this.settings.dynamicSpeed) {
-        this.setSpeed(1);
-    }
+GameBoyAdvanceEmulator.prototype.disableSkipBootROM = function () {
+    this.settings.SKIPBoot = false;
+}
+GameBoyAdvanceEmulator.prototype.enableDynamicSpeed = function () {
+    this.settings.dynamicSpeed = true;
+}
+GameBoyAdvanceEmulator.prototype.disableDynamicSpeed = function () {
+    this.settings.dynamicSpeed = false;
+    this.setSpeed(1);
 }

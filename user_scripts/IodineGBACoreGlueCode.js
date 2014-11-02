@@ -74,7 +74,12 @@ function registerGUIEvents() {
     });
     document.getElementById("skip_boot").checked = false;
     addEvent("click", document.getElementById("skip_boot"), function () {
-             Iodine.toggleSkipBootROM(this.checked);
+             if (this.checked) {
+                Iodine.enableSkipBootROM();
+             }
+             else {
+                Iodine.disableSkipBootROM();
+             }
     });
     document.getElementById("toggleSmoothScaling").checked = true;
     addEvent("click", document.getElementById("toggleSmoothScaling"), function () {
@@ -84,7 +89,12 @@ function registerGUIEvents() {
     });
     document.getElementById("toggleDynamicSpeed").checked = false;
     addEvent("click", document.getElementById("toggleDynamicSpeed"), function () {
-             Iodine.toggleDynamicSpeed(this.checked);
+             if (this.checked) {
+                Iodine.enableDynamicSpeed();
+             }
+             else {
+                Iodine.disableDynamicSpeed();
+             }
     });
     addEvent("change", document.getElementById("import"), function (e) {
              if (typeof this.files != "undefined") {
@@ -147,12 +157,10 @@ function resetPlayButton() {
     document.getElementById("play").style.display = "inline";
 }
 function lowerVolume() {
-    var emuVolume = Math.max(Iodine.getVolume() - 0.04, 0);
-    Iodine.changeVolume(emuVolume);
+    Iodine.incrementVolume(-0.04);
 }
 function raiseVolume() {
-    var emuVolume = Math.min(Iodine.getVolume() + 0.04, 1);
-    Iodine.changeVolume(emuVolume);
+    Iodine.incrementVolume(0.04);
 }
 function writeRedTemporaryText(textString) {
     if (timerID) {

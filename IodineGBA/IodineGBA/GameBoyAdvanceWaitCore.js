@@ -253,7 +253,9 @@ GameBoyAdvanceWait.prototype.prefetchROMInRAM = function (address) {
         else {
             this.prebufferClocks = ((this.prebufferClocks | 0) - (this.waitStateClocks[address | this.nonSequentialPrebuffer] | 0)) | 0;
             this.ROMPrebuffer = ((this.ROMPrebuffer | 0) + 1) | 0;
-            this.romPrebufferContinued = this.nonSequentialPrebuffer = this.nonSequential = 0;
+            this.romPrebufferContinued = 0;
+            this.nonSequentialPrebuffer = 0;
+            this.nonSequential = 0;
         }
     }
 }
@@ -318,14 +320,19 @@ GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     else {
         //Cache is empty:
         this.IOCore.updateCore(((this.waitStateClocks[address | this.nonSequentialPrebuffer] | 0) - (this.prebufferClocks | 0)) | 0);
-        this.romPrebufferContinued = this.prebufferClocks = this.nonSequential = this.nonSequentialPrebuffer = 0;
+        this.romPrebufferContinued = 0;
+        this.prebufferClocks = 0;
+        this.nonSequential = 0;
+        this.nonSequentialPrebuffer = 0;
     }
 }
 GameBoyAdvanceWait.prototype.getROMRead16NoPrefetch = function (address) {
     //Caching disabled:
     address = address | 0;
     this.IOCore.updateCore(this.waitStateClocks[address | this.nonSequential | this.nonSequentialROM] | 0);
-    this.prebufferClocks = this.nonSequentialROM = this.nonSequential = 0;
+    this.prebufferClocks = 0;
+    this.nonSequentialROM = 0;
+    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
     //Caching enabled:
@@ -335,12 +342,15 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
         case 0:
             //Cache miss:
             this.IOCore.updateCore(((this.waitStateClocksFull[address | this.nonSequentialPrebuffer] | 0) - (this.prebufferClocks | 0)) | 0);
-            this.prebufferClocks = this.nonSequential = this.nonSequentialPrebuffer = 0;
+            this.prebufferClocks = 0;
+            this.nonSequential = 0;
+            this.nonSequentialPrebuffer = 0;
             break;
         case 1:
             //Partial miss if only 16 bits out of 32 bits stored:
             this.IOCore.updateCore(((this.waitStateClocks[address & 0xFF] | 0) - (this.prebufferClocks | 0)) | 0);
-            this.prebufferClocks = this.ROMPrebuffer = 0;
+            this.prebufferClocks = 0;
+            this.ROMPrebuffer = 0;
             break;
         default:
             //Cache hit:
@@ -351,7 +361,9 @@ GameBoyAdvanceWait.prototype.getROMRead32NoPrefetch = function (address) {
     //Caching disabled:
     address = address | 0;
     this.IOCore.updateCore(this.waitStateClocksFull[address | this.nonSequential | this.nonSequentialROM] | 0);
-    this.prebufferClocks = this.nonSequentialROM = this.nonSequential = 0;
+    this.prebufferClocks = 0;
+    this.nonSequentialROM = 0;
+    this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
     this.nonSequential = 0x100;
