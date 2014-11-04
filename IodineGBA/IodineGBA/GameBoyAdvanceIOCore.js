@@ -85,7 +85,7 @@ GameBoyAdvanceIO.prototype.run = function () {
             default: //Handle lesser called / End of stepping
                 /*
                  * Don't inline this into the top switch.
-                 * JITs shit themselves on better optimizes on larger switches.
+                 * JITs shit themselves on better optimizations on larger switches.
                  * Also, JIT compilation time is smaller on smaller switches.
                  */
                 switch (this.systemStatus | 0) {

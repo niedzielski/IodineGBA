@@ -35,9 +35,14 @@ GlueCodeMixer.prototype.initializeBuffer = function () {
 }
 GlueCodeMixer.prototype.appendInput = function (inUnit) {
     if (this.audio) {
-        this.outputUnits.push(inUnit);
+        for (var index = 0; index < this.outputUnits.length; index++) {
+            if (!this.outputUnits[index]) {
+                break;
+            }
+        }
+        this.outputUnits[index] = inUnit;
         this.outputUnitsValid.push(inUnit);
-        inUnit.registerStackPosition(this.outputUnits.length - 1);
+        inUnit.registerStackPosition(index);
     }
     else if (typeof inUnit.errorCallback == "function") {
         inUnit.errorCallback();
