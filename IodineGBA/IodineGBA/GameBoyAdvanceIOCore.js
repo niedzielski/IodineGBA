@@ -115,7 +115,7 @@ GameBoyAdvanceIO.prototype.run = function () {
                     case 0x1D:
                     case 0x1E:
                     case 0x1F:
-                        this.dma.perform();
+                        this.handleDMA();
                         break;
                     case 0x10: //Handle Halt State
                     case 0x11:
@@ -209,6 +209,18 @@ GameBoyAdvanceIO.prototype.getRemainingCycles = function () {
         return 0;
     }
     return this.cyclesToIterate | 0;
+}
+GameBoyAdvanceIO.prototype.handleDMA = function () {
+    /*
+     Loop our state status in here as
+     an optimized iteration, as DMA stepping instances
+     happen in quick succession of each other, and
+     aren't often done for one memory word only.
+     */
+    do {
+        //Perform a DMA read and write:
+        this.dma.perform();
+    } while ((this.systemStatus & 0x48) == 8);
 }
 GameBoyAdvanceIO.prototype.handleHalt = function () {
     if (!this.irq.IRQMatch()) {
