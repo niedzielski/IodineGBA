@@ -107,7 +107,7 @@ GameBoyAdvanceIO.prototype.runARM = function () {
                         this.cpu.executeBubbleARM();
                         break;
                     case 4: //CPU Handle State (IRQ)
-                        this.cpu.IRQ();
+                        this.cpu.IRQinARM();
                         break;
                     case 0x8: //DMA Handle State
                     case 0x9:
@@ -157,7 +157,7 @@ GameBoyAdvanceIO.prototype.runTHUMB = function () {
                         this.cpu.executeBubbleTHUMB();
                         break;
                     case 6: //CPU Handle State (IRQ)
-                        this.cpu.IRQ();
+                        this.cpu.IRQinTHUMB();
                         break;
                     case 0xA: //DMA Handle State
                     case 0xB:

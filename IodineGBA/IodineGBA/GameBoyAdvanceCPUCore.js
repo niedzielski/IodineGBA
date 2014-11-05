@@ -167,16 +167,29 @@ GameBoyAdvanceCPU.prototype.THUMBBitModify = function (isThumb) {
         this.IOCore.deflagTHUMB();
     }
 }
-GameBoyAdvanceCPU.prototype.IRQ = function () {
+GameBoyAdvanceCPU.prototype.IRQinARM = function () {
     //Mode bits are set to IRQ:
     this.switchMode(0x12);
     //Save link register:
-    if (this.IOCore.inTHUMB()) {
-        this.registers[14] = this.THUMB.getIRQLR() | 0;
+    this.registers[14] = this.ARM.getIRQLR() | 0;
+    //Disable IRQ:
+    this.IRQDisabled = true;
+    if (this.IOCore.BIOSFound) {
+        //IRQ exception vector:
+        this.branch(0x18);
     }
     else {
-        this.registers[14] = this.ARM.getIRQLR() | 0;
+        //HLE the IRQ entrance:
+        this.HLEIRQEnter();
     }
+    //Deflag IRQ from state:
+    this.IOCore.deflagIRQ();
+}
+GameBoyAdvanceCPU.prototype.IRQinTHUMB = function () {
+    //Mode bits are set to IRQ:
+    this.switchMode(0x12);
+    //Save link register:
+    this.registers[14] = this.THUMB.getIRQLR() | 0;
     //Disable IRQ:
     this.IRQDisabled = true;
 	//Exception always enter ARM mode:
