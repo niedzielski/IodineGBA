@@ -127,7 +127,7 @@ GameBoyAdvanceIO.prototype.runARM = function () {
                         break;
                     default: //Handle Stop State
 						//End of Stepping and/or CPU run loop switch:
-                        if ((this.systemStatus & 0x40) != 0) {
+                        if ((this.systemStatus & 0x42) != 0) {
                             return;
                         }
                         this.handleStop();
