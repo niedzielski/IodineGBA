@@ -66,6 +66,26 @@ GameBoyAdvanceIO.prototype.enter = function (CPUCyclesTotal) {
     this.cyclesOveriteratedPreviously = this.cyclesToIterate | 0;
 }
 GameBoyAdvanceIO.prototype.run = function () {
+	//Clock through the state machine:
+	while (true) {
+		//Dispatch to optimized run loops:
+		switch (this.systemStatus & 0x42) {
+			case 0:
+				//ARM instruction set:
+				this.runARM();
+				break;
+			case 0x2:
+				//THUMB instruction sey:
+				this.runTHUMB();
+				break;
+			default:
+				//End of stepping:
+				this.deflagIterationEnd();
+				return;
+		}
+	}
+}
+GameBoyAdvanceIO.prototype.runARM = function () {
     //Clock through the state machine:
     while (true) {
         //Handle the current system state selected:
@@ -76,6 +96,50 @@ GameBoyAdvanceIO.prototype.run = function () {
             case 1: //CPU Handle State (Bubble ARM)
                 this.cpu.executeBubbleARM();
                 break;
+            default: //Handle lesser called / End of stepping
+                /*
+                 * Don't inline this into the top switch.
+                 * JITs shit themselves on better optimizations on larger switches.
+                 * Also, JIT compilation time is smaller on smaller switches.
+                 */
+                switch (this.systemStatus | 0) {
+                    case 5: //CPU Handle State (Bubble ARM)
+                        this.cpu.executeBubbleARM();
+                        break;
+                    case 4: //CPU Handle State (IRQ)
+                        this.cpu.IRQ();
+                        break;
+                    case 0x8: //DMA Handle State
+                    case 0x9:
+                    case 0xC:
+                    case 0xD:
+                    case 0x18: //DMA Inside Halt State
+                    case 0x19:
+                    case 0x1C:
+                    case 0x1D:
+                        this.handleDMA();
+                        break;
+                    case 0x10: //Handle Halt State
+                    case 0x11:
+                    case 0x14:
+                    case 0x15:
+                        this.handleHalt();
+                        break;
+                    default: //Handle Stop State
+						//End of Stepping and/or CPU run loop switch:
+                        if ((this.systemStatus & 0x40) != 0) {
+                            return;
+                        }
+                        this.handleStop();
+                }
+        }
+    }
+}
+GameBoyAdvanceIO.prototype.runTHUMB = function () {
+	//Clock through the state machine:
+    while (true) {
+        //Handle the current system state selected:
+        switch (this.systemStatus | 0) {
             case 2: //CPU Handle State (Normal THUMB)
                 this.THUMB.executeIteration();
                 break;
@@ -89,51 +153,34 @@ GameBoyAdvanceIO.prototype.run = function () {
                  * Also, JIT compilation time is smaller on smaller switches.
                  */
                 switch (this.systemStatus | 0) {
-                    case 5: //CPU Handle State (Bubble ARM)
-                        this.cpu.executeBubbleARM();
-                        break;
                     case 7: //CPU Handle State (Bubble THUMB)
                         this.cpu.executeBubbleTHUMB();
                         break;
-                    case 4: //CPU Handle State (IRQ)
-                    case 6:
+                    case 6: //CPU Handle State (IRQ)
                         this.cpu.IRQ();
                         break;
-                    case 0x8: //DMA Handle State
-                    case 0x9:
-                    case 0xA:
+                    case 0xA: //DMA Handle State
                     case 0xB:
-                    case 0xC:
-                    case 0xD:
                     case 0xE:
                     case 0xF:
-                    case 0x18: //DMA Inside Halt State
-                    case 0x19:
-                    case 0x1A:
+                    case 0x1A: //DMA Inside Halt State
                     case 0x1B:
-                    case 0x1C:
-                    case 0x1D:
                     case 0x1E:
                     case 0x1F:
                         this.handleDMA();
                         break;
-                    case 0x10: //Handle Halt State
-                    case 0x11:
-                    case 0x12:
+                    case 0x12: //Handle Halt State
                     case 0x13:
-                    case 0x14:
-                    case 0x15:
                     case 0x16:
                     case 0x17:
                         this.handleHalt();
                         break;
                     default: //Handle Stop State
-                        if ((this.systemStatus & 0x40) == 0x40) {
-                            //End of Stepping:
-                            this.deflagIterationEnd();
-                            return;
-                        }
-                        this.handleStop();
+						//End of Stepping and/or CPU run loop switch:
+						if ((this.systemStatus & 0x42) != 0x2) {
+							return;
+						}
+						this.handleStop();
                 }
         }
     }
@@ -325,7 +372,7 @@ GameBoyAdvanceIO.prototype.deflagIterationEnd = function () {
     this.systemStatus = this.systemStatus & 0x3F;
 }
 GameBoyAdvanceIO.prototype.isStopped = function () {
-    return ((this.systemStatus & 0x40) == 0x40);
+    return ((this.systemStatus & 0x20) == 0x20);
 }
 GameBoyAdvanceIO.prototype.inDMA = function () {
     return ((this.systemStatus & 0x8) == 0x8);
