@@ -402,7 +402,7 @@ GameBoyAdvanceSound.prototype.nextFIFOAEventTime = function () {
             nextEventTime = this.IOCore.timer.nextTimer1Overflow(samplesUntilDMA | 0);
         }
     }
-    return Math.min(nextEventTime, 0x7FFFFFFF) | 0;
+    return Math.max(Math.min(nextEventTime, 0x7FFFFFFF), -1) | 0;
 }
 GameBoyAdvanceSound.prototype.nextFIFOBEventTime = function () {
     var nextEventTime = 0;
@@ -415,7 +415,7 @@ GameBoyAdvanceSound.prototype.nextFIFOBEventTime = function () {
             nextEventTime = this.IOCore.timer.nextTimer1Overflow(samplesUntilDMA | 0);
         }
     }
-    return Math.min(nextEventTime, 0x7FFFFFFF) | 0;
+    return Math.max(Math.min(nextEventTime, 0x7FFFFFFF), -1) | 0;
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundATimerIncrement = function () {
     this.AGBDirectSoundA = this.FIFOABuffer.shift() | 0;

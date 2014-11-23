@@ -466,23 +466,53 @@ GameBoyAdvanceTimer.prototype.nextTimer3OverflowSingle = function () {
 GameBoyAdvanceTimer.prototype.nextAudioTimerOverflow = function () {
     var timer0 = this.nextTimer0OverflowSingle() | 0;
     if ((timer0 | 0) == -1) {
+        //Negative numbers are our "no event" code:
         timer0 = 0x7FFFFFFF;
     }
     var timer1 = this.nextTimer1OverflowSingle();
     if (timer1 == -1) {
+        //Negative numbers are our "no event" code:
         timer1 = 0x7FFFFFFF;
     }
+    //Have to clamp to prevent integer overflow bugs:
     return Math.min(timer0 | 0, timer1, 0x7FFFFFFF) | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer0IRQEventTime = function () {
-    return ((this.timer0Enabled && this.timer0IRQ) ? (Math.min(this.nextTimer0OverflowSingle() | 0, this.IOCore.getRemainingCycles() | 0) | 0) : -1) | 0;
+    //-1 is our "no event" code:
+    var clocks = -1;
+    if (this.timer0Enabled && this.timer0IRQ) {
+        //Timer 0 logic is not wider than 32 bits for single stepping:
+        clocks = this.nextTimer0OverflowSingle() | 0;
+    }
+    return clocks | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer1IRQEventTime = function () {
-    return ((this.timer1Enabled && this.timer1IRQ) ? (Math.min(this.nextTimer1OverflowSingle(), this.IOCore.getRemainingCycles() | 0) | 0) : -1) | 0;
+    //-1 is our "no event" code:
+    var clocks = -1;
+    if (this.timer1Enabled && this.timer1IRQ) {
+        //Have to clamp to prevent integer overflow bugs:
+        //In addition, timer 1 logic can be wider than 32 bits:
+        clocks = Math.max(Math.min(this.nextTimer1OverflowSingle(), 0x7FFFFFFF), -1) | 0;
+    }
+    return clocks | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer2IRQEventTime = function () {
-    return ((this.timer2Enabled && this.timer2IRQ) ? (Math.min(this.nextTimer2OverflowSingle(), this.IOCore.getRemainingCycles() | 0) | 0) : -1) | 0;
+    //-1 is our "no event" code:
+    var clocks = -1;
+    if (this.timer2Enabled && this.timer2IRQ) {
+        //Have to clamp to prevent integer overflow bugs:
+        //In addition, timer 2 logic can be wider than 32 bits:
+        clocks = Math.max(Math.min(this.nextTimer2OverflowSingle(), 0x7FFFFFFF), -1) | 0;
+    }
+    return clocks | 0;
 }
 GameBoyAdvanceTimer.prototype.nextTimer3IRQEventTime = function () {
-    return ((this.timer3Enabled && this.timer3IRQ) ? (Math.min(this.nextTimer3OverflowSingle(), this.IOCore.getRemainingCycles() | 0) | 0) : -1) | 0;
+    //-1 is our "no event" code:
+    var clocks = -1;
+    if (this.timer3Enabled && this.timer3IRQ) {
+        //Have to clamp to prevent integer overflow bugs:
+        //In addition, timer 3 logic can be wider than 32 bits:
+        clocks = Math.max(Math.min(this.nextTimer3OverflowSingle(), 0x7FFFFFFF), -1) | 0;
+    }
+    return clocks | 0;
 }
