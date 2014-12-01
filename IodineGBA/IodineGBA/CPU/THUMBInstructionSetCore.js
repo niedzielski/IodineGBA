@@ -1267,7 +1267,7 @@ THUMBInstructionSet.prototype.B = function () {
 THUMBInstructionSet.prototype.BLsetup = function () {
     //Brank with Link (High offset)
     //Update the link register to branch address:
-    this.writeLR(((this.readPC() | 0) + (((this.execute & 0x7FF) << 21) >> 9)) | 0);
+    this.writeLR(((this.readPC() | 0) + ((this.execute << 21) >> 9)) | 0);
     //Update PC:
     this.incrementProgramCounter();
 }
