@@ -696,9 +696,15 @@ THUMBInstructionSet.prototype.TST = function () {
 }
 THUMBInstructionSet.prototype.NEG = function () {
     var source = this.read3OffsetLowRegister() | 0;
-    this.CPSR.setOverflow((source ^ (-(source | 0))) == 0);
-    //Perform Subtraction:
-    source = (-(source | 0)) | 0;
+	if ((source | 0) != -0x80000000) {
+		//Perform Subtraction:
+		source = (-(source | 0)) | 0;
+		this.CPSR.setOverflowFalse();
+	}
+	else {
+		//Negation of MIN_INT overflows!
+		this.setOverflowTrue();
+	}
     this.CPSR.setNZInt(source | 0);
     //Update destination register:
     this.write0OffsetLowRegister(source | 0);

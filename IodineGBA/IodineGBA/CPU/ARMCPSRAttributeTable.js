@@ -60,6 +60,12 @@ function ARMCPSRAttributeTable() {
     function setOverflow(toSet) {
         overflow = !!toSet;
     };
+	function setOverflowTrue() {
+        overflow = true;
+    };
+	function setOverflowFalse() {
+        overflow = false;
+    };
     function getOverflow() {
         return !!overflow;
     };
@@ -193,6 +199,8 @@ function ARMCPSRAttributeTable() {
         "setZeroFalse":setZeroFalse,
         "getZero":getZero,
         "setOverflow":setOverflow,
+		"setOverflowTrue":setOverflowTrue,
+		"setOverflowFalse":setOverflowFalse,
         "getOverflow":getOverflow,
         "setCarry":setCarry,
         "setCarryInt":setCarryInt,
