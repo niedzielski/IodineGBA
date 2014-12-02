@@ -703,7 +703,7 @@ THUMBInstructionSet.prototype.NEG = function () {
 	}
 	else {
 		//Negation of MIN_INT overflows!
-		this.setOverflowTrue();
+		this.CPSR.setOverflowTrue();
 	}
     this.CPSR.setNZInt(source | 0);
     //Update destination register:
