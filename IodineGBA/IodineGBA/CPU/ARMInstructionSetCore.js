@@ -982,7 +982,7 @@ ARMInstructionSet.prototype.MSR = function () {
     this.incrementProgramCounter();
 }
 ARMInstructionSet.prototype.MSR1 = function () {
-    var newcpsr = this.readRegister(this.execute & 0xF) | 0;
+    var newcpsr = this.read0OffsetRegister() | 0;
     this.CPSR.setNegativeInt(newcpsr | 0);
     this.CPSR.setZeroInt((newcpsr & 0x40000000) ^ 0x40000000);
     this.CPSR.setCarryInt((newcpsr & 0x20000000) << 2);
@@ -997,7 +997,7 @@ ARMInstructionSet.prototype.MSR1 = function () {
     }
 }
 ARMInstructionSet.prototype.MSR2 = function () {
-    var newspsr = this.readRegister(this.execute & 0xF) | 0;
+    var newspsr = this.read0OffsetRegister() | 0;
     switch (this.CPUCore.MODEBits | 0) {
         case 0x11:    //FIQ
             var spsr = this.CPUCore.SPSRFIQ;
@@ -2098,7 +2098,7 @@ ARMInstructionSet.prototype.SWP = function () {
     var data = this.CPUCore.read32(base | 0) | 0;
     //Clock a cycle for the processing delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
-    this.CPUCore.write32(base | 0, this.readRegister(this.execute & 0xF) | 0);
+    this.CPUCore.write32(base | 0, this.read0OffsetRegister() | 0);
     this.guard12OffsetRegisterWrite(data | 0);
 }
 ARMInstructionSet.prototype.SWPB = function () {
@@ -2106,7 +2106,7 @@ ARMInstructionSet.prototype.SWPB = function () {
     var data = this.CPUCore.read8(base | 0) | 0;
     //Clock a cycle for the processing delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
-    this.CPUCore.write8(base | 0, this.readRegister(this.execute & 0xF) | 0);
+    this.CPUCore.write8(base | 0, this.read0OffsetRegister() | 0);
     this.guard12OffsetRegisterWrite(data | 0);
 }
 ARMInstructionSet.prototype.SWI = function () {
@@ -2211,7 +2211,7 @@ ARMInstructionSet.prototype.operand2OP_LoadStoreOffsetGen = function () {
 ARMInstructionSet.prototype.operand2OP_LoadStoreOperandDetermine = function () {
     var offset = 0;
     if ((this.execute & 0x400000) == 0) {
-        offset = this.readRegister(this.execute & 0xF) | 0;
+        offset = this.read0OffsetRegister() | 0;
     }
     else {
         offset = ((this.execute & 0xF00) >> 4) | (this.execute & 0xF);
@@ -2295,7 +2295,7 @@ ARMInstructionSet.prototype.llr = function () {
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Shift the register data left:
-    var shifter = this.readRegister((this.execute >> 8) & 0xF) & 0xFF;
+    var shifter = this.read8OffsetRegister() & 0xFF;
     if ((shifter | 0) < 0x20) {
         register = register << (shifter | 0);
     }
@@ -2311,7 +2311,7 @@ ARMInstructionSet.prototype.llrs = function () {
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
-    var shifter = this.readRegister((this.execute >> 8) & 0xF) & 0xFF;
+    var shifter = this.read8OffsetRegister() & 0xFF;
     //Check to see if we need to update CPSR:
     if ((shifter | 0) > 0) {
         if ((shifter | 0) < 0x20) {
@@ -2376,7 +2376,7 @@ ARMInstructionSet.prototype.lrr = function () {
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Shift the register data right logically:
-    var shifter = this.readRegister((this.execute >> 8) & 0xF) & 0xFF;
+    var shifter = this.read8OffsetRegister() & 0xFF;
     if ((shifter | 0) < 0x20) {
         register = (register >>> (shifter | 0)) | 0;
     }
@@ -2392,7 +2392,7 @@ ARMInstructionSet.prototype.lrrs = function () {
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
-    var shifter = this.readRegister((this.execute >> 8) & 0xF) & 0xFF;
+    var shifter = this.read8OffsetRegister() & 0xFF;
     //Check to see if we need to update CPSR:
     if ((shifter | 0) > 0) {
         if ((shifter | 0) < 0x20) {
@@ -2455,7 +2455,7 @@ ARMInstructionSet.prototype.arr = function () {
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Shift the register data right:
-    return register >> Math.min(this.readRegister((this.execute >> 8) & 0xF) & 0xFF, 0x1F);
+    return register >> Math.min(this.read8OffsetRegister() & 0xFF, 0x1F);
 }
 ARMInstructionSet.prototype.arrs = function () {
     //Arithmetic Right Shift with Register and CPSR:
@@ -2464,7 +2464,7 @@ ARMInstructionSet.prototype.arrs = function () {
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Get the shift amount:
-    var shifter = this.readRegister((this.execute >> 8) & 0xF) & 0xFF;
+    var shifter = this.read8OffsetRegister() & 0xFF;
     //Check to see if we need to update CPSR:
     if ((shifter | 0) > 0) {
         if ((shifter | 0) < 0x20) {
@@ -2527,7 +2527,7 @@ ARMInstructionSet.prototype.rrr = function () {
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Rotate the register right:
-    var shifter = this.readRegister((this.execute >> 8) & 0xF) & 0x1F;
+    var shifter = this.read8OffsetRegister() & 0x1F;
     if ((shifter | 0) > 0) {
         //ROR
         register = (register << (0x20 - (shifter | 0))) | (register >>> (shifter | 0));
@@ -2542,7 +2542,7 @@ ARMInstructionSet.prototype.rrrs = function () {
     //Clock a cycle for the shift delaying the CPU:
     this.wait.CPUInternalSingleCyclePrefetch();
     //Rotate the register right:
-    var shifter = this.readRegister((this.execute >> 8) & 0xF) & 0xFF;
+    var shifter = this.read8OffsetRegister() & 0xFF;
     if ((shifter | 0) > 0) {
         shifter = shifter & 0x1F;
         if ((shifter | 0) > 0) {
