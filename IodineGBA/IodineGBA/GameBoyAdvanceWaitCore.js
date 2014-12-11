@@ -319,7 +319,21 @@ GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     }
     else {
         //Cache is empty:
-        this.IOCore.updateCore(((this.waitStateClocks[address | this.nonSequentialPrebuffer] | 0) - (this.prebufferClocks | 0)) | 0);
+        var wait1 = this.waitStateClocks[address | this.nonSequentialPrebuffer] | 0;
+        var wait2 = this.prebufferClocks | 0;
+        if (wait1 <= wait2) {
+            //assert
+            console.log("waitStateClocks: " + wait1 + "; ");
+            console.log("prebufferClocks: " + wait2 + "; ");
+            console.log("ROMPrebuffer: " + this.ROMPrebuffer + "; ");
+            console.log("nonSequentialPrebuffer: " + this.nonSequentialPrebuffer + "; ");
+            console.log("nonSequential: " + this.nonSequential + "; ");
+            console.log("romPrebufferContinued: " + this.romPrebufferContinued + "; ");
+            wait1 = 1;
+            wait2 = 0;
+            alert("Bad wait state logic (16)");
+        }
+        this.IOCore.updateCore(((wait1 | 0) - (wait2 | 0)) | 0);
         this.romPrebufferContinued = 0;
         this.prebufferClocks = 0;
         this.nonSequential = 0;
@@ -342,13 +356,28 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
         case 0:
             //Cache miss:
             this.IOCore.updateCore(((this.waitStateClocksFull[address | this.nonSequentialPrebuffer] | 0) - (this.prebufferClocks | 0)) | 0);
+            this.romPrebufferContinued = 0;
             this.prebufferClocks = 0;
             this.nonSequential = 0;
             this.nonSequentialPrebuffer = 0;
             break;
         case 1:
             //Partial miss if only 16 bits out of 32 bits stored:
-            this.IOCore.updateCore(((this.waitStateClocks[address & 0xFF] | 0) - (this.prebufferClocks | 0)) | 0);
+            var wait1 = this.waitStateClocks[address & 0xFF] | 0;
+            var wait2 = this.prebufferClocks | 0;
+            if (wait1 <= wait2) {
+                //assert
+                console.log("waitStateClocks: " + wait1 + "; ");
+                console.log("prebufferClocks: " + wait2 + "; ");
+                console.log("ROMPrebuffer: " + this.ROMPrebuffer + "; ");
+                console.log("nonSequentialPrebuffer: " + this.nonSequentialPrebuffer + "; ");
+                console.log("nonSequential: " + this.nonSequential + "; ");
+                console.log("romPrebufferContinued: " + this.romPrebufferContinued + "; ");
+                wait1 = 1;
+                wait2 = 0;
+                alert("Bad wait state logic (32)");
+            }
+            this.IOCore.updateCore(((wait1 | 0) - (wait2 | 0)) | 0);
             this.prebufferClocks = 0;
             this.ROMPrebuffer = 0;
             break;
