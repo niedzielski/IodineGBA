@@ -263,7 +263,7 @@ GameBoyAdvanceWait.prototype.prefetchActiveCheck = function (clocks) {
     clocks = clocks | 0;
     this.IOCore.updateCore(clocks | 0);
     var address = this.IOCore.cpu.registers[15] | 0;
-    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
+    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000 && (this.prebufferClocks | 0) < 0xFF) {
         this.prebufferClocks = ((this.prebufferClocks | 0) + (clocks | 0)) | 0;
     }
     else {
@@ -274,7 +274,7 @@ GameBoyAdvanceWait.prototype.prefetchActiveCheck = function (clocks) {
 GameBoyAdvanceWait.prototype.singleClock = function () {
     this.IOCore.updateCoreSingle();
     var address = this.IOCore.cpu.registers[15] | 0;
-    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
+    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000 && (this.prebufferClocks | 0) < 0xFF) {
         this.prebufferClocks = ((this.prebufferClocks | 0) + 1) | 0;
     }
     else {
@@ -285,7 +285,7 @@ GameBoyAdvanceWait.prototype.singleClock = function () {
 GameBoyAdvanceWait.prototype.prefetchActiveCheck2 = function () {
     this.IOCore.updateCoreTwice();
     var address = this.IOCore.cpu.registers[15] | 0;
-    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
+    if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000 && (this.prebufferClocks | 0) < 0xFF) {
         this.prebufferClocks = ((this.prebufferClocks | 0) + 2) | 0;
     }
     else {
@@ -319,21 +319,7 @@ GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     }
     else {
         //Cache is empty:
-        var wait1 = this.waitStateClocks[address | this.nonSequentialPrebuffer] | 0;
-        var wait2 = this.prebufferClocks | 0;
-        if (wait1 <= wait2) {
-            //assert
-            console.log("waitStateClocks: " + wait1 + "; ");
-            console.log("prebufferClocks: " + wait2 + "; ");
-            console.log("ROMPrebuffer: " + this.ROMPrebuffer + "; ");
-            console.log("nonSequentialPrebuffer: " + this.nonSequentialPrebuffer + "; ");
-            console.log("nonSequential: " + this.nonSequential + "; ");
-            console.log("romPrebufferContinued: " + this.romPrebufferContinued + "; ");
-            wait1 = 1;
-            wait2 = 0;
-            alert("Bad wait state logic (16)");
-        }
-        this.IOCore.updateCore(((wait1 | 0) - (wait2 | 0)) | 0);
+        this.IOCore.updateCore(((this.waitStateClocks[address | this.nonSequentialPrebuffer] | 0) - (this.prebufferClocks | 0)) | 0);
         this.romPrebufferContinued = 0;
         this.prebufferClocks = 0;
         this.nonSequential = 0;
@@ -363,21 +349,7 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
             break;
         case 1:
             //Partial miss if only 16 bits out of 32 bits stored:
-            var wait1 = this.waitStateClocks[address & 0xFF] | 0;
-            var wait2 = this.prebufferClocks | 0;
-            if (wait1 <= wait2) {
-                //assert
-                console.log("waitStateClocks: " + wait1 + "; ");
-                console.log("prebufferClocks: " + wait2 + "; ");
-                console.log("ROMPrebuffer: " + this.ROMPrebuffer + "; ");
-                console.log("nonSequentialPrebuffer: " + this.nonSequentialPrebuffer + "; ");
-                console.log("nonSequential: " + this.nonSequential + "; ");
-                console.log("romPrebufferContinued: " + this.romPrebufferContinued + "; ");
-                wait1 = 1;
-                wait2 = 0;
-                alert("Bad wait state logic (32)");
-            }
-            this.IOCore.updateCore(((wait1 | 0) - (wait2 | 0)) | 0);
+            this.IOCore.updateCore(((this.waitStateClocks[address & 0xFF] | 0) - (this.prebufferClocks | 0)) | 0);
             this.prebufferClocks = 0;
             this.ROMPrebuffer = 0;
             break;
