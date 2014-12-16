@@ -60,11 +60,12 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     this.FIQDisabled = true;        //F Bit
     this.MODEBits = 0x13;            //M0 thru M4 Bits
     //Banked SPSR Registers:
-    this.SPSRFIQ = [false, false, false, false, true, true, false, 0x13];    //FIQ
-    this.SPSRIRQ = [false, false, false, false, true, true, false, 0x13];    //IRQ
-    this.SPSRSVC = [false, false, false, false, true, true, false, 0x13];    //Supervisor
-    this.SPSRABT = [false, false, false, false, true, true, false, 0x13];    //Abort
-    this.SPSRUND = [false, false, false, false, true, true, false, 0x13];    //Undefined
+    this.SPSR = getUint16Array(5);
+    this.SPSR[0] = 0xD3; //FIQ
+    this.SPSR[1] = 0xD3; //IRQ
+    this.SPSR[2] = 0xD3; //Supervisor
+    this.SPSR[3] = 0xD3; //Abort
+    this.SPSR[4] = 0xD3; //Undefined
     this.triggeredIRQ = false;        //Pending IRQ found.
     this.pipelineInvalid = 0x2;        //Mark pipeline as invalid.
     //Pre-initialize stack pointers if no BIOS loaded:
@@ -248,8 +249,7 @@ GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
     //Return from an exception mode:
     var data = this.CPSR.setSUBFlags(this.registers[0xE] | 0, 4) | 0;
     //Restore SPSR to CPSR:
-    this.SPSRtoCPSR();
-    data &= (!this.IOCore.inTHUMB()) ? -4 : -2;
+     data = data & (-4 >> (this.SPSRtoCPSR() >> 5));
     //We performed a branch:
     this.branch(data | 0);
 }
@@ -305,34 +305,36 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
 }
 GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
     //Used for leaving an exception and returning to the previous state:
+    var bank = 1;
     switch (this.MODEBits | 0) {
-        case 0x11:    //FIQ
-            var spsr = this.SPSRFIQ;
-            break;
         case 0x12:    //IRQ
-            var spsr = this.SPSRIRQ;
             break;
         case 0x13:    //Supervisor
-            var spsr = this.SPSRSVC;
+            bank = 2;
+            break;
+        case 0x11:    //FIQ
+            bank = 0;
             break;
         case 0x17:    //Abort
-            var spsr = this.SPSRABT;
+            bank = 3;
             break;
         case 0x1B:    //Undefined
-            var spsr = this.SPSRUND;
+            bank = 4;
             break;
         default:
             return;
     }
-    this.CPSR.setNegative(spsr[0]);
-    this.CPSR.setZero(spsr[1]);
-    this.CPSR.setOverflow(spsr[2]);
-    this.CPSR.setCarry(spsr[3]);
-    this.IRQDisabled = spsr[4];
+    var spsr = this.SPSR[bank | 0] | 0;
+    this.CPSR.setNegative((spsr & 0x800) != 0);
+    this.CPSR.setZero((spsr & 0x400) != 0);
+    this.CPSR.setCarry((spsr & 0x200) != 0);
+    this.CPSR.setOverflow((spsr & 0x100) != 0);
+    this.IRQDisabled = ((spsr & 0x80) != 0);
     this.assertIRQ();
-    this.FIQDisabled = spsr[5];
-    this.THUMBBitModify(spsr[6]);
-    this.switchRegisterBank(spsr[7]);
+    this.FIQDisabled = ((spsr & 0x40) != 0);
+    this.THUMBBitModify((spsr & 0x20) != 0);
+    this.switchRegisterBank(spsr & 0x1F);
+    return spsr & 0x20;
 }
 GameBoyAdvanceCPU.prototype.switchMode = function (newMode) {
     newMode = newMode | 0;
@@ -340,33 +342,45 @@ GameBoyAdvanceCPU.prototype.switchMode = function (newMode) {
     this.switchRegisterBank(newMode | 0);
 }
 GameBoyAdvanceCPU.prototype.CPSRtoSPSR = function (newMode) {
-    //Used for leaving an exception and returning to the previous state:
+    //Used for entering an exception and saving the previous state:
+    var spsr = this.MODEBits | 0;
+    if ((this.CPSR.getNegativeInt() | 0) < 0) {
+        spsr = spsr | 0x800;
+    }
+    if ((this.CPSR.getZeroInt() | 0) == 0) {
+        spsr = spsr | 0x400;
+    }
+    if (!!this.CPSR.getCarry()) {
+        spsr = spsr | 0x200;
+    }
+    if (!!this.CPSR.getOverflow()) {
+        spsr = spsr | 0x100;
+    }
+    if (!!this.IRQDisabled) {
+        spsr = spsr | 0x80;
+    }
+    if (!!this.FIQDisabled) {
+        spsr = spsr | 0x40;
+    }
+    if (!!this.IOCore.inTHUMB()) {
+        spsr = spsr | 0x20;
+    }
     switch (newMode | 0) {
-        case 0x11:    //FIQ
-            var spsr = this.SPSRFIQ;
-            break;
         case 0x12:    //IRQ
-            var spsr = this.SPSRIRQ;
+            this.SPSR[1] = spsr | 0;
             break;
         case 0x13:    //Supervisor
-            var spsr = this.SPSRSVC;
+            this.SPSR[2] = spsr | 0;
+            break;
+        case 0x11:    //FIQ
+            this.SPSR[0] = spsr | 0;
             break;
         case 0x17:    //Abort
-            var spsr = this.SPSRABT;
+            this.SPSR[3] = spsr | 0;
             break;
         case 0x1B:    //Undefined
-            var spsr = this.SPSRUND;
-        default:    //Any other mode does not have access here.
-            return;
+            this.SPSR[4] = spsr | 0;
     }
-    spsr[0] = this.CPSR.getNegative();
-    spsr[1] = this.CPSR.getZero();
-    spsr[2] = this.CPSR.getOverflow();
-    spsr[3] = this.CPSR.getCarry();
-    spsr[4] = this.IRQDisabled;
-    spsr[5] = this.FIQDisabled;
-    spsr[6] = this.IOCore.inTHUMB();
-    spsr[7] = this.MODEBits;
 }
 GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
     newMode = newMode | 0;

@@ -302,8 +302,7 @@ ARMInstructionSet.prototype.guard16OffsetRegisterWrite = function (data) {
 ARMInstructionSet.prototype.guardProgramCounterRegisterWriteCPSR = function (data) {
     data = data | 0;
     //Restore SPSR to CPSR:
-    this.CPUCore.SPSRtoCPSR();
-    data &= (!this.CPUCore.IOCore.inTHUMB()) ? -4 : -2;
+    data = data & (-4 >> (this.CPUCore.SPSRtoCPSR() >> 5));
     //We performed a branch:
     this.CPUCore.branch(data | 0);
 }
@@ -997,35 +996,32 @@ ARMInstructionSet.prototype.MSR1 = function () {
     }
 }
 ARMInstructionSet.prototype.MSR2 = function () {
-    var newspsr = this.read0OffsetRegister() | 0;
+    var operand = this.read0OffsetRegister() | 0;
+    var bank = 1;
     switch (this.CPUCore.MODEBits | 0) {
-        case 0x11:    //FIQ
-            var spsr = this.CPUCore.SPSRFIQ;
-            break;
         case 0x12:    //IRQ
-            var spsr = this.CPUCore.SPSRIRQ;
             break;
         case 0x13:    //Supervisor
-            var spsr = this.CPUCore.SPSRSVC;
+            bank = 2;
+            break;
+        case 0x11:    //FIQ
+            bank = 0;
             break;
         case 0x17:    //Abort
-            var spsr = this.CPUCore.SPSRABT;
+            bank = 3;
             break;
         case 0x1B:    //Undefined
-            var spsr = this.CPUCore.SPSRUND;
+            bank = 4;
             break;
         default:
             return;
     }
-    spsr[0] = (newspsr < 0);
-    spsr[1] = ((newspsr & 0x40000000) != 0);
-    spsr[2] = ((newspsr & 0x20000000) != 0);
-    spsr[3] = ((newspsr & 0x10000000) != 0);
+    var spsr = (operand >> 20) & 0xF00;
     if ((this.execute & 0x10000) == 0x10000) {
-        spsr[4] = ((newspsr & 0x80) != 0);
-        spsr[5] = ((newspsr & 0x40) != 0);
-        spsr[6] = ((newspsr & 0x20) != 0);
-        spsr[7] = newspsr & 0x1F;
+        this.CPUCore.SPSR[bank | 0] = spsr | (operand & 0xFF);
+    }
+    else {
+        this.CPUCore.SPSR[bank | 0] = spsr | (this.CPUCore.SPSR[bank | 0] & 0xFF);
     }
 }
 ARMInstructionSet.prototype.MSR3 = function () {
@@ -1036,30 +1032,28 @@ ARMInstructionSet.prototype.MSR3 = function () {
     this.CPSR.setOverflow((operand & 0x10000000) != 0);
 }
 ARMInstructionSet.prototype.MSR4 = function () {
-    var operand = this.imm() | 0;
+    var operand = this.imm() >> 20;
+    var bank = 1;
     switch (this.CPUCore.MODEBits | 0) {
-        case 0x11:    //FIQ
-            var spsr = this.CPUCore.SPSRFIQ;
-            break;
         case 0x12:    //IRQ
-            var spsr = this.CPUCore.SPSRIRQ;
             break;
         case 0x13:    //Supervisor
-            var spsr = this.CPUCore.SPSRSVC;
+            bank = 2;
+            break;
+        case 0x11:    //FIQ
+            bank = 0;
             break;
         case 0x17:    //Abort
-            var spsr = this.CPUCore.SPSRABT;
+            bank = 3;
             break;
         case 0x1B:    //Undefined
-            var spsr = this.CPUCore.SPSRUND;
+            bank = 4;
             break;
         default:
             return;
     }
-    spsr[0] = (operand < 0);
-    spsr[1] = ((operand & 0x40000000) != 0);
-    spsr[2] = ((operand & 0x20000000) != 0);
-    spsr[3] = ((operand & 0x10000000) != 0);
+    var spsr = this.CPUCore.SPSR[bank | 0] & 0xFF;
+    this.CPUCore.SPSR[bank | 0] = spsr | (operand & 0xF00);
 }
 ARMInstructionSet.prototype.MUL = function () {
     //Perform multiplication:
@@ -2591,36 +2585,28 @@ ARMInstructionSet.prototype.rc = function () {
             );
 }
 ARMInstructionSet.prototype.rs = function () {
+    var spsr = 0;
     switch (this.CPUCore.MODEBits | 0) {
-        case 0x11:    //FIQ
-            var spsr = this.CPUCore.SPSRFIQ;
-            break;
         case 0x12:    //IRQ
-            var spsr = this.CPUCore.SPSRIRQ;
+            spsr = this.CPUCore.SPSR[1] | 0;
             break;
         case 0x13:    //Supervisor
-            var spsr = this.CPUCore.SPSRSVC;
+            spsr = this.CPUCore.SPSR[2] | 0;
+            break;
+        case 0x11:    //FIQ
+            spsr = this.CPUCore.SPSR[0] | 0;
             break;
         case 0x17:    //Abort
-            var spsr = this.CPUCore.SPSRABT;
+            spsr = this.CPUCore.SPSR[3] | 0;
             break;
         case 0x1B:    //Undefined
-            var spsr = this.CPUCore.SPSRUND;
+            spsr = this.CPUCore.SPSR[4] | 0;
             break;
         default:
             //Instruction hit an invalid SPSR request:
             return this.rc() | 0;
     }
-    return (
-            ((spsr[0]) ? 0x80000000 : 0) |
-            ((spsr[1]) ? 0x40000000 : 0) |
-            ((spsr[2]) ? 0x20000000 : 0) |
-            ((spsr[3]) ? 0x10000000 : 0) |
-            ((spsr[4]) ? 0x80 : 0) |
-            ((spsr[5]) ? 0x40 : 0) |
-            ((spsr[6]) ? 0x20 : 0) |
-            spsr[7]
-            );
+    return ((spsr & 0xF00) << 20) | (spsr & 0xFF);
 }
 function compileARMInstructionDecodeMap() {
     var pseudoCodes = [

@@ -117,7 +117,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
     else {
         this.getROMRead16 = this.getROMRead16Prefetch;
         this.getROMRead32 = this.getROMRead32Prefetch;
-        this.CPUInternalCyclePrefetch = this.CPUInternalCycleDoPrefetch;
+        this.CPUInternalCyclePrefetch = this.prefetchActiveCheck;
         this.CPUInternalSingleCyclePrefetch = this.singleClock;
         this.nonSequentialROM = 0;
         this.nonSequentialPrebuffer = 0x100;
@@ -208,13 +208,6 @@ GameBoyAdvanceWait.prototype.readConfigureWRAM16 = function (address) {
 }
 GameBoyAdvanceWait.prototype.readConfigureWRAM32 = function () {
     return this.WRAMConfiguration & 0xFF00002F;
-}
-GameBoyAdvanceWait.prototype.CPUInternalCycleDoPrefetch = function (clocks) {
-    clocks = clocks | 0;
-    //Check for ROM prefetching:
-    //We were already in ROM, so if prefetch do so as sequential:
-    //Only case for non-sequential ROM prefetch is invalid anyways:
-    this.prefetchActiveCheck(clocks | 0);
 }
 GameBoyAdvanceWait.prototype.CPUInternalCycleNoPrefetch = function (clocks) {
     clocks = clocks | 0;
