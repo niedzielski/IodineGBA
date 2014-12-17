@@ -949,15 +949,17 @@ ARMInstructionSet.prototype.MVNS2 = function () {
     this.guard12OffsetRegisterWriteCPSR2(operand2 | 0);
 }
 ARMInstructionSet.prototype.MRS = function () {
-    //Transfer PSR to Register
+    //Transfer PSR to Register:
+    var psr = 0;
     if ((this.execute & 0x400000) == 0) {
         //CPSR->Register
-        this.guard12OffsetRegisterWrite(this.rc() | 0);
+        psr = this.rc() | 0;
     }
     else {
         //SPSR->Register
-        this.guard12OffsetRegisterWrite(this.rs() | 0);
+        psr = this.rs() | 0;
     }
+    this.guard12OffsetRegisterWrite(psr | 0);
 }
 ARMInstructionSet.prototype.MSR = function () {
     switch (this.execute & 0x2400000) {
@@ -1018,11 +1020,12 @@ ARMInstructionSet.prototype.MSR2 = function () {
     }
     var spsr = (operand >> 20) & 0xF00;
     if ((this.execute & 0x10000) == 0x10000) {
-        this.CPUCore.SPSR[bank | 0] = spsr | (operand & 0xFF);
+        spsr = spsr | (operand & 0xFF);
     }
     else {
-        this.CPUCore.SPSR[bank | 0] = spsr | (this.CPUCore.SPSR[bank | 0] & 0xFF);
+        spsr = spsr | (this.CPUCore.SPSR[bank | 0] & 0xFF);
     }
+    this.CPUCore.SPSR[bank | 0] = spsr | 0;
 }
 ARMInstructionSet.prototype.MSR3 = function () {
     var operand = this.imm() | 0;
