@@ -193,7 +193,7 @@ GameBoyAdvanceCPU.prototype.IRQinTHUMB = function () {
     this.registers[14] = this.THUMB.getIRQLR() | 0;
     //Disable IRQ:
     this.IRQDisabled = true;
-	//Exception always enter ARM mode:
+    //Exception always enter ARM mode:
     this.enterARM();
     if (this.IOCore.BIOSFound) {
         //IRQ exception vector:

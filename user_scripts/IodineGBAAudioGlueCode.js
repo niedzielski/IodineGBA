@@ -187,53 +187,53 @@ AudioBufferWrapper.prototype.shift = function () {
     if (this.resampleBufferStart != this.resampleBufferEnd) {
         output = this.outBuffer[this.resampleBufferStart++];
         if (this.resampleBufferStart == this.outBufferSize) {
-			this.resampleBufferStart = 0;
-		}
+            this.resampleBufferStart = 0;
+        }
     }
     return output;
 }
 AudioBufferWrapper.prototype.resampleRefill = function () {
-	if (this.inputOffset > 0) {
-		//Resample a chunk of audio:
-		var resampleLength = this.resampler.resampler(this.getSlice(this.inBuffer, this.inputOffset));
-		var resampledResult = this.resampler.outputBuffer;
-		for (var index2 = 0; index2 < resampleLength;) {
-			this.outBuffer[this.resampleBufferEnd++] = resampledResult[index2++];
-			if (this.resampleBufferEnd == this.outBufferSize) {
-				this.resampleBufferEnd = 0;
-			}
-			if (this.resampleBufferStart == this.resampleBufferEnd) {
-				this.resampleBufferStart += this.mixerChannelCount;
-				if (this.resampleBufferStart == this.outBufferSize) {
-					this.resampleBufferStart = 0;
-				}
-			}
-		}
-		this.inputOffset = 0;
-	}
+    if (this.inputOffset > 0) {
+        //Resample a chunk of audio:
+        var resampleLength = this.resampler.resampler(this.getSlice(this.inBuffer, this.inputOffset));
+        var resampledResult = this.resampler.outputBuffer;
+        for (var index2 = 0; index2 < resampleLength;) {
+            this.outBuffer[this.resampleBufferEnd++] = resampledResult[index2++];
+            if (this.resampleBufferEnd == this.outBufferSize) {
+                this.resampleBufferEnd = 0;
+            }
+            if (this.resampleBufferStart == this.resampleBufferEnd) {
+                this.resampleBufferStart += this.mixerChannelCount;
+                if (this.resampleBufferStart == this.outBufferSize) {
+                    this.resampleBufferStart = 0;
+                }
+            }
+        }
+        this.inputOffset = 0;
+    }
 }
 AudioBufferWrapper.prototype.remainingBuffer = function () {
     return (Math.floor((this.resampledSamplesLeft() * this.resampler.ratioWeight) / this.mixerChannelCount) * this.mixerChannelCount) + this.inputOffset;
 }
 AudioBufferWrapper.prototype.resampledSamplesLeft = function () {
-	return ((this.resampleBufferStart <= this.resampleBufferEnd) ? 0 : this.outBufferSize) + this.resampleBufferEnd - this.resampleBufferStart;
+    return ((this.resampleBufferStart <= this.resampleBufferEnd) ? 0 : this.outBufferSize) + this.resampleBufferEnd - this.resampleBufferStart;
 }
 AudioBufferWrapper.prototype.getSlice = function (buffer, lengthOf) {
-	//Typed array and normal array buffer section referencing:
-	try {
-		return buffer.subarray(0, lengthOf);
-	}
-	catch (error) {
-		try {
-			//Regular array pass:
-			buffer.length = lengthOf;
-			return buffer;
-		}
-		catch (error) {
-			//Nightly Firefox 4 used to have the subarray function named as slice:
-			return buffer.slice(0, lengthOf);
-		}
-	}
+    //Typed array and normal array buffer section referencing:
+    try {
+        return buffer.subarray(0, lengthOf);
+    }
+    catch (error) {
+        try {
+            //Regular array pass:
+            buffer.length = lengthOf;
+            return buffer;
+        }
+        catch (error) {
+            //Nightly Firefox 4 used to have the subarray function named as slice:
+            return buffer.slice(0, lengthOf);
+        }
+    }
 }
 function AudioSimpleBuffer(channelCount, bufferAmount) {
     this.channelCount = channelCount;
@@ -248,21 +248,21 @@ AudioSimpleBuffer.prototype.push = function (data) {
     }
 }
 AudioSimpleBuffer.prototype.getSlice = function () {
-	var lengthOf = this.stackLength;
+    var lengthOf = this.stackLength;
     this.stackLength = 0;
     //Typed array and normal array buffer section referencing:
-	try {
-		return this.buffer.subarray(0, lengthOf);
-	}
-	catch (error) {
-		try {
-			//Regular array pass:
-			this.buffer.length = lengthOf;
-			return this.buffer;
-		}
-		catch (error) {
-			//Nightly Firefox 4 used to have the subarray function named as slice:
-			return this.buffer.slice(0, lengthOf);
-		}
-	}
+    try {
+        return this.buffer.subarray(0, lengthOf);
+    }
+    catch (error) {
+        try {
+            //Regular array pass:
+            this.buffer.length = lengthOf;
+            return this.buffer;
+        }
+        catch (error) {
+            //Nightly Firefox 4 used to have the subarray function named as slice:
+            return this.buffer.slice(0, lengthOf);
+        }
+    }
 }
