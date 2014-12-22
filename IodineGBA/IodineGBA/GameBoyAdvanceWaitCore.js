@@ -292,7 +292,10 @@ GameBoyAdvanceWait.prototype.doZeroWait16 = function () {
     //Only case for non-sequential ROM prefetch is invalid anyways:
     this.ROMPrebuffer = ((this.ROMPrebuffer | 0) - 1) | 0;
     //Clock for fetch time:
-    this.singleClock();
+    this.IOCore.updateCoreSingle();
+    if ((this.prebufferClocks | 0) < 0xFF) {
+        this.prebufferClocks = ((this.prebufferClocks | 0) + 1) | 0;
+    }
 }
 GameBoyAdvanceWait.prototype.doZeroWait32 = function () {
     //Check for ROM prefetching:
@@ -300,7 +303,10 @@ GameBoyAdvanceWait.prototype.doZeroWait32 = function () {
     //Only case for non-sequential ROM prefetch is invalid anyways:
     this.ROMPrebuffer = ((this.ROMPrebuffer | 0) - 2) | 0;
     //Clock for fetch time:
-    this.singleClock();
+    this.IOCore.updateCoreSingle();
+    if ((this.prebufferClocks | 0) < 0xFF) {
+        this.prebufferClocks = ((this.prebufferClocks | 0) + 1) | 0;
+    }
 }
 GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     //Caching enabled:

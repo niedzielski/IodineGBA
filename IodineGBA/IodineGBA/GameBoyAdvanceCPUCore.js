@@ -322,7 +322,7 @@ GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
             bank = 4;
             break;
         default:
-            return;
+            return 0;
     }
     var spsr = this.SPSR[bank | 0] | 0;
     this.CPSR.setNegative((spsr & 0x800) != 0);
