@@ -55,10 +55,8 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     //Undefined mode registers (R13-R14):
     this.registersUND = getInt32Array(2);
     //CPSR Register:
-    this.CPSR = new ARMCPSRAttributeTable();
-    this.IRQDisabled = true;        //I Bit
-    this.FIQDisabled = true;        //F Bit
-    this.MODEBits = 0x13;            //M0 thru M4 Bits
+    this.branchFlags = new ARMCPSRAttributeTable();
+    this.modeFlags = 0xD3;
     //Banked SPSR Registers:
     this.SPSR = getUint16Array(5);
     this.SPSR[0] = 0xD3; //FIQ
@@ -80,7 +78,7 @@ GameBoyAdvanceCPU.prototype.HLEReset = function () {
     this.registersIRQ[0] = 0x3007FA0;
     this.registers[13] = 0x3007F00;
     this.registers[15] = 0x8000000;
-    this.MODEBits = 0x1F;
+    this.modeFlags = this.modeFlags | 0x1f;
 }
 GameBoyAdvanceCPU.prototype.executeBubbleARM = function () {
     //Tick the pipeline and bubble out invalidity:
@@ -133,12 +131,12 @@ GameBoyAdvanceCPU.prototype.triggerIRQ = function (didFire) {
     this.assertIRQ();
 }
 GameBoyAdvanceCPU.prototype.assertIRQ = function () {
-    if (this.triggeredIRQ && !this.IRQDisabled) {
+    if (this.triggeredIRQ && (this.modeFlags & 0x80) == 0) {
         this.IOCore.flagIRQ();
     }
 }
 GameBoyAdvanceCPU.prototype.getCurrentFetchValue = function () {
-    if (this.IOCore.inTHUMB()) {
+    if ((this.modeFlags & 0x20) != 0) {
         return this.THUMB.getCurrentFetchValue() | 0;
     }
     else {
@@ -146,14 +144,16 @@ GameBoyAdvanceCPU.prototype.getCurrentFetchValue = function () {
     }
 }
 GameBoyAdvanceCPU.prototype.enterARM = function () {
+    this.modeFlags = this.modeFlags & 0xdf;
     this.THUMBBitModify(false);
 }
 GameBoyAdvanceCPU.prototype.enterTHUMB = function () {
+    this.modeFlags = this.modeFlags | 0x20;
     this.THUMBBitModify(true);
 }
 GameBoyAdvanceCPU.prototype.getLR = function () {
     //Get the previous instruction address:
-    if (this.IOCore.inTHUMB()) {
+    if ((this.modeFlags & 0x20) != 0) {
         return this.THUMB.getLR() | 0;
     }
     else {
@@ -174,7 +174,7 @@ GameBoyAdvanceCPU.prototype.IRQinARM = function () {
     //Save link register:
     this.registers[14] = this.ARM.getIRQLR() | 0;
     //Disable IRQ:
-    this.IRQDisabled = true;
+    this.modeFlags = this.modeFlags | 0x80;
     if (this.IOCore.BIOSFound) {
         //IRQ exception vector:
         this.branch(0x18);
@@ -192,7 +192,7 @@ GameBoyAdvanceCPU.prototype.IRQinTHUMB = function () {
     //Save link register:
     this.registers[14] = this.THUMB.getIRQLR() | 0;
     //Disable IRQ:
-    this.IRQDisabled = true;
+    this.modeFlags = this.modeFlags | 0x80;
     //Exception always enter ARM mode:
     this.enterARM();
     if (this.IOCore.BIOSFound) {
@@ -247,9 +247,9 @@ GameBoyAdvanceCPU.prototype.HLEIRQExit = function () {
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
     //Return from an exception mode:
-    var data = this.CPSR.setSUBFlags(this.registers[0xE] | 0, 4) | 0;
+    var data = this.branchFlags.setSUBFlags(this.registers[0xE] | 0, 4) | 0;
     //Restore SPSR to CPSR:
-     data = data & (-4 >> (this.SPSRtoCPSR() >> 5));
+    data = data & (-4 >> (this.SPSRtoCPSR() >> 5));
     //We performed a branch:
     this.branch(data | 0);
 }
@@ -260,14 +260,14 @@ GameBoyAdvanceCPU.prototype.SWI = function () {
         //Save link register:
         this.registers[14] = this.getLR() | 0;
         //Disable IRQ:
-        this.IRQDisabled = true;
+        this.modeFlags = this.modeFlags | 0x80;
         //Exception always enter ARM mode:
         this.enterARM();
         //SWI exception vector:
         this.branch(0x8);
     }
     else {
-        if (this.IOCore.inTHUMB()) {
+        if ((this.modeFlags & 0x20) != 0) {
             this.THUMB.incrementProgramCounter();
             //HLE the SWI command:
             this.swi.execute(this.THUMB.getSWICode() | 0);
@@ -287,7 +287,7 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
         //Save link register:
         this.registers[14] = this.getLR() | 0;
         //Disable IRQ:
-        this.IRQDisabled = true;
+        this.modeFlags = this.modeFlags | 0x80;
         //Exception always enter ARM mode:
         this.enterARM();
         //Undefined exception vector:
@@ -295,7 +295,7 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
     }
     else {
         //Pretend we didn't execute the bad instruction then:
-        if (this.IOCore.inTHUMB()) {
+        if ((this.modeFlags & 0x20) != 0) {
             this.THUMB.incrementProgramCounter();
         }
         else {
@@ -306,7 +306,7 @@ GameBoyAdvanceCPU.prototype.UNDEFINED = function () {
 GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
     //Used for leaving an exception and returning to the previous state:
     var bank = 1;
-    switch (this.MODEBits | 0) {
+    switch (this.modeFlags & 0x1f) {
         case 0x12:    //IRQ
             break;
         case 0x13:    //Supervisor
@@ -325,45 +325,36 @@ GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
             return 0;
     }
     var spsr = this.SPSR[bank | 0] | 0;
-    this.CPSR.setNegative((spsr & 0x800) != 0);
-    this.CPSR.setZero((spsr & 0x400) != 0);
-    this.CPSR.setCarry((spsr & 0x200) != 0);
-    this.CPSR.setOverflow((spsr & 0x100) != 0);
-    this.IRQDisabled = ((spsr & 0x80) != 0);
-    this.assertIRQ();
-    this.FIQDisabled = ((spsr & 0x40) != 0);
-    this.THUMBBitModify((spsr & 0x20) != 0);
+    this.branchFlags.setNegative((spsr & 0x800) != 0);
+    this.branchFlags.setZero((spsr & 0x400) != 0);
+    this.branchFlags.setCarry((spsr & 0x200) != 0);
+    this.branchFlags.setOverflow((spsr & 0x100) != 0);
     this.switchRegisterBank(spsr & 0x1F);
+    this.modeFlags = spsr & 0xFF;
+    this.assertIRQ();
+    this.THUMBBitModify((spsr & 0x20) != 0);
     return spsr & 0x20;
 }
 GameBoyAdvanceCPU.prototype.switchMode = function (newMode) {
     newMode = newMode | 0;
     this.CPSRtoSPSR(newMode | 0);
     this.switchRegisterBank(newMode | 0);
+    this.modeFlags = (this.modeFlags & 0xe0) | (newMode | 0);
 }
 GameBoyAdvanceCPU.prototype.CPSRtoSPSR = function (newMode) {
     //Used for entering an exception and saving the previous state:
-    var spsr = this.MODEBits | 0;
-    if ((this.CPSR.getNegativeInt() | 0) < 0) {
+    var spsr = this.modeFlags & 0xFF;
+    if ((this.branchFlags.getNegativeInt() | 0) < 0) {
         spsr = spsr | 0x800;
     }
-    if ((this.CPSR.getZeroInt() | 0) == 0) {
+    if ((this.branchFlags.getZeroInt() | 0) == 0) {
         spsr = spsr | 0x400;
     }
-    if (!!this.CPSR.getCarry()) {
+    if (!!this.branchFlags.getCarry()) {
         spsr = spsr | 0x200;
     }
-    if (!!this.CPSR.getOverflow()) {
+    if (!!this.branchFlags.getOverflow()) {
         spsr = spsr | 0x100;
-    }
-    if (!!this.IRQDisabled) {
-        spsr = spsr | 0x80;
-    }
-    if (!!this.FIQDisabled) {
-        spsr = spsr | 0x40;
-    }
-    if (!!this.IOCore.inTHUMB()) {
-        spsr = spsr | 0x20;
     }
     switch (newMode | 0) {
         case 0x12:    //IRQ
@@ -384,7 +375,7 @@ GameBoyAdvanceCPU.prototype.CPSRtoSPSR = function (newMode) {
 }
 GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
     newMode = newMode | 0;
-    switch (this.MODEBits | 0) {
+    switch (this.modeFlags & 0x1F) {
         case 0x10:
         case 0x1F:
             this.registersUSR[0] = this.registers[8] | 0;
@@ -496,7 +487,6 @@ GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
             this.registers[13] = this.registersUND[0] | 0;
             this.registers[14] = this.registersUND[1] | 0;
     }
-    this.MODEBits = newMode | 0;
 }
 if (!!Math.imul) {
     //Math.imul found, insert the optimized path in:

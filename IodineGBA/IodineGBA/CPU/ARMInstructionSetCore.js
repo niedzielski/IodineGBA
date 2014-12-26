@@ -23,7 +23,7 @@ ARMInstructionSet.prototype.initialize = function () {
     this.wait = this.CPUCore.wait;
     this.registers = this.CPUCore.registers;
     this.registersUSR = this.CPUCore.registersUSR;
-    this.CPSR = this.CPUCore.CPSR;
+    this.branchFlags = this.CPUCore.branchFlags;
     this.fetch = 0;
     this.decode = 0;
     this.execute = 0;
@@ -50,7 +50,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
      */
     switch (this.execute >>> 28) {
         case 0x0:        //EQ (equal)
-            if (this.CPSR.getZero()) {
+            if (this.branchFlags.getZero()) {
                 this.executeDecoded();
             }
             else {
@@ -59,7 +59,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x1:        //NE (not equal)
-            if (!this.CPSR.getZero()) {
+            if (!this.branchFlags.getZero()) {
                 this.executeDecoded();
             }
             else {
@@ -68,7 +68,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x2:        //CS (unsigned higher or same)
-            if (this.CPSR.getCarry()) {
+            if (this.branchFlags.getCarry()) {
                 this.executeDecoded();
             }
             else {
@@ -77,7 +77,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x3:        //CC (unsigned lower)
-            if (!this.CPSR.getCarry()) {
+            if (!this.branchFlags.getCarry()) {
                 this.executeDecoded();
             }
             else {
@@ -86,7 +86,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x4:        //MI (negative)
-            if (this.CPSR.getNegative()) {
+            if (this.branchFlags.getNegative()) {
                 this.executeDecoded();
             }
             else {
@@ -95,7 +95,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x5:        //PL (positive or zero)
-            if (!this.CPSR.getNegative()) {
+            if (!this.branchFlags.getNegative()) {
                 this.executeDecoded();
             }
             else {
@@ -104,7 +104,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x6:        //VS (overflow)
-            if (this.CPSR.getOverflow()) {
+            if (this.branchFlags.getOverflow()) {
                 this.executeDecoded();
             }
             else {
@@ -113,7 +113,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x7:        //VC (no overflow)
-            if (!this.CPSR.getOverflow()) {
+            if (!this.branchFlags.getOverflow()) {
                 this.executeDecoded();
             }
             else {
@@ -122,7 +122,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x8:        //HI (unsigned higher)
-            if (this.CPSR.getCarry() && !this.CPSR.getZero()) {
+            if (this.branchFlags.getCarry() && !this.branchFlags.getZero()) {
                 this.executeDecoded();
             }
             else {
@@ -131,7 +131,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0x9:        //LS (unsigned lower or same)
-            if (!this.CPSR.getCarry() || this.CPSR.getZero()) {
+            if (!this.branchFlags.getCarry() || this.branchFlags.getZero()) {
                 this.executeDecoded();
             }
             else {
@@ -140,7 +140,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0xA:        //GE (greater or equal)
-            if (this.CPSR.getNegative() == this.CPSR.getOverflow()) {
+            if (this.branchFlags.getNegative() == this.branchFlags.getOverflow()) {
                 this.executeDecoded();
             }
             else {
@@ -149,7 +149,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0xB:        //LT (less than)
-            if (this.CPSR.getNegative() != this.CPSR.getOverflow()) {
+            if (this.branchFlags.getNegative() != this.branchFlags.getOverflow()) {
                 this.executeDecoded();
             }
             else {
@@ -158,7 +158,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0xC:        //GT (greater than)
-            if (!this.CPSR.getZero() && this.CPSR.getNegative() == this.CPSR.getOverflow()) {
+            if (!this.branchFlags.getZero() && this.branchFlags.getNegative() == this.branchFlags.getOverflow()) {
                 this.executeDecoded();
             }
             else {
@@ -167,7 +167,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
             }
             break;
         case 0xD:        //LE (less than or equal)
-            if (this.CPSR.getZero() || this.CPSR.getNegative() != this.CPSR.getOverflow()) {
+            if (this.branchFlags.getZero() || this.branchFlags.getNegative() != this.branchFlags.getOverflow()) {
                 this.executeDecoded();
             }
             else {
@@ -336,7 +336,7 @@ ARMInstructionSet.prototype.guardUserRegisterWrite = function (address, data) {
     //Guard only on user access, not PC!:
     address = address | 0;
     data = data | 0;
-    switch (this.CPUCore.MODEBits | 0) {
+    switch (this.CPUCore.modeFlags & 0x1f) {
         case 0x10:
         case 0x1F:
             this.writeRegister(address | 0, data | 0);
@@ -433,7 +433,7 @@ ARMInstructionSet.prototype.guard12OffsetRegisterRead = function () {
 ARMInstructionSet.prototype.guardUserRegisterRead = function (address) {
     //Guard only on user access, not PC!:
     address = address | 0;
-    switch (this.CPUCore.MODEBits | 0) {
+    switch (this.CPUCore.modeFlags & 0x1f) {
         case 0x10:
         case 0x1F:
             return this.readRegister(address | 0) | 0;
@@ -521,7 +521,7 @@ ARMInstructionSet.prototype.ANDS = function () {
     var operand2 = this.operand2OP_DataProcessing2() | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR(result | 0);
 }
@@ -532,7 +532,7 @@ ARMInstructionSet.prototype.ANDS2 = function () {
     var operand2 = this.operand2OP_DataProcessing4() | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR2(result | 0);
 }
@@ -557,7 +557,7 @@ ARMInstructionSet.prototype.EORS = function () {
     var operand2 = this.operand2OP_DataProcessing2() | 0;
     //Perform bitwise EOR:
     var result = operand1 ^ operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR(result | 0);
 }
@@ -568,7 +568,7 @@ ARMInstructionSet.prototype.EORS2 = function () {
     var operand2 = this.operand2OP_DataProcessing4() | 0;
     //Perform bitwise EOR:
     var result = operand1 ^ operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR2(result | 0);
 }
@@ -592,7 +592,7 @@ ARMInstructionSet.prototype.SUBS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR(this.branchFlags.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SUBS2 = function () {
     //Increment PC:
@@ -600,7 +600,7 @@ ARMInstructionSet.prototype.SUBS2 = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR2(this.CPSR.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR2(this.branchFlags.setSUBFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSB = function () {
     var operand1 = this.read16OffsetRegister() | 0;
@@ -622,7 +622,7 @@ ARMInstructionSet.prototype.RSBS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR(this.branchFlags.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSBS2 = function () {
     //Increment PC:
@@ -630,7 +630,7 @@ ARMInstructionSet.prototype.RSBS2 = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR2(this.CPSR.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR2(this.branchFlags.setSUBFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADD = function () {
     var operand1 = this.read16OffsetRegister() | 0;
@@ -652,7 +652,7 @@ ARMInstructionSet.prototype.ADDS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR(this.branchFlags.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADDS2 = function () {
     //Increment PC:
@@ -660,14 +660,14 @@ ARMInstructionSet.prototype.ADDS2 = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR2(this.CPSR.setADDFlags(operand1 | 0, operand2 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR2(this.branchFlags.setADDFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADC = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Perform Addition w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0) + (this.CPSR.getCarryInt() | 0)) | 0);
+    this.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0) + (this.branchFlags.getCarryInt() | 0)) | 0);
 }
 ARMInstructionSet.prototype.ADC2 = function () {
     //Increment PC:
@@ -676,13 +676,13 @@ ARMInstructionSet.prototype.ADC2 = function () {
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Perform Addition w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite2(((operand1 | 0) + (operand2 | 0) + (this.CPSR.getCarryInt() | 0)) | 0);
+    this.guard12OffsetRegisterWrite2(((operand1 | 0) + (operand2 | 0) + (this.branchFlags.getCarryInt() | 0)) | 0);
 }
 ARMInstructionSet.prototype.ADCS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR(this.branchFlags.setADCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.ADCS2 = function () {
     //Increment PC:
@@ -690,14 +690,14 @@ ARMInstructionSet.prototype.ADCS2 = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR2(this.CPSR.setADCFlags(operand1 | 0, operand2 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR2(this.branchFlags.setADCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SBC = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Perform Subtraction w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0) - (this.CPSR.getCarryIntReverse() | 0)) | 0);
+    this.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0);
 }
 ARMInstructionSet.prototype.SBC2 = function () {
     //Increment PC:
@@ -706,13 +706,13 @@ ARMInstructionSet.prototype.SBC2 = function () {
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Perform Subtraction w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite2(((operand1 | 0) - (operand2 | 0) - (this.CPSR.getCarryIntReverse() | 0)) | 0);
+    this.guard12OffsetRegisterWrite2(((operand1 | 0) - (operand2 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0);
 }
 ARMInstructionSet.prototype.SBCS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR(this.branchFlags.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.SBCS2 = function () {
     //Increment PC:
@@ -720,14 +720,14 @@ ARMInstructionSet.prototype.SBCS2 = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR2(this.CPSR.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR2(this.branchFlags.setSBCFlags(operand1 | 0, operand2 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSC = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Perform Reverse Subtraction w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0) - (this.CPSR.getCarryIntReverse() | 0)) | 0);
+    this.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0);
 }
 ARMInstructionSet.prototype.RSC2 = function () {
     //Increment PC:
@@ -736,13 +736,13 @@ ARMInstructionSet.prototype.RSC2 = function () {
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Perform Reverse Subtraction w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite2(((operand2 | 0) - (operand1 | 0) - (this.CPSR.getCarryIntReverse() | 0)) | 0);
+    this.guard12OffsetRegisterWrite2(((operand2 | 0) - (operand1 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0);
 }
 ARMInstructionSet.prototype.RSCS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR(this.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR(this.branchFlags.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.RSCS2 = function () {
     //Increment PC:
@@ -750,14 +750,14 @@ ARMInstructionSet.prototype.RSCS2 = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Update destination register:
-    this.guard12OffsetRegisterWriteCPSR2(this.CPSR.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
+    this.guard12OffsetRegisterWriteCPSR2(this.branchFlags.setSBCFlags(operand2 | 0, operand1 | 0) | 0);
 }
 ARMInstructionSet.prototype.TSTS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing2() | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Increment PC:
     this.incrementProgramCounter();
 }
@@ -768,14 +768,14 @@ ARMInstructionSet.prototype.TSTS2 = function () {
     var operand2 = this.operand2OP_DataProcessing4() | 0;
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
 }
 ARMInstructionSet.prototype.TEQS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing2() | 0;
     //Perform bitwise EOR:
     var result = operand1 ^ operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Increment PC:
     this.incrementProgramCounter();
 }
@@ -786,12 +786,12 @@ ARMInstructionSet.prototype.TEQS2 = function () {
     var operand2 = this.operand2OP_DataProcessing4() | 0;
     //Perform bitwise EOR:
     var result = operand1 ^ operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
 }
 ARMInstructionSet.prototype.CMPS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1() | 0;
-    this.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+    this.branchFlags.setCMPFlags(operand1 | 0, operand2 | 0);
     //Increment PC:
     this.incrementProgramCounter();
 }
@@ -800,12 +800,12 @@ ARMInstructionSet.prototype.CMPS2 = function () {
     this.incrementProgramCounter();
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing3() | 0;
-    this.CPSR.setCMPFlags(operand1 | 0, operand2 | 0);
+    this.branchFlags.setCMPFlags(operand1 | 0, operand2 | 0);
 }
 ARMInstructionSet.prototype.CMNS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing1();
-    this.CPSR.setCMNFlags(operand1 | 0, operand2 | 0);
+    this.branchFlags.setCMNFlags(operand1 | 0, operand2 | 0);
     //Increment PC:
     this.incrementProgramCounter();
 }
@@ -814,7 +814,7 @@ ARMInstructionSet.prototype.CMNS2 = function () {
     this.incrementProgramCounter();
     var operand1 = this.read16OffsetRegister() | 0;
     var operand2 = this.operand2OP_DataProcessing3();
-    this.CPSR.setCMNFlags(operand1 | 0, operand2 | 0);
+    this.branchFlags.setCMNFlags(operand1 | 0, operand2 | 0);
 }
 ARMInstructionSet.prototype.ORR = function () {
     var operand1 = this.read16OffsetRegister() | 0;
@@ -837,7 +837,7 @@ ARMInstructionSet.prototype.ORRS = function () {
     var operand2 = this.operand2OP_DataProcessing2() | 0;
     //Perform bitwise OR:
     var result = operand1 | operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR(result | 0);
 }
@@ -848,7 +848,7 @@ ARMInstructionSet.prototype.ORRS2 = function () {
     var operand2 = this.operand2OP_DataProcessing4() | 0;
     //Perform bitwise OR:
     var result = operand1 | operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR2(result | 0);
 }
@@ -867,7 +867,7 @@ ARMInstructionSet.prototype.MOV2 = function () {
 ARMInstructionSet.prototype.MOVS = function () {
     var operand2 = this.operand2OP_DataProcessing2() | 0;
     //Perform move:
-    this.CPSR.setNZInt(operand2 | 0);
+    this.branchFlags.setNZInt(operand2 | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR(operand2 | 0);
 }
@@ -876,7 +876,7 @@ ARMInstructionSet.prototype.MOVS2 = function () {
     this.incrementProgramCounter();
     var operand2 = this.operand2OP_DataProcessing4() | 0;
     //Perform move:
-    this.CPSR.setNZInt(operand2 | 0);
+    this.branchFlags.setNZInt(operand2 | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR2(operand2 | 0);
 }
@@ -904,7 +904,7 @@ ARMInstructionSet.prototype.BICS = function () {
     var operand2 = ~this.operand2OP_DataProcessing2();
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR(result | 0);
 }
@@ -916,7 +916,7 @@ ARMInstructionSet.prototype.BICS2 = function () {
     var operand2 = ~this.operand2OP_DataProcessing4();
     //Perform bitwise AND:
     var result = operand1 & operand2;
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR2(result | 0);
 }
@@ -935,7 +935,7 @@ ARMInstructionSet.prototype.MVN2 = function () {
 ARMInstructionSet.prototype.MVNS = function () {
     var operand2 = ~this.operand2OP_DataProcessing2();
     //Perform move negative:
-    this.CPSR.setNZInt(operand2 | 0);
+    this.branchFlags.setNZInt(operand2 | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR(operand2 | 0);
 }
@@ -944,7 +944,7 @@ ARMInstructionSet.prototype.MVNS2 = function () {
     this.incrementProgramCounter();
     var operand2 = ~this.operand2OP_DataProcessing4();
     //Perform move negative:
-    this.CPSR.setNZInt(operand2 | 0);
+    this.branchFlags.setNZInt(operand2 | 0);
     //Update destination register and guard CPSR for PC:
     this.guard12OffsetRegisterWriteCPSR2(operand2 | 0);
 }
@@ -984,23 +984,20 @@ ARMInstructionSet.prototype.MSR = function () {
 }
 ARMInstructionSet.prototype.MSR1 = function () {
     var newcpsr = this.read0OffsetRegister() | 0;
-    this.CPSR.setNegativeInt(newcpsr | 0);
-    this.CPSR.setZeroInt((newcpsr & 0x40000000) ^ 0x40000000);
-    this.CPSR.setCarryInt((newcpsr & 0x20000000) << 2);
-    this.CPSR.setOverflow((newcpsr & 0x10000000) != 0);
-    if ((this.execute & 0x10000) == 0x10000 && (this.CPUCore.MODEBits | 0) != 0x10) {
-        this.CPUCore.IRQDisabled = ((newcpsr & 0x80) != 0);
-        this.CPUCore.assertIRQ();
-        this.CPUCore.FIQDisabled = ((newcpsr & 0x40) != 0);
-        //this.CPUCore.THUMBBitModify((newcpsr & 0x20) != 0);
-        //ARMWrestler test rom triggers THUMB mode, but expects it to remain in ARM mode, so ignore.
+    this.branchFlags.setNegativeInt(newcpsr | 0);
+    this.branchFlags.setZeroInt((newcpsr & 0x40000000) ^ 0x40000000);
+    this.branchFlags.setCarryInt((newcpsr & 0x20000000) << 2);
+    this.branchFlags.setOverflow((newcpsr & 0x10000000) != 0);
+    if ((this.execute & 0x10000) == 0x10000 && (this.CPUCore.modeFlags & 0x1f) != 0x10) {
         this.CPUCore.switchRegisterBank(newcpsr & 0x1F);
+        this.CPUCore.modeFlags = newcpsr & 0xdf;
+        this.CPUCore.assertIRQ();
     }
 }
 ARMInstructionSet.prototype.MSR2 = function () {
     var operand = this.read0OffsetRegister() | 0;
     var bank = 1;
-    switch (this.CPUCore.MODEBits | 0) {
+    switch (this.CPUCore.modeFlags & 0x1f) {
         case 0x12:    //IRQ
             break;
         case 0x13:    //Supervisor
@@ -1029,15 +1026,15 @@ ARMInstructionSet.prototype.MSR2 = function () {
 }
 ARMInstructionSet.prototype.MSR3 = function () {
     var operand = this.imm() | 0;
-    this.CPSR.setNegativeInt(operand | 0);
-    this.CPSR.setZeroInt((operand & 0x40000000) ^ 0x40000000);
-    this.CPSR.setCarryInt((operand & 0x20000000) << 2);
-    this.CPSR.setOverflow((operand & 0x10000000) != 0);
+    this.branchFlags.setNegativeInt(operand | 0);
+    this.branchFlags.setZeroInt((operand & 0x40000000) ^ 0x40000000);
+    this.branchFlags.setCarryInt((operand & 0x20000000) << 2);
+    this.branchFlags.setOverflow((operand & 0x10000000) != 0);
 }
 ARMInstructionSet.prototype.MSR4 = function () {
     var operand = this.imm() >> 20;
     var bank = 1;
-    switch (this.CPUCore.MODEBits | 0) {
+    switch (this.CPUCore.modeFlags & 0x1f) {
         case 0x12:    //IRQ
             break;
         case 0x13:    //Supervisor
@@ -1067,8 +1064,8 @@ ARMInstructionSet.prototype.MUL = function () {
 ARMInstructionSet.prototype.MULS = function () {
     //Perform multiplication:
     var result = this.performMUL32() | 0;
-    this.CPSR.setCarryFalse();
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setCarryFalse();
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(result | 0);
 }
@@ -1085,8 +1082,8 @@ ARMInstructionSet.prototype.MLAS = function () {
     var result = this.performMUL32MLA() | 0;
     //Perform addition:
     result = ((result | 0) + (this.read12OffsetRegister() | 0)) | 0;
-    this.CPSR.setCarryFalse();
-    this.CPSR.setNZInt(result | 0);
+    this.branchFlags.setCarryFalse();
+    this.branchFlags.setNZInt(result | 0);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(result | 0);
 }
@@ -1100,9 +1097,9 @@ ARMInstructionSet.prototype.UMULL = function () {
 ARMInstructionSet.prototype.UMULLS = function () {
     //Perform multiplication:
     this.CPUCore.performUMUL64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0);
-    this.CPSR.setCarryFalse();
-    this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
-    this.CPSR.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
+    this.branchFlags.setCarryFalse();
+    this.branchFlags.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
+    this.branchFlags.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
     this.multiplyGuard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
@@ -1117,9 +1114,9 @@ ARMInstructionSet.prototype.UMLAL = function () {
 ARMInstructionSet.prototype.UMLALS = function () {
     //Perform multiplication:
     this.CPUCore.performUMLA64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0, this.read16OffsetRegister() | 0, this.read12OffsetRegister() | 0);
-    this.CPSR.setCarryFalse();
-    this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
-    this.CPSR.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
+    this.branchFlags.setCarryFalse();
+    this.branchFlags.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
+    this.branchFlags.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
     this.multiplyGuard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
@@ -1134,9 +1131,9 @@ ARMInstructionSet.prototype.SMULL = function () {
 ARMInstructionSet.prototype.SMULLS = function () {
     //Perform multiplication:
     this.CPUCore.performMUL64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0);
-    this.CPSR.setCarryFalse();
-    this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
-    this.CPSR.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
+    this.branchFlags.setCarryFalse();
+    this.branchFlags.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
+    this.branchFlags.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
     this.multiplyGuard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
@@ -1151,9 +1148,9 @@ ARMInstructionSet.prototype.SMLAL = function () {
 ARMInstructionSet.prototype.SMLALS = function () {
     //Perform multiplication:
     this.CPUCore.performMLA64(this.read0OffsetRegister() | 0, this.read8OffsetRegister() | 0, this.read16OffsetRegister() | 0, this.read12OffsetRegister() | 0);
-    this.CPSR.setCarryFalse();
-    this.CPSR.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
-    this.CPSR.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
+    this.branchFlags.setCarryFalse();
+    this.branchFlags.setNegativeInt(this.CPUCore.mul64ResultHigh | 0);
+    this.branchFlags.setZeroInt(this.CPUCore.mul64ResultHigh | this.CPUCore.mul64ResultLow);
     //Update destination register and guard CPSR for PC:
     this.multiplyGuard16OffsetRegisterWrite(this.CPUCore.mul64ResultHigh | 0);
     this.multiplyGuard12OffsetRegisterWrite(this.CPUCore.mul64ResultLow | 0);
@@ -2280,7 +2277,7 @@ ARMInstructionSet.prototype.llis = function () {
     var shifter = (this.execute >> 7) & 0x1F;
     //Check to see if we need to update CPSR:
     if ((shifter | 0) > 0) {
-        this.CPSR.setCarryInt(register << ((shifter | 0) - 1));
+        this.branchFlags.setCarryInt(register << ((shifter | 0) - 1));
     }
     //Shift the register data left:
     return register << (shifter | 0);
@@ -2313,17 +2310,17 @@ ARMInstructionSet.prototype.llrs = function () {
     if ((shifter | 0) > 0) {
         if ((shifter | 0) < 0x20) {
             //Shift the register data left:
-            this.CPSR.setCarryInt(register << ((shifter | 0) - 1));
+            this.branchFlags.setCarryInt(register << ((shifter | 0) - 1));
             register = register << (shifter | 0);
         }
         else {
             if ((shifter | 0) == 0x20) {
                 //Shift bit 0 into carry:
-                this.CPSR.setCarryInt(register << 31);
+                this.branchFlags.setCarryInt(register << 31);
             }
             else {
                 //Everything Zero'd:
-                this.CPSR.setCarryFalse();
+                this.branchFlags.setCarryFalse();
             }
             register = 0;
         }
@@ -2356,12 +2353,12 @@ ARMInstructionSet.prototype.lris = function () {
     var shifter = (this.execute >> 7) & 0x1F;
     //Check to see if we need to update CPSR:
     if ((shifter | 0) > 0) {
-        this.CPSR.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
+        this.branchFlags.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
         //Shift the register data right logically:
         register = (register >>> (shifter | 0)) | 0;
     }
     else {
-        this.CPSR.setCarryInt(register | 0);
+        this.branchFlags.setCarryInt(register | 0);
         //Return 0:
         register = 0;
     }
@@ -2394,17 +2391,17 @@ ARMInstructionSet.prototype.lrrs = function () {
     if ((shifter | 0) > 0) {
         if ((shifter | 0) < 0x20) {
             //Shift the register data right logically:
-            this.CPSR.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
+            this.branchFlags.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
             register = (register >>> (shifter | 0)) | 0;
         }
         else {
             if ((shifter | 0) == 0x20) {
                 //Shift bit 31 into carry:
-                this.CPSR.setCarryInt(register | 0);
+                this.branchFlags.setCarryInt(register | 0);
             }
             else {
                 //Everything Zero'd:
-                this.CPSR.setCarryFalse();
+                this.branchFlags.setCarryFalse();
             }
             register = 0;
         }
@@ -2435,12 +2432,12 @@ ARMInstructionSet.prototype.aris = function () {
     var shifter = (this.execute >> 7) & 0x1F;
     //Check to see if we need to update CPSR:
     if ((shifter | 0) > 0) {
-        this.CPSR.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
+        this.branchFlags.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
     }
     else {
         //Shift full length if shifter is zero:
         shifter = 0x1F;
-        this.CPSR.setCarryInt(register | 0);
+        this.branchFlags.setCarryInt(register | 0);
     }
     //Shift the register data right:
     return register >> (shifter | 0);
@@ -2466,12 +2463,12 @@ ARMInstructionSet.prototype.arrs = function () {
     if ((shifter | 0) > 0) {
         if ((shifter | 0) < 0x20) {
             //Shift the register data right arithmetically:
-            this.CPSR.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
+            this.branchFlags.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
             register = register >> (shifter | 0);
         }
         else {
             //Set all bits with bit 31:
-            this.CPSR.setCarryInt(register | 0);
+            this.branchFlags.setCarryInt(register | 0);
             register = register >> 0x1F;
         }
     }
@@ -2492,7 +2489,7 @@ ARMInstructionSet.prototype.rri = function () {
     }
     else {
         //RRX
-        register = ((this.CPSR.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
+        register = ((this.branchFlags.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
     }
     return register | 0;
 }
@@ -2506,13 +2503,13 @@ ARMInstructionSet.prototype.rris = function () {
     var shifter = (this.execute >> 7) & 0x1F;
     if ((shifter | 0) > 0) {
         //ROR
-        this.CPSR.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
+        this.branchFlags.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
         register = (register << (0x20 - (shifter | 0))) | (register >>> (shifter | 0));
     }
     else {
         //RRX
-        var rrxValue = ((this.CPSR.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
-        this.CPSR.setCarryInt(register << 31);
+        var rrxValue = ((this.branchFlags.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
+        this.branchFlags.setCarryInt(register << 31);
         register = rrxValue | 0;
     }
     return register | 0;
@@ -2544,12 +2541,12 @@ ARMInstructionSet.prototype.rrrs = function () {
         shifter = shifter & 0x1F;
         if ((shifter | 0) > 0) {
             //ROR
-            this.CPSR.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
+            this.branchFlags.setCarryInt((register >> ((shifter | 0) - 1)) << 31);
             register = (register << (0x20 - (shifter | 0))) | (register >>> (shifter | 0));
         }
         else {
             //No shift, but make carry set to bit 31:
-            this.CPSR.setCarryInt(register | 0);
+            this.branchFlags.setCarryInt(register | 0);
         }
     }
     //If shift is 0, just return the register without mod:
@@ -2572,24 +2569,22 @@ ARMInstructionSet.prototype.imms = function () {
     var shifter = (this.execute >> 7) & 0x1E;
     if ((shifter | 0) > 0) {
         immediate = (immediate << (0x20 - (shifter | 0))) | (immediate >>> (shifter | 0));
-        this.CPSR.setCarryInt(immediate | 0);
+        this.branchFlags.setCarryInt(immediate | 0);
     }
     return immediate | 0;
 }
 ARMInstructionSet.prototype.rc = function () {
     return (
-            ((this.CPSR.getNegative()) ? 0x80000000 : 0) |
-            ((this.CPSR.getZero()) ? 0x40000000 : 0) |
-            ((this.CPSR.getCarry()) ? 0x20000000 : 0) |
-            ((this.CPSR.getOverflow()) ? 0x10000000 : 0) |
-            ((this.CPUCore.IRQDisabled) ? 0x80 : 0) |
-            ((this.CPUCore.FIQDisabled) ? 0x40 : 0) |
-            this.CPUCore.MODEBits
+            ((this.branchFlags.getNegative()) ? 0x80000000 : 0) |
+            ((this.branchFlags.getZero()) ? 0x40000000 : 0) |
+            ((this.branchFlags.getCarry()) ? 0x20000000 : 0) |
+            ((this.branchFlags.getOverflow()) ? 0x10000000 : 0) |
+            this.CPUCore.modeFlags
             );
 }
 ARMInstructionSet.prototype.rs = function () {
     var spsr = 0;
-    switch (this.CPUCore.MODEBits | 0) {
+    switch (this.CPUCore.modeFlags & 0x1f) {
         case 0x12:    //IRQ
             spsr = this.CPUCore.SPSR[1] | 0;
             break;
