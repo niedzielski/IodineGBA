@@ -208,6 +208,7 @@ GameBoyAdvanceIO.prototype.updateCoreTwice = function () {
     }
 }
 GameBoyAdvanceIO.prototype.updateCoreSpill = function () {
+    //Invalidate & recompute new event times:
     this.updateCoreClocking();
     this.updateCoreEventTime();
 }
@@ -372,15 +373,15 @@ GameBoyAdvanceIO.prototype.deflagIterationEnd = function () {
     this.systemStatus = this.systemStatus & 0x3F;
 }
 GameBoyAdvanceIO.prototype.isStopped = function () {
+    //Sound system uses this to emulate a unpowered audio output:
     return ((this.systemStatus & 0x20) == 0x20);
 }
 GameBoyAdvanceIO.prototype.inDMA = function () {
+    //Save system uses this to detect dma:
     return ((this.systemStatus & 0x8) == 0x8);
 }
-GameBoyAdvanceIO.prototype.inTHUMB = function () {
-    return ((this.systemStatus & 0x2) == 0x2);
-}
 GameBoyAdvanceIO.prototype.getCurrentFetchValue = function () {
+    //Last valid value output for bad reads:
     var fetch = 0;
     if ((this.systemStatus & 0x8) == 0) {
         fetch = this.cpu.getCurrentFetchValue() | 0;
