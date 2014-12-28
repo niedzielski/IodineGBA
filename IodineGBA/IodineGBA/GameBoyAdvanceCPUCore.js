@@ -321,8 +321,8 @@ GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
         case 0x1B:    //Undefined
             bank = 4;
             break;
-        default:
-            return 0;
+        default:      //User & system lacks SPSR
+            return this.modeFlags & 0x20;
     }
     var spsr = this.SPSR[bank | 0] | 0;
     this.branchFlags.setNegative((spsr & 0x800) != 0);
