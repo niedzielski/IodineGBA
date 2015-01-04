@@ -20,12 +20,14 @@ function GameBoyAdvanceEmulator() {
         "SKIPBoot":false,                   //Skip the BIOS boot screen.
         "useWorkers":true,                  //Enable Web Workers for compiling.
         "audioVolume":1,                    //Starting audio volume.
-        "audioBufferUnderrunLimit":4,       //Audio buffer minimum span amount over x interpreter iterations.
+        "audioBufferUnderrunLimit":8,       //Audio buffer minimum span amount over x interpreter iterations.
+        "audioBufferDynamicLimit":2,        //Audio buffer dynamic minimum span amount over x interpreter iterations.
         "audioBufferSize":20,               //Audio buffer maximum span amount over x interpreter iterations.
         "timerIntervalRate":16,             //How often the emulator core is called into (in milliseconds).
         "emulatorSpeed":1,                  //Speed multiplier of the emulator.
         "metricCollectionMinimum":30,       //How many cycles to collect before determining speed.
-        "dynamicSpeed":false                //Whether to actively change the target speed for best user experience.
+        "dynamicSpeed":false,               //Whether to actively change the target speed for best user experience.
+        "dynamicSpeedLimit":20              //Rate limiter for dynamic speed.
     }
     this.audioFound = false;                  //Do we have audio output sink found yet?
     this.loaded = false;                      //Did we initialize IodineGBA?
@@ -48,6 +50,7 @@ function GameBoyAdvanceEmulator() {
     this.clockCyclesSinceStart = 0;           //Clocking hueristics reference
     this.metricCollectionCounted = 0;         //Clocking hueristics reference
     this.metricStart = null;                  //Date object reference.
+    this.dynamicSpeedCounter = 0;             //Rate limiter counter for dynamic speed.
     this.calculateTimings();                  //Calculate some multipliers against the core emulator timer.
     this.generateCoreExposed();               //Generate a limit API for the core to call this shell object.
 }
@@ -217,6 +220,7 @@ GameBoyAdvanceEmulator.prototype.resetMetrics = function () {
     this.clockCyclesSinceStart = 0;
     this.metricCollectionCounted = 0;
     this.metricStart = new Date();
+    this.dynamicSpeedCounter = 0;
 }
 GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
     this.clocksPerSecond = this.settings.emulatorSpeed * 0x1000000;
@@ -225,22 +229,14 @@ GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
 GameBoyAdvanceEmulator.prototype.calculateSpeedPercentage = function () {
     if (this.metricStart) {
         if (this.metricCollectionCounted >= this.settings.metricCollectionMinimum) {
-            var metricEnd = new Date();
-            var timeDiff = Math.max(metricEnd.getTime() - this.metricStart.getTime(), 1);
-            var result = ((this.settings.timerIntervalRate * this.clockCyclesSinceStart / timeDiff) / this.CPUCyclesPerIteration) * 100;
-            var speed = this.getSpeed();
-            if (this.settings.dynamicSpeed) {
-                if (result < 97) {
-                    speed -= 0.02;
-                }
-                else if (this.getSpeed() < 1) {
-                    speed = Math.min(speed + 0.02, 1);
-                }
-            }
-            this.setSpeed(speed);
             if (this.speedCallback) {
+                var metricEnd = new Date();
+                var timeDiff = Math.max(metricEnd.getTime() - this.metricStart.getTime(), 1);
+                var result = ((this.settings.timerIntervalRate * this.clockCyclesSinceStart / timeDiff) / this.CPUCyclesPerIteration) * 100;
                 this.speedCallback(result.toFixed(2) + "%");
             }
+            
+            this.resetMetrics();
         }
     }
     else {
@@ -321,6 +317,7 @@ GameBoyAdvanceEmulator.prototype.disableAudio = function () {
 GameBoyAdvanceEmulator.prototype.initializeAudioBuffering = function () {
     this.audioDestinationPosition = 0;
     this.audioBufferContainAmount = Math.max(this.CPUCyclesPerIteration * this.settings.audioBufferUnderrunLimit / this.audioResamplerFirstPassFactor, 4096) << 1;
+    this.audioBufferDynamicContainAmount = Math.max(this.CPUCyclesPerIteration * this.settings.audioBufferDynamicLimit / this.audioResamplerFirstPassFactor, 4096) << 1;
     this.audioNumSamplesTotal = (this.CPUCyclesPerIteration / this.audioResamplerFirstPassFactor) << 1;
     this.audioBuffer = getFloat32Array(this.audioNumSamplesTotal);
 }
@@ -346,11 +343,38 @@ GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInputLeft, do
 GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
     this.CPUCyclesTotal = this.CPUCyclesPerIteration | 0;
     if (this.audioFound) {
-        var underrunAmount = this.audio.remainingBuffer();
-        if (typeof underrunAmount == "number") {
-            underrunAmount = this.audioBufferContainAmount - Math.max(underrunAmount, 0);
+        var remainingAmount = this.audio.remainingBuffer();
+        if (typeof remainingAmount == "number") {
+            remainingAmount = Math.max(remainingAmount, 0);
+            var underrunAmount = this.audioBufferContainAmount - remainingAmount;
             if (underrunAmount > 0) {
+                if (this.settings.dynamicSpeed) {
+                    if (this.dynamicSpeedCounter > this.settings.dynamicSpeedLimit) {
+                        if ((this.audioBufferDynamicContainAmount - remainingAmount) > 0) {
+                            var speed = this.getSpeed();
+                            speed = Math.max(speed - 0.1, 0.1);
+                            this.setSpeed(speed);
+                        }
+                        else {
+                            this.dynamicSpeedCounter = this.settings.dynamicSpeedLimit;
+                        }
+                    }
+                    this.dynamicSpeedCounter++;
+                }
                 this.CPUCyclesTotal = Math.min(((this.CPUCyclesTotal | 0) + ((underrunAmount >> 1) * this.audioResamplerFirstPassFactor)) | 0, this.CPUCyclesTotal << 1, 0x7FFFFFFF) | 0;
+            }
+            else if (this.settings.dynamicSpeed) {
+                if (this.dynamicSpeedCounter > this.settings.dynamicSpeedLimit) {
+                    var speed = this.getSpeed();
+                    if (speed < 1) {
+                        speed = Math.min(speed + 0.05, 1);
+                        this.setSpeed(speed);
+                    }
+                    else {
+                        this.dynamicSpeedCounter = this.settings.dynamicSpeedLimit;
+                    }
+                }
+                this.dynamicSpeedCounter++;
             }
         }
     }
