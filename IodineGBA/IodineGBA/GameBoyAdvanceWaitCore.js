@@ -126,7 +126,7 @@ GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
     this.WAITCNT1 = data & 0x5F;
 }
 GameBoyAdvanceWait.prototype.readWAITCNT1 = function () {
-    return this.WAITCNT1 | 0x20;
+    return this.WAITCNT1 | 0;
 }
 GameBoyAdvanceWait.prototype.writePOSTBOOT = function (data) {
     this.POSTBOOT = data | 0;

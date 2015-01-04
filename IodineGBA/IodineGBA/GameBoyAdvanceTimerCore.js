@@ -249,7 +249,7 @@ GameBoyAdvanceTimer.prototype.readTM0CNT_L1 = function () {
     return (this.timer0Counter & 0xFF00) >> 8;
 }
 GameBoyAdvanceTimer.prototype.readTM0CNT_H = function () {
-    return 0x38 | this.timer0Control;
+    return  this.timer0Control | 0;
 }
 GameBoyAdvanceTimer.prototype.writeTM1CNT_L0 = function (data) {
     data = data | 0;
@@ -290,7 +290,7 @@ GameBoyAdvanceTimer.prototype.readTM1CNT_L1 = function () {
     return (this.timer1Counter & 0xFF00) >> 8;
 }
 GameBoyAdvanceTimer.prototype.readTM1CNT_H = function () {
-    return 0x38 | this.timer1Control;
+    return this.timer1Control | 0;
 }
 GameBoyAdvanceTimer.prototype.writeTM2CNT_L0 = function (data) {
     data = data | 0;
@@ -328,7 +328,7 @@ GameBoyAdvanceTimer.prototype.readTM2CNT_L1 = function () {
     return (this.timer2Counter & 0xFF00) >> 8;
 }
 GameBoyAdvanceTimer.prototype.readTM2CNT_H = function () {
-    return 0x38 | this.timer2Control;
+    return this.timer2Control | 0;
 }
 GameBoyAdvanceTimer.prototype.writeTM3CNT_L0 = function (data) {
     data = data | 0;
@@ -366,7 +366,7 @@ GameBoyAdvanceTimer.prototype.readTM3CNT_L1 = function () {
     return (this.timer3Counter & 0xFF00) >> 8;
 }
 GameBoyAdvanceTimer.prototype.readTM3CNT_H = function () {
-    return 0x38 | this.timer3Control;
+    return this.timer3Control | 0;
 }
 GameBoyAdvanceTimer.prototype.preprocessTimer1 = function () {
     this.timer1UseMainClocks = (this.timer1Enabled && !this.timer1CountUp);

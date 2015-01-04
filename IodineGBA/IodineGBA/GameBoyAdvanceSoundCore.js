@@ -694,7 +694,7 @@ GameBoyAdvanceSound.prototype.writeSOUNDCNT_H0 = function (data) {
 }
 GameBoyAdvanceSound.prototype.readSOUNDCNT_H0 = function () {
     //NR60:
-    return 0xF0 | this.nr60;
+    return this.nr60 | 0;
 }
 GameBoyAdvanceSound.prototype.writeSOUNDCNT_H1 = function (data) {
     //NR61:
@@ -732,7 +732,7 @@ GameBoyAdvanceSound.prototype.writeSOUNDCNT_X = function (data) {
 }
 GameBoyAdvanceSound.prototype.readSOUNDCNT_X = function () {
     //NR52:
-    return 0x70 | this.nr52;
+    return this.nr52 | 0;
 }
 GameBoyAdvanceSound.prototype.writeSOUNDBIAS0 = function (data) {
     //NR62:
@@ -758,5 +758,5 @@ GameBoyAdvanceSound.prototype.writeSOUNDBIAS1 = function (data) {
 }
 GameBoyAdvanceSound.prototype.readSOUNDBIAS1 = function () {
     //NR63:
-    return 0x2C | this.nr63;
+    return this.nr63 | 0;
 }
