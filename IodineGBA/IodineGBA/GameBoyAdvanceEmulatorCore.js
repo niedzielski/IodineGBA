@@ -26,8 +26,7 @@ function GameBoyAdvanceEmulator() {
         "timerIntervalRate":16,             //How often the emulator core is called into (in milliseconds).
         "emulatorSpeed":1,                  //Speed multiplier of the emulator.
         "metricCollectionMinimum":30,       //How many cycles to collect before determining speed.
-        "dynamicSpeed":false,               //Whether to actively change the target speed for best user experience.
-        "dynamicSpeedLimit":20              //Rate limiter for dynamic speed.
+        "dynamicSpeed":false                //Whether to actively change the target speed for best user experience.
     }
     this.audioFound = false;                  //Do we have audio output sink found yet?
     this.loaded = false;                      //Did we initialize IodineGBA?
@@ -220,11 +219,11 @@ GameBoyAdvanceEmulator.prototype.resetMetrics = function () {
     this.clockCyclesSinceStart = 0;
     this.metricCollectionCounted = 0;
     this.metricStart = new Date();
-    this.dynamicSpeedCounter = 0;
 }
 GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
     this.clocksPerSecond = this.settings.emulatorSpeed * 0x1000000;
     this.CPUCyclesTotal = this.CPUCyclesPerIteration = (this.clocksPerSecond / 1000 * this.settings.timerIntervalRate) | 0;
+    this.dynamicSpeedCounter = 0;
 }
 GameBoyAdvanceEmulator.prototype.calculateSpeedPercentage = function () {
     if (this.metricStart) {
@@ -235,7 +234,6 @@ GameBoyAdvanceEmulator.prototype.calculateSpeedPercentage = function () {
                 var result = ((this.settings.timerIntervalRate * this.clockCyclesSinceStart / timeDiff) / this.CPUCyclesPerIteration) * 100;
                 this.speedCallback(result.toFixed(2) + "%");
             }
-            
             this.resetMetrics();
         }
     }
@@ -349,14 +347,14 @@ GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
             var underrunAmount = this.audioBufferContainAmount - remainingAmount;
             if (underrunAmount > 0) {
                 if (this.settings.dynamicSpeed) {
-                    if (this.dynamicSpeedCounter > this.settings.dynamicSpeedLimit) {
+                    if (this.dynamicSpeedCounter > this.settings.metricCollectionMinimum) {
                         if ((this.audioBufferDynamicContainAmount - remainingAmount) > 0) {
                             var speed = this.getSpeed();
                             speed = Math.max(speed - 0.1, 0.1);
                             this.setSpeed(speed);
                         }
                         else {
-                            this.dynamicSpeedCounter = this.settings.dynamicSpeedLimit;
+                            this.dynamicSpeedCounter = this.settings.metricCollectionMinimum;
                         }
                     }
                     this.dynamicSpeedCounter++;
@@ -364,14 +362,14 @@ GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
                 this.CPUCyclesTotal = Math.min(((this.CPUCyclesTotal | 0) + ((underrunAmount >> 1) * this.audioResamplerFirstPassFactor)) | 0, this.CPUCyclesTotal << 1, 0x7FFFFFFF) | 0;
             }
             else if (this.settings.dynamicSpeed) {
-                if (this.dynamicSpeedCounter > this.settings.dynamicSpeedLimit) {
+                if (this.dynamicSpeedCounter > this.settings.metricCollectionMinimum) {
                     var speed = this.getSpeed();
                     if (speed < 1) {
                         speed = Math.min(speed + 0.05, 1);
                         this.setSpeed(speed);
                     }
                     else {
-                        this.dynamicSpeedCounter = this.settings.dynamicSpeedLimit;
+                        this.dynamicSpeedCounter = this.settings.metricCollectionMinimum;
                     }
                 }
                 this.dynamicSpeedCounter++;
