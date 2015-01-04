@@ -122,7 +122,7 @@ GameBoyAdvanceJoyPad.prototype.readKeyStatus0 = function () {
     return this.keyInput & 0xFF;
 }
 GameBoyAdvanceJoyPad.prototype.readKeyStatus1 = function () {
-    return ((this.keyInput >> 8) & 0x3) | 0xFC;
+    return (this.keyInput >> 8) & 0x3;
 }
 GameBoyAdvanceJoyPad.prototype.writeKeyControl0 = function (data) {
     data = data | 0;
@@ -138,5 +138,5 @@ GameBoyAdvanceJoyPad.prototype.writeKeyControl1 = function (data) {
     this.keyInterrupt = this.keyInterrupt | (data << 8);
 }
 GameBoyAdvanceJoyPad.prototype.readKeyControl1 = function () {
-    return ((this.keyInterrupt >> 8) & 0xC3) | 0x3C;
+    return (this.keyInterrupt >> 8) & 0xC3;
 }
