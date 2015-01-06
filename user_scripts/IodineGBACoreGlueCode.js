@@ -41,6 +41,7 @@ function registerAudioHandler() {
     Mixer = new GlueCodeMixer();
     MixerInput = new GlueCodeMixerInput(Mixer);
     Iodine.attachAudioHandler(MixerInput);
+    Iodine.enableAudio();
 }
 function registerGUIEvents() {
     addEvent("keydown", document, keyDown);
@@ -63,7 +64,7 @@ function registerGUIEvents() {
         Iodine.restart();
         e.preventDefault();
     });
-    document.getElementById("sound").checked = false;
+    document.getElementById("sound").checked = true;
     addEvent("click", document.getElementById("sound"), function () {
         if (this.checked) {
             Iodine.enableAudio();
@@ -87,7 +88,7 @@ function registerGUIEvents() {
                 Blitter.setSmoothScaling(this.checked);
              }
     });
-    document.getElementById("toggleDynamicSpeed").checked = false;
+    document.getElementById("toggleDynamicSpeed").checked = true;
     addEvent("click", document.getElementById("toggleDynamicSpeed"), function () {
              if (this.checked) {
                 Iodine.enableDynamicSpeed();

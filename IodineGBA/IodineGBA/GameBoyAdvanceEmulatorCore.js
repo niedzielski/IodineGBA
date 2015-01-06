@@ -18,7 +18,6 @@
 function GameBoyAdvanceEmulator() {
     this.settings = {
         "SKIPBoot":false,                   //Skip the BIOS boot screen.
-        "useWorkers":true,                  //Enable Web Workers for compiling.
         "audioVolume":1,                    //Starting audio volume.
         "audioBufferUnderrunLimit":8,       //Audio buffer minimum span amount over x interpreter iterations.
         "audioBufferDynamicLimit":2,        //Audio buffer dynamic minimum span amount over x interpreter iterations.
@@ -26,7 +25,7 @@ function GameBoyAdvanceEmulator() {
         "timerIntervalRate":16,             //How often the emulator core is called into (in milliseconds).
         "emulatorSpeed":1,                  //Speed multiplier of the emulator.
         "metricCollectionMinimum":30,       //How many cycles to collect before determining speed.
-        "dynamicSpeed":false                //Whether to actively change the target speed for best user experience.
+        "dynamicSpeed":true                 //Whether to actively change the target speed for best user experience.
     }
     this.audioFound = false;                  //Do we have audio output sink found yet?
     this.loaded = false;                      //Did we initialize IodineGBA?
@@ -50,6 +49,7 @@ function GameBoyAdvanceEmulator() {
     this.metricCollectionCounted = 0;         //Clocking hueristics reference
     this.metricStart = null;                  //Date object reference.
     this.dynamicSpeedCounter = 0;             //Rate limiter counter for dynamic speed.
+    this.audioNumSamplesTotal = 0;            //Buffer size.
     this.calculateTimings();                  //Calculate some multipliers against the core emulator timer.
     this.generateCoreExposed();               //Generate a limit API for the core to call this shell object.
 }
@@ -315,9 +315,12 @@ GameBoyAdvanceEmulator.prototype.disableAudio = function () {
 GameBoyAdvanceEmulator.prototype.initializeAudioBuffering = function () {
     this.audioDestinationPosition = 0;
     this.audioBufferContainAmount = Math.max(this.CPUCyclesPerIteration * this.settings.audioBufferUnderrunLimit / this.audioResamplerFirstPassFactor, 4096) << 1;
-    this.audioBufferDynamicContainAmount = Math.max(this.CPUCyclesPerIteration * this.settings.audioBufferDynamicLimit / this.audioResamplerFirstPassFactor, 4096) << 1;
-    this.audioNumSamplesTotal = (this.CPUCyclesPerIteration / this.audioResamplerFirstPassFactor) << 1;
-    this.audioBuffer = getFloat32Array(this.audioNumSamplesTotal);
+    this.audioBufferDynamicContainAmount = Math.max(this.CPUCyclesPerIteration * this.settings.audioBufferDynamicLimit / this.audioResamplerFirstPassFactor, 2048) << 1;
+    var audioNumSamplesTotal = Math.max(this.CPUCyclesPerIteration / this.audioResamplerFirstPassFactor, 1) << 1;
+    if (audioNumSamplesTotal != this.audioNumSamplesTotal) {
+        this.audioNumSamplesTotal = audioNumSamplesTotal;
+        this.audioBuffer = getFloat32Array(this.audioNumSamplesTotal);
+    }
 }
 GameBoyAdvanceEmulator.prototype.changeVolume = function (newVolume) {
     this.settings.audioVolume = Math.min(Math.max(parseFloat(newVolume), 0), 1);
