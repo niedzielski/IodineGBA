@@ -102,7 +102,6 @@ GlueCodeMixerInput.prototype.initialize = function (channelCount, sampleRate, bu
     this.buffer = new AudioBufferWrapper(this.channelCount,
                                          this.mixer.channelCount,
                                          this.bufferAmount,
-                                         this.mixer.bufferAmount,
                                          this.sampleRate,
                                          this.mixer.sampleRate);
     
@@ -135,13 +134,11 @@ GlueCodeMixerInput.prototype.unregister = function () {
 function AudioBufferWrapper(channelCount,
                             mixerChannelCount,
                             bufferAmount,
-                            mixerBufferAmount,
                             sampleRate,
                             mixerSampleRate) {
     this.channelCount = channelCount;
     this.mixerChannelCount = mixerChannelCount;
     this.bufferAmount = bufferAmount;
-    this.mixerBufferAmount = mixerBufferAmount;
     this.sampleRate = sampleRate;
     this.mixerSampleRate = mixerSampleRate;
     this.initialize();
@@ -149,7 +146,7 @@ function AudioBufferWrapper(channelCount,
 AudioBufferWrapper.prototype.initialize = function () {
     this.inBufferSize = this.bufferAmount * this.mixerChannelCount;
     this.inBuffer = getFloat32Array(this.inBufferSize);
-    this.outBufferSize = (this.inBufferSize * Math.ceil(this.mixerSampleRate / this.sampleRate)) + this.mixerChannelCount;
+    this.outBufferSize = (Math.ceil(this.inBufferSize * this.mixerSampleRate / this.sampleRate / this.mixerChannelCount) * this.mixerChannelCount) + this.mixerChannelCount;
     this.outBuffer = getFloat32Array(this.outBufferSize);
     this.resampler = new Resampler(this.sampleRate, this.mixerSampleRate, this.mixerChannelCount, this.outBufferSize, true);
     this.inputOffset = 0;
