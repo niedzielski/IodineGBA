@@ -215,7 +215,11 @@ GameBoyAdvanceGraphics.prototype.nextVBlankIRQEventTime = function () {
     return nextEventTime | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankEventTime = function () {
-    return ((2238 - (this.LCDTicks | 0)) % 1232) | 0;
+    var time = 1006;
+    if ((this.LCDTicks | 0) >= 1006) {
+        time = 2238;
+    }
+    return ((time | 0) - (this.LCDTicks | 0)) | 0;
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankIRQEventTime = function () {
     var nextEventTime = -1;
