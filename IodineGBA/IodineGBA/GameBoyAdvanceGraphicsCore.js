@@ -158,7 +158,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDNextLine = function () {
                 this.checkDisplaySync();                            //Check for display sync.
                 break;
             case 162:
-                this.IOCore.dma.gfxDisplaySyncKillRequest();        //Display Sync. DMA reset on start of line 162.
+                this.IOCore.dma.gfxDisplaySyncEnableCheck();        //Display Sync. DMA reset on start of line 162.
                 break;
             case 227:
                 this.inVBlank = false;                              //Un-mark VBlank on start of last vblank line.
