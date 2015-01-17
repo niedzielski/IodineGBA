@@ -131,12 +131,12 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
     if (this.isDrawable(sprite, isOBJWindow)) {
         if (sprite.mosaic) {
             //Correct line number for mosaic:
-            line -= this.gfx.mosaicRenderer.getOBJMosaicYOffset(line | 0);
+            line = ((line | 0) - (this.gfx.mosaicRenderer.getOBJMosaicYOffset(line | 0) | 0)) | 0;
         }
         //Obtain horizontal size info:
-        var xSize = this.lookupXSize[(sprite.shape << 2) | sprite.size] << ((sprite.doubleSizeOrDisabled) ? 1 : 0);
+        var xSize = this.lookupXSize[(sprite.shape << 2) | sprite.size] << (sprite.doubleSizeOrDisabled | 0);
         //Obtain vertical size info:
-        var ySize = this.lookupYSize[(sprite.shape << 2) | sprite.size] << ((sprite.doubleSizeOrDisabled) ? 1 : 0);
+        var ySize = this.lookupYSize[(sprite.shape << 2) | sprite.size] << (sprite.doubleSizeOrDisabled | 0);
         //Obtain some offsets:
         var ycoord = sprite.ycoord | 0;
         var yOffset = ((line | 0) - (ycoord | 0)) | 0;
@@ -176,9 +176,9 @@ if (!!Math.imul) {
         yOffset = yOffset | 0;
         var xDiff = (-(xSize >> 1)) | 0;
         var yDiff = ((yOffset | 0) - (ySize >> 1)) | 0;
-        var xSizeOriginal = (xSize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
+        var xSizeOriginal = xSize >> (sprite.doubleSizeOrDisabled | 0);
         var xSizeFixed = xSizeOriginal << 8;
-        var ySizeOriginal = (ySize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0)) | 0;
+        var ySizeOriginal = ySize >> (sprite.doubleSizeOrDisabled | 0);
         var ySizeFixed = ySizeOriginal << 8;
         var params = this.OBJMatrixParameters[sprite.matrixParameters | 0];
         var dx = params[0] | 0;
@@ -209,9 +209,9 @@ else {
     GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
         var xDiff = -(xSize >> 1);
         var yDiff = yOffset - (ySize >> 1);
-        var xSizeOriginal = xSize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0);
+        var xSizeOriginal = xSize >> (sprite.doubleSizeOrDisabled | 0);
         var xSizeFixed = xSizeOriginal << 8;
-        var ySizeOriginal = ySize >> ((sprite.doubleSizeOrDisabled) ? 1 : 0);
+        var ySizeOriginal = ySize >> (sprite.doubleSizeOrDisabled | 0);
         var ySizeFixed = ySizeOriginal << 8;
         var params = this.OBJMatrixParameters[sprite.matrixParameters];
         var dx = params[0];
@@ -474,7 +474,7 @@ if (__LITTLE_ENDIAN__) {
             case 0:
                 OAMTable.ycoord = data & 0xFF;
                 OAMTable.matrix2D = ((data & 0x100) == 0x100);
-                OAMTable.doubleSizeOrDisabled = ((data & 0x200) == 0x200);
+                OAMTable.doubleSizeOrDisabled = (data & 0x200) >> 9;
                 OAMTable.mode = (data >> 10) & 0x3;
                 OAMTable.mosaic = ((data & 0x1000) == 0x1000);
                 OAMTable.monolithicPalette = ((data & 0x2000) == 0x2000);
@@ -508,7 +508,7 @@ if (__LITTLE_ENDIAN__) {
             //Attrib 0:
             OAMTable.ycoord = data & 0xFF;
             OAMTable.matrix2D = ((data & 0x100) == 0x100);
-            OAMTable.doubleSizeOrDisabled = ((data & 0x200) == 0x200);
+            OAMTable.doubleSizeOrDisabled = (data & 0x200) >> 9;
             OAMTable.mode = (data >> 10) & 0x3;
             OAMTable.mosaic = ((data & 0x1000) == 0x1000);
             OAMTable.monolithicPalette = ((data & 0x2000) == 0x2000);
@@ -549,7 +549,7 @@ else {
             case 0:
                 OAMTable.ycoord = data & 0xFF;
                 OAMTable.matrix2D = ((data & 0x100) == 0x100);
-                OAMTable.doubleSizeOrDisabled = ((data & 0x200) == 0x200);
+                OAMTable.doubleSizeOrDisabled = (data & 0x200) >> 9;
                 OAMTable.mode = (data >> 10) & 0x3;
                 OAMTable.mosaic = ((data & 0x1000) == 0x1000);
                 OAMTable.monolithicPalette = ((data & 0x2000) == 0x2000);
@@ -585,7 +585,7 @@ else {
             //Attrib 0:
             OAMTable.ycoord = data & 0xFF;
             OAMTable.matrix2D = ((data & 0x100) == 0x100);
-            OAMTable.doubleSizeOrDisabled = ((data & 0x200) == 0x200);
+            OAMTable.doubleSizeOrDisabled = (data & 0x200) >> 9;
             OAMTable.mode = (data >> 10) & 0x3;
             OAMTable.mosaic = ((data & 0x1000) == 0x1000);
             OAMTable.monolithicPalette = ((data & 0x2000) == 0x2000);

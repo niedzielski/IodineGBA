@@ -18,7 +18,7 @@
 function GameBoyAdvanceOAMAttributeTable() {
     this.ycoord = 0;
     this.matrix2D = false;
-    this.doubleSizeOrDisabled = false;
+    this.doubleSizeOrDisabled = 0;
     this.mode = 0;
     this.mosaic = false;
     this.monolithicPalette = false;
