@@ -40,26 +40,45 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
     16, 32, 32, 64
 ];
 if (__VIEWS_SUPPORTED__) {
-    GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
-        this.VRAM32 = this.gfx.VRAM32;
-        this.OAMRAM = getUint8Array(0x400);
-        this.OAMRAM16 = getUint16View(this.OAMRAM);
-        this.OAMRAM32 = getInt32View(this.OAMRAM);
-        this.scratchBuffer = getInt32Array(240);
-        this.scratchWindowBuffer = getInt32Array(240);
-        this.scratchOBJBuffer = getInt32Array(128);
-        this.clearingBuffer = getInt32Array(240);
-        this.targetBuffer = null;
-        this.initializeClearingBuffer();
-        this.initializeMatrixStorage();
-        this.initializeOAMTable();
+    if (typeof getUint8Array(1).fill == "function") {
+        GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
+            this.VRAM32 = this.gfx.VRAM32;
+            this.OAMRAM = getUint8Array(0x400);
+            this.OAMRAM16 = getUint16View(this.OAMRAM);
+            this.OAMRAM32 = getInt32View(this.OAMRAM);
+            this.scratchBuffer = getInt32Array(240);
+            this.scratchWindowBuffer = getInt32Array(240);
+            this.scratchOBJBuffer = getInt32Array(128);
+            this.targetBuffer = null;
+            this.initializeMatrixStorage();
+            this.initializeOAMTable();
+        }
+        GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
+            this.targetBuffer.fill(this.transparency | 0);
+        }
     }
-    GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
-        this.targetBuffer.set(this.clearingBuffer);
-    }
-    GameBoyAdvanceOBJRenderer.prototype.initializeClearingBuffer = function () {
-        for (var position = 0; position < 240; ++position) {
-            this.clearingBuffer[position] = this.transparency;
+    else {
+        GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
+            this.VRAM32 = this.gfx.VRAM32;
+            this.OAMRAM = getUint8Array(0x400);
+            this.OAMRAM16 = getUint16View(this.OAMRAM);
+            this.OAMRAM32 = getInt32View(this.OAMRAM);
+            this.scratchBuffer = getInt32Array(240);
+            this.scratchWindowBuffer = getInt32Array(240);
+            this.scratchOBJBuffer = getInt32Array(128);
+            this.clearingBuffer = getInt32Array(240);
+            this.targetBuffer = null;
+            this.initializeClearingBuffer();
+            this.initializeMatrixStorage();
+            this.initializeOAMTable();
+        }
+        GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
+            this.targetBuffer.set(this.clearingBuffer);
+        }
+        GameBoyAdvanceOBJRenderer.prototype.initializeClearingBuffer = function () {
+            for (var position = 0; position < 240; ++position) {
+                this.clearingBuffer[position] = this.transparency | 0;
+            }
         }
     }
 }
