@@ -168,6 +168,6 @@ else {
     }
 }
 GameBoyAdvanceBG2FrameBufferRenderer.prototype.writeFrameSelect = function (frameSelect) {
-    frameSelect = frameSelect | 0;
-    this.frameSelect = (frameSelect * 0xA000) | 0;
+    frameSelect = frameSelect >> 31;
+    this.frameSelect = frameSelect & 0xA000;
 }

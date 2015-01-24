@@ -411,7 +411,7 @@ GameBoyAdvanceGraphics.prototype.writeDISPCNT0 = function (data) {
     data = data | 0;
     this.graphicsJIT();
     this.BGMode = data & 0x07;
-    this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) >> 4);
+    this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
     this.HBlankIntervalFree = ((data & 0x20) == 0x20);
     this.VRAMOneDimensional = ((data & 0x40) == 0x40);
     this.forcedBlank = ((data & 0x80) == 0x80);
