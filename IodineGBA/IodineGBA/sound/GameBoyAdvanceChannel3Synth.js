@@ -110,7 +110,7 @@ GameBoyAdvanceChannel3Synth.prototype.writeWAVE = function (address, data) {
         this.sound.audioJIT();
     }
     address = ((address | 0) + (this.WAVERAMBankAccessed >> 1)) | 0;
-    this.WAVERAM[address | 0] = data & 0xFF;
+    this.WAVERAM[address | 0] = data | 0;
     address <<= 1;
     this.PCM[address | 0] = data >> 4;
     this.PCM[address | 1] = data & 0xF;

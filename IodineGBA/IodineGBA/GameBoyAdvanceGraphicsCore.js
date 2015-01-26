@@ -1034,6 +1034,7 @@ if (__LITTLE_ENDIAN__) {
         data = data | 0;
         if ((address & 0x10000) == 0 || ((address & 0x17FFF) < 0x14000 && (this.BGMode | 0) >= 3)) {
             this.graphicsJIT();
+            address = address & (((address & 0x10000) >> 1) ^ address);
             this.VRAM16[(address >> 1) & 0xFFFF] = Math.imul(data & 0xFF, 0x101) | 0;
         }
     }
@@ -1065,7 +1066,7 @@ if (__LITTLE_ENDIAN__) {
         data = data | 0;
         address = address >> 1;
         this.graphicsJIT();
-        this.paletteRAM16[address & 0x1FF] = data & 0xFFFF;
+        this.paletteRAM16[address & 0x1FF] = data | 0;
         data = data & 0x7FFF;
         this.writePalette256Color(address | 0, data | 0);
         this.writePalette16Color(address | 0, data | 0);
@@ -1093,7 +1094,7 @@ if (__LITTLE_ENDIAN__) {
 }
 else {
     GameBoyAdvanceGraphics.prototype.writeVRAM8 = function (address, data) {
-        address &= 0x1FFFE;
+        address &= 0x1FFFE & (((address & 0x10000) >> 1) ^ address);
         if (address < 0x10000 || ((address & 0x17FFF) < 0x14000 && this.BGMode >= 3)) {
             this.graphicsJIT();
             this.VRAM[address++] = data & 0xFF;
