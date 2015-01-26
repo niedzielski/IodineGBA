@@ -259,11 +259,11 @@ if (!!Math.imul) {
         var nextEventTime = -1;
         if ((this.VCounter | 0) <= 227) {
             //Only match lines within screen or vblank:
-            nextEventTime = (227 + (this.VCounter | 0)) | 0;
-            nextEventTime = ((nextEventTime | 0) - (this.currentScanLine | 0)) | 0;
-            nextEventTime = ((nextEventTime | 0) % 228) | 0;
+            nextEventTime = ((this.VCounter | 0) - (this.currentScanLine | 0)) | 0;
+            if ((nextEventTime | 0) <= 0) {
+                nextEventTime = ((nextEventTime | 0) + 228) | 0;
+            }
             nextEventTime = Math.imul(nextEventTime | 0, 1232) | 0;
-            nextEventTime = ((nextEventTime | 0) + 1232) | 0;
             nextEventTime = ((nextEventTime | 0) - (this.LCDTicks | 0)) | 0;
         }
         return nextEventTime | 0;
