@@ -275,14 +275,15 @@ GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, x, y, x
     x = x | 0;
     y = y | 0;
     xSize = xSize | 0;
-    var address = this.tileNumberToAddress(sprite, xSize | 0, y | 0) | 0;
     if ((sprite.monolithicPalette | 0) != 0) {
         //256 Colors / 1 Palette:
+        var address = this.tileNumberToAddress256(sprite.tileNumber | 0, xSize | 0, y | 0) | 0;
         address = ((address | 0) + (this.tileRelativeAddressOffset(x | 0, y | 0) | 0)) | 0;
         return this.paletteOBJ256[this.VRAM[address | 0] | 0] | 0;
     }
     else {
         //16 Colors / 16 palettes:
+        var address = this.tileNumberToAddress16(sprite.tileNumber | 0, xSize | 0, y | 0) | 0;
         address = ((address | 0) + ((this.tileRelativeAddressOffset(x | 0, y | 0) >> 1) | 0)) | 0;
         if ((x & 0x1) == 0) {
             return this.paletteOBJ16[sprite.paletteNumber | this.VRAM[address | 0] & 0xF] | 0;
@@ -305,14 +306,15 @@ GameBoyAdvanceOBJRenderer.prototype.renderNormalSprite = function (sprite, xSize
         //Flip y-coordinate offset:
         yOffset = ((ySize | 0) - (yOffset | 0)) | 0;
     }
-    var address = this.tileNumberToAddress(sprite, xSize | 0, yOffset | 0) | 0;
     if ((sprite.monolithicPalette | 0) != 0) {
         //256 Colors / 1 Palette:
+        var address = this.tileNumberToAddress256(sprite.tileNumber | 0, xSize | 0, yOffset | 0) | 0;
         address = ((address | 0) + ((yOffset & 7) << 3)) | 0;
         this.render256ColorPaletteSprite(address | 0, xSize | 0);
     }
     else {
         //16 Colors / 16 palettes:
+        var address = this.tileNumberToAddress16(sprite.tileNumber | 0, xSize | 0, yOffset | 0) | 0;
         address = ((address | 0) + ((yOffset & 7) << 2)) | 0;
         this.render16ColorPaletteSprite(address | 0, xSize | 0, sprite.paletteNumber | 0);
     }
@@ -390,28 +392,35 @@ else {
 }
 if (typeof Math.imul == "function") {
     //Math.imul found, insert the optimized path in:
-    GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, xSize, yOffset) {
+    GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress256 = function (tileNumber, xSize, yOffset) {
+        tileNumber = tileNumber | 0;
         xSize = xSize | 0;
         yOffset = yOffset | 0;
-        var tileNumber = sprite.tileNumber | 0;
         if (!this.gfx.VRAMOneDimensional) {
             //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
-            if ((sprite.monolithicPalette | 0) != 0) {
-                //Hardware ignores the LSB in this case:
-                tileNumber = tileNumber & -2;
-            }
+            //Hardware ignores the LSB in this case:
+            tileNumber = ((tileNumber & -2) + (Math.imul(yOffset >> 3, 0x20) | 0)) | 0;
+        }
+        else {
+            //1D Mapping:
+            //256 Color Palette:
+            tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, xSize >> 2) | 0)) | 0;
+        }
+        //Starting address of currently drawing sprite line:
+        return ((tileNumber << 5) + 0x10000) | 0;
+    }
+    GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress16 = function (tileNumber, xSize, yOffset) {
+        tileNumber = tileNumber | 0;
+        xSize = xSize | 0;
+        yOffset = yOffset | 0;
+        if (!this.gfx.VRAMOneDimensional) {
+            //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
             tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, 0x20) | 0)) | 0;
         }
         else {
             //1D Mapping:
-            if ((sprite.monolithicPalette | 0) != 0) {
-                //256 Color Palette:
-                tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, xSize >> 2) | 0)) | 0;
-            }
-            else {
-                //16 Color Palette:
-                tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, xSize >> 3) | 0)) | 0;
-            }
+            //16 Color Palette:
+            tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, xSize >> 3) | 0)) | 0;
         }
         //Starting address of currently drawing sprite line:
         return ((tileNumber << 5) + 0x10000) | 0;
@@ -419,19 +428,28 @@ if (typeof Math.imul == "function") {
 }
 else {
     //Math.imul not found, use the compatibility method:
-    GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress = function (sprite, xSize, yOffset) {
-        var tileNumber = sprite.tileNumber;
+    GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress256 = function (tileNumber, xSize, yOffset) {
         if (!this.gfx.VRAMOneDimensional) {
             //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
-            if (sprite.monolithicPalette != 0) {
-                //Hardware ignores the LSB in this case:
-                tileNumber &= -2;
-            }
+            //Hardware ignores the LSB in this case:
+            tileNumber &= -2;
             tileNumber += (yOffset >> 3) * 0x20;
         }
         else {
             //1D Mapping:
-            tileNumber += (yOffset >> 3) * (xSize >> ((sprite.monolithicPalette != 0) ? 2 : 3));
+            tileNumber += (yOffset >> 3) * (xSize >> 2);
+        }
+        //Starting address of currently drawing sprite line:
+        return (tileNumber << 5) + 0x10000;
+    }
+    GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress16 = function (tileNumber, xSize, yOffset) {
+        if (!this.gfx.VRAMOneDimensional) {
+            //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
+            tileNumber += (yOffset >> 3) * 0x20;
+        }
+        else {
+            //1D Mapping:
+            tileNumber += (yOffset >> 3) * (xSize >> 3);
         }
         //Starting address of currently drawing sprite line:
         return (tileNumber << 5) + 0x10000;
