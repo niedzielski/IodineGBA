@@ -50,7 +50,7 @@ if (__VIEWS_SUPPORTED__) {
             this.scratchWindowBuffer = getInt32Array(240);
             this.scratchOBJBuffer = getInt32Array(128);
             this.targetBuffer = null;
-            this.initializeMatrixStorage();
+            this.OBJMatrixParameters = getInt32Array(0x80);
             this.initializeOAMTable();
         }
         GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
@@ -69,7 +69,7 @@ if (__VIEWS_SUPPORTED__) {
             this.clearingBuffer = getInt32Array(240);
             this.targetBuffer = null;
             this.initializeClearingBuffer();
-            this.initializeMatrixStorage();
+            this.OBJMatrixParameters = getInt32Array(0x80);
             this.initializeOAMTable();
         }
         GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
@@ -89,19 +89,13 @@ else {
         this.scratchWindowBuffer = getInt32Array(240);
         this.scratchOBJBuffer = getInt32Array(128);
         this.targetBuffer = null;
-        this.initializeMatrixStorage();
+        this.OBJMatrixParameters = getInt32Array(0x80);
         this.initializeOAMTable();
     }
     GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
         for (var position = 0; position < 240; ++position) {
             this.targetBuffer[position] = this.transparency;
         }
-    }
-}
-GameBoyAdvanceOBJRenderer.prototype.initializeMatrixStorage = function () {
-    this.OBJMatrixParameters = [];
-    for (var index = 0; index < 0x20;) {
-        this.OBJMatrixParameters[index++] = getInt32Array(0x4);
     }
 }
 GameBoyAdvanceOBJRenderer.prototype.initializeOAMTable = function () {
@@ -222,11 +216,10 @@ if (typeof Math.imul == "function") {
         var xSizeFixed = xSizeOriginal << 8;
         var ySizeOriginal = ySize >> (sprite.doubleSizeOrDisabled | 0);
         var ySizeFixed = ySizeOriginal << 8;
-        var params = this.OBJMatrixParameters[sprite.matrixParameters | 0];
-        var dx = params[0] | 0;
-        var dmx = params[1] | 0;
-        var dy = params[2] | 0;
-        var dmy = params[3] | 0;
+        var dx = this.OBJMatrixParameters[sprite.matrixParameters | 0] | 0;
+        var dmx = this.OBJMatrixParameters[sprite.matrixParameters | 1] | 0;
+        var dy = this.OBJMatrixParameters[sprite.matrixParameters | 2] | 0;
+        var dmy = this.OBJMatrixParameters[sprite.matrixParameters | 3] | 0;
         var pa = Math.imul(dx | 0, xDiff | 0) | 0;
         var pb = Math.imul(dmx | 0, yDiff | 0) | 0;
         var pc = Math.imul(dy | 0, xDiff | 0) | 0;
@@ -251,15 +244,14 @@ else {
     GameBoyAdvanceOBJRenderer.prototype.renderMatrixSprite = function (sprite, xSize, ySize, yOffset) {
         var xDiff = -(xSize >> 1);
         var yDiff = yOffset - (ySize >> 1);
-        var xSizeOriginal = xSize >> (sprite.doubleSizeOrDisabled | 0);
+        var xSizeOriginal = xSize >> sprite.doubleSizeOrDisabled;
         var xSizeFixed = xSizeOriginal << 8;
-        var ySizeOriginal = ySize >> (sprite.doubleSizeOrDisabled | 0);
+        var ySizeOriginal = ySize >> sprite.doubleSizeOrDisabled;
         var ySizeFixed = ySizeOriginal << 8;
-        var params = this.OBJMatrixParameters[sprite.matrixParameters];
-        var dx = params[0];
-        var dmx = params[1];
-        var dy = params[2];
-        var dmy = params[3];
+        var dx = this.OBJMatrixParameters[sprite.matrixParameters];
+        var dmx = this.OBJMatrixParameters[sprite.matrixParameters | 1];
+        var dy = this.OBJMatrixParameters[sprite.matrixParameters | 2];
+        var dmy = this.OBJMatrixParameters[sprite.matrixParameters | 3];
         var pa = dx * xDiff;
         var pb = dmx * yDiff;
         var pc = dy * xDiff;
@@ -525,7 +517,7 @@ if (__LITTLE_ENDIAN__) {
                 //Attrib 1:
             case 1:
                 OAMTable.xcoord = data & 0x1FF;
-                OAMTable.matrixParameters = (data >> 9) & 0x1F;
+                OAMTable.matrixParameters = (data >> 7) & 0x7C;
                 OAMTable.horizontalFlip = data & 0x1000;
                 OAMTable.verticalFlip = data & 0x2000;
                 OAMTable.size = data >> 14;
@@ -538,7 +530,7 @@ if (__LITTLE_ENDIAN__) {
                 break;
                 //Scaling/Rotation Parameter:
             default:
-                this.OBJMatrixParameters[address >> 4][(address >> 2) & 0x3] = (data << 16) >> 16;
+                this.OBJMatrixParameters[address >> 2] = (data << 16) >> 16;
         }
         this.OAMRAM16[address | 0] = data | 0;
     }
@@ -557,7 +549,7 @@ if (__LITTLE_ENDIAN__) {
             OAMTable.shape = (data >> 14) & 0x3;
             //Attrib 1:
             OAMTable.xcoord = (data >> 16) & 0x1FF;
-            OAMTable.matrixParameters = (data >> 25) & 0x1F;
+            OAMTable.matrixParameters = (data >> 23) & 0x7C;
             OAMTable.horizontalFlip = data & 0x10000000;
             OAMTable.verticalFlip = data & 0x20000000;
             OAMTable.size = (data >> 30) & 0x3;
@@ -568,7 +560,7 @@ if (__LITTLE_ENDIAN__) {
             OAMTable.priority = (data >> 10) & 0x3;
             OAMTable.paletteNumber = (data >> 8) & 0xF0;
             //Scaling/Rotation Parameter:
-            this.OBJMatrixParameters[address >> 3][(address >> 1) & 0x3] = data >> 16;
+            this.OBJMatrixParameters[address >> 2] = data >> 16;
         }
         this.OAMRAM32[address | 0] = data | 0;
     }
@@ -600,7 +592,7 @@ else {
                 //Attrib 1:
             case 1:
                 OAMTable.xcoord = data & 0x1FF;
-                OAMTable.matrixParameters = (data >> 9) & 0x1F;
+                OAMTable.matrixParameters = (data >> 7) & 0x7C;
                 OAMTable.horizontalFlip = data & 0x1000;
                 OAMTable.verticalFlip = data & 0x2000;
                 OAMTable.size = data >> 14;
@@ -613,7 +605,7 @@ else {
                 break;
                 //Scaling/Rotation Parameter:
             default:
-                this.OBJMatrixParameters[address >> 4][(address >> 2) & 0x3] = (data << 16) >> 16;
+                this.OBJMatrixParameters[address >> 2] = (data << 16) >> 16;
         }
         address = address << 1;
         this.OAMRAM[address | 0] = data & 0xFF;
@@ -634,7 +626,7 @@ else {
             OAMTable.shape = (data >> 14) & 0x3;
             //Attrib 1:
             OAMTable.xcoord = (data >> 16) & 0x1FF;
-            OAMTable.matrixParameters = (data >> 25) & 0x1F;
+            OAMTable.matrixParameters = (data >> 23) & 0x7C;
             OAMTable.horizontalFlip = data & 0x10000000;
             OAMTable.verticalFlip = data & 0x20000000;
             OAMTable.size = (data >> 30) & 0x3;
@@ -645,7 +637,7 @@ else {
             OAMTable.priority = (data >> 10) & 0x3;
             OAMTable.paletteNumber = (data >> 8) & 0xF0;
             //Scaling/Rotation Parameter:
-            this.OBJMatrixParameters[address >> 3][(address >> 1) & 0x3] = data >> 16;
+            this.OBJMatrixParameters[address >> 2] = data >> 16;
         }
         address = address << 2;
         this.OAMRAM[address | 0] = data & 0xFF;
