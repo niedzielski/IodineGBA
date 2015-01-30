@@ -43,7 +43,7 @@ GameBoyAdvanceBG2FrameBufferRenderer.prototype.renderScanLine = function (line) 
     return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
 if (__LITTLE_ENDIAN__) {
-    if (!!Math.imul) {
+    if (typeof Math.imul == "function") {
         //Math.imul found, insert the optimized path in:
         GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
             x = x | 0;
@@ -95,7 +95,7 @@ if (__LITTLE_ENDIAN__) {
     }
 }
 else {
-    if (!!Math.imul) {
+    if (typeof Math.imul == "function") {
         //Math.imul found, insert the optimized path in:
         GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode3Pixel = function (x, y) {
             x = x | 0;
@@ -142,7 +142,7 @@ else {
         }
     }
 }
-if (!!Math.imul) {
+if (typeof Math.imul == "function") {
     //Math.imul found, insert the optimized path in:
     GameBoyAdvanceBG2FrameBufferRenderer.prototype.fetchMode4Pixel = function (x, y) {
         x = x | 0;

@@ -229,7 +229,7 @@ GameBoyAdvanceGraphics.prototype.nextVCounterIRQEventTime = function () {
     }
     return nextEventTime | 0;
 }
-if (!!Math.imul) {
+if (typeof Math.imul == "function") {
     //Math.imul found, insert the optimized path in:
     GameBoyAdvanceGraphics.prototype.nextVBlankEventTime = function () {
         var nextEventTime = (160 - (this.currentScanLine | 0)) | 0;

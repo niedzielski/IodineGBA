@@ -31,7 +31,7 @@ GameBoyAdvanceBGMatrixRenderer.prototype.renderScanLine = function (line) {
     line = line | 0;
     return this.bgAffineRenderer.renderScanLine(line | 0, this);
 }
-if (!!Math.imul) {
+if (typeof Math.imul == "function") {
     //Math.imul found, insert the optimized path in:
     GameBoyAdvanceBGMatrixRenderer.prototype.fetchTile = function (x, y) {
         //Compute address for tile VRAM to address:

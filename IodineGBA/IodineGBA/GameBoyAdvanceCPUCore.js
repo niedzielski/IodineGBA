@@ -488,7 +488,7 @@ GameBoyAdvanceCPU.prototype.switchRegisterBank = function (newMode) {
             this.registers[14] = this.registersUND[1] | 0;
     }
 }
-if (!!Math.imul) {
+if (typeof Math.imul == "function") {
     //Math.imul found, insert the optimized path in:
     GameBoyAdvanceCPU.prototype.calculateMUL32 = Math.imul;
 }
