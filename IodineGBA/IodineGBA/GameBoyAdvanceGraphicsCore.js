@@ -49,7 +49,6 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
     this.BGDisplayOverflow = [false, false];
     this.BGScreenSize = getUint8Array(0x4);
     this.WINOutside = 0;
-    this.WINOBJOutside = 0;
     this.paletteRAM = getUint8Array(0x400);
     this.VRAM = getUint8Array(0x18000);
     this.VRAM16 = getUint16View(this.VRAM);
@@ -67,8 +66,7 @@ GameBoyAdvanceGraphics.prototype.initializeIO = function () {
         this.currentScanLine = 0x7C;
         this.lastUnrenderedLine = 0x7C;
     }
-    this.transparency = 0x3800000;
-    this.backdrop = this.transparency | 0x200000;
+    this.backdrop = 0x3A00000;
 }
 GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
     this.initializePaletteStorage();
@@ -100,14 +98,14 @@ GameBoyAdvanceGraphics.prototype.initializeRenderer = function () {
 GameBoyAdvanceGraphics.prototype.initializePaletteStorage = function () {
     //Both BG and OAM in unified storage:
     this.palette256 = getInt32Array(0x100);
-    this.palette256[0] = this.transparency;
+    this.palette256[0] = 0x3800000;
     this.paletteOBJ256 = getInt32Array(0x100);
-    this.paletteOBJ256[0] = this.transparency;
+    this.paletteOBJ256[0] = 0x3800000;
     this.palette16 = getInt32Array(0x100);
     this.paletteOBJ16 = getInt32Array(0x100);
     for (var index = 0; index < 0x10; ++index) {
-        this.palette16[index << 4] = this.transparency;
-        this.paletteOBJ16[index << 4] = this.transparency;
+        this.palette16[index << 4] = 0x3800000;
+        this.paletteOBJ16[index << 4] = 0x3800000;
     }
 }
 GameBoyAdvanceGraphics.prototype.addClocks = function (clocks) {
@@ -975,11 +973,10 @@ GameBoyAdvanceGraphics.prototype.readWINOUT0 = function () {
 GameBoyAdvanceGraphics.prototype.writeWINOUT1 = function (data) {
     data = data | 0;
     this.graphicsJIT();
-    this.WINOBJOutside = data & 0x3F;
-    this.objWindowRenderer.preprocess();
+    this.objWindowRenderer.writeWINOUT1(data | 0);
 }
 GameBoyAdvanceGraphics.prototype.readWINOUT1 = function () {
-    return this.WINOBJOutside | 0;
+    return this.objWindowRenderer.readWINOUT1() | 0;
 }
 GameBoyAdvanceGraphics.prototype.writeMOSAIC0 = function (data) {
     data = data | 0;
@@ -1184,7 +1181,7 @@ GameBoyAdvanceGraphics.prototype.writePalette256Color = function (address, palet
     address = address | 0;
     palette = palette | 0;
     if ((address & 0xFF) == 0) {
-        palette = this.transparency | palette;
+        palette = 0x3800000 | palette;
         if (address == 0) {
             this.backdrop = palette | 0x200000;
         }
@@ -1200,7 +1197,7 @@ GameBoyAdvanceGraphics.prototype.writePalette16Color = function (address, palett
     address = address | 0;
     palette = palette | 0;
     if ((address & 0xF) == 0) {
-        palette = this.transparency | palette;
+        palette = 0x3800000 | palette;
     }
     if ((address | 0) < 0x100) {
         //BG Layer Palette:

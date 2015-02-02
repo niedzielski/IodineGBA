@@ -17,7 +17,6 @@
  */
 function GameBoyAdvanceOBJRenderer(gfx) {
     this.gfx = gfx;
-    this.transparency = this.gfx.transparency;
     this.paletteOBJ256 = this.gfx.paletteOBJ256;
     this.paletteOBJ16 = this.gfx.paletteOBJ16;
     this.VRAM = this.gfx.VRAM;
@@ -54,7 +53,7 @@ if (__VIEWS_SUPPORTED__) {
             this.initializeOAMTable();
         }
         GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
-            this.targetBuffer.fill(this.transparency | 0);
+            this.targetBuffer.fill(0x3800000);
         }
     }
     else {
@@ -77,7 +76,7 @@ if (__VIEWS_SUPPORTED__) {
         }
         GameBoyAdvanceOBJRenderer.prototype.initializeClearingBuffer = function () {
             for (var position = 0; position < 240; ++position) {
-                this.clearingBuffer[position] = this.transparency | 0;
+                this.clearingBuffer[position] = 0x3800000;
             }
         }
     }
@@ -94,7 +93,7 @@ else {
     }
     GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
         for (var position = 0; position < 240; ++position) {
-            this.targetBuffer[position] = this.transparency;
+            this.targetBuffer[position] = 0x3800000;
         }
     }
 }
@@ -235,7 +234,7 @@ if (typeof Math.imul == "function") {
             }
             else {
                 //Coordinates outside of range, transparency defaulted:
-                this.scratchOBJBuffer[position | 0] = this.transparency | 0;
+                this.scratchOBJBuffer[position | 0] = 0x3800000;
             }
         }
     }
@@ -266,9 +265,10 @@ else {
             }
             else {
                 //Coordinates outside of range, transparency defaulted:
-                this.scratchOBJBuffer[position] = this.transparency;
+                this.scratchOBJBuffer[position] = 0x3800000;
             }
         }
+        
     }
 }
 GameBoyAdvanceOBJRenderer.prototype.fetchMatrixPixel = function (sprite, x, y, xSize) {

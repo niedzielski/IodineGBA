@@ -20,7 +20,6 @@ function GameBoyAdvanceBGMatrixRenderer(gfx, BGLayer) {
     this.BGLayer = BGLayer | 0;
     this.VRAM = this.gfx.VRAM;
     this.palette = this.gfx.palette256;
-    this.transparency = this.gfx.transparency | 0;
     this.bgAffineRenderer = this.gfx.bgAffineRenderer[BGLayer & 0x1];
     this.screenSizePreprocess();
     this.screenBaseBlockPreprocess();
@@ -75,7 +74,7 @@ GameBoyAdvanceBGMatrixRenderer.prototype.fetchPixelNoOverflow = function (x, y) 
     if ((x | 0) != (x & this.mapSizeComparer) || (y | 0) != (y & this.mapSizeComparer)) {
         //Overflow Handling:
         //Out of bounds with no overflow allowed:
-        return this.transparency | 0;
+        return 0x3800000;
     }
     var address = this.computeScreenAddress(x | 0, y | 0) | 0;
     return this.palette[this.VRAM[address & 0xFFFF] & 0xFF] | 0;
