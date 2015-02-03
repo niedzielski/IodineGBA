@@ -667,7 +667,9 @@ ARMInstructionSet.prototype.ADC = function () {
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Perform Addition w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite(((operand1 | 0) + (operand2 | 0) + (this.branchFlags.getCarryInt() | 0)) | 0);
+	operand1 = ((operand1 | 0) + (operand2 | 0)) | 0;
+	operand1 = ((operand1 | 0) + (this.branchFlags.getCarryInt() | 0)) | 0;
+    this.guard12OffsetRegisterWrite(operand1 | 0);
 }
 ARMInstructionSet.prototype.ADC2 = function () {
     //Increment PC:
@@ -676,7 +678,9 @@ ARMInstructionSet.prototype.ADC2 = function () {
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Perform Addition w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite2(((operand1 | 0) + (operand2 | 0) + (this.branchFlags.getCarryInt() | 0)) | 0);
+	operand1 = ((operand1 | 0) + (operand2 | 0)) | 0;
+	operand1 = ((operand1 | 0) + (this.branchFlags.getCarryInt() | 0)) | 0;
+    this.guard12OffsetRegisterWrite2(operand1 | 0);
 }
 ARMInstructionSet.prototype.ADCS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
@@ -697,7 +701,9 @@ ARMInstructionSet.prototype.SBC = function () {
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Perform Subtraction w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite(((operand1 | 0) - (operand2 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0);
+	operand1 = ((operand1 | 0) - (operand2 | 0)) | 0;
+	operand1 = ((operand1 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0;
+    this.guard12OffsetRegisterWrite(operand1 | 0);
 }
 ARMInstructionSet.prototype.SBC2 = function () {
     //Increment PC:
@@ -706,7 +712,9 @@ ARMInstructionSet.prototype.SBC2 = function () {
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Perform Subtraction w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite2(((operand1 | 0) - (operand2 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0);
+	operand1 = ((operand1 | 0) - (operand2 | 0)) | 0;
+	operand1 = ((operand1 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0;
+    this.guard12OffsetRegisterWrite2(operand1 | 0);
 }
 ARMInstructionSet.prototype.SBCS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
@@ -727,7 +735,9 @@ ARMInstructionSet.prototype.RSC = function () {
     var operand2 = this.operand2OP_DataProcessing1() | 0;
     //Perform Reverse Subtraction w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite(((operand2 | 0) - (operand1 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0);
+	operand1 = ((operand2 | 0) - (operand1 | 0)) | 0;
+	operand1 = ((operand1 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0;
+    this.guard12OffsetRegisterWrite(operand1 | 0);
 }
 ARMInstructionSet.prototype.RSC2 = function () {
     //Increment PC:
@@ -736,7 +746,9 @@ ARMInstructionSet.prototype.RSC2 = function () {
     var operand2 = this.operand2OP_DataProcessing3() | 0;
     //Perform Reverse Subtraction w/ Carry:
     //Update destination register:
-    this.guard12OffsetRegisterWrite2(((operand2 | 0) - (operand1 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0);
+	operand1 = ((operand2 | 0) - (operand1 | 0)) | 0;
+	operand1 = ((operand1 | 0) - (this.branchFlags.getCarryIntReverse() | 0)) | 0;
+    this.guard12OffsetRegisterWrite2(operand1 | 0);
 }
 ARMInstructionSet.prototype.RSCS = function () {
     var operand1 = this.read16OffsetRegister() | 0;
@@ -2508,7 +2520,7 @@ ARMInstructionSet.prototype.rris = function () {
     }
     else {
         //RRX
-        var rrxValue = ((this.branchFlags.getCarry()) ? 0x80000000 : 0) | (register >>> 0x1);
+        var rrxValue = (this.branchFlags.getCarryInt() << 31) | (register >>> 0x1);
         this.branchFlags.setCarryInt(register << 31);
         register = rrxValue | 0;
     }
@@ -2577,7 +2589,7 @@ ARMInstructionSet.prototype.rc = function () {
     return (
             (this.branchFlags.getNegativeInt() & 0x80000000) |
             ((this.branchFlags.getZero()) ? 0x40000000 : 0) |
-            ((this.branchFlags.getCarry()) ? 0x20000000 : 0) |
+            (this.branchFlags.getCarryInt() << 29) |
             ((this.branchFlags.getOverflow()) ? 0x10000000 : 0) |
             this.CPUCore.modeFlags
             );
