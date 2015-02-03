@@ -106,15 +106,8 @@ GameBoyAdvanceIO.prototype.runARM = function () {
                  */
                 switch (this.systemStatus >> 2) {
                     case 0x2:
-                        if ((this.systemStatus | 0) > 0x8) {
-                            //CPU Handle State (Bubble ARM)
-                            this.ARM.executeBubble();
-                            this.tickBubble();
-                        }
-                        else {
-                            //CPU Handle State (IRQ)
-                            this.cpu.IRQinARM();
-                        }
+                        //IRQ Handle State:
+                        this.handleIRQARM();
                         break;
                     case 0x4:
                     case 0x6:
@@ -160,15 +153,8 @@ GameBoyAdvanceIO.prototype.runTHUMB = function () {
                  */
                 switch (this.systemStatus >> 2) {
                     case 0x3:
-                        if ((this.systemStatus | 0) > 0xC) {
-                            //CPU Handle State (Bubble THUMB)
-                            this.THUMB.executeBubble();
-                            this.tickBubble();
-                        }
-                        else {
-                            //CPU Handle State (IRQ)
-                            this.cpu.IRQinTHUMB();
-                        }
+                        //IRQ Handle State:
+                        this.handleIRQThumb();
                         break;
                     case 0x5:
                     case 0x7:
@@ -265,6 +251,28 @@ GameBoyAdvanceIO.prototype.getRemainingCycles = function () {
         return 0;
     }
     return this.cyclesToIterate | 0;
+}
+GameBoyAdvanceIO.prototype.handleIRQARM = function () {
+    if ((this.systemStatus | 0) > 0x8) {
+        //CPU Handle State (Bubble ARM)
+        this.ARM.executeBubble();
+        this.tickBubble();
+    }
+    else {
+        //CPU Handle State (IRQ)
+        this.cpu.IRQinARM();
+    }
+}
+GameBoyAdvanceIO.prototype.handleIRQThumb = function () {
+    if ((this.systemStatus | 0) > 0xC) {
+        //CPU Handle State (Bubble THUMB)
+        this.THUMB.executeBubble();
+        this.tickBubble();
+    }
+    else {
+        //CPU Handle State (IRQ)
+        this.cpu.IRQinTHUMB();
+    }
 }
 GameBoyAdvanceIO.prototype.handleDMA = function () {
     /*
