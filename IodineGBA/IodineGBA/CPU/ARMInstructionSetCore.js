@@ -866,7 +866,7 @@ ARMInstructionSet.prototype.MSR1 = function () {
     this.branchFlags.setNegativeInt(newcpsr | 0);
     this.branchFlags.setZeroInt((newcpsr & 0x40000000) ^ 0x40000000);
     this.branchFlags.setCarryInt((newcpsr & 0x20000000) << 2);
-    this.branchFlags.setOverflow((newcpsr & 0x10000000) != 0);
+    this.branchFlags.setOverflow(newcpsr & 0x10000000);
     if ((this.execute & 0x10000) == 0x10000 && (this.CPUCore.modeFlags & 0x1f) != 0x10) {
         this.CPUCore.switchRegisterBank(newcpsr & 0x1F);
         this.CPUCore.modeFlags = newcpsr & 0xdf;
@@ -908,7 +908,7 @@ ARMInstructionSet.prototype.MSR3 = function () {
     this.branchFlags.setNegativeInt(operand | 0);
     this.branchFlags.setZeroInt((operand & 0x40000000) ^ 0x40000000);
     this.branchFlags.setCarryInt((operand & 0x20000000) << 2);
-    this.branchFlags.setOverflow((operand & 0x10000000) != 0);
+    this.branchFlags.setOverflow(operand & 0x10000000);
 }
 ARMInstructionSet.prototype.MSR4 = function () {
     var operand = this.imm() >> 20;
@@ -2457,9 +2457,7 @@ ARMInstructionSet.prototype.rc = function () {
             (this.branchFlags.getNegativeInt() & 0x80000000) |
             ((this.branchFlags.getZero()) ? 0x40000000 : 0) |
             (this.branchFlags.getCarryInt() << 29) |
-            ((this.branchFlags.getOverflow()) ? 0x10000000 : 0) |
-            this.CPUCore.modeFlags
-            );
+            this.branchFlags.getOverflow() | this.CPUCore.modeFlags);
 }
 ARMInstructionSet.prototype.rs = function () {
     var spsr = 0;

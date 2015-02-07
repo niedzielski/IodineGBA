@@ -1183,7 +1183,7 @@ THUMBInstructionSet.prototype.BPL = function () {
 }
 THUMBInstructionSet.prototype.BVS = function () {
     //Branch if Overflow Set:
-    if (this.branchFlags.getOverflow()) {
+    if ((this.branchFlags.getOverflow() | 0) != 0) {
         this.offsetPC();
     }
     else {
@@ -1193,7 +1193,7 @@ THUMBInstructionSet.prototype.BVS = function () {
 }
 THUMBInstructionSet.prototype.BVC = function () {
     //Branch if Overflow Clear:
-    if (!this.branchFlags.getOverflow()) {
+    if ((this.branchFlags.getOverflow() | 0) == 0) {
         this.offsetPC();
     }
     else {
@@ -1223,7 +1223,7 @@ THUMBInstructionSet.prototype.BLS = function () {
 }
 THUMBInstructionSet.prototype.BGE = function () {
     //Branch if Negative equal to Overflow
-    if (this.branchFlags.getNegative() == this.branchFlags.getOverflow()) {
+    if (this.branchFlags.getNegative() == ((this.branchFlags.getOverflow() | 0) != 0)) {
         this.offsetPC();
     }
     else {
@@ -1233,7 +1233,7 @@ THUMBInstructionSet.prototype.BGE = function () {
 }
 THUMBInstructionSet.prototype.BLT = function () {
     //Branch if Negative NOT equal to Overflow
-    if (this.branchFlags.getNegative() != this.branchFlags.getOverflow()) {
+    if (this.branchFlags.getNegative() != ((this.branchFlags.getOverflow() | 0) != 0)) {
         this.offsetPC();
     }
     else {
@@ -1243,7 +1243,7 @@ THUMBInstructionSet.prototype.BLT = function () {
 }
 THUMBInstructionSet.prototype.BGT = function () {
     //Branch if Zero Clear and Negative equal to Overflow
-    if (!this.branchFlags.getZero() && this.branchFlags.getNegative() == this.branchFlags.getOverflow()) {
+    if (!this.branchFlags.getZero() && this.branchFlags.getNegative() == ((this.branchFlags.getOverflow() | 0) != 0)) {
         this.offsetPC();
     }
     else {
@@ -1253,7 +1253,7 @@ THUMBInstructionSet.prototype.BGT = function () {
 }
 THUMBInstructionSet.prototype.BLE = function () {
     //Branch if Zero Set or Negative NOT equal to Overflow
-    if (this.branchFlags.getZero() || this.branchFlags.getNegative() != this.branchFlags.getOverflow()) {
+    if (this.branchFlags.getZero() || this.branchFlags.getNegative() != ((this.branchFlags.getOverflow() | 0) != 0)) {
         this.offsetPC();
     }
     else {

@@ -16,10 +16,10 @@
  *
  */
 function ARMCPSRAttributeTable() {
-    var negative = 0;            //N Bit
-    var zero = 1;                //Z Bit
-    var overflow = false;        //V Bit
-    var carry = false;           //C Bit
+    var negative = 0;          //N Bit
+    var zero = 1;              //Z Bit
+    var overflow = 0;          //V Bit
+    var carry = 0;             //C Bit
     function setNegative(toSet) {
         if (!!toSet) {
             negative = -1;
@@ -64,16 +64,16 @@ function ARMCPSRAttributeTable() {
         return zero | 0;
     };
     function setOverflow(toSet) {
-        overflow = !!toSet;
+        overflow = toSet | 0;
     };
     function setOverflowTrue() {
-        overflow = true;
+        overflow = 0x10000000;
     };
     function setOverflowFalse() {
-        overflow = false;
+        overflow = 0;
     };
     function getOverflow() {
-        return !!overflow;
+        return overflow | 0;
     };
     function setCarry(toSet) {
         carry = !!toSet;
@@ -125,16 +125,16 @@ function ARMCPSRAttributeTable() {
                 execute = (negative < 0) ? 0 : 0x10000000;
                 break;
             case 0x3:
-                execute = (overflow) ? 0 : 0x10000000;
+                execute = overflow ^ 0x10000000;
                 break;
             case 0x4:
                 execute = (carry && zero != 0) ? 0 : 0x10000000;
                 break;
             case 0x5:
-                execute = ((negative < 0) == overflow) ? 0 : 0x10000000;
+                execute = ((negative < 0) == (overflow != 0)) ? 0 : 0x10000000;
                 break;
             case 0x6:
-                execute = (zero != 0 && (negative < 0) == overflow) ? 0 : 0x10000000;
+                execute = (zero != 0 && (negative < 0) == (overflow != 0)) ? 0 : 0x10000000;
                 break;
             default:
                 execute = 0;
@@ -151,14 +151,14 @@ function ARMCPSRAttributeTable() {
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
         result = result | 0;
-        overflow = ((operand1 ^ operand2) >= 0 && (operand1 ^ result) < 0);
+        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ result)) >> 3) & 0x10000000;
     };
     function setVFlagForSUB(operand1, operand2, result) {
         //Compute the overflow flag for subtraction:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
         result = result | 0;
-        overflow = ((operand1 ^ operand2) < 0 && (operand1 ^ result) < 0);
+        overflow = (((operand1 ^ operand2) & (operand1 ^ result)) >> 3) & 0x10000000;
     };
     function setADDFlags(operand1, operand2) {
         //Update flags for an addition operation:
