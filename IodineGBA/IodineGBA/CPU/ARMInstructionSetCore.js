@@ -40,7 +40,7 @@ ARMInstructionSet.prototype.executeIteration = function () {
 }
 ARMInstructionSet.prototype.executeConditionalCode = function () {
     //LSB of condition code is used to reverse the test logic:
-    if (((this.execute & 0x10000000) == 0) == this.checkConditionalCode()) {
+    if ((this.execute & 0x10000000 ^ this.branchFlags.checkConditionalCode(this.execute | 0)) == 0) {
         //Passed the condition code test, so execute:
         this.executeDecoded();
     }
@@ -49,35 +49,7 @@ ARMInstructionSet.prototype.executeConditionalCode = function () {
         this.incrementProgramCounter();
     }
 }
-ARMInstructionSet.prototype.checkConditionalCode = function () {
-    /*
-     Instruction Decode Pattern:
-     C = Conditional Code Bit;
-     X = Possible opcode bit;
-     N = Data Bit, definitely not an opcode bit
-     OPCODE: CCCCXXXXXXXXXXXXNNNNNNNNXXXXNNNN
-     
-     For this function, we decode the top 3 bits for the conditional code test:
-     */
-    switch (this.execute >>> 29) {
-        case 0x0:
-            return this.branchFlags.getZero();
-        case 0x1:
-            return this.branchFlags.getCarry();
-        case 0x2:
-            return this.branchFlags.getNegative();
-        case 0x3:
-            return this.branchFlags.getOverflow();
-        case 0x4:
-            return (this.branchFlags.getCarry() && !this.branchFlags.getZero());
-        case 0x5:
-            return (this.branchFlags.getNegative() == this.branchFlags.getOverflow());
-        case 0x6:
-            return (!this.branchFlags.getZero() && this.branchFlags.getNegative() == this.branchFlags.getOverflow());
-        default:
-            return true;
-    }
-}
+
 ARMInstructionSet.prototype.executeBubble = function () {
     //Push the new fetch access:
     this.fetch = this.memory.memoryReadCPU32(this.readPC() | 0) | 0;
