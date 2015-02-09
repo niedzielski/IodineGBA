@@ -106,7 +106,7 @@ function ARMCPSRAttributeTable() {
                 execute = carry ^ 0x10000000;
                 break;
             case 0x2:
-                execute = (negative < 0) ? 0 : 0x10000000;
+                execute = (~negative >>> 31) << 28;
                 break;
             case 0x3:
                 execute = overflow ^ 0x10000000;
@@ -115,10 +115,10 @@ function ARMCPSRAttributeTable() {
                 execute = ((carry | 0) != 0 && (zero | 0) != 0) ? 0 : 0x10000000;
                 break;
             case 0x5:
-                execute = ((negative < 0) == (overflow != 0)) ? 0 : 0x10000000;
+                execute = ((negative >>> 31) << 28) ^ overflow;
                 break;
             case 0x6:
-                execute = (zero != 0 && (negative < 0) == (overflow != 0)) ? 0 : 0x10000000;
+                execute = (zero != 0) ? (((negative >>> 31) << 28) ^ overflow) : 0x10000000;
                 break;
             default:
                 execute = 0;
