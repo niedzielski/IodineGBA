@@ -429,7 +429,7 @@ THUMBInstructionSet.prototype.LSLimm = function () {
     var offset = (this.execute >> 6) & 0x1F;
     if ((offset | 0) > 0) {
         //CPSR Carry is set by the last bit shifted out:
-        this.branchFlags.setCarryInt(source << (((offset | 0) - 1) | 0));
+        this.branchFlags.setCarry((source << (((offset | 0) - 1) | 0)) & 0x80000000);
         //Perform shift:
         source = source << (offset | 0);
     }
@@ -445,12 +445,12 @@ THUMBInstructionSet.prototype.LSRimm = function () {
     var offset = (this.execute >> 6) & 0x1F;
     if ((offset | 0) > 0) {
         //CPSR Carry is set by the last bit shifted out:
-        this.branchFlags.setCarryInt((source >> (((offset | 0) - 1) | 0)) << 31);
+        this.branchFlags.setCarry((source >> (((offset | 0) - 1) | 0)) << 31);
         //Perform shift:
         source = (source >>> (offset | 0)) | 0;
     }
     else {
-        this.branchFlags.setCarryInt(source | 0);
+        this.branchFlags.setCarry(source & 0x80000000);
         source = 0;
     }
     //Perform CPSR updates for N and Z (But not V):
@@ -465,12 +465,12 @@ THUMBInstructionSet.prototype.ASRimm = function () {
     var offset = (this.execute >> 6) & 0x1F;
     if ((offset | 0) > 0) {
         //CPSR Carry is set by the last bit shifted out:
-        this.branchFlags.setCarryInt((source >> (((offset | 0) - 1) | 0)) << 31);
+        this.branchFlags.setCarry((source >> (((offset | 0) - 1) | 0)) << 31);
         //Perform shift:
         source = source >> (offset | 0);
     }
     else {
-        this.branchFlags.setCarryInt(source | 0);
+        this.branchFlags.setCarry(source & 0x80000000);
         source = source >> 0x1F;
     }
     //Perform CPSR updates for N and Z (But not V):
@@ -575,12 +575,12 @@ THUMBInstructionSet.prototype.LSL = function () {
     if ((source | 0) > 0) {
         if ((source | 0) < 0x20) {
             //Shift the register data left:
-            this.branchFlags.setCarryInt(destination << (((source | 0) - 1) | 0));
+            this.branchFlags.setCarry((destination << (((source | 0) - 1) | 0)) & 0x80000000);
             destination = destination << (source | 0);
         }
         else if ((source | 0) == 0x20) {
             //Shift bit 0 into carry:
-            this.branchFlags.setCarryInt(destination << 31);
+            this.branchFlags.setCarry(destination << 31);
             destination = 0;
         }
         else {
@@ -603,12 +603,12 @@ THUMBInstructionSet.prototype.LSR = function () {
     if ((source | 0) > 0) {
         if ((source | 0) < 0x20) {
             //Shift the register data right logically:
-            this.branchFlags.setCarryInt((destination >> (((source | 0) - 1) | 0)) << 31);
+            this.branchFlags.setCarry((destination >> (((source | 0) - 1) | 0)) << 31);
             destination = (destination >>> (source | 0)) | 0;
         }
         else if (source == 0x20) {
             //Shift bit 31 into carry:
-            this.branchFlags.setCarryInt(destination | 0);
+            this.branchFlags.setCarry(destination & 0x80000000);
             destination = 0;
         }
         else {
@@ -631,12 +631,12 @@ THUMBInstructionSet.prototype.ASR = function () {
     if ((source | 0) > 0) {
         if ((source | 0) < 0x20) {
             //Shift the register data right arithmetically:
-            this.branchFlags.setCarryInt((destination >> (((source | 0) - 1) | 0)) << 31);
+            this.branchFlags.setCarry((destination >> (((source | 0) - 1) | 0)) << 31);
             destination = destination >> (source | 0);
         }
         else {
             //Set all bits with bit 31:
-            this.branchFlags.setCarryInt(destination | 0);
+            this.branchFlags.setCarry(destination & 0x80000000);
             destination = destination >> 0x1F;
         }
     }
@@ -670,12 +670,12 @@ THUMBInstructionSet.prototype.ROR = function () {
         source = source & 0x1F;
         if ((source | 0) > 0) {
             //CPSR Carry is set by the last bit shifted out:
-            this.branchFlags.setCarryInt((destination >> ((source - 1) | 0)) << 31);
+            this.branchFlags.setCarry((destination >> ((source - 1) | 0)) << 31);
             //Perform rotate:
             destination = (destination << ((0x20 - (source | 0)) | 0)) | (destination >>> (source | 0));
         }
         else {
-            this.branchFlags.setCarryInt(destination | 0);
+            this.branchFlags.setCarry(destination & 0x80000000);
         }
     }
     //Perform CPSR updates for N and Z (But not V):
@@ -1143,7 +1143,7 @@ THUMBInstructionSet.prototype.BNE = function () {
 }
 THUMBInstructionSet.prototype.BCS = function () {
     //Branch if Carry Set:
-    if (this.branchFlags.getCarry()) {
+    if ((this.branchFlags.getCarry() | 0) != 0) {
         this.offsetPC();
     }
     else {
@@ -1153,7 +1153,7 @@ THUMBInstructionSet.prototype.BCS = function () {
 }
 THUMBInstructionSet.prototype.BCC = function () {
     //Branch if Carry Clear:
-    if (!this.branchFlags.getCarry()) {
+    if ((this.branchFlags.getCarry() | 0) == 0) {
         this.offsetPC();
     }
     else {
@@ -1203,7 +1203,7 @@ THUMBInstructionSet.prototype.BVC = function () {
 }
 THUMBInstructionSet.prototype.BHI = function () {
     //Branch if Carry & Non-Zero:
-    if (this.branchFlags.getCarry() && !this.branchFlags.getZero()) {
+    if ((this.branchFlags.getCarry() | 0) != 0 && !this.branchFlags.getZero()) {
         this.offsetPC();
     }
     else {
@@ -1213,7 +1213,7 @@ THUMBInstructionSet.prototype.BHI = function () {
 }
 THUMBInstructionSet.prototype.BLS = function () {
     //Branch if Carry Clear or is Zero Set:
-    if (!this.branchFlags.getCarry() || this.branchFlags.getZero()) {
+    if ((this.branchFlags.getCarry() | 0) == 0 || this.branchFlags.getZero()) {
         this.offsetPC();
     }
     else {

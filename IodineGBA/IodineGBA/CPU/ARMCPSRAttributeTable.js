@@ -19,7 +19,7 @@ function ARMCPSRAttributeTable() {
     var negative = 0;          //N Bit
     var zero = 1;              //Z Bit
     var overflow = 0;          //V Bit
-    var carry = false;         //C Bit
+    var carry = 0;             //C Bit
     function setNegative(toSet) {
         if (!!toSet) {
             negative = -1;
@@ -76,32 +76,16 @@ function ARMCPSRAttributeTable() {
         return overflow | 0;
     };
     function setCarry(toSet) {
-        carry = !!toSet;
-    };
-    function setCarryInt(toSet) {
-        carry = ((toSet | 0) < 0);
+        carry = (toSet >>> 3) | 0;
     };
     function setCarryFalse() {
-        carry = false;
+        carry = 0;
     };
     function getCarry() {
-        return !!carry;
+        return carry | 0;
     };
-    function getCarryInt() {
-        if (carry) {
-            return 1;
-        }
-        else {
-            return 0;
-        }
-    };
-    function getCarryIntReverse() {
-        if (carry) {
-            return 0;
-        }
-        else {
-            return 1;
-        }
+    function getCarryReverse() {
+        return carry ^ 0x10000000;
     };
     function checkConditionalCode(execute) {
         execute = execute | 0;
@@ -119,7 +103,7 @@ function ARMCPSRAttributeTable() {
                 execute = (zero == 0) ? 0 : 0x10000000;
                 break;
             case 0x1:
-                execute = (carry) ? 0 : 0x10000000;
+                execute = carry ^ 0x10000000;
                 break;
             case 0x2:
                 execute = (negative < 0) ? 0 : 0x10000000;
@@ -128,7 +112,7 @@ function ARMCPSRAttributeTable() {
                 execute = overflow ^ 0x10000000;
                 break;
             case 0x4:
-                execute = (carry && zero != 0) ? 0 : 0x10000000;
+                execute = ((carry | 0) != 0 && (zero | 0) != 0) ? 0 : 0x10000000;
                 break;
             case 0x5:
                 execute = ((negative < 0) == (overflow != 0)) ? 0 : 0x10000000;
@@ -168,7 +152,7 @@ function ARMCPSRAttributeTable() {
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
-        carry = (unsignedResult > 0xFFFFFFFF);
+        carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
         negative = result | 0;
         zero = result | 0;
         return result | 0;
@@ -181,7 +165,7 @@ function ARMCPSRAttributeTable() {
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0) + ((carry) ? 1 : 0);
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
-        carry = (unsignedResult > 0xFFFFFFFF);
+        carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
         negative = result | 0;
         zero = result | 0;
         return result | 0;
@@ -192,7 +176,7 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         var result = (operand1 - operand2) | 0;
         setVFlagForSUB(operand1, operand2, result);
-        carry = ((operand1 >>> 0) >= (operand2 >>> 0));
+        carry = ((operand1 >>> 0) >= (operand2 >>> 0)) ? 0x10000000 : 0;
         negative = result | 0;
         zero = result | 0;
         return result | 0;
@@ -205,7 +189,7 @@ function ARMCPSRAttributeTable() {
         var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - ((carry) ? 0 : 1);
         var result = unsignedResult | 0;
         setVFlagForSUB(operand1, operand2, result);
-        carry = (unsignedResult >= 0);
+        carry = (unsignedResult >= 0) ? 0x10000000 : 0;
         negative = result | 0;
         zero = result | 0;
         return result | 0;
@@ -216,7 +200,7 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         var result = (operand1 - operand2) | 0;
         setVFlagForSUB(operand1, operand2, result);
-        carry = ((operand1 >>> 0) >= (operand2 >>> 0));
+        carry = ((operand1 >>> 0) >= (operand2 >>> 0)) ? 0x10000000 : 0;
         negative = result | 0;
         zero = result | 0;
     };
@@ -228,7 +212,7 @@ function ARMCPSRAttributeTable() {
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
-        carry = (unsignedResult > 0xFFFFFFFF);
+        carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
         negative = result | 0;
         zero = result | 0;
     };
@@ -249,11 +233,9 @@ function ARMCPSRAttributeTable() {
         "setOverflowFalse":setOverflowFalse,
         "getOverflow":getOverflow,
         "setCarry":setCarry,
-        "setCarryInt":setCarryInt,
         "setCarryFalse":setCarryFalse,
         "getCarry":getCarry,
-        "getCarryInt":getCarryInt,
-        "getCarryIntReverse":getCarryIntReverse,
+        "getCarryReverse":getCarryReverse,
         "checkConditionalCode":checkConditionalCode,
         "setNZInt":setNZInt,
         "setADDFlags":setADDFlags,

@@ -303,7 +303,7 @@ GameBoyAdvanceCPU.prototype.SPSRtoCPSR = function () {
     var spsr = this.SPSR[bank | 0] | 0;
     this.branchFlags.setNegative((spsr & 0x800) != 0);
     this.branchFlags.setZero((spsr & 0x400) != 0);
-    this.branchFlags.setCarry((spsr & 0x200) != 0);
+    this.branchFlags.setCarry((spsr & 0x200) << 22);
     this.branchFlags.setOverflow((spsr & 0x100) << 20);
     this.switchRegisterBank(spsr & 0x1F);
     this.modeFlags = spsr & 0xFF;
@@ -326,9 +326,7 @@ GameBoyAdvanceCPU.prototype.CPSRtoSPSR = function (newMode) {
     if ((this.branchFlags.getZeroInt() | 0) == 0) {
         spsr = spsr | 0x400;
     }
-    if (!!this.branchFlags.getCarry()) {
-        spsr = spsr | 0x200;
-    }
+    spsr = spsr | (this.branchFlags.getCarry() >> 19);
     spsr = spsr | (this.branchFlags.getOverflow() >> 20);
     switch (newMode | 0) {
         case 0x12:    //IRQ
