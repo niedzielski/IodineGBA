@@ -19,7 +19,7 @@ function ARMCPSRAttributeTable() {
     var negative = 0;          //N Bit
     var zero = 1;              //Z Bit
     var overflow = 0;          //V Bit
-    var carry = 0;             //C Bit
+    var carry = false;         //C Bit
     function setNegative(toSet) {
         if (!!toSet) {
             negative = -1;
