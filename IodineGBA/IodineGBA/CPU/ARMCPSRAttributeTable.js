@@ -21,34 +21,15 @@ function ARMCPSRAttributeTable() {
     var overflow = 0;          //V Bit
     var carry = 0;             //C Bit
     function setNegative(toSet) {
-        if (!!toSet) {
-            negative = -1;
-        }
-        else {
-            negative = 0;
-        }
-    };
-    function setNegativeInt(toSet) {
         negative = toSet | 0;
     };
     function setNegativeFalse() {
         negative = 0;
     };
     function getNegative() {
-        return (negative < 0);
-    };
-    function getNegativeInt() {
         return negative | 0;
     };
     function setZero(toSet) {
-        if (!!toSet) {
-            zero = 0;
-        }
-        else {
-            zero = 1;
-        }
-    };
-    function setZeroInt(toSet) {
         zero = toSet | 0;
     };
     function setZeroTrue() {
@@ -58,9 +39,6 @@ function ARMCPSRAttributeTable() {
         zero = 1;
     };
     function getZero() {
-        return (zero == 0);
-    };
-    function getZeroInt() {
         return zero | 0;
     };
     function setOverflow(toSet) {
@@ -100,7 +78,11 @@ function ARMCPSRAttributeTable() {
          */
         switch (execute >>> 29) {
             case 0x0:
-                execute = (zero == 0) ? 0 : 0x10000000;
+                if (zero == 0) {
+                    execute = 0;
+                    break;
+                }
+                execute = 0x10000000;
                 break;
             case 0x1:
                 execute = carry ^ 0x10000000;
@@ -111,15 +93,19 @@ function ARMCPSRAttributeTable() {
             case 0x3:
                 execute = overflow ^ 0x10000000;
                 break;
-            case 0x4:
-                execute = ((carry | 0) != 0 && (zero | 0) != 0) ? 0 : 0x10000000;
-                break;
+            case 0x6:
+                if (zero == 0) {
+                    execute = 0x10000000;
+                    break;
+                }
             case 0x5:
                 execute = ((negative >>> 31) << 28) ^ overflow;
                 break;
-            case 0x6:
-                execute = (zero != 0) ? (((negative >>> 31) << 28) ^ overflow) : 0x10000000;
-                break;
+            case 0x4:
+                if (carry == 0 || zero == 0) {
+                    execute = 0x10000000;
+                    break;
+                }
             default:
                 execute = 0;
         }
@@ -216,18 +202,18 @@ function ARMCPSRAttributeTable() {
         negative = result | 0;
         zero = result | 0;
     };
+    function BGE() {
+        //Branch if Negative equal to Overflow
+        return (negative >>> 3) ^ overflow;
+    };
     return {
         "setNegative":setNegative,
-        "setNegativeInt":setNegativeInt,
         "setNegativeFalse":setNegativeFalse,
         "getNegative":getNegative,
-        "getNegativeInt":getNegativeInt,
         "setZero":setZero,
-        "setZeroInt":setZeroInt,
         "setZeroTrue":setZeroTrue,
         "setZeroFalse":setZeroFalse,
         "getZero":getZero,
-        "getZeroInt":getZeroInt,
         "setOverflow":setOverflow,
         "setOverflowTrue":setOverflowTrue,
         "setOverflowFalse":setOverflowFalse,
@@ -243,6 +229,7 @@ function ARMCPSRAttributeTable() {
         "setSUBFlags":setSUBFlags,
         "setSBCFlags":setSBCFlags,
         "setCMPFlags":setCMPFlags,
-        "setCMNFlags":setCMNFlags
+        "setCMNFlags":setCMNFlags,
+        "BGE":BGE
     };
 }

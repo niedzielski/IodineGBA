@@ -516,7 +516,7 @@ THUMBInstructionSet.prototype.MOVimm8 = function () {
     //Get the 8-bit value to move into the register:
     var result = this.execute & 0xFF;
     this.branchFlags.setNegativeFalse();
-    this.branchFlags.setZeroInt(result | 0);
+    this.branchFlags.setZero(result | 0);
     //Update destination register:
     this.write8OffsetLowRegister(result | 0);
     //Update PC:
@@ -1123,7 +1123,7 @@ THUMBInstructionSet.prototype.LDMIA = function () {
 }
 THUMBInstructionSet.prototype.BEQ = function () {
     //Branch if EQual:
-    if (this.branchFlags.getZero()) {
+    if ((this.branchFlags.getZero() | 0) == 0) {
         this.offsetPC();
     }
     else {
@@ -1133,7 +1133,7 @@ THUMBInstructionSet.prototype.BEQ = function () {
 }
 THUMBInstructionSet.prototype.BNE = function () {
     //Branch if Not Equal:
-    if (!this.branchFlags.getZero()) {
+    if ((this.branchFlags.getZero() | 0) != 0) {
         this.offsetPC();
     }
     else {
@@ -1163,7 +1163,7 @@ THUMBInstructionSet.prototype.BCC = function () {
 }
 THUMBInstructionSet.prototype.BMI = function () {
     //Branch if Negative Set:
-    if (this.branchFlags.getNegative()) {
+    if ((this.branchFlags.getNegative() | 0) < 0) {
         this.offsetPC();
     }
     else {
@@ -1173,7 +1173,7 @@ THUMBInstructionSet.prototype.BMI = function () {
 }
 THUMBInstructionSet.prototype.BPL = function () {
     //Branch if Negative Clear:
-    if (!this.branchFlags.getNegative()) {
+    if ((this.branchFlags.getNegative() | 0) >= 0) {
         this.offsetPC();
     }
     else {
@@ -1203,7 +1203,7 @@ THUMBInstructionSet.prototype.BVC = function () {
 }
 THUMBInstructionSet.prototype.BHI = function () {
     //Branch if Carry & Non-Zero:
-    if ((this.branchFlags.getCarry() | 0) != 0 && !this.branchFlags.getZero()) {
+    if ((this.branchFlags.getCarry() | 0) != 0 && (this.branchFlags.getZero() | 0) != 0) {
         this.offsetPC();
     }
     else {
@@ -1213,17 +1213,17 @@ THUMBInstructionSet.prototype.BHI = function () {
 }
 THUMBInstructionSet.prototype.BLS = function () {
     //Branch if Carry Clear or is Zero Set:
-    if ((this.branchFlags.getCarry() | 0) == 0 || this.branchFlags.getZero()) {
-        this.offsetPC();
-    }
-    else {
+    if ((this.branchFlags.getCarry() | 0) != 0 && (this.branchFlags.getZero() | 0) != 0) {
         //Update PC:
         this.incrementProgramCounter();
+    }
+    else {
+        this.offsetPC();
     }
 }
 THUMBInstructionSet.prototype.BGE = function () {
     //Branch if Negative equal to Overflow
-    if (this.branchFlags.getNegative() == ((this.branchFlags.getOverflow() | 0) != 0)) {
+    if ((this.branchFlags.BGE() | 0) < 0x10000000) {
         this.offsetPC();
     }
     else {
@@ -1233,7 +1233,7 @@ THUMBInstructionSet.prototype.BGE = function () {
 }
 THUMBInstructionSet.prototype.BLT = function () {
     //Branch if Negative NOT equal to Overflow
-    if (this.branchFlags.getNegative() != ((this.branchFlags.getOverflow() | 0) != 0)) {
+    if ((this.branchFlags.BGE() | 0) >= 0x10000000) {
         this.offsetPC();
     }
     else {
@@ -1243,7 +1243,7 @@ THUMBInstructionSet.prototype.BLT = function () {
 }
 THUMBInstructionSet.prototype.BGT = function () {
     //Branch if Zero Clear and Negative equal to Overflow
-    if (!this.branchFlags.getZero() && this.branchFlags.getNegative() == ((this.branchFlags.getOverflow() | 0) != 0)) {
+    if ((this.branchFlags.getZero() | 0) != 0 && (this.branchFlags.BGE() | 0) < 0x10000000) {
         this.offsetPC();
     }
     else {
@@ -1253,12 +1253,12 @@ THUMBInstructionSet.prototype.BGT = function () {
 }
 THUMBInstructionSet.prototype.BLE = function () {
     //Branch if Zero Set or Negative NOT equal to Overflow
-    if (this.branchFlags.getZero() || this.branchFlags.getNegative() != ((this.branchFlags.getOverflow() | 0) != 0)) {
-        this.offsetPC();
-    }
-    else {
+    if ((this.branchFlags.getZero() | 0) != 0 && (this.branchFlags.BGE() | 0) < 0x10000000) {
         //Update PC:
         this.incrementProgramCounter();
+    }
+    else {
+        this.offsetPC();
     }
 }
 THUMBInstructionSet.prototype.SWI = function () {
