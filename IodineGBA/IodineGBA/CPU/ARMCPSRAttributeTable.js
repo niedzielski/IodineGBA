@@ -120,13 +120,11 @@ function ARMCPSRAttributeTable() {
         //Update flags for an addition operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
-        //We let this get outside of int32 on purpose:
-        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
-        carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
-        zero = unsignedResult | 0;
-        negative = zero | 0;
-        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ zero)) >> 3) & 0x10000000;
-        return zero | 0;
+        negative = ((operand1 | 0) + (operand2 | 0)) | 0;
+        zero = negative | 0;
+        carry = ((negative >>> 0) < (operand1 >>> 0)) ? 0x10000000 : 0;
+        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ negative)) >> 3) & 0x10000000;
+        return negative | 0;
     };
     function setADCFlags(operand1, operand2) {
         //Update flags for an addition operation:
@@ -175,12 +173,10 @@ function ARMCPSRAttributeTable() {
         //Update flags for an addition operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
-        //We let this get outside of int32 on purpose:
-        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
-        carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
-        zero = unsignedResult | 0;
-        negative = zero | 0;
-        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ zero)) >> 3) & 0x10000000;
+        negative = ((operand1 | 0) + (operand2 | 0)) | 0;
+        zero = negative | 0;
+        carry = ((negative >>> 0) < (operand1 >>> 0)) ? 0x10000000 : 0;
+        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ negative)) >> 3) & 0x10000000;
     };
     function BGE() {
         //Branch if Negative equal to Overflow
