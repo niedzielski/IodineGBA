@@ -148,7 +148,7 @@ function ARMCPSRAttributeTable() {
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
-        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0) + ((carry) ? 1 : 0);
+        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0) + (carry >> 28);
         var result = unsignedResult | 0;
         setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
@@ -172,7 +172,7 @@ function ARMCPSRAttributeTable() {
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
-        var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - ((carry) ? 0 : 1);
+        var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - (1 ^ (carry >> 28));
         var result = unsignedResult | 0;
         setVFlagForSUB(operand1, operand2, result);
         carry = (unsignedResult >= 0) ? 0x10000000 : 0;
