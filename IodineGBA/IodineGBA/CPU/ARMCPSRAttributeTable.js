@@ -110,25 +110,11 @@ function ARMCPSRAttributeTable() {
                 execute = 0;
         }
         return execute | 0;
-    }
+    };
     function setNZInt(toSet) {
         toSet = toSet | 0;
         negative = toSet | 0;
         zero = toSet | 0;
-    }
-    function setVFlagForADD(operand1, operand2, result) {
-        //Compute the overflow flag for addition:
-        operand1 = operand1 | 0;
-        operand2 = operand2 | 0;
-        result = result | 0;
-        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ result)) >> 3) & 0x10000000;
-    };
-    function setVFlagForSUB(operand1, operand2, result) {
-        //Compute the overflow flag for subtraction:
-        operand1 = operand1 | 0;
-        operand2 = operand2 | 0;
-        result = result | 0;
-        overflow = (((operand1 ^ operand2) & (operand1 ^ result)) >> 3) & 0x10000000;
     };
     function setADDFlags(operand1, operand2) {
         //Update flags for an addition operation:
@@ -136,12 +122,11 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
-        var result = unsignedResult | 0;
-        setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
-        negative = result | 0;
-        zero = result | 0;
-        return result | 0;
+        zero = unsignedResult | 0;
+        negative = zero | 0;
+        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ zero)) >> 3) & 0x10000000;
+        return zero | 0;
     };
     function setADCFlags(operand1, operand2) {
         //Update flags for an addition operation:
@@ -149,23 +134,21 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0) + (carry >> 28);
-        var result = unsignedResult | 0;
-        setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
-        negative = result | 0;
-        zero = result | 0;
-        return result | 0;
+        zero = unsignedResult | 0;
+        negative = zero | 0;
+        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ zero)) >> 3) & 0x10000000;
+        return zero | 0;
     };
     function setSUBFlags(operand1, operand2) {
         //Update flags for a subtraction operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
-        var result = (operand1 - operand2) | 0;
-        setVFlagForSUB(operand1, operand2, result);
+        zero = (operand1 - operand2) | 0;
+        negative = zero | 0;
+        overflow = (((operand1 ^ operand2) & (operand1 ^ zero)) >> 3) & 0x10000000;
         carry = ((operand1 >>> 0) >= (operand2 >>> 0)) ? 0x10000000 : 0;
-        negative = result | 0;
-        zero = result | 0;
-        return result | 0;
+        return zero | 0;
     };
     function setSBCFlags(operand1, operand2) {
         //Update flags for a subtraction operation:
@@ -173,22 +156,20 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
         var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - (1 ^ (carry >> 28));
-        var result = unsignedResult | 0;
-        setVFlagForSUB(operand1, operand2, result);
         carry = (unsignedResult >= 0) ? 0x10000000 : 0;
-        negative = result | 0;
-        zero = result | 0;
-        return result | 0;
+        zero = unsignedResult | 0;
+        negative = zero | 0;
+        overflow = (((operand1 ^ operand2) & (operand1 ^ zero)) >> 3) & 0x10000000;
+        return zero | 0;
     };
     function setCMPFlags(operand1, operand2) {
         //Update flags for a subtraction operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
-        var result = (operand1 - operand2) | 0;
-        setVFlagForSUB(operand1, operand2, result);
+        zero = (operand1 - operand2) | 0;
+        negative = zero | 0;
+        overflow = (((operand1 ^ operand2) & (operand1 ^ zero)) >> 3) & 0x10000000;
         carry = ((operand1 >>> 0) >= (operand2 >>> 0)) ? 0x10000000 : 0;
-        negative = result | 0;
-        zero = result | 0;
     };
     function setCMNFlags(operand1, operand2) {
         //Update flags for an addition operation:
@@ -196,11 +177,10 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
         var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0);
-        var result = unsignedResult | 0;
-        setVFlagForADD(operand1, operand2, result);
         carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
-        negative = result | 0;
-        zero = result | 0;
+        zero = unsignedResult | 0;
+        negative = zero | 0;
+        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ zero)) >> 3) & 0x10000000;
     };
     function BGE() {
         //Branch if Negative equal to Overflow
