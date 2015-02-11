@@ -60,7 +60,7 @@ function ARMCPSRAttributeTable() {
         return carry | 0;
     };
     function getCarryReverse() {
-        return carry ^ -1;
+        return ~carry;
     };
     function checkConditionalCode(execute) {
         execute = execute | 0;
@@ -74,21 +74,19 @@ function ARMCPSRAttributeTable() {
          For this function, we decode the top 3 bits for the conditional code test:
          */
         switch (execute >>> 29) {
-            case 0x0:
+            case 0x4:
                 if (zero == 0) {
-                    execute = 0;
+                    execute = -1;
                     break;
                 }
-                execute = -1;
-                break;
             case 0x1:
-                execute = carry ^ -1;
+                execute = ~carry;
                 break;
             case 0x2:
                 execute = ~negative;
                 break;
             case 0x3:
-                execute = overflow ^ -1;
+                execute = ~overflow;
                 break;
             case 0x6:
                 if (zero == 0) {
@@ -98,9 +96,9 @@ function ARMCPSRAttributeTable() {
             case 0x5:
                 execute = negative ^ overflow;
                 break;
-            case 0x4:
-                if (zero == 0) {
-                    execute = ~carry;
+            case 0x0:
+                if (zero != 0) {
+                    execute = -1;
                     break;
                 }
             default:
