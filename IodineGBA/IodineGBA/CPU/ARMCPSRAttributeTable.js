@@ -99,8 +99,8 @@ function ARMCPSRAttributeTable() {
                 execute = negative ^ overflow;
                 break;
             case 0x4:
-                if (carry == 0 || zero == 0) {
-                    execute = -1;
+                if (zero == 0) {
+                    execute = ~carry;
                     break;
                 }
             default:
