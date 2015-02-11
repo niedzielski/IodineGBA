@@ -41,11 +41,8 @@ function ARMCPSRAttributeTable() {
     function getZero() {
         return zero | 0;
     };
-    function setOverflow(toSet) {
-        overflow = toSet | 0;
-    };
     function setOverflowTrue() {
-        overflow = 0x10000000;
+        overflow = -1;
     };
     function setOverflowFalse() {
         overflow = 0;
@@ -54,7 +51,7 @@ function ARMCPSRAttributeTable() {
         return overflow | 0;
     };
     function setCarry(toSet) {
-        carry = (toSet >>> 3) | 0;
+        carry = toSet | 0;
     };
     function setCarryFalse() {
         carry = 0;
@@ -63,7 +60,7 @@ function ARMCPSRAttributeTable() {
         return carry | 0;
     };
     function getCarryReverse() {
-        return carry ^ 0x10000000;
+        return carry ^ -1;
     };
     function checkConditionalCode(execute) {
         execute = execute | 0;
@@ -82,28 +79,28 @@ function ARMCPSRAttributeTable() {
                     execute = 0;
                     break;
                 }
-                execute = 0x10000000;
+                execute = -1;
                 break;
             case 0x1:
-                execute = carry ^ 0x10000000;
+                execute = carry ^ -1;
                 break;
             case 0x2:
-                execute = (~negative >>> 31) << 28;
+                execute = ~negative;
                 break;
             case 0x3:
-                execute = overflow ^ 0x10000000;
+                execute = overflow ^ -1;
                 break;
             case 0x6:
                 if (zero == 0) {
-                    execute = 0x10000000;
+                    execute = -1;
                     break;
                 }
             case 0x5:
-                execute = ((negative >>> 31) << 28) ^ overflow;
+                execute = negative ^ overflow;
                 break;
             case 0x4:
                 if (carry == 0 || zero == 0) {
-                    execute = 0x10000000;
+                    execute = -1;
                     break;
                 }
             default:
@@ -116,14 +113,30 @@ function ARMCPSRAttributeTable() {
         negative = toSet | 0;
         zero = toSet | 0;
     };
+    function setNZCV(toSet) {
+        toSet = toSet | 0;
+        negative = toSet | 0;
+        zero = (~toSet) & 0x40000000;
+        carry = toSet << 2;
+        overflow = toSet << 3;
+    };
+    function getNZCV() {
+        var toSet = negative & 0x80000000;
+        if (zero == 0) {
+            toSet = toSet | 0x40000000;
+        }
+        toSet = toSet | ((carry >>> 31) << 29);
+        toSet = toSet | ((overflow >>> 31) << 28);
+        return toSet | 0;
+    };
     function setADDFlags(operand1, operand2) {
         //Update flags for an addition operation:
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
         negative = ((operand1 | 0) + (operand2 | 0)) | 0;
         zero = negative | 0;
-        carry = ((negative >>> 0) < (operand1 >>> 0)) ? 0x10000000 : 0;
-        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ negative)) >> 3) & 0x10000000;
+        carry = ((negative >>> 0) < (operand1 >>> 0)) ? -1 : 0;
+        overflow = (~(operand1 ^ operand2)) & (operand1 ^ negative);
         return negative | 0;
     };
     function setADCFlags(operand1, operand2) {
@@ -131,11 +144,11 @@ function ARMCPSRAttributeTable() {
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
-        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0) + (carry >> 28);
-        carry = (unsignedResult > 0xFFFFFFFF) ? 0x10000000 : 0;
+        var unsignedResult = (operand1 >>> 0) + (operand2 >>> 0) + (carry >>> 31);
+        carry = (unsignedResult > 0xFFFFFFFF) ? -1 : 0;
         zero = unsignedResult | 0;
         negative = zero | 0;
-        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ zero)) >> 3) & 0x10000000;
+        overflow = (~(operand1 ^ operand2)) & (operand1 ^ zero);
         return zero | 0;
     };
     function setSUBFlags(operand1, operand2) {
@@ -144,8 +157,8 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         zero = (operand1 - operand2) | 0;
         negative = zero | 0;
-        overflow = (((operand1 ^ operand2) & (operand1 ^ zero)) >> 3) & 0x10000000;
-        carry = ((operand1 >>> 0) >= (operand2 >>> 0)) ? 0x10000000 : 0;
+        overflow = (operand1 ^ operand2) & (operand1 ^ zero);
+        carry = ((operand1 >>> 0) >= (operand2 >>> 0)) ? -1 : 0;
         return zero | 0;
     };
     function setSBCFlags(operand1, operand2) {
@@ -153,11 +166,11 @@ function ARMCPSRAttributeTable() {
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
-        var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - (1 ^ (carry >> 28));
-        carry = (unsignedResult >= 0) ? 0x10000000 : 0;
+        var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - (1 ^ (carry >>> 31));
+        carry = (unsignedResult >= 0) ? -1 : 0;
         zero = unsignedResult | 0;
         negative = zero | 0;
-        overflow = (((operand1 ^ operand2) & (operand1 ^ zero)) >> 3) & 0x10000000;
+        overflow = (operand1 ^ operand2) & (operand1 ^ zero);
         return zero | 0;
     };
     function setCMPFlags(operand1, operand2) {
@@ -166,8 +179,8 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         zero = (operand1 - operand2) | 0;
         negative = zero | 0;
-        overflow = (((operand1 ^ operand2) & (operand1 ^ zero)) >> 3) & 0x10000000;
-        carry = ((operand1 >>> 0) >= (operand2 >>> 0)) ? 0x10000000 : 0;
+        overflow = (operand1 ^ operand2) & (operand1 ^ zero);
+        carry = ((operand1 >>> 0) >= (operand2 >>> 0)) ? -1 : 0;
     };
     function setCMNFlags(operand1, operand2) {
         //Update flags for an addition operation:
@@ -175,12 +188,12 @@ function ARMCPSRAttributeTable() {
         operand2 = operand2 | 0;
         negative = ((operand1 | 0) + (operand2 | 0)) | 0;
         zero = negative | 0;
-        carry = ((negative >>> 0) < (operand1 >>> 0)) ? 0x10000000 : 0;
-        overflow = (((~(operand1 ^ operand2)) & (operand1 ^ negative)) >> 3) & 0x10000000;
+        carry = ((negative >>> 0) < (operand1 >>> 0)) ? -1 : 0;
+        overflow = (~(operand1 ^ operand2)) & (operand1 ^ negative);
     };
     function BGE() {
         //Branch if Negative equal to Overflow
-        return (negative >>> 3) ^ overflow;
+        return negative ^ overflow;
     };
     return {
         "setNegative":setNegative,
@@ -190,7 +203,6 @@ function ARMCPSRAttributeTable() {
         "setZeroTrue":setZeroTrue,
         "setZeroFalse":setZeroFalse,
         "getZero":getZero,
-        "setOverflow":setOverflow,
         "setOverflowTrue":setOverflowTrue,
         "setOverflowFalse":setOverflowFalse,
         "getOverflow":getOverflow,
@@ -200,6 +212,8 @@ function ARMCPSRAttributeTable() {
         "getCarryReverse":getCarryReverse,
         "checkConditionalCode":checkConditionalCode,
         "setNZInt":setNZInt,
+        "setNZCV":setNZCV,
+        "getNZCV":getNZCV,
         "setADDFlags":setADDFlags,
         "setADCFlags":setADCFlags,
         "setSUBFlags":setSUBFlags,

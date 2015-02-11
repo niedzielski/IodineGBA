@@ -429,7 +429,7 @@ THUMBInstructionSet.prototype.LSLimm = function () {
     var offset = (this.execute >> 6) & 0x1F;
     if ((offset | 0) > 0) {
         //CPSR Carry is set by the last bit shifted out:
-        this.branchFlags.setCarry((source << (((offset | 0) - 1) | 0)) & 0x80000000);
+        this.branchFlags.setCarry((source << (((offset | 0) - 1) | 0)) | 0);
         //Perform shift:
         source = source << (offset | 0);
     }
@@ -450,7 +450,7 @@ THUMBInstructionSet.prototype.LSRimm = function () {
         source = (source >>> (offset | 0)) | 0;
     }
     else {
-        this.branchFlags.setCarry(source & 0x80000000);
+        this.branchFlags.setCarry(source | 0);
         source = 0;
     }
     //Perform CPSR updates for N and Z (But not V):
@@ -470,7 +470,7 @@ THUMBInstructionSet.prototype.ASRimm = function () {
         source = source >> (offset | 0);
     }
     else {
-        this.branchFlags.setCarry(source & 0x80000000);
+        this.branchFlags.setCarry(source | 0);
         source = source >> 0x1F;
     }
     //Perform CPSR updates for N and Z (But not V):
@@ -575,7 +575,7 @@ THUMBInstructionSet.prototype.LSL = function () {
     if ((source | 0) > 0) {
         if ((source | 0) < 0x20) {
             //Shift the register data left:
-            this.branchFlags.setCarry((destination << (((source | 0) - 1) | 0)) & 0x80000000);
+            this.branchFlags.setCarry(destination << (((source | 0) - 1) | 0));
             destination = destination << (source | 0);
         }
         else if ((source | 0) == 0x20) {
@@ -608,7 +608,7 @@ THUMBInstructionSet.prototype.LSR = function () {
         }
         else if (source == 0x20) {
             //Shift bit 31 into carry:
-            this.branchFlags.setCarry(destination & 0x80000000);
+            this.branchFlags.setCarry(destination | 0);
             destination = 0;
         }
         else {
@@ -636,7 +636,7 @@ THUMBInstructionSet.prototype.ASR = function () {
         }
         else {
             //Set all bits with bit 31:
-            this.branchFlags.setCarry(destination & 0x80000000);
+            this.branchFlags.setCarry(destination | 0);
             destination = destination >> 0x1F;
         }
     }
@@ -675,7 +675,7 @@ THUMBInstructionSet.prototype.ROR = function () {
             destination = (destination << ((0x20 - (source | 0)) | 0)) | (destination >>> (source | 0));
         }
         else {
-            this.branchFlags.setCarry(destination & 0x80000000);
+            this.branchFlags.setCarry(destination | 0);
         }
     }
     //Perform CPSR updates for N and Z (But not V):
@@ -1143,7 +1143,7 @@ THUMBInstructionSet.prototype.BNE = function () {
 }
 THUMBInstructionSet.prototype.BCS = function () {
     //Branch if Carry Set:
-    if ((this.branchFlags.getCarry() | 0) != 0) {
+    if ((this.branchFlags.getCarry() | 0) < 0) {
         this.offsetPC();
     }
     else {
@@ -1153,7 +1153,7 @@ THUMBInstructionSet.prototype.BCS = function () {
 }
 THUMBInstructionSet.prototype.BCC = function () {
     //Branch if Carry Clear:
-    if ((this.branchFlags.getCarry() | 0) == 0) {
+    if ((this.branchFlags.getCarry() | 0) >= 0) {
         this.offsetPC();
     }
     else {
@@ -1183,7 +1183,7 @@ THUMBInstructionSet.prototype.BPL = function () {
 }
 THUMBInstructionSet.prototype.BVS = function () {
     //Branch if Overflow Set:
-    if ((this.branchFlags.getOverflow() | 0) != 0) {
+    if ((this.branchFlags.getOverflow() | 0) < 0) {
         this.offsetPC();
     }
     else {
@@ -1193,7 +1193,7 @@ THUMBInstructionSet.prototype.BVS = function () {
 }
 THUMBInstructionSet.prototype.BVC = function () {
     //Branch if Overflow Clear:
-    if ((this.branchFlags.getOverflow() | 0) == 0) {
+    if ((this.branchFlags.getOverflow() | 0) >= 0) {
         this.offsetPC();
     }
     else {
@@ -1203,7 +1203,7 @@ THUMBInstructionSet.prototype.BVC = function () {
 }
 THUMBInstructionSet.prototype.BHI = function () {
     //Branch if Carry & Non-Zero:
-    if ((this.branchFlags.getCarry() | 0) != 0 && (this.branchFlags.getZero() | 0) != 0) {
+    if ((this.branchFlags.getCarry() | 0) < 0 && (this.branchFlags.getZero() | 0) != 0) {
         this.offsetPC();
     }
     else {
@@ -1213,7 +1213,7 @@ THUMBInstructionSet.prototype.BHI = function () {
 }
 THUMBInstructionSet.prototype.BLS = function () {
     //Branch if Carry Clear or is Zero Set:
-    if ((this.branchFlags.getCarry() | 0) != 0 && (this.branchFlags.getZero() | 0) != 0) {
+    if ((this.branchFlags.getCarry() | 0) < 0 && (this.branchFlags.getZero() | 0) != 0) {
         //Update PC:
         this.incrementProgramCounter();
     }
@@ -1223,7 +1223,7 @@ THUMBInstructionSet.prototype.BLS = function () {
 }
 THUMBInstructionSet.prototype.BGE = function () {
     //Branch if Negative equal to Overflow
-    if ((this.branchFlags.BGE() | 0) < 0x10000000) {
+    if ((this.branchFlags.BGE() | 0) >= 0) {
         this.offsetPC();
     }
     else {
@@ -1233,7 +1233,7 @@ THUMBInstructionSet.prototype.BGE = function () {
 }
 THUMBInstructionSet.prototype.BLT = function () {
     //Branch if Negative NOT equal to Overflow
-    if ((this.branchFlags.BGE() | 0) >= 0x10000000) {
+    if ((this.branchFlags.BGE() | 0) < 0) {
         this.offsetPC();
     }
     else {
@@ -1243,7 +1243,7 @@ THUMBInstructionSet.prototype.BLT = function () {
 }
 THUMBInstructionSet.prototype.BGT = function () {
     //Branch if Zero Clear and Negative equal to Overflow
-    if ((this.branchFlags.getZero() | 0) != 0 && (this.branchFlags.BGE() | 0) < 0x10000000) {
+    if ((this.branchFlags.getZero() | 0) != 0 && (this.branchFlags.BGE() | 0) >= 0) {
         this.offsetPC();
     }
     else {
@@ -1253,7 +1253,7 @@ THUMBInstructionSet.prototype.BGT = function () {
 }
 THUMBInstructionSet.prototype.BLE = function () {
     //Branch if Zero Set or Negative NOT equal to Overflow
-    if ((this.branchFlags.getZero() | 0) != 0 && (this.branchFlags.BGE() | 0) < 0x10000000) {
+    if ((this.branchFlags.getZero() | 0) != 0 && (this.branchFlags.BGE() | 0) >= 0) {
         //Update PC:
         this.incrementProgramCounter();
     }
