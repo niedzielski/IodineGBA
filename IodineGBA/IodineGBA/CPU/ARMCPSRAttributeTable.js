@@ -164,7 +164,7 @@ function ARMCPSRAttributeTable() {
         operand1 = operand1 | 0;
         operand2 = operand2 | 0;
         //We let this get outside of int32 on purpose:
-        var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - (1 ^ (carry >>> 31));
+        var unsignedResult = (operand1 >>> 0) - (operand2 >>> 0) - ((~carry) >>> 31);
         carry = (unsignedResult >= 0) ? -1 : 0;
         zero = unsignedResult | 0;
         negative = zero | 0;
