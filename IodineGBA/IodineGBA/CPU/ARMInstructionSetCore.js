@@ -2226,7 +2226,7 @@ ARMInstructionSet.prototype.lris = function () {
     var shifter = (this.execute >> 7) & 0x1F;
     //Check to see if we need to update CPSR:
     if ((shifter | 0) > 0) {
-        this.branchFlags.setCarry((register >> ((shifter | 0) - 1)) << 31);
+        this.branchFlags.setCarry((register >> (((shifter | 0) - 1) | 0)) << 31);
         //Shift the register data right logically:
         register = (register >>> (shifter | 0)) | 0;
     }
@@ -2264,7 +2264,7 @@ ARMInstructionSet.prototype.lrrs = function () {
     if ((shifter | 0) > 0) {
         if ((shifter | 0) < 0x20) {
             //Shift the register data right logically:
-            this.branchFlags.setCarry((register >> ((shifter | 0) - 1)) << 31);
+            this.branchFlags.setCarry((register >> (((shifter | 0) - 1) | 0)) << 31);
             register = (register >>> (shifter | 0)) | 0;
         }
         else {
@@ -2305,7 +2305,7 @@ ARMInstructionSet.prototype.aris = function () {
     var shifter = (this.execute >> 7) & 0x1F;
     //Check to see if we need to update CPSR:
     if ((shifter | 0) > 0) {
-        this.branchFlags.setCarry((register >> ((shifter | 0) - 1)) << 31);
+        this.branchFlags.setCarry((register >> (((shifter | 0) - 1) | 0)) << 31);
     }
     else {
         //Shift full length if shifter is zero:
@@ -2336,7 +2336,7 @@ ARMInstructionSet.prototype.arrs = function () {
     if ((shifter | 0) > 0) {
         if ((shifter | 0) < 0x20) {
             //Shift the register data right arithmetically:
-            this.branchFlags.setCarry((register >> ((shifter | 0) - 1)) << 31);
+            this.branchFlags.setCarry((register >> (((shifter | 0) - 1) | 0)) << 31);
             register = register >> (shifter | 0);
         }
         else {
@@ -2376,7 +2376,7 @@ ARMInstructionSet.prototype.rris = function () {
     var shifter = (this.execute >> 7) & 0x1F;
     if ((shifter | 0) > 0) {
         //ROR
-        this.branchFlags.setCarry((register >> ((shifter | 0) - 1)) << 31);
+        this.branchFlags.setCarry((register >> (((shifter | 0) - 1) | 0)) << 31);
         register = (register << (0x20 - (shifter | 0))) | (register >>> (shifter | 0));
     }
     else {
@@ -2414,7 +2414,7 @@ ARMInstructionSet.prototype.rrrs = function () {
         shifter = shifter & 0x1F;
         if ((shifter | 0) > 0) {
             //ROR
-            this.branchFlags.setCarry((register >> ((shifter | 0) - 1)) << 31);
+            this.branchFlags.setCarry((register >> (((shifter | 0) - 1) | 0)) << 31);
             register = (register << (0x20 - (shifter | 0))) | (register >>> (shifter | 0));
         }
         else {
