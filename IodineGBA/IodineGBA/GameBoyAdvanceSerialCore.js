@@ -413,7 +413,7 @@ GameBoyAdvanceSerial.prototype.readJOYBUS_STAT = function () {
 }
 GameBoyAdvanceSerial.prototype.nextIRQEventTime = function (clocks) {
     return -1;  //Short-circuit serial IRQ support for now.
-    if (this.SIOCNT_IRQ && this.RCNTMode < 2) {
+    /*if (this.SIOCNT_IRQ && this.RCNTMode < 2) {
         switch (this.SIOCNT_MODE) {
             case 0:
             case 1:
@@ -441,5 +441,5 @@ GameBoyAdvanceSerial.prototype.nextIRQEventTime = function (clocks) {
     }
     else {
         return -1;
-    }
+    }*/
 }
