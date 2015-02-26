@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,7 +45,7 @@ GameBoyAdvanceSerial.prototype.initialize = function () {
     this.RCNTIRQ = false;
     this.RCNTDataBits = 0;
     this.RCNTDataBitFlow = 0;
-    this.JOYBUS_IRQ = false;
+    this.JOYBUS_IRQ = 0;
     this.JOYBUS_CNTL_FLAGS = 0;
     this.JOYBUS_RECV0 = 0xFF;
     this.JOYBUS_RECV1 = 0xFF;
@@ -281,7 +281,7 @@ GameBoyAdvanceSerial.prototype.readSIOCNT0 = function () {
                 return ((this.SIOTransferStarted) ? 0x80 : 0) | ((this.SIOCOMMERROR) ? 0x40 : 0) | (this.SIOMULT_PLAYER_NUMBER << 4) | this.SIOBaudRate;
             //UART:
             case 3:
-                return (this.SIOCNT_UART_MISC << 2) | ((this.SIOCNT_UART_FIFO == 4) ? 0x10 : 0) | 0x20 | this.SIOBaudRate;
+                return (this.SIOCNT_UART_MISC << 2) | ((this.SIOCNT_UART_FIFO == 4) ? 0x30 : 0x20) | this.SIOBaudRate;
         }
     }
     return 0xFF;
@@ -340,80 +340,79 @@ GameBoyAdvanceSerial.prototype.writeRCNT1 = function (data) {
     }
 }
 GameBoyAdvanceSerial.prototype.readRCNT1 = function () {
-    return (this.RCNTMode << 6) | 0x3E | ((this.RCNTIRQ) ? 0x1 : 0);
+    return (this.RCNTMode << 6) | ((this.RCNTIRQ) ? 0x3F : 0x3E);
 }
 GameBoyAdvanceSerial.prototype.writeJOYCNT = function (data) {
-    this.JOYBUS_IRQ = ((data & 0x40) == 0x40);
+    this.JOYBUS_IRQ = (data << 25) >> 31;
     this.JOYBUS_CNTL_FLAGS &= ~(data & 0x7);
 }
 GameBoyAdvanceSerial.prototype.readJOYCNT = function () {
-    return 0xB8 | ((this.JOYBUS_IRQ) ? 0x40 : 0) | this.JOYBUS_CNTL_FLAGS;
+    return (this.JOYBUS_CNTL_FLAGS | 0x40) | (0xB8 & this.JOYBUS_IRQ);
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_RECV0 = function (data) {
-    this.JOYBUS_RECV0 = data;
+    this.JOYBUS_RECV0 = data | 0;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_RECV0 = function () {
-    this.JOYBUS_STAT &= 0xF7;
-    return this.JOYBUS_RECV0;
+    this.JOYBUS_STAT = this.JOYBUS_STAT & 0xF7;
+    return this.JOYBUS_RECV0 | 0;
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_RECV1 = function (data) {
-    this.JOYBUS_RECV1 = data;
+    this.JOYBUS_RECV1 = data | 0;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_RECV1 = function () {
-    this.JOYBUS_STAT &= 0xF7;
-    return this.JOYBUS_RECV1;
+    this.JOYBUS_STAT = this.JOYBUS_STAT & 0xF7;
+    return this.JOYBUS_RECV1 | 0;
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_RECV2 = function (data) {
-    this.JOYBUS_RECV2 = data;
+    this.JOYBUS_RECV2 = data | 0;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_RECV2 = function () {
-    this.JOYBUS_STAT &= 0xF7;
-    return this.JOYBUS_RECV2;
+    this.JOYBUS_STAT = this.JOYBUS_STAT & 0xF7;
+    return this.JOYBUS_RECV2 | 0;
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_RECV3 = function (data) {
-    this.JOYBUS_RECV3 = data;
+    this.JOYBUS_RECV3 = data | 0;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_RECV3 = function () {
-    this.JOYBUS_STAT &= 0xF7;
-    return this.JOYBUS_RECV3;
+    this.JOYBUS_STAT = this.JOYBUS_STAT & 0xF7;
+    return this.JOYBUS_RECV3 | 0;
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_SEND0 = function (data) {
-    this.JOYBUS_SEND0 = data;
-    this.JOYBUS_STAT |= 0x2;
+    this.JOYBUS_SEND0 = data | 0;
+    this.JOYBUS_STAT = this.JOYBUS_STAT | 0x2;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_SEND0 = function () {
-    return this.JOYBUS_SEND0;
+    return this.JOYBUS_SEND0 | 0;
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_SEND1 = function (data) {
-    this.JOYBUS_SEND1 = data;
-    this.JOYBUS_STAT |= 0x2;
+    this.JOYBUS_SEND1 = data | 0;
+    this.JOYBUS_STAT = this.JOYBUS_STAT | 0x2;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_SEND1 = function () {
-    return this.JOYBUS_SEND1;
+    return this.JOYBUS_SEND1 | 0;
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_SEND2 = function (data) {
-    this.JOYBUS_SEND2 = data;
-    this.JOYBUS_STAT |= 0x2;
+    this.JOYBUS_SEND2 = data | 0;
+    this.JOYBUS_STAT = this.JOYBUS_STAT | 0x2;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_SEND2 = function () {
-    return this.JOYBUS_SEND2;
+    return this.JOYBUS_SEND2 | 0;
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_SEND3 = function (data) {
-    this.JOYBUS_SEND3 = data;
-    this.JOYBUS_STAT |= 0x2;
+    this.JOYBUS_SEND3 = data | 0;
+    this.JOYBUS_STAT = this.JOYBUS_STAT | 0x2;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_SEND3 = function () {
-    return this.JOYBUS_SEND3;
+    return this.JOYBUS_SEND3 | 0;
 }
 GameBoyAdvanceSerial.prototype.writeJOYBUS_STAT = function (data) {
-    this.JOYBUS_STAT = data;
+    this.JOYBUS_STAT = data | 0;
 }
 GameBoyAdvanceSerial.prototype.readJOYBUS_STAT = function () {
     return 0xC5 | this.JOYBUS_STAT;
 }
-GameBoyAdvanceSerial.prototype.nextIRQEventTime = function (clocks) {
-    return -1;  //Short-circuit serial IRQ support for now.
-    /*if (this.SIOCNT_IRQ && this.RCNTMode < 2) {
+/*GameBoyAdvanceSerial.prototype.nextIRQEventTime = function (clocks) {
+    if (this.SIOCNT_IRQ && this.RCNTMode < 2) {
         switch (this.SIOCNT_MODE) {
             case 0:
             case 1:
@@ -441,5 +440,5 @@ GameBoyAdvanceSerial.prototype.nextIRQEventTime = function (clocks) {
     }
     else {
         return -1;
-    }*/
-}
+    }
+}*/
