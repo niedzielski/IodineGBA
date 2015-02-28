@@ -139,7 +139,8 @@ GameBoyAdvanceGraphics.prototype.clockLCDStatePostRender = function () {
 GameBoyAdvanceGraphics.prototype.clockLCDNextLine = function () {
     /*We've now overflowed the LCD scan line state machine counter,
      which tells us we need to be on a new scan-line and refresh over.*/
-    this.renderedScanLine = this.inHBlank = false;                  //Un-mark HBlank and line render.
+    this.renderedScanLine = false;                                  //Unmark line render.
+    this.inHBlank = false;                                          //Un-mark HBlank.
     //De-clock for starting on new scan-line:
     this.LCDTicks = ((this.LCDTicks | 0) - 1232) | 0;               //We start out at the beginning of the next line.
     //Increment scanline counter:
