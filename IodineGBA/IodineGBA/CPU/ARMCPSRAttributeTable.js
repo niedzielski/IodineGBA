@@ -17,7 +17,7 @@
  */
 function ARMCPSRAttributeTable() {
     var FLAGS = getInt32Array(4);
-    FLAGS[1] = 0;  //Reverse the zero flag.
+    FLAGS[1] = 1;  //Reverse the zero flag.
     function setNegative(toSet) {
         FLAGS[0] = toSet | 0;
     };
