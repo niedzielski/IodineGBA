@@ -16,7 +16,7 @@
  *
  */
 function ARMCPSRAttributeTable() {
-    "use asm";
+    //"use asm";
     var negative = 0;
     var zero = 1;
     var carry = 0;
