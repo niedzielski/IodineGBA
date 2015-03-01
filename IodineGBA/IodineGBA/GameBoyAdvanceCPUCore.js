@@ -55,7 +55,7 @@ GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     //Undefined mode registers (R13-R14):
     this.registersUND = getInt32Array(2);
     //CPSR Register:
-    this.branchFlags = new ARMCPSRAttributeTable();
+    this.branchFlags = ARMCPSRAttributeTable();
     this.modeFlags = 0xD3;
     //Banked SPSR Registers:
     this.SPSR = getUint16Array(5);

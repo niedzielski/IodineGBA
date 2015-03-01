@@ -16,6 +16,253 @@
  *
  */
 function ARMCPSRAttributeTable() {
+    if (__VIEWS_SUPPORTED__) {
+        var buffer = new ArrayBuffer(16);
+        var buf32 = new Int32Array(buffer);
+        buf32[1] = 1;
+        return new ARMCPSRAttributeTableASMJS(window, null, buffer);
+    }
+    else {
+        return new ARMCPSRAttributeTableNormal();
+    }
+}
+function ARMCPSRAttributeTableASMJS(stdlib, foreign, buffer) {
+    "use asm";
+    var FLAGS = new stdlib.Int32Array(buffer);
+    function setNegative(toSet) {
+        toSet = toSet | 0;
+        FLAGS[0] = toSet | 0;
+    };
+    function setNegativeFalse() {
+        FLAGS[0] = 0;
+    };
+    function getNegative() {
+        return FLAGS[0] | 0;
+    };
+    function setZero(toSet) {
+        toSet = toSet | 0;
+        FLAGS[1] = toSet | 0;
+    };
+    function setZeroTrue() {
+        FLAGS[1] = 0;
+    };
+    function setZeroFalse() {
+        FLAGS[1] = 1;
+    };
+    function getZero() {
+        return FLAGS[1] | 0;
+    };
+    function setOverflowTrue() {
+        FLAGS[3] = -1;
+    };
+    function setOverflowFalse() {
+        FLAGS[3] = 0;
+    };
+    function getOverflow() {
+        return FLAGS[3] | 0;
+    };
+    function setCarry(toSet) {
+        toSet = toSet | 0;
+        FLAGS[2] = toSet | 0;
+    };
+    function setCarryFalse() {
+        FLAGS[2] = 0;
+    };
+    function getCarry() {
+        return FLAGS[2] | 0;
+    };
+    function getCarryReverse() {
+        return (~FLAGS[2]) | 0;
+    };
+    function checkConditionalCode(execute) {
+        execute = execute | 0;
+        /*
+         Instruction Decode Pattern:
+         C = Conditional Code Bit;
+         X = Possible opcode bit;
+         N = Data Bit, definitely not an opcode bit
+         OPCODE: CCCCXXXXXXXXXXXXNNNNNNNNXXXXNNNN
+         
+         For this function, we decode the top 3 bits for the conditional code test:
+         */
+        switch ((execute >>> 29) | 0) {
+            case 0x4:
+                if ((FLAGS[1] | 0) == 0) {
+                    execute = -1;
+                    break;
+                }
+            case 0x1:
+                execute = ~FLAGS[2];
+                break;
+            case 0x2:
+                execute = ~FLAGS[0];
+                break;
+            case 0x3:
+                execute = ~FLAGS[3];
+                break;
+            case 0x6:
+                if ((FLAGS[1] | 0) == 0) {
+                    execute = -1;
+                    break;
+                }
+            case 0x5:
+                execute = FLAGS[0] ^ FLAGS[3];
+                break;
+            case 0x0:
+                if ((FLAGS[1] | 0) != 0) {
+                    execute = -1;
+                    break;
+                }
+            default:
+                execute = 0;
+        }
+        return execute | 0;
+    };
+    function setNZInt(toSet) {
+        toSet = toSet | 0;
+        FLAGS[0] = toSet | 0;
+        FLAGS[1] = toSet | 0;
+    };
+    function setNZCV(toSet) {
+        toSet = toSet | 0;
+        FLAGS[0] = toSet | 0;
+        FLAGS[1] = (~toSet) & 0x40000000;
+        FLAGS[2] = toSet << 2;
+        FLAGS[3] = toSet << 3;
+    };
+    function getNZCV() {
+        var toSet = 0;
+        toSet = FLAGS[0] & 0x80000000;
+        if ((FLAGS[1] | 0) == 0) {
+            toSet = toSet | 0x40000000;
+        }
+        toSet = toSet | ((FLAGS[2] >>> 31) << 29);
+        toSet = toSet | ((FLAGS[3] >>> 31) << 28);
+        return toSet | 0;
+    };
+    function setADDFlags(operand1, operand2) {
+        //Update flags for an addition operation:
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        FLAGS[0] = ((operand1 | 0) + (operand2 | 0)) | 0;
+        FLAGS[1] = FLAGS[0] | 0;
+        if ((FLAGS[0] >>> 0) < (operand1 >>> 0)) {
+            FLAGS[2] = -1;
+        }
+        else {
+            FLAGS[2] = 0;
+        }
+        FLAGS[3] = (~(operand1 ^ operand2)) & (operand1 ^ FLAGS[0]);
+        return FLAGS[0] | 0;
+    };
+    function setADCFlags(operand1, operand2) {
+        //Update flags for an addition operation:
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        FLAGS[0] = ((operand1 | 0) + (operand2 | 0)) | 0;
+        FLAGS[0] = ((FLAGS[0] | 0) + (FLAGS[2] >>> 31)) | 0;
+        FLAGS[1] = FLAGS[0] | 0;
+        if ((FLAGS[0] >>> 0) < (operand1 >>> 0)) {
+            FLAGS[2] = -1;
+        }
+        else if ((FLAGS[0] >>> 0) > (operand1 >>> 0)) {
+            FLAGS[2] = 0;
+        }
+        FLAGS[3] = (~(operand1 ^ operand2)) & (operand1 ^ FLAGS[0]);
+        return FLAGS[0] | 0;
+    };
+    function setSUBFlags(operand1, operand2) {
+        //Update flags for a subtraction operation:
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        FLAGS[0] = ((operand1 | 0) - (operand2 | 0)) | 0;
+        FLAGS[1] = FLAGS[0] | 0;
+        if ((operand1 >>> 0) >= (operand2 >>> 0)) {
+            FLAGS[2] = -1;
+        }
+        else {
+            FLAGS[2] = 0;
+        }
+        FLAGS[3] = (operand1 ^ operand2) & (operand1 ^ FLAGS[0]);
+        return FLAGS[0] | 0;
+    };
+    function setSBCFlags(operand1, operand2) {
+        //Update flags for a subtraction operation:
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        FLAGS[0] = ((operand1 | 0) - (operand2 | 0)) | 0;
+        FLAGS[0] = ((FLAGS[0] | 0) - ((~FLAGS[2]) >>> 31)) | 0
+        FLAGS[1] = FLAGS[0] | 0;
+        if ((FLAGS[0] >>> 0) < (operand1 >>> 0)) {
+            FLAGS[2] = -1;
+        }
+        else if ((FLAGS[0] >>> 0) > (operand1 >>> 0)) {
+            FLAGS[2] = 0;
+        }
+        FLAGS[3] = (operand1 ^ operand2) & (operand1 ^ FLAGS[0]);
+        return FLAGS[0] | 0;
+    };
+    function setCMPFlags(operand1, operand2) {
+        //Update flags for a subtraction operation:
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        FLAGS[0] = ((operand1 | 0) - (operand2 | 0)) | 0;
+        FLAGS[1] = FLAGS[0] | 0;
+        if ((operand1 >>> 0) >= (operand2 >>> 0)) {
+            FLAGS[2] = -1;
+        }
+        else {
+            FLAGS[2] = 0;
+        }
+        FLAGS[3] = (operand1 ^ operand2) & (operand1 ^ FLAGS[0]);
+    };
+    function setCMNFlags(operand1, operand2) {
+        //Update flags for an addition operation:
+        operand1 = operand1 | 0;
+        operand2 = operand2 | 0;
+        FLAGS[0] = ((operand1 | 0) + (operand2 | 0)) | 0;
+        FLAGS[1] = FLAGS[0] | 0;
+        if ((FLAGS[0] >>> 0) < (operand1 >>> 0)) {
+            FLAGS[2] = -1;
+        }
+        else {
+            FLAGS[2] = 0;
+        }
+        FLAGS[3] = (~(operand1 ^ operand2)) & (operand1 ^ FLAGS[0]);
+    };
+    function BGE() {
+        //Branch if Negative equal to Overflow
+        return (FLAGS[0] ^ FLAGS[3]) | 0;
+    };
+    return {
+        setNegative:setNegative,
+        setNegativeFalse:setNegativeFalse,
+        getNegative:getNegative,
+        setZero:setZero,
+        setZeroTrue:setZeroTrue,
+        setZeroFalse:setZeroFalse,
+        getZero:getZero,
+        setOverflowTrue:setOverflowTrue,
+        setOverflowFalse:setOverflowFalse,
+        getOverflow:getOverflow,
+        setCarry:setCarry,
+        setCarryFalse:setCarryFalse,
+        getCarry:getCarry,
+        getCarryReverse:getCarryReverse,
+        checkConditionalCode:checkConditionalCode,
+        setNZInt:setNZInt,
+        setNZCV:setNZCV,
+        getNZCV:getNZCV,
+        setADDFlags:setADDFlags,
+        setADCFlags:setADCFlags,
+        setSUBFlags:setSUBFlags,
+        setSBCFlags:setSBCFlags,
+        setCMPFlags:setCMPFlags,
+        setCMNFlags:setCMNFlags,
+        BGE:BGE
+    };
+}
+function ARMCPSRAttributeTableNormal() {
     var FLAGS = getInt32Array(4);
     FLAGS[1] = 1;  //Reverse the zero flag.
     function setNegative(toSet) {
