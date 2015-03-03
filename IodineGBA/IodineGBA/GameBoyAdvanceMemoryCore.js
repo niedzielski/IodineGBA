@@ -160,20 +160,20 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.singleClock();
-    switch (address & 0xFFE) {
+    switch (address & -2) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
-        case 0:
+        case 0x4000000:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeDISPCNT0(data & 0xFF);
             this.gfx.writeDISPCNT1((data >> 8) & 0xFF);
             break;
         //4000002h - Undocumented - Green Swap (R/W)
-        case 0x2:
+        case 0x4000002:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeGreenSwap(data & 0xFF);
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
-        case 0x4:
+        case 0x4000004:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeDISPSTAT0(data & 0xFF);
             this.gfx.writeDISPSTAT1((data >> 8) & 0xFF);
@@ -181,242 +181,242 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
-        case 0x8:
+        case 0x4000008:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG0CNT0(data & 0xFF);
             this.gfx.writeBG0CNT1((data >> 8) & 0xFF);
             break;
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
-        case 0xA:
+        case 0x400000A:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG1CNT0(data & 0xFF);
             this.gfx.writeBG1CNT1((data >> 8) & 0xFF);
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
-        case 0xC:
+        case 0x400000C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2CNT0(data & 0xFF);
             this.gfx.writeBG2CNT1((data >> 8) & 0xFF);
             break;
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
-        case 0xE:
+        case 0x400000E:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3CNT0(data & 0xFF);
             this.gfx.writeBG3CNT1((data >> 8) & 0xFF);
             break;
         //4000010h - BG0HOFS - BG0 X-Offset (W)
-        case 0x10:
+        case 0x4000010:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG0HOFS0(data & 0xFF);
             this.gfx.writeBG0HOFS1((data >> 8) & 0xFF);
             break;
         //4000012h - BG0VOFS - BG0 Y-Offset (W)
-        case 0x12:
+        case 0x4000012:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG0VOFS0(data & 0xFF);
             this.gfx.writeBG0VOFS1((data >> 8) & 0xFF);
             break;
         //4000014h - BG1HOFS - BG1 X-Offset (W)
-        case 0x14:
+        case 0x4000014:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG1HOFS0(data & 0xFF);
             this.gfx.writeBG1HOFS1((data >> 8) & 0xFF);
             break;
         //4000016h - BG1VOFS - BG1 Y-Offset (W)
-        case 0x16:
+        case 0x4000016:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG1VOFS0(data & 0xFF);
             this.gfx.writeBG1VOFS1((data >> 8) & 0xFF);
             break;
         //4000018h - BG2HOFS - BG2 X-Offset (W)
-        case 0x18:
+        case 0x4000018:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2HOFS0(data & 0xFF);
             this.gfx.writeBG2HOFS1((data >> 8) & 0xFF);
             break;
         //400001Ah - BG2VOFS - BG2 Y-Offset (W)
-        case 0x1A:
+        case 0x400001A:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2VOFS0(data & 0xFF);
             this.gfx.writeBG2VOFS1((data >> 8) & 0xFF);
             break;
         //400001Ch - BG3HOFS - BG3 X-Offset (W)
-        case 0x1C:
+        case 0x400001C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3HOFS0(data & 0xFF);
             this.gfx.writeBG3HOFS1((data >> 8) & 0xFF);
             break;
         //400001Eh - BG3VOFS - BG3 Y-Offset (W)
-        case 0x1E:
+        case 0x400001E:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3VOFS0(data & 0xFF);
             this.gfx.writeBG3VOFS1((data >> 8) & 0xFF);
             break;
         //4000020h - BG2PA - BG2 Rotation/Scaling Parameter A (alias dx) (W)
-        case 0x20:
+        case 0x4000020:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2PA0(data & 0xFF);
             this.gfx.writeBG2PA1((data >> 8) & 0xFF);
             break;
         //4000022h - BG2PB - BG2 Rotation/Scaling Parameter B (alias dmx) (W)
-        case 0x22:
+        case 0x4000022:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2PB0(data & 0xFF);
             this.gfx.writeBG2PB1((data >> 8) & 0xFF);
             break;
         //4000024h - BG2PC - BG2 Rotation/Scaling Parameter C (alias dy) (W)
-        case 0x24:
+        case 0x4000024:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2PC0(data & 0xFF);
             this.gfx.writeBG2PC1((data >> 8) & 0xFF);
             break;
         //4000026h - BG2PD - BG2 Rotation/Scaling Parameter D (alias dmy) (W)
-        case 0x26:
+        case 0x4000026:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2PD0(data & 0xFF);
             this.gfx.writeBG2PD1((data >> 8) & 0xFF);
             break;
         //4000028h - BG2X_L - BG2 Reference Point X-Coordinate, lower 16 bit (W)
-        case 0x28:
+        case 0x4000028:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2X_L0(data & 0xFF);
             this.gfx.writeBG2X_L1((data >> 8) & 0xFF);
             break;
         //400002Ah - BG2X_H - BG2 Reference Point X-Coordinate, upper 12 bit (W)
-        case 0x2A:
+        case 0x400002A:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2X_H0(data & 0xFF);
             this.gfx.writeBG2X_H1((data >> 8) & 0xFF);
             break;
         //400002Ch - BG2Y_L - BG2 Reference Point Y-Coordinate, lower 16 bit (W)
-        case 0x2C:
+        case 0x400002C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2Y_L0(data & 0xFF);
             this.gfx.writeBG2Y_L1((data >> 8) & 0xFF);
             break;
         //400002Eh - BG2Y_H - BG2 Reference Point Y-Coordinate, upper 12 bit (W)
-        case 0x2E:
+        case 0x400002E:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2Y_H0(data & 0xFF);
             this.gfx.writeBG2Y_H1((data >> 8) & 0xFF);
             break;
         //4000030h - BG3PA - BG3 Rotation/Scaling Parameter A (alias dx) (W)
-        case 0x30:
+        case 0x4000030:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3PA0(data & 0xFF);
             this.gfx.writeBG3PA1((data >> 8) & 0xFF);
             break;
         //4000032h - BG3PB - BG3 Rotation/Scaling Parameter B (alias dmx) (W)
-        case 0x32:
+        case 0x4000032:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3PB0(data & 0xFF);
             this.gfx.writeBG3PB1((data >> 8) & 0xFF);
             break;
         //4000034h - BG3PC - BG3 Rotation/Scaling Parameter C (alias dy) (W)
-        case 0x34:
+        case 0x4000034:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3PC0(data & 0xFF);
             this.gfx.writeBG3PC1((data >> 8) & 0xFF);
             break;
         //4000036h - BG3PD - BG3 Rotation/Scaling Parameter D (alias dmy) (W)
-        case 0x36:
+        case 0x4000036:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3PD0(data & 0xFF);
             this.gfx.writeBG3PD1((data >> 8) & 0xFF);
             break;
         //4000038h - BG3X_L - BG3 Reference Point X-Coordinate, lower 16 bit (W)
-        case 0x38:
+        case 0x4000038:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3X_L0(data & 0xFF);
             this.gfx.writeBG3X_L1((data >> 8) & 0xFF);
             break;
         //400003Ah - BG3X_H - BG3 Reference Point X-Coordinate, upper 12 bit (W)
-        case 0x3A:
+        case 0x400003A:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3X_H0(data & 0xFF);
             this.gfx.writeBG3X_H1((data >> 8) & 0xFF);
             break;
         //400003Ch - BG3Y_L - BG3 Reference Point Y-Coordinate, lower 16 bit (W)
-        case 0x3C:
+        case 0x400003C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3Y_L0(data & 0xFF);
             this.gfx.writeBG3Y_L1((data >> 8) & 0xFF);
             break;
         //400003Eh - BG3Y_H - BG3 Reference Point Y-Coordinate, upper 12 bit (W)
-        case 0x3E:
+        case 0x400003E:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3Y_H0(data & 0xFF);
             this.gfx.writeBG3Y_H1((data >> 8) & 0xFF);
             break;
         //4000040h - WIN0H - Window 0 Horizontal Dimensions (W)
-        case 0x40:
+        case 0x4000040:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWIN0H0(data & 0xFF);
             this.gfx.writeWIN0H1((data >> 8) & 0xFF);
             break;
         //4000042h - WIN1H - Window 1 Horizontal Dimensions (W)
-        case 0x42:
+        case 0x4000042:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWIN1H0(data & 0xFF);
             this.gfx.writeWIN1H1((data >> 8) & 0xFF);
             break;
         //4000044h - WIN0V - Window 0 Vertical Dimensions (W)
-        case 0x44:
+        case 0x4000044:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWIN0V0(data & 0xFF);
             this.gfx.writeWIN0V1((data >> 8) & 0xFF);
             break;
         //4000046h - WIN1V - Window 1 Vertical Dimensions (W)
-        case 0x46:
+        case 0x4000046:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWIN1V0(data & 0xFF);
             this.gfx.writeWIN1V1((data >> 8) & 0xFF);
             break;
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
-        case 0x48:
+        case 0x4000048:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWININ0(data & 0xFF);
             this.gfx.writeWININ1((data >> 8) & 0xFF);
             break;
         //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
-        case 0x4A:
+        case 0x400004A:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWINOUT0(data & 0xFF);
             this.gfx.writeWINOUT1((data >> 8) & 0xFF);
             break;
         //400004Ch - MOSAIC - Mosaic Size (W)
-        case 0x4C:
+        case 0x400004C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeMOSAIC0(data & 0xFF);
             this.gfx.writeMOSAIC1((data >> 8) & 0xFF);
             break;
         //400004Eh - NOT USED - ZERO
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
-        case 0x50:
+        case 0x4000050:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBLDCNT0(data & 0xFF);
             this.gfx.writeBLDCNT1((data >> 8) & 0xFF);
             break;
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
-        case 0x52:
+        case 0x4000052:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBLDALPHA0(data & 0xFF);
             this.gfx.writeBLDALPHA1((data >> 8) & 0xFF);
             break;
         //4000054h - BLDY - Brightness (Fade-In/Out) Coefficient (W)
-        case 0x54:
+        case 0x4000054:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBLDY(data & 0xFF);
             break;
         //4000055h through 400005Fh - NOT USED - ZERO/GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
-        case 0x60:
+        case 0x4000060:
             //NR10:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND1CNT_L(data & 0xFF);
             break;
         //4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
-        case 0x62:
+        case 0x4000062:
             //NR11:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND1CNT_H0(data & 0xFF);
@@ -424,7 +424,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             this.sound.writeSOUND1CNT_H1((data >> 8) & 0xFF);
             break;
         //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
-        case 0x64:
+        case 0x4000064:
             //NR13:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND1CNT_X0(data & 0xFF);
@@ -433,7 +433,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //4000066h - NOT USED - ZERO
         //4000068h - SOUND2CNT_L (NR21, NR22) - Channel 2 Duty/Length/Envelope (R/W)
-        case 0x68:
+        case 0x4000068:
             //NR21:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND2CNT_L0(data & 0xFF);
@@ -442,7 +442,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //400006Ah - NOT USED - ZERO
         //400006Ch - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
-        case 0x6C:
+        case 0x400006C:
             //NR23:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND2CNT_H0(data & 0xFF);
@@ -451,13 +451,13 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //400006Eh - NOT USED - ZERO
         //4000070h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)
-        case 0x70:
+        case 0x4000070:
             //NR30:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND3CNT_L(data & 0xFF);
             break;
         //4000072h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
-        case 0x72:
+        case 0x4000072:
             //NR31:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND3CNT_H0(data & 0xFF);
@@ -465,7 +465,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             this.sound.writeSOUND3CNT_H1((data >> 8) & 0xFF);
             break;
         //4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
-        case 0x74:
+        case 0x4000074:
             //NR33:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND3CNT_X0(data & 0xFF);
@@ -474,7 +474,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //4000076h - NOT USED - ZERO
         //4000078h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
-        case 0x78:
+        case 0x4000078:
             //NR41:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND4CNT_L0(data & 0xFF);
@@ -483,7 +483,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //400007Ah - NOT USED - ZERO
         //400007Ch - SOUND4CNT_H (NR43, NR44) - Channel 4 Frequency/Control (R/W)
-        case 0x7C:
+        case 0x400007C:
             //NR43:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND4CNT_H0(data & 0xFF);
@@ -492,7 +492,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //400007Eh - NOT USED - ZERO
         //4000080h - SOUNDCNT_L (NR50, NR51) - Channel L/R Volume/Enable (R/W)
-        case 0x80:
+        case 0x4000080:
             //NR50:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUNDCNT_L0(data & 0xFF);
@@ -500,221 +500,221 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             this.sound.writeSOUNDCNT_L1((data >> 8) & 0xFF);
             break;
         //4000082h - SOUNDCNT_H (GBA only) - DMA Sound Control/Mixing (R/W)
-        case 0x82:
+        case 0x4000082:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUNDCNT_H0(data & 0xFF);
             this.sound.writeSOUNDCNT_H1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)
-        case 0x84:
+        case 0x4000084:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUNDCNT_X(data & 0xFF);
             break;
         //4000086h - NOT USED - ZERO
         //4000088h - SOUNDBIAS - Sound PWM Control (R/W)
-        case 0x88:
+        case 0x4000088:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUNDBIAS0(data & 0xFF);
             this.sound.writeSOUNDBIAS1((data >> 8) & 0xFF);
             break;
         //400008Ah through 400008Fh - NOT USED - ZERO/GLITCHED
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x90:
+        case 0x4000090:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0, data & 0xFF);
             this.sound.writeWAVE(0x1, (data >> 8) & 0xFF);
             break;
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x92:
+        case 0x4000092:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0x2, data & 0xFF);
             this.sound.writeWAVE(0x3, (data >> 8) & 0xFF);
             break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x94:
+        case 0x4000094:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0x4, data & 0xFF);
             this.sound.writeWAVE(0x5, (data >> 8) & 0xFF);
             break;
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x96:
+        case 0x4000096:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0x6, data & 0xFF);
             this.sound.writeWAVE(0x7, (data >> 8) & 0xFF);
             break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x98:
+        case 0x4000098:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0x8, data & 0xFF);
             this.sound.writeWAVE(0x9, (data >> 8) & 0xFF);
             break;
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9A:
+        case 0x400009A:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0xA, data & 0xFF);
             this.sound.writeWAVE(0xB, (data >> 8) & 0xFF);
             break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9C:
+        case 0x400009C:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0xC, data & 0xFF);
             this.sound.writeWAVE(0xD, (data >> 8) & 0xFF);
             break;
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9E:
+        case 0x400009E:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0xE, data & 0xFF);
             this.sound.writeWAVE(0xF, (data >> 8) & 0xFF);
             break;
         //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
-        case 0xA0:
+        case 0x40000A0:
             this.IOCore.updateTimerClocking();
             this.sound.writeFIFOA(data & 0xFF);
             this.sound.writeFIFOA((data >> 8) & 0xFF);
             break;
         //40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
-        case 0xA2:
+        case 0x40000A2:
             this.IOCore.updateTimerClocking();
             this.sound.writeFIFOA(data & 0xFF);
             this.sound.writeFIFOA((data >> 8) & 0xFF);
             break;
         //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
-        case 0xA4:
+        case 0x40000A4:
             this.IOCore.updateTimerClocking();
             this.sound.writeFIFOB(data & 0xFF);
             this.sound.writeFIFOB((data >> 8) & 0xFF);
             break;
         //40000A6h - FIFO_B_H - FIFO Channel B Second Word (W)
-        case 0xA6:
+        case 0x40000A6:
             this.IOCore.updateTimerClocking();
             this.sound.writeFIFOB(data & 0xFF);
             this.sound.writeFIFOB((data >> 8) & 0xFF);
             break;
         //40000A8h through 40000AFh - NOT USED - GLITCHED
         //40000B0h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
-        case 0xB0:
+        case 0x40000B0:
             this.dma.writeDMASource0(0, data & 0xFF);
             this.dma.writeDMASource1(0, (data >> 8) & 0xFF);
             break;
         //40000B2h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
-        case 0xB2:
+        case 0x40000B2:
             this.dma.writeDMASource2(0, data & 0xFF);
             this.dma.writeDMASource3(0, (data >> 8) & 0x7);    //Mask out the unused bits.
             break;
         //40000B4h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)
-        case 0xB4:
+        case 0x40000B4:
             this.dma.writeDMADestination0(0, data & 0xFF);
             this.dma.writeDMADestination1(0, (data >> 8) & 0xFF);
             break;
         //40000B6h - DMA0DAH - DMA 0 Destination Address (W) (internal memory)
-        case 0xB6:
+        case 0x40000B6:
             this.dma.writeDMADestination2(0, data & 0xFF);
             this.dma.writeDMADestination3(0, (data >> 8) & 0x7);
             break;
         //40000B8h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)
-        case 0xB8:
+        case 0x40000B8:
             this.dma.writeDMAWordCount0(0, data & 0xFF);
             this.dma.writeDMAWordCount1(0, (data >> 8) & 0x3F);
             break;
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
-        case 0xBA:
+        case 0x40000BA:
             this.dma.writeDMAControl0(0, data & 0xFF);
             this.IOCore.updateCoreClocking();
             this.dma.writeDMAControl1(0, (data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //40000BCh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
-        case 0xBC:
+        case 0x40000BC:
             this.dma.writeDMASource0(1, data & 0xFF);
             this.dma.writeDMASource1(1, (data >> 8) & 0xFF);
             break;
         //40000BEh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
-        case 0xBE:
+        case 0x40000BE:
             this.dma.writeDMASource2(1, data & 0xFF);
             this.dma.writeDMASource3(1, (data >> 8) & 0xF);    //Mask out the unused bits.
             break;
         //40000C0h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
-        case 0xC0:
+        case 0x40000C0:
             this.dma.writeDMADestination0(1, data & 0xFF);
             this.dma.writeDMADestination1(1, (data >> 8) & 0xFF);
             break;
         //40000C2h - DMA1DAH - DMA 1 Destination Address (W) (internal memory)
-        case 0xC2:
+        case 0x40000C2:
             this.dma.writeDMADestination2(1, data & 0xFF);
             this.dma.writeDMADestination3(1, (data >> 8) & 0x7);
             break;
         //40000C4h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)
-        case 0xC4:
+        case 0x40000C4:
             this.dma.writeDMAWordCount0(1, data & 0xFF);
             this.dma.writeDMAWordCount1(1, (data >> 8) & 0x3F);
             break;
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
-        case 0xC6:
+        case 0x40000C6:
             this.dma.writeDMAControl0(1, data & 0xFF);
             this.IOCore.updateCoreClocking();
             this.dma.writeDMAControl1(1, (data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //40000C8h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
-        case 0xC8:
+        case 0x40000C8:
             this.dma.writeDMASource0(2, data & 0xFF);
             this.dma.writeDMASource1(2, (data >> 8) & 0xFF);
             break;
         //40000CAh - DMA2SAH - DMA 2 Source Address (W) (internal memory)
-        case 0xCA:
+        case 0x40000CA:
             this.dma.writeDMASource2(2, data & 0xFF);
             this.dma.writeDMASource3(2, (data >> 8) & 0xF);    //Mask out the unused bits.
             break;
         //40000CCh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)
-        case 0xCC:
+        case 0x40000CC:
             this.dma.writeDMADestination0(2, data & 0xFF);
             this.dma.writeDMADestination1(2, (data >> 8) & 0xFF);
             break;
         //40000CEh - DMA2DAH - DMA 2 Destination Address (W) (internal memory)
-        case 0xCE:
+        case 0x40000CE:
             this.dma.writeDMADestination2(2, data & 0xFF);
             this.dma.writeDMADestination3(2, (data >> 8) & 0x7);
             break;
         //40000D0h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)
-        case 0xD0:
+        case 0x40000D0:
             this.dma.writeDMAWordCount0(2, data & 0xFF);
             this.dma.writeDMAWordCount1(2, (data >> 8) & 0x3F);
             break;
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
-        case 0xD2:
+        case 0x40000D2:
             this.dma.writeDMAControl0(2, data & 0xFF);
             this.IOCore.updateCoreClocking();
             this.dma.writeDMAControl1(2, (data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //40000D4h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
-        case 0xD4:
+        case 0x40000D4:
             this.dma.writeDMASource0(3, data & 0xFF);
             this.dma.writeDMASource1(3, (data >> 8) & 0xFF);
             break;
         //40000D6h - DMA3SAH - DMA 3 Source Address (W) (internal memory)
-        case 0xD6:
+        case 0x40000D6:
             this.dma.writeDMASource2(3, data & 0xFF);
             this.dma.writeDMASource3(3, (data >> 8) & 0xF);    //Mask out the unused bits.
             break;
         //40000D8h - DMA3DAD - DMA 3 Destination Address (W) (internal memory)
-        case 0xD8:
+        case 0x40000D8:
             this.dma.writeDMADestination0(3, data & 0xFF);
             this.dma.writeDMADestination1(3, (data >> 8) & 0xFF);
             break;
         //40000DAh - DMA3DAH - DMA 3 Destination Address (W) (internal memory)
-        case 0xDA:
+        case 0x40000DA:
             this.dma.writeDMADestination2(3, data & 0xFF);
             this.dma.writeDMADestination3(3, (data >> 8) & 0xF);
             break;
         //40000DCh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)
-        case 0xDC:
+        case 0x40000DC:
             this.dma.writeDMAWordCount0(3, data & 0xFF);
             this.dma.writeDMAWordCount1(3, (data >> 8) & 0xFF);
             break;
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
-        case 0xDE:
+        case 0x40000DE:
             this.dma.writeDMAControl0(3, data & 0xFF);
             this.IOCore.updateCoreClocking();
             this.dma.writeDMAControl1(3, (data >> 8) & 0xFF);
@@ -722,95 +722,95 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
-        case 0x100:
+        case 0x4000100:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM0CNT_L0(data & 0xFF);
             this.timer.writeTM0CNT_L1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
-        case 0x102:
+        case 0x4000102:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM0CNT_H(data & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
-        case 0x104:
+        case 0x4000104:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM1CNT_L0(data & 0xFF);
             this.timer.writeTM1CNT_L1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
-        case 0x106:
+        case 0x4000106:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM1CNT_H(data & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
-        case 0x108:
+        case 0x4000108:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM2CNT_L0(data & 0xFF);
             this.timer.writeTM2CNT_L1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
-        case 0x10A:
+        case 0x400010A:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM2CNT_H(data & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
-        case 0x10C:
+        case 0x400010C:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM3CNT_L0(data & 0xFF);
             this.timer.writeTM3CNT_L1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
-        case 0x10E:
+        case 0x400010E:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM3CNT_H(data & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000110h through 400011Fh - NOT USED - GLITCHED
         //4000120h - Serial Data A (R/W)
-        case 0x120:
+        case 0x4000120:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIODATA_A0(data & 0xFF);
             this.serial.writeSIODATA_A1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000122h - Serial Data B (R/W)
-        case 0x122:
+        case 0x4000122:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIODATA_B0(data & 0xFF);
             this.serial.writeSIODATA_B1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000124h - Serial Data C (R/W)
-        case 0x124:
+        case 0x4000124:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIODATA_C0(data & 0xFF);
             this.serial.writeSIODATA_C1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000126h - Serial Data D (R/W)
-        case 0x126:
+        case 0x4000126:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIODATA_D0(data & 0xFF);
             this.serial.writeSIODATA_D1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000128h - SIOCNT - SIO Sub Mode Control (R/W)
-        case 0x128:
+        case 0x4000128:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIOCNT0(data & 0xFF);
             this.serial.writeSIOCNT1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //400012Ah - SIOMLT_SEND - Data Send Register (R/W)
-        case 0x12A:
+        case 0x400012A:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIODATA8_0(data & 0xFF);
             this.serial.writeSIODATA8_1((data >> 8) & 0xFF);
@@ -819,12 +819,12 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
         //400012Ch through 400012Fh - NOT USED - GLITCHED
         //4000130h - KEYINPUT - Key Status (R)
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
-        case 0x132:
+        case 0x4000132:
             this.joypad.writeKeyControl0(data & 0xFF);
             this.joypad.writeKeyControl1((data >> 8) & 0xFF);
             break;
         //4000134h - RCNT (R/W) - Mode Selection
-        case 0x134:
+        case 0x4000134:
             this.IOCore.updateSerialClocking();
             this.serial.writeRCNT0(data & 0xFF);
             this.serial.writeRCNT1((data >> 8) & 0xFF);
@@ -832,76 +832,76 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //4000136h through 400013Fh - NOT USED - GLITCHED
         //4000140h - JOYCNT - JOY BUS Control Register (R/W)
-        case 0x140:
+        case 0x4000140:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYCNT(data & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000142h through 400014Fh - NOT USED - GLITCHED
         //4000150h - JoyBus Receive (R/W)
-        case 0x150:
+        case 0x4000150:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYBUS_RECV0(data & 0xFF);
             this.serial.writeJOYBUS_RECV1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000152h - JoyBus Receive (R/W)
-        case 0x152:
+        case 0x4000152:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYBUS_RECV2(data & 0xFF);
             this.serial.writeJOYBUS_RECV3((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000154h - JoyBus Send (R/W)
-        case 0x154:
+        case 0x4000154:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYBUS_SEND0(data & 0xFF);
             this.serial.writeJOYBUS_SEND1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000156h - JoyBus Send (R/W)
-        case 0x156:
+        case 0x4000156:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYBUS_SEND2(data & 0xFF);
             this.serial.writeJOYBUS_SEND3((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000158h - JoyBus Stat (R/W)
-        case 0x158:
+        case 0x4000158:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYBUS_STAT(data & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000159h through 40001FFh - NOT USED - GLITCHED
         //4000200h - IE - Interrupt Enable Register (R/W)
-        case 0x200:
+        case 0x4000200:
             this.IOCore.updateCoreClocking();
             this.irq.writeIE0(data & 0xFF);
             this.irq.writeIE1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000202h - IF - Interrupt Request Flags / IRQ Acknowledge
-        case 0x202:
+        case 0x4000202:
             this.IOCore.updateCoreClocking();
             this.irq.writeIF0(data & 0xFF);
             this.irq.writeIF1((data >> 8) & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000204h - WAITCNT - Waitstate Control (R/W)
-        case 0x204:
+        case 0x4000204:
             this.wait.writeWAITCNT0(data & 0xFF);
             this.wait.writeWAITCNT1((data >> 8) & 0xFF);
             break;
         //4000206h - WAITCNT - Waitstate Control (R/W)
         //4000208h - IME - Interrupt Master Enable Register (R/W)
-        case 0x208:
+        case 0x4000208:
             this.IOCore.updateCoreClocking();
             this.irq.writeIME(data & 0xFF);
             this.IOCore.updateCoreEventTime();
             break;
         //4000209h through 40002FFh - NOT USED - GLITCHED
         //4000300h - POSTFLG - BYTE - Undocumented - Post Boot / Debug Control (R/W)
-        case 0x300:
+        case 0x4000300:
             this.wait.writePOSTBOOT(data & 0xFF);
             this.wait.writeHALTCNT((data >> 8) & 0xFF);
             break;
@@ -916,10 +916,10 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.wait.singleClock();
-    switch (address & 0xFFC) {
+    switch (address & -4) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
         //4000002h - Undocumented - Green Swap (R/W)
-        case 0:
+        case 0x4000000:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeDISPCNT0(data & 0xFF);
             this.gfx.writeDISPCNT1((data >> 8) & 0xFF);
@@ -927,7 +927,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         //4000006h - VCOUNT - Vertical Counter (Read only)
-        case 0x4:
+        case 0x4000004:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeDISPSTAT0(data & 0xFF);
             this.gfx.writeDISPSTAT1((data >> 8) & 0xFF);
@@ -935,7 +935,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
-        case 0x8:
+        case 0x4000008:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG0CNT0(data & 0xFF);
             this.gfx.writeBG0CNT1((data >> 8) & 0xFF);
@@ -944,7 +944,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
-        case 0xC:
+        case 0x400000C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2CNT0(data & 0xFF);
             this.gfx.writeBG2CNT1((data >> 8) & 0xFF);
@@ -953,7 +953,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000010h - BG0HOFS - BG0 X-Offset (W)
         //4000012h - BG0VOFS - BG0 Y-Offset (W)
-        case 0x10:
+        case 0x4000010:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG0HOFS0(data & 0xFF);
             this.gfx.writeBG0HOFS1((data >> 8) & 0xFF);
@@ -962,7 +962,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000014h - BG1HOFS - BG1 X-Offset (W)
         //4000016h - BG1VOFS - BG1 Y-Offset (W)
-        case 0x14:
+        case 0x4000014:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG1HOFS0(data & 0xFF);
             this.gfx.writeBG1HOFS1((data >> 8) & 0xFF);
@@ -971,7 +971,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000018h - BG2HOFS - BG2 X-Offset (W)
         //400001Ah - BG2VOFS - BG2 Y-Offset (W)
-        case 0x18:
+        case 0x4000018:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2HOFS0(data & 0xFF);
             this.gfx.writeBG2HOFS1((data >> 8) & 0xFF);
@@ -980,7 +980,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400001Ch - BG3HOFS - BG3 X-Offset (W)
         //400001Eh - BG3VOFS - BG3 Y-Offset (W)
-        case 0x1C:
+        case 0x400001C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3HOFS0(data & 0xFF);
             this.gfx.writeBG3HOFS1((data >> 8) & 0xFF);
@@ -989,7 +989,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000020h - BG2PA - BG2 Rotation/Scaling Parameter A (alias dx) (W)
         //4000022h - BG2PB - BG2 Rotation/Scaling Parameter B (alias dmx) (W)
-        case 0x20:
+        case 0x4000020:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2PA0(data & 0xFF);
             this.gfx.writeBG2PA1((data >> 8) & 0xFF);
@@ -998,7 +998,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000024h - BG2PC - BG2 Rotation/Scaling Parameter C (alias dy) (W)
         //4000026h - BG2PD - BG2 Rotation/Scaling Parameter D (alias dmy) (W)
-        case 0x24:
+        case 0x4000024:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2PC0(data & 0xFF);
             this.gfx.writeBG2PC1((data >> 8) & 0xFF);
@@ -1007,7 +1007,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000028h - BG2X_L - BG2 Reference Point X-Coordinate, lower 16 bit (W)
         //400002Ah - BG2X_H - BG2 Reference Point X-Coordinate, upper 12 bit (W)
-        case 0x28:
+        case 0x4000028:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2X_L0(data & 0xFF);
             this.gfx.writeBG2X_L1((data >> 8) & 0xFF);
@@ -1016,7 +1016,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400002Ch - BG2Y_L - BG2 Reference Point Y-Coordinate, lower 16 bit (W)
         //400002Eh - BG2Y_H - BG2 Reference Point Y-Coordinate, upper 12 bit (W)
-        case 0x2C:
+        case 0x400002C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG2Y_L0(data & 0xFF);
             this.gfx.writeBG2Y_L1((data >> 8) & 0xFF);
@@ -1025,7 +1025,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000030h - BG3PA - BG3 Rotation/Scaling Parameter A (alias dx) (W)
         //4000032h - BG3PB - BG3 Rotation/Scaling Parameter B (alias dmx) (W)
-        case 0x30:
+        case 0x4000030:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3PA0(data & 0xFF);
             this.gfx.writeBG3PA1((data >> 8) & 0xFF);
@@ -1034,7 +1034,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000034h - BG3PC - BG3 Rotation/Scaling Parameter C (alias dy) (W)
         //4000036h - BG3PD - BG3 Rotation/Scaling Parameter D (alias dmy) (W)
-        case 0x34:
+        case 0x4000034:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3PC0(data & 0xFF);
             this.gfx.writeBG3PC1((data >> 8) & 0xFF);
@@ -1043,7 +1043,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000038h - BG3X_L - BG3 Reference Point X-Coordinate, lower 16 bit (W)
         //400003Ah - BG3X_H - BG3 Reference Point X-Coordinate, upper 12 bit (W)
-        case 0x38:
+        case 0x4000038:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3X_L0(data & 0xFF);
             this.gfx.writeBG3X_L1((data >> 8) & 0xFF);
@@ -1052,7 +1052,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400003Ch - BG3Y_L - BG3 Reference Point Y-Coordinate, lower 16 bit (W)
         //400003Eh - BG3Y_H - BG3 Reference Point Y-Coordinate, upper 12 bit (W)
-        case 0x3C:
+        case 0x400003C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBG3Y_L0(data & 0xFF);
             this.gfx.writeBG3Y_L1((data >> 8) & 0xFF);
@@ -1061,7 +1061,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000040h - WIN0H - Window 0 Horizontal Dimensions (W)
         //4000042h - WIN1H - Window 1 Horizontal Dimensions (W)
-        case 0x40:
+        case 0x4000040:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWIN0H0(data & 0xFF);
             this.gfx.writeWIN0H1((data >> 8) & 0xFF);
@@ -1070,7 +1070,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000044h - WIN0V - Window 0 Vertical Dimensions (W)
         //4000046h - WIN1V - Window 1 Vertical Dimensions (W)
-        case 0x44:
+        case 0x4000044:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWIN0V0(data & 0xFF);
             this.gfx.writeWIN0V1((data >> 8) & 0xFF);
@@ -1079,7 +1079,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
         //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
-        case 0x48:
+        case 0x4000048:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeWININ0(data & 0xFF);
             this.gfx.writeWININ1((data >> 8) & 0xFF);
@@ -1088,14 +1088,14 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400004Ch - MOSAIC - Mosaic Size (W)
         //400004Eh - NOT USED - ZERO
-        case 0x4C:
+        case 0x400004C:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeMOSAIC0(data & 0xFF);
             this.gfx.writeMOSAIC1((data >> 8) & 0xFF);
             break;
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
-        case 0x50:
+        case 0x4000050:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBLDCNT0(data & 0xFF);
             this.gfx.writeBLDCNT1((data >> 8) & 0xFF);
@@ -1103,14 +1103,14 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             this.gfx.writeBLDALPHA1(data >>> 24);
             break;
         //4000054h - BLDY - Brightness (Fade-In/Out) Coefficient (W)
-        case 0x54:
+        case 0x4000054:
             this.IOCore.updateGraphicsClocking();
             this.gfx.writeBLDY(data & 0xFF);
             break;
         //4000055h through 400005Fh - NOT USED - ZERO/GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
         //4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
-        case 0x60:
+        case 0x4000060:
             //NR10:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND1CNT_L(data & 0xFF);
@@ -1121,7 +1121,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
         //4000066h - NOT USED - ZERO
-        case 0x64:
+        case 0x4000064:
             //NR13:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND1CNT_X0(data & 0xFF);
@@ -1130,7 +1130,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000068h - SOUND2CNT_L (NR21, NR22) - Channel 2 Duty/Length/Envelope (R/W)
         //400006Ah - NOT USED - ZERO
-        case 0x68:
+        case 0x4000068:
             //NR21:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND2CNT_L0(data & 0xFF);
@@ -1139,7 +1139,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400006Ch - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
         //400006Eh - NOT USED - ZERO
-        case 0x6C:
+        case 0x400006C:
             //NR23:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND2CNT_H0(data & 0xFF);
@@ -1148,7 +1148,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000070h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)
         //4000072h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
-        case 0x70:
+        case 0x4000070:
             //NR30:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND3CNT_L(data & 0xFF);
@@ -1159,7 +1159,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
         //4000076h - NOT USED - ZERO
-        case 0x74:
+        case 0x4000074:
             //NR33:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND3CNT_X0(data & 0xFF);
@@ -1168,7 +1168,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000078h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
         //400007Ah - NOT USED - ZERO
-        case 0x78:
+        case 0x4000078:
             //NR41:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND4CNT_L0(data & 0xFF);
@@ -1177,7 +1177,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400007Ch - SOUND4CNT_H (NR43, NR44) - Channel 4 Frequency/Control (R/W)
         //400007Eh - NOT USED - ZERO
-        case 0x7C:
+        case 0x400007C:
             //NR43:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUND4CNT_H0(data & 0xFF);
@@ -1186,7 +1186,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000080h - SOUNDCNT_L (NR50, NR51) - Channel L/R Volume/Enable (R/W)
         //4000082h - SOUNDCNT_H (GBA only) - DMA Sound Control/Mixing (R/W)
-        case 0x80:
+        case 0x4000080:
             //NR50:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUNDCNT_L0(data & 0xFF);
@@ -1198,12 +1198,12 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)
         //4000086h - NOT USED - ZERO
-        case 0x84:
+        case 0x4000084:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUNDCNT_X(data & 0xFF);
             break;
         //4000088h - SOUNDBIAS - Sound PWM Control (R/W)
-        case 0x88:
+        case 0x4000088:
             this.IOCore.updateTimerClocking();
             this.sound.writeSOUNDBIAS0(data & 0xFF);
             this.sound.writeSOUNDBIAS1((data >> 8) & 0xFF);
@@ -1211,7 +1211,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //400008Ah through 400008Fh - NOT USED - ZERO/GLITCHED
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x90:
+        case 0x4000090:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0, data & 0xFF);
             this.sound.writeWAVE(0x1, (data >> 8) & 0xFF);
@@ -1220,7 +1220,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x94:
+        case 0x4000094:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0x4, data & 0xFF);
             this.sound.writeWAVE(0x5, (data >> 8) & 0xFF);
@@ -1229,7 +1229,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x98:
+        case 0x4000098:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0x8, data & 0xFF);
             this.sound.writeWAVE(0x9, (data >> 8) & 0xFF);
@@ -1238,7 +1238,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9C:
+        case 0x400009C:
             this.IOCore.updateTimerClocking();
             this.sound.writeWAVE(0xC, data & 0xFF);
             this.sound.writeWAVE(0xD, (data >> 8) & 0xFF);
@@ -1247,7 +1247,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
         //40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
-        case 0xA0:
+        case 0x40000A0:
             this.IOCore.updateTimerClocking();
             this.sound.writeFIFOA(data & 0xFF);
             this.sound.writeFIFOA((data >> 8) & 0xFF);
@@ -1256,7 +1256,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
         //40000A6h - FIFO_B_H - FIFO Channel B Second Word (W)
-        case 0xA4:
+        case 0x40000A4:
             this.IOCore.updateTimerClocking();
             this.sound.writeFIFOB(data & 0xFF);
             this.sound.writeFIFOB((data >> 8) & 0xFF);
@@ -1266,7 +1266,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //40000A8h through 40000AFh - NOT USED - GLITCHED
         //40000B0h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
         //40000B2h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
-        case 0xB0:
+        case 0x40000B0:
             this.dma.writeDMASource0(0, data & 0xFF);
             this.dma.writeDMASource1(0, (data >> 8) & 0xFF);
             this.dma.writeDMASource2(0, (data >> 16) & 0xFF);
@@ -1274,7 +1274,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000B4h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)
         //40000B6h - DMA0DAH - DMA 0 Destination Address (W) (internal memory)
-        case 0xB4:
+        case 0x40000B4:
             this.dma.writeDMADestination0(0, data & 0xFF);
             this.dma.writeDMADestination1(0, (data >> 8) & 0xFF);
             this.dma.writeDMADestination2(0, (data >> 16) & 0xFF);
@@ -1282,7 +1282,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000B8h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
-        case 0xB8:
+        case 0x40000B8:
             this.dma.writeDMAWordCount0(0, data & 0xFF);
             this.dma.writeDMAWordCount1(0, (data >> 8) & 0x3F);
             this.dma.writeDMAControl0(0, (data >> 16) & 0xFF);
@@ -1292,7 +1292,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000BCh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
         //40000BEh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
-        case 0xBC:
+        case 0x40000BC:
             this.dma.writeDMASource0(1, data & 0xFF);
             this.dma.writeDMASource1(1, (data >> 8) & 0xFF);
             this.dma.writeDMASource2(1, (data >> 16) & 0xFF);
@@ -1300,7 +1300,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000C0h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
         //40000C2h - DMA1DAH - DMA 1 Destination Address (W) (internal memory)
-        case 0xC0:
+        case 0x40000C0:
             this.dma.writeDMADestination0(1, data & 0xFF);
             this.dma.writeDMADestination1(1, (data >> 8) & 0xFF);
             this.dma.writeDMADestination2(1, (data >> 16) & 0xFF);
@@ -1308,7 +1308,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000C4h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
-        case 0xC4:
+        case 0x40000C4:
             this.dma.writeDMAWordCount0(1, data & 0xFF);
             this.dma.writeDMAWordCount1(1, (data >> 8) & 0x3F);
             this.dma.writeDMAControl0(1, (data >> 16) & 0xFF);
@@ -1318,7 +1318,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000C8h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
         //40000CAh - DMA2SAH - DMA 2 Source Address (W) (internal memory)
-        case 0xC8:
+        case 0x40000C8:
             this.dma.writeDMASource0(2, data & 0xFF);
             this.dma.writeDMASource1(2, (data >> 8) & 0xFF);
             this.dma.writeDMASource2(2, (data >> 16) & 0xFF);
@@ -1326,7 +1326,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000CCh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)
         //40000CEh - DMA2DAH - DMA 2 Destination Address (W) (internal memory)
-        case 0xCC:
+        case 0x40000CC:
             this.dma.writeDMADestination0(2, data & 0xFF);
             this.dma.writeDMADestination1(2, (data >> 8) & 0xFF);
             this.dma.writeDMADestination2(2, (data >> 16) & 0xFF);
@@ -1334,7 +1334,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000D0h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
-        case 0xD0:
+        case 0x40000D0:
             this.dma.writeDMAWordCount0(2, data & 0xFF);
             this.dma.writeDMAWordCount1(2, (data >> 8) & 0x3F);
             this.dma.writeDMAControl0(2, (data >> 16) & 0xFF);
@@ -1344,7 +1344,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000D4h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
         //40000D6h - DMA3SAH - DMA 3 Source Address (W) (internal memory)
-        case 0xD4:
+        case 0x40000D4:
             this.dma.writeDMASource0(3, data & 0xFF);
             this.dma.writeDMASource1(3, (data >> 8) & 0xFF);
             this.dma.writeDMASource2(3, (data >> 16) & 0xFF);
@@ -1352,7 +1352,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000D8h - DMA3DAD - DMA 3 Destination Address (W) (internal memory)
         //40000DAh - DMA3DAH - DMA 3 Destination Address (W) (internal memory)
-        case 0xD8:
+        case 0x40000D8:
             this.dma.writeDMADestination0(3, data & 0xFF);
             this.dma.writeDMADestination1(3, (data >> 8) & 0xFF);
             this.dma.writeDMADestination2(3, (data >> 16) & 0xFF);
@@ -1360,7 +1360,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //40000DCh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
-        case 0xDC:
+        case 0x40000DC:
             this.dma.writeDMAWordCount0(3, data & 0xFF);
             this.dma.writeDMAWordCount1(3, (data >> 8) & 0xFF);
             this.dma.writeDMAControl0(3, (data >> 16) & 0xFF);
@@ -1371,7 +1371,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
-        case 0x100:
+        case 0x4000100:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM0CNT_L0(data & 0xFF);
             this.timer.writeTM0CNT_L1((data >> 8) & 0xFF);
@@ -1380,7 +1380,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
-        case 0x104:
+        case 0x4000104:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM1CNT_L0(data & 0xFF);
             this.timer.writeTM1CNT_L1((data >> 8) & 0xFF);
@@ -1389,7 +1389,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
-        case 0x108:
+        case 0x4000108:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM2CNT_L0(data & 0xFF);
             this.timer.writeTM2CNT_L1((data >> 8) & 0xFF);
@@ -1398,7 +1398,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
-        case 0x10C:
+        case 0x400010C:
             this.IOCore.updateTimerClocking();
             this.timer.writeTM3CNT_L0(data & 0xFF);
             this.timer.writeTM3CNT_L1((data >> 8) & 0xFF);
@@ -1408,7 +1408,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000110h through 400011Fh - NOT USED - GLITCHED
         //4000120h - Serial Data A (R/W)
         //4000122h - Serial Data B (R/W)
-        case 0x120:
+        case 0x4000120:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIODATA_A0(data & 0xFF);
             this.serial.writeSIODATA_A1((data >> 8) & 0xFF);
@@ -1418,7 +1418,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000124h - Serial Data C (R/W)
         //4000126h - Serial Data D (R/W)
-        case 0x124:
+        case 0x4000124:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIODATA_C0(data & 0xFF);
             this.serial.writeSIODATA_C1((data >> 8) & 0xFF);
@@ -1428,7 +1428,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000128h - SIOCNT - SIO Sub Mode Control (R/W)
         //400012Ah - SIOMLT_SEND - Data Send Register (R/W)
-        case 0x128:
+        case 0x4000128:
             this.IOCore.updateSerialClocking();
             this.serial.writeSIOCNT0(data & 0xFF);
             this.serial.writeSIOCNT1((data >> 8) & 0xFF);
@@ -1439,12 +1439,12 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //400012Ch through 400012Fh - NOT USED - GLITCHED
         //4000130h - KEYINPUT - Key Status (R)
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
-        case 0x130:
+        case 0x4000130:
             this.joypad.writeKeyControl0((data >> 16) & 0xFF);
             this.joypad.writeKeyControl1(data >>> 24);
             break;
         //4000134h - RCNT (R/W) - Mode Selection
-        case 0x134:
+        case 0x4000134:
             this.IOCore.updateSerialClocking();
             this.serial.writeRCNT0(data & 0xFF);
             this.serial.writeRCNT1((data >> 8) & 0xFF);
@@ -1452,7 +1452,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000136h through 400013Fh - NOT USED - GLITCHED
         //4000140h - JOYCNT - JOY BUS Control Register (R/W)
-        case 0x140:
+        case 0x4000140:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYCNT(data & 0xFF);
             this.IOCore.updateCoreEventTime();
@@ -1460,7 +1460,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000142h through 400014Fh - NOT USED - GLITCHED
         //4000150h - JoyBus Receive (R/W)
         //4000152h - JoyBus Receive (R/W)
-        case 0x150:
+        case 0x4000150:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYBUS_RECV0(data & 0xFF);
             this.serial.writeJOYBUS_RECV1((data >> 8) & 0xFF);
@@ -1470,7 +1470,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000154h - JoyBus Send (R/W)
         //4000156h - JoyBus Send (R/W)
-        case 0x154:
+        case 0x4000154:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYBUS_SEND0(data & 0xFF);
             this.serial.writeJOYBUS_SEND1((data >> 8) & 0xFF);
@@ -1479,7 +1479,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             this.IOCore.updateCoreEventTime();
             break;
         //4000158h - JoyBus Stat (R/W)
-        case 0x158:
+        case 0x4000158:
             this.IOCore.updateSerialClocking();
             this.serial.writeJOYBUS_STAT(data & 0xFF);
             this.IOCore.updateCoreEventTime();
@@ -1487,7 +1487,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000159h through 40001FFh - NOT USED - GLITCHED
         //4000200h - IE - Interrupt Enable Register (R/W)
         //4000202h - IF - Interrupt Request Flags / IRQ Acknowledge
-        case 0x200:
+        case 0x4000200:
             this.IOCore.updateCoreClocking();
             this.irq.writeIE0(data & 0xFF);
             this.irq.writeIE1((data >> 8) & 0xFF);
@@ -1497,12 +1497,12 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             break;
         //4000204h - WAITCNT - Waitstate Control (R/W)
         //4000206h - WAITCNT - Waitstate Control (R/W)
-        case 0x204:
+        case 0x4000204:
             this.wait.writeWAITCNT0(data & 0xFF);
             this.wait.writeWAITCNT1((data >> 8) & 0xFF);
             break;
         //4000208h - IME - Interrupt Master Enable Register (R/W)
-        case 0x208:
+        case 0x4000208:
             this.IOCore.updateCoreClocking();
             this.irq.writeIME(data & 0xFF);
             this.IOCore.updateCoreEventTime();
@@ -1510,7 +1510,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000209h through 40002FFh - NOT USED - GLITCHED
         //4000300h - POSTFLG - BYTE - Undocumented - Post Boot / Debug Control (R/W)
         //4000302h - NOT USED - ZERO
-        case 0x300:
+        case 0x4000300:
             this.wait.writePOSTBOOT(data & 0xFF);
             this.wait.writeHALTCNT((data >> 8) & 0xFF);
             break;
