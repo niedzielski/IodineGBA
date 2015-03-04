@@ -4777,6 +4777,7 @@ GameBoyAdvanceMemory.prototype.loadBIOS = function () {
     }
     else {
         this.IOCore.BIOSFound = false;
+        throw(new Error("BIOS invalid."));
     }
 }
 function generateMemoryTopLevelDispatch() {
