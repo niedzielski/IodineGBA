@@ -3776,7 +3776,6 @@ GameBoyAdvanceMemory.prototype.readIO8 = function (address) {
         case 0x302:
         //4000303h - NOT USED - ZERO
         case 0x303:
-            data = 0;
             break;
         default:
             data = this.readUnused8IO(address | 0) | 0;
@@ -4176,7 +4175,6 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
         case 0x20A:
         //4000302h - NOT USED - ZERO
         case 0x302:
-            data = 0;
             break;
         default:
             data = this.readUnused16IO(address | 0) | 0;
