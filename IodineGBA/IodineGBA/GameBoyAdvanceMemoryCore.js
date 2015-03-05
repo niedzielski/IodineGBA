@@ -3117,194 +3117,194 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
     address = address | 0;
     this.wait.singleClock();
     var data = 0;
-    switch (address & 0x3FF) {
+    switch (address | 0) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
-        case 0:
+        case 0x4000000:
             data = this.gfx.readDISPCNT0() | 0;
             break;
         //4000001h - DISPCNT - LCD Control (Read/Write)
-        case 0x1:
+        case 0x4000001:
             data = this.gfx.readDISPCNT1() | 0;
             break;
         //4000002h - Undocumented - Green Swap (R/W)
-        case 0x2:
+        case 0x4000002:
             data = this.gfx.readGreenSwap() | 0;
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
-        case 0x4:
+        case 0x4000004:
             this.IOCore.updateGraphicsClocking();
             data = this.gfx.readDISPSTAT0() | 0;
             break;
         //4000005h - DISPSTAT - General LCD Status (Read/Write)
-        case 0x5:
+        case 0x4000005:
             this.IOCore.updateGraphicsClocking();
             data = this.gfx.readDISPSTAT1() | 0;
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
-        case 0x6:
+        case 0x4000006:
             this.IOCore.updateGraphicsClocking();
             data = this.gfx.readVCOUNT() | 0;
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
-        case 0x8:
+        case 0x4000008:
             data = this.gfx.readBG0CNT0() | 0;
             break;
         //4000009h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
-        case 0x9:
+        case 0x4000009:
             data = this.gfx.readBG0CNT1() | 0;
             break;
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
-        case 0xA:
+        case 0x400000A:
             data = this.gfx.readBG1CNT0() | 0;
             break;
         //400000Bh - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
-        case 0xB:
+        case 0x400000B:
             data = this.gfx.readBG1CNT1() | 0;
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
-        case 0xC:
+        case 0x400000C:
             data = this.gfx.readBG2CNT0() | 0;
             break;
         //400000Dh - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
-        case 0xD:
+        case 0x400000D:
             data = this.gfx.readBG2CNT1() | 0;
             break;
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
-        case 0xE:
+        case 0x400000E:
             data = this.gfx.readBG3CNT0() | 0;
             break;
         //400000Fh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
-        case 0xF:
+        case 0x400000F:
             data = this.gfx.readBG3CNT1() | 0;
             break;
         //4000010h through 4000047h - WRITE ONLY
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
-        case 0x48:
+        case 0x4000048:
             data = this.gfx.readWININ0() | 0;
             break;
         //4000049h - WININ - Control of Inside of Window(s) (R/W)
-        case 0x49:
+        case 0x4000049:
             data = this.gfx.readWININ1() | 0;
             break;
         //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
-        case 0x4A:
+        case 0x400004A:
             data = this.gfx.readWINOUT0() | 0;
             break;
         //400004AB- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
-        case 0x4B:
+        case 0x400004B:
             data = this.gfx.readWINOUT1() | 0;
             break;
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
-        case 0x50:
+        case 0x4000050:
             data = this.gfx.readBLDCNT0() | 0;
             break;
         //4000051h - BLDCNT - Color Special Effects Selection (R/W)
-        case 0x51:
+        case 0x4000051:
             data = this.gfx.readBLDCNT1() | 0;
             break;
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
-        case 0x52:
+        case 0x4000052:
             data = this.gfx.readBLDALPHA0() | 0;
             break;
         //4000053h - BLDALPHA - Alpha Blending Coefficients (R/W)
-        case 0x53:
+        case 0x4000053:
             data = this.gfx.readBLDALPHA1() | 0;
             break;
         //4000054h through 400005Fh - NOT USED - GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
-        case 0x60:
+        case 0x4000060:
             //NR10:
             data = this.sound.readSOUND1CNT_L() | 0;
             break;
         //4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
-        case 0x62:
+        case 0x4000062:
             //NR11:
             data = this.sound.readSOUND1CNT_H0() | 0;
             break;
         //4000063h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
-        case 0x63:
+        case 0x4000063:
             //NR12:
             data = this.sound.readSOUND1CNT_H1() | 0;
             break;
         //4000065h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
-        case 0x65:
+        case 0x4000065:
             //NR14:
             data = this.sound.readSOUND1CNT_X() | 0;
             break;
         //4000068h - SOUND2CNT_L (NR21, NR22) - Channel 2 Duty/Length/Envelope (R/W)
-        case 0x68:
+        case 0x4000068:
             //NR21:
             data = this.sound.readSOUND2CNT_L0() | 0;
             break;
         //4000069h - SOUND2CNT_L (NR21, NR22) - Channel 2 Duty/Length/Envelope (R/W)
-        case 0x69:
+        case 0x4000069:
             //NR22:
             data = this.sound.readSOUND2CNT_L1() | 0;
             break;
         //400006Dh - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
-        case 0x6D:
+        case 0x400006D:
             //NR24:
             data = this.sound.readSOUND2CNT_H() | 0;
             break;
         //4000070h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)
-        case 0x70:
+        case 0x4000070:
             //NR30:
             data = this.sound.readSOUND3CNT_L() | 0;
             break;
         //4000073h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
-        case 0x73:
+        case 0x4000073:
             //NR32:
             data = this.sound.readSOUND3CNT_H() | 0;
             break;
         //4000075h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
-        case 0x75:
+        case 0x4000075:
             //NR34:
             data = this.sound.readSOUND3CNT_X() | 0;
             break;
         //4000079h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
-        case 0x79:
+        case 0x4000079:
             //NR42:
             data = this.sound.readSOUND4CNT_L() | 0;
             break;
         //400007Ch - SOUND4CNT_H (NR43, NR44) - Channel 4 Frequency/Control (R/W)
-        case 0x7C:
+        case 0x400007C:
             //NR43:
             data = this.sound.readSOUND4CNT_H0() | 0;
             break;
         //400007Dh - SOUND4CNT_H (NR43, NR44) - Channel 4 Frequency/Control (R/W)
-        case 0x7D:
+        case 0x400007D:
             //NR44:
             data = this.sound.readSOUND4CNT_H1() | 0;
             break;
         //4000080h - SOUNDCNT_L (NR50, NR51) - Channel L/R Volume/Enable (R/W)
-        case 0x80:
+        case 0x4000080:
             //NR50:
             data = this.sound.readSOUNDCNT_L0() | 0;
             break;
         //4000081h - SOUNDCNT_L (NR50, NR51) - Channel L/R Volume/Enable (R/W)
-        case 0x81:
+        case 0x4000081:
             //NR51:
             data = this.sound.readSOUNDCNT_L1() | 0;
             break;
         //4000082h - SOUNDCNT_H (GBA only) - DMA Sound Control/Mixing (R/W)
-        case 0x82:
+        case 0x4000082:
             data = this.sound.readSOUNDCNT_H0() | 0;
             break;
         //4000083h - SOUNDCNT_H (GBA only) - DMA Sound Control/Mixing (R/W)
-        case 0x83:
+        case 0x4000083:
             data = this.sound.readSOUNDCNT_H1() | 0;
             break;
         //4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)
-        case 0x84:
+        case 0x4000084:
             this.IOCore.updateTimerClocking();
             data = this.sound.readSOUNDCNT_X() | 0;
             break;
         //4000088h - SOUNDBIAS - Sound PWM Control (R/W, see below)
-        case 0x88:
+        case 0x4000088:
             data = this.sound.readSOUNDBIAS0() | 0;
             break;
         //4000089h - SOUNDBIAS - Sound PWM Control (R/W, see below)
-        case 0x89:
+        case 0x4000089:
             data = this.sound.readSOUNDBIAS1() | 0;
             break;
         //400008Ch - NOT USED - GLITCHED
@@ -3312,454 +3312,454 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
         //400008Eh - NOT USED - GLITCHED
         //400008Fh - NOT USED - GLITCHED
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x90:
+        case 0x4000090:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(0) | 0;
             break;
         //4000091h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x91:
+        case 0x4000091:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(1) | 0;
             break;
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x92:
+        case 0x4000092:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(2) | 0;
             break;
         //4000093h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x93:
+        case 0x4000093:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(3) | 0;
             break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x94:
+        case 0x4000094:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(4) | 0;
             break;
         //4000095h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x95:
+        case 0x4000095:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(5) | 0;
             break;
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x96:
+        case 0x4000096:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(6) | 0;
             break;
         //4000097h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x97:
+        case 0x4000097:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(7) | 0;
             break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x98:
+        case 0x4000098:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(8) | 0;
             break;
         //4000099h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x99:
+        case 0x4000099:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(9) | 0;
             break;
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9A:
+        case 0x400009A:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(10) | 0;
             break;
         //400009Bh - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9B:
+        case 0x400009B:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(11) | 0;
             break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9C:
+        case 0x400009C:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(12) | 0;
             break;
         //400009Dh - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9D:
+        case 0x400009D:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(13) | 0;
             break;
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9E:
+        case 0x400009E:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(14) | 0;
             break;
         //400009Fh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
-        case 0x9F:
+        case 0x400009F:
             this.IOCore.updateTimerClocking();
             data = this.sound.readWAVE(15) | 0;
             break;
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
-        case 0xBA:
+        case 0x40000BA:
             data = this.dma.readDMAControl0(0) | 0;
             break;
         //40000BBh - DMA0CNT_H - DMA 0 Control (R/W)
-        case 0xBB:
+        case 0x40000BB:
             data = this.dma.readDMAControl1(0) | 0;
             break;
         //40000BCh through 40000C5h - WRITE ONLY
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
-        case 0xC6:
+        case 0x40000C6:
             data = this.dma.readDMAControl0(1) | 0;
             break;
         //40000C7h - DMA1CNT_H - DMA 1 Control (R/W)
-        case 0xC7:
+        case 0x40000C7:
             data = this.dma.readDMAControl1(1) | 0;
             break;
         //40000C8h through 40000D1h - WRITE ONLY
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
-        case 0xD2:
+        case 0x40000D2:
             data = this.dma.readDMAControl0(2) | 0;
             break;
         //40000D3h - DMA2CNT_H - DMA 2 Control (R/W)
-        case 0xD3:
+        case 0x40000D3:
             data = this.dma.readDMAControl1(2) | 0;
             break;
         //40000D4h through 40000DDh - WRITE ONLY
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
-        case 0xDE:
+        case 0x40000DE:
             data = this.dma.readDMAControl0(3) | 0;
             break;
         //40000DFh - DMA3CNT_H - DMA 3 Control (R/W)
-        case 0xDF:
+        case 0x40000DF:
             data = this.dma.readDMAControl1(3) | 0;
             break;
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
-        case 0x100:
+        case 0x4000100:
             this.IOCore.updateTimerClocking();
             data = this.timer.readTM0CNT_L0() | 0;
             break;
         //4000101h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
-        case 0x101:
+        case 0x4000101:
             this.IOCore.updateTimerClocking();
             data = this.timer.readTM0CNT_L1() | 0;
             break;
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
-        case 0x102:
+        case 0x4000102:
             data = this.timer.readTM0CNT_H() | 0;
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
-        case 0x104:
+        case 0x4000104:
             this.IOCore.updateTimerClocking();
             data = this.timer.readTM1CNT_L0() | 0;
             break;
         //4000105h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
-        case 0x105:
+        case 0x4000105:
             this.IOCore.updateTimerClocking();
             data = this.timer.readTM1CNT_L1() | 0;
             break;
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
-        case 0x106:
+        case 0x4000106:
             data = this.timer.readTM1CNT_H() | 0;
             break;
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
-        case 0x108:
+        case 0x4000108:
             this.IOCore.updateTimerClocking();
             data = this.timer.readTM2CNT_L0() | 0;
             break;
         //4000109h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
-        case 0x109:
+        case 0x4000109:
             this.IOCore.updateTimerClocking();
             data = this.timer.readTM2CNT_L1() | 0;
             break;
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
-        case 0x10A:
+        case 0x400010A:
             data = this.timer.readTM2CNT_H() | 0;
             break;
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
-        case 0x10C:
+        case 0x400010C:
             this.IOCore.updateTimerClocking();
             data = this.timer.readTM3CNT_L0() | 0;
             break;
         //400010Dh - TM3CNT_L - Timer 3 Counter/Reload (R/W)
-        case 0x10D:
+        case 0x400010D:
             this.IOCore.updateTimerClocking();
             data = this.timer.readTM3CNT_L1() | 0;
             break;
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
-        case 0x10E:
+        case 0x400010E:
             data = this.timer.readTM3CNT_H() | 0;
             break;
         //4000110h through 400011Fh - NOT USED - GLITCHED
         //4000120h - Serial Data A (R/W)
-        case 0x120:
+        case 0x4000120:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA_A0() | 0;
             break;
         //4000121h - Serial Data A (R/W)
-        case 0x121:
+        case 0x4000121:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA_A1() | 0;
             break;
         //4000122h - Serial Data B (R/W)
-        case 0x122:
+        case 0x4000122:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA_B0() | 0;
             break;
         //4000123h - Serial Data B (R/W)
-        case 0x123:
+        case 0x4000123:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA_B1() | 0;
             break;
         //4000124h - Serial Data C (R/W)
-        case 0x124:
+        case 0x4000124:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA_C0() | 0;
             break;
         //4000125h - Serial Data C (R/W)
-        case 0x125:
+        case 0x4000125:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA_C1() | 0;
             break;
         //4000126h - Serial Data D (R/W)
-        case 0x126:
+        case 0x4000126:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA_D0() | 0;
             break;
         //4000127h - Serial Data D (R/W)
-        case 0x127:
+        case 0x4000127:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA_D1() | 0;
             break;
         //4000128h - SIOCNT - SIO Sub Mode Control (R/W)
-        case 0x128:
+        case 0x4000128:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIOCNT0() | 0;
             break;
         //4000129h - SIOCNT - SIO Sub Mode Control (R/W)
-        case 0x129:
+        case 0x4000129:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIOCNT1() | 0;
             break;
         //400012Ah - SIOMLT_SEND - Data Send Register (R/W)
-        case 0x12A:
+        case 0x400012A:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA8_0() | 0;
             break;
         //400012Bh - SIOMLT_SEND - Data Send Register (R/W)
-        case 0x12B:
+        case 0x400012B:
             this.IOCore.updateSerialClocking();
             data = this.serial.readSIODATA8_1() | 0;
             break;
         //400012Ch through 400012Fh - NOT USED - GLITCHED
         //4000130h - KEYINPUT - Key Status (R)
-        case 0x130:
+        case 0x4000130:
             data = this.joypad.readKeyStatus0() | 0;
             break;
         //4000131h - KEYINPUT - Key Status (R)
-        case 0x131:
+        case 0x4000131:
             data = this.joypad.readKeyStatus1() | 0;
             break;
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
-        case 0x132:
+        case 0x4000132:
             data = this.joypad.readKeyControl0() | 0;
             break;
         //4000133h - KEYCNT - Key Interrupt Control (R/W)
-        case 0x133:
+        case 0x4000133:
             data = this.joypad.readKeyControl1() | 0;
             break;
         //4000134h - RCNT (R/W) - Mode Selection
-        case 0x134:
+        case 0x4000134:
             this.IOCore.updateSerialClocking();
             data = this.serial.readRCNT0() | 0;
             break;
         //4000135h - RCNT (R/W) - Mode Selection
-        case 0x135:
+        case 0x4000135:
             this.IOCore.updateSerialClocking();
             data = this.serial.readRCNT1() | 0;
             break;
         //4000138h through 400013Fh - NOT USED - GLITCHED
         //4000140h - JOYCNT - JOY BUS Control Register (R/W)
-        case 0x140:
+        case 0x4000140:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYCNT() | 0;
             break;
         //4000144h through 400014Fh - NOT USED - GLITCHED
         //4000150h - JoyBus Receive (R/W)
-        case 0x150:
+        case 0x4000150:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_RECV0() | 0;
             break;
         //4000151h - JoyBus Receive (R/W)
-        case 0x151:
+        case 0x4000151:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_RECV1() | 0;
             break;
         //4000152h - JoyBus Receive (R/W)
-        case 0x152:
+        case 0x4000152:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_RECV2() | 0;
             break;
         //4000153h - JoyBus Receive (R/W)
-        case 0x153:
+        case 0x4000153:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_RECV3() | 0;
             break;
         //4000154h - JoyBus Send (R/W)
-        case 0x154:
+        case 0x4000154:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_SEND0() | 0;
             break;
         //4000155h - JoyBus Send (R/W)
-        case 0x155:
+        case 0x4000155:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_SEND1() | 0;
             break;
         //4000156h - JoyBus Send (R/W)
-        case 0x156:
+        case 0x4000156:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_SEND2() | 0;
             break;
         //4000157h - JoyBus Send (R/W)
-        case 0x157:
+        case 0x4000157:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_SEND3() | 0;
             break;
         //4000158h - JoyBus Stat (R/W)
-        case 0x158:
+        case 0x4000158:
             this.IOCore.updateSerialClocking();
             data = this.serial.readJOYBUS_STAT() | 0;
             break;
         //400015Ch through 40001FFh - NOT USED - GLITCHED
         //4000200h - IE - Interrupt Enable Register (R/W)
-        case 0x200:
+        case 0x4000200:
             data = this.irq.readIE0() | 0;
             break;
         //4000201h - IE - Interrupt Enable Register (R/W)
-        case 0x201:
+        case 0x4000201:
             data = this.irq.readIE1() | 0;
             break;
         //4000202h - IF - Interrupt Request Flags / IRQ Acknowledge
-        case 0x202:
+        case 0x4000202:
             this.IOCore.updateCoreSpillRetain();
             data = this.irq.readIF0() | 0;
             break;
         //4000203h - IF - Interrupt Request Flags / IRQ Acknowledge
-        case 0x203:
+        case 0x4000203:
             this.IOCore.updateCoreSpillRetain();
             data = this.irq.readIF1() | 0;
             break;
         //4000204h - WAITCNT - Waitstate Control (R/W)
-        case 0x204:
+        case 0x4000204:
             data = this.wait.readWAITCNT0() | 0;
             break;
         //4000205h - WAITCNT - Waitstate Control (R/W)
-        case 0x205:
+        case 0x4000205:
             data = this.wait.readWAITCNT1() | 0;
             break;
         //4000208h - IME - Interrupt Master Enable Register (R/W)
-        case 0x208:
+        case 0x4000208:
             data = this.irq.readIME() | 0;
             break;
         //400020Ch through 40002FFh - NOT USED - GLITCHED
         //4000300h - POSTFLG - BYTE - Undocumented - Post Boot / Debug Control (R/W)
-        case 0x300:
+        case 0x4000300:
             data = this.wait.readPOSTBOOT() | 0;
             break;
         //4000003h - Undocumented - Green Swap (R/W)
-        case 0x3:
+        case 0x4000003:
         //4000007h - VCOUNT - Vertical Counter (Read only)
-        case 0x7:
+        case 0x4000007:
         //400004Ch - MOSAIC - Mosaic Size (W)
-        case 0x4C:
+        case 0x400004C:
         //400004Dh - MOSAIC - Mosaic Size (W)
-        case 0x4D:
+        case 0x400004D:
         //400004Eh - NOT USED - ZERO
-        case 0x4E:
+        case 0x400004E:
         //400004Fh - NOT USED - ZERO
-        case 0x4F:
+        case 0x400004F:
         //4000061h - NOT USED - ZERO
-        case 0x61:
+        case 0x4000061:
         //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
-        case 0x64:
+        case 0x4000064:
         //4000066h - NOT USED - ZERO
-        case 0x66:
+        case 0x4000066:
         //4000067h - NOT USED - ZERO
-        case 0x67:
+        case 0x4000067:
         //400006Ah - NOT USED - ZERO
-        case 0x6A:
+        case 0x400006A:
         //400006Bh - NOT USED - ZERO
-        case 0x6B:
+        case 0x400006B:
         //400006Ch - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
-        case 0x6C:
+        case 0x400006C:
         //400006Eh - NOT USED - ZERO
-        case 0x6E:
+        case 0x400006E:
         //400006Fh - NOT USED - ZERO
-        case 0x6F:
+        case 0x400006F:
         //4000071h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)
-        case 0x71:
+        case 0x4000071:
         //4000072h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
-        case 0x72:
+        case 0x4000072:
         //4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
-        case 0x74:
+        case 0x4000074:
         //4000076h - NOT USED - ZERO
-        case 0x76:
+        case 0x4000076:
         //4000077h - NOT USED - ZERO
-        case 0x77:
+        case 0x4000077:
         //4000078h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
-        case 0x78:
+        case 0x4000078:
         //400007Ah - NOT USED - ZERO
-        case 0x7A:
+        case 0x400007A:
         //400007Bh - NOT USED - ZERO
-        case 0x7B:
+        case 0x400007B:
         //400007Eh - NOT USED - ZERO
-        case 0x7E:
+        case 0x400007E:
         //400007Fh - NOT USED - ZERO
-        case 0x7F:
+        case 0x400007F:
         //4000085h - NOT USED - ZERO
-        case 0x85:
+        case 0x4000085:
         //4000086h - NOT USED - ZERO
-        case 0x86:
+        case 0x4000086:
         //4000087h - NOT USED - ZERO
-        case 0x87:
+        case 0x4000087:
         //400008Ah - NOT USED - ZERO
-        case 0x8A:
+        case 0x400008A:
         //400008Bh - NOT USED - ZERO
-        case 0x8B:
+        case 0x400008B:
         //4000103h - TM0CNT_H - Timer 0 Control (R/W)
-        case 0x103:
+        case 0x4000103:
         //4000107h - TM1CNT_H - Timer 1 Control (R/W)
-        case 0x107:
+        case 0x4000107:
         //400010Bh - TM2CNT_H - Timer 2 Control (R/W)
-        case 0x10B:
+        case 0x400010B:
         //400010Fh - TM3CNT_H - Timer 3 Control (R/W)
-        case 0x10F:
+        case 0x400010F:
         //4000136h - NOT USED - ZERO
-        case 0x136:
+        case 0x4000136:
         //4000137h - NOT USED - ZERO
-        case 0x137:
+        case 0x4000137:
         //4000141h - JOYCNT - JOY BUS Control Register (R/W)
-        case 0x141:
+        case 0x4000141:
         //4000142h - NOT USED - ZERO
-        case 0x142:
+        case 0x4000142:
         //4000143h - NOT USED - ZERO
-        case 0x143:
+        case 0x4000143:
         //4000159h - JoyBus Stat (R/W)
-        case 0x159:
+        case 0x4000159:
         //400015Ah - NOT USED - ZERO
-        case 0x15A:
+        case 0x400015A:
         //400015Bh - NOT USED - ZERO
-        case 0x15B:
+        case 0x400015B:
         //4000206h - NOT USED - ZERO
-        case 0x206:
+        case 0x4000206:
         //4000207h - NOT USED - ZERO
-        case 0x207:
+        case 0x4000207:
         //4000209h - IME - Interrupt Master Enable Register (R/W)
-        case 0x209:
+        case 0x4000209:
         //400020Ah - NOT USED - ZERO
-        case 0x20A:
+        case 0x400020A:
         //400020Bh - NOT USED - ZERO
-        case 0x20B:
+        case 0x400020B:
         //4000301h - HALTCNT - BYTE - Undocumented - Low Power Mode Control (W)
-        case 0x301:
+        case 0x4000301:
         //4000302h - NOT USED - ZERO
-        case 0x302:
+        case 0x4000302:
         //4000303h - NOT USED - ZERO
-        case 0x303:
+        case 0x4000303:
             break;
         default:
             if ((address & 0xFFFC) == 0x800) {
@@ -4818,11 +4818,11 @@ function generateMemoryTopLevelDispatch() {
         code += "case 0xE:";
         /*
          Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
-         --UNDOCUMENTED MIRROR--
+         Mirrored up to 0FFFFFFF
          */
         code += "case 0xF:{data = this." + readSRAM + "(address | 0) | 0;break};";
         /*
-         Unused (0F000000-FFFFFFFF)
+         Unused (10000000-FFFFFFFF)
          */
         code += "default:{data = this." + readUnused + "(" + ((readUnused.slice(0, 12) == "readUnused32") ? "" : "address | 0") + ") | 0};";
         //Generate the function:
@@ -4905,11 +4905,11 @@ function generateMemoryTopLevelDispatch() {
         code += "case 0xE:";
         /*
          Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
-         --UNDOCUMENTED MIRROR--
+         Mirrored up to 0FFFFFFF
          */
         code += "case 0xF:{this." + writeSRAM + "(address | 0, data | 0);break};";
         /*
-         Unused (0F000000-FFFFFFFF)
+         Unused (10000000-FFFFFFFF)
          */
         code += "default:{this." + writeUnused + "()}";
         //Generate the function:
