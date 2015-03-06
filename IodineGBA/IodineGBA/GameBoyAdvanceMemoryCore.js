@@ -3660,105 +3660,114 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
         case 0x4000300:
             data = this.wait.readPOSTBOOT() | 0;
             break;
-        //4000003h - Undocumented - Green Swap (R/W)
+        default:
+            data = this.readIO8LessCalled(address | 0) | 0;
+    }
+    return data | 0;
+}
+GameBoyAdvanceMemory.prototype.readIO8LessCalled = function (address) {
+    address = address | 0;
+    var data = 0;
+    switch (address | 0) {
+            //4000003h - Undocumented - Green Swap (R/W)
         case 0x4000003:
-        //4000007h - VCOUNT - Vertical Counter (Read only)
+            //4000007h - VCOUNT - Vertical Counter (Read only)
         case 0x4000007:
-        //400004Ch - MOSAIC - Mosaic Size (W)
+            //400004Ch - MOSAIC - Mosaic Size (W)
         case 0x400004C:
-        //400004Dh - MOSAIC - Mosaic Size (W)
+            //400004Dh - MOSAIC - Mosaic Size (W)
         case 0x400004D:
-        //400004Eh - NOT USED - ZERO
+            //400004Eh - NOT USED - ZERO
         case 0x400004E:
-        //400004Fh - NOT USED - ZERO
+            //400004Fh - NOT USED - ZERO
         case 0x400004F:
-        //4000061h - NOT USED - ZERO
+            //4000061h - NOT USED - ZERO
         case 0x4000061:
-        //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
+            //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
         case 0x4000064:
-        //4000066h - NOT USED - ZERO
+            //4000066h - NOT USED - ZERO
         case 0x4000066:
-        //4000067h - NOT USED - ZERO
+            //4000067h - NOT USED - ZERO
         case 0x4000067:
-        //400006Ah - NOT USED - ZERO
+            //400006Ah - NOT USED - ZERO
         case 0x400006A:
-        //400006Bh - NOT USED - ZERO
+            //400006Bh - NOT USED - ZERO
         case 0x400006B:
-        //400006Ch - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
+            //400006Ch - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)
         case 0x400006C:
-        //400006Eh - NOT USED - ZERO
+            //400006Eh - NOT USED - ZERO
         case 0x400006E:
-        //400006Fh - NOT USED - ZERO
+            //400006Fh - NOT USED - ZERO
         case 0x400006F:
-        //4000071h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)
+            //4000071h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)
         case 0x4000071:
-        //4000072h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
+            //4000072h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)
         case 0x4000072:
-        //4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
+            //4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)
         case 0x4000074:
-        //4000076h - NOT USED - ZERO
+            //4000076h - NOT USED - ZERO
         case 0x4000076:
-        //4000077h - NOT USED - ZERO
+            //4000077h - NOT USED - ZERO
         case 0x4000077:
-        //4000078h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
+            //4000078h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)
         case 0x4000078:
-        //400007Ah - NOT USED - ZERO
+            //400007Ah - NOT USED - ZERO
         case 0x400007A:
-        //400007Bh - NOT USED - ZERO
+            //400007Bh - NOT USED - ZERO
         case 0x400007B:
-        //400007Eh - NOT USED - ZERO
+            //400007Eh - NOT USED - ZERO
         case 0x400007E:
-        //400007Fh - NOT USED - ZERO
+            //400007Fh - NOT USED - ZERO
         case 0x400007F:
-        //4000085h - NOT USED - ZERO
+            //4000085h - NOT USED - ZERO
         case 0x4000085:
-        //4000086h - NOT USED - ZERO
+            //4000086h - NOT USED - ZERO
         case 0x4000086:
-        //4000087h - NOT USED - ZERO
+            //4000087h - NOT USED - ZERO
         case 0x4000087:
-        //400008Ah - NOT USED - ZERO
+            //400008Ah - NOT USED - ZERO
         case 0x400008A:
-        //400008Bh - NOT USED - ZERO
+            //400008Bh - NOT USED - ZERO
         case 0x400008B:
-        //4000103h - TM0CNT_H - Timer 0 Control (R/W)
+            //4000103h - TM0CNT_H - Timer 0 Control (R/W)
         case 0x4000103:
-        //4000107h - TM1CNT_H - Timer 1 Control (R/W)
+            //4000107h - TM1CNT_H - Timer 1 Control (R/W)
         case 0x4000107:
-        //400010Bh - TM2CNT_H - Timer 2 Control (R/W)
+            //400010Bh - TM2CNT_H - Timer 2 Control (R/W)
         case 0x400010B:
-        //400010Fh - TM3CNT_H - Timer 3 Control (R/W)
+            //400010Fh - TM3CNT_H - Timer 3 Control (R/W)
         case 0x400010F:
-        //4000136h - NOT USED - ZERO
+            //4000136h - NOT USED - ZERO
         case 0x4000136:
-        //4000137h - NOT USED - ZERO
+            //4000137h - NOT USED - ZERO
         case 0x4000137:
-        //4000141h - JOYCNT - JOY BUS Control Register (R/W)
+            //4000141h - JOYCNT - JOY BUS Control Register (R/W)
         case 0x4000141:
-        //4000142h - NOT USED - ZERO
+            //4000142h - NOT USED - ZERO
         case 0x4000142:
-        //4000143h - NOT USED - ZERO
+            //4000143h - NOT USED - ZERO
         case 0x4000143:
-        //4000159h - JoyBus Stat (R/W)
+            //4000159h - JoyBus Stat (R/W)
         case 0x4000159:
-        //400015Ah - NOT USED - ZERO
+            //400015Ah - NOT USED - ZERO
         case 0x400015A:
-        //400015Bh - NOT USED - ZERO
+            //400015Bh - NOT USED - ZERO
         case 0x400015B:
-        //4000206h - NOT USED - ZERO
+            //4000206h - NOT USED - ZERO
         case 0x4000206:
-        //4000207h - NOT USED - ZERO
+            //4000207h - NOT USED - ZERO
         case 0x4000207:
-        //4000209h - IME - Interrupt Master Enable Register (R/W)
+            //4000209h - IME - Interrupt Master Enable Register (R/W)
         case 0x4000209:
-        //400020Ah - NOT USED - ZERO
+            //400020Ah - NOT USED - ZERO
         case 0x400020A:
-        //400020Bh - NOT USED - ZERO
+            //400020Bh - NOT USED - ZERO
         case 0x400020B:
-        //4000301h - HALTCNT - BYTE - Undocumented - Low Power Mode Control (W)
+            //4000301h - HALTCNT - BYTE - Undocumented - Low Power Mode Control (W)
         case 0x4000301:
-        //4000302h - NOT USED - ZERO
+            //4000302h - NOT USED - ZERO
         case 0x4000302:
-        //4000303h - NOT USED - ZERO
+            //4000303h - NOT USED - ZERO
         case 0x4000303:
             break;
         default:
@@ -4113,37 +4122,46 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
         case 0x4000300:
             data = this.wait.readPOSTBOOT() | 0;
             break;
-        //400004Ch - MOSAIC - Mosaic Size (W)
+        default:
+            data = this.readIO16LessCalled(address | 0) | 0;
+    }
+    return data | 0;
+}
+GameBoyAdvanceMemory.prototype.readIO16LessCalled = function (address) {
+    address = address | 0;
+    var data = 0;
+    switch (address & -2) {
+            //400004Ch - MOSAIC - Mosaic Size (W)
         case 0x400004C:
-        //400004Eh - NOT USED - ZERO
+            //400004Eh - NOT USED - ZERO
         case 0x400004E:
-        //4000066h - NOT USED - ZERO
+            //4000066h - NOT USED - ZERO
         case 0x4000066:
-        //400006Ah - NOT USED - ZERO
+            //400006Ah - NOT USED - ZERO
         case 0x400006A:
-        //400006Eh - NOT USED - ZERO
+            //400006Eh - NOT USED - ZERO
         case 0x400006E:
-        //4000076h - NOT USED - ZERO
+            //4000076h - NOT USED - ZERO
         case 0x4000076:
-        //400007Ah - NOT USED - ZERO
+            //400007Ah - NOT USED - ZERO
         case 0x400007A:
-        //400007Eh - NOT USED - ZERO
+            //400007Eh - NOT USED - ZERO
         case 0x400007E:
-        //4000086h - NOT USED - ZERO
+            //4000086h - NOT USED - ZERO
         case 0x4000086:
-        //400008Ah - NOT USED - ZERO
+            //400008Ah - NOT USED - ZERO
         case 0x400008A:
-        //4000136h - NOT USED - ZERO
+            //4000136h - NOT USED - ZERO
         case 0x4000136:
-        //4000142h - NOT USED - ZERO
+            //4000142h - NOT USED - ZERO
         case 0x4000142:
-        //400015Ah - NOT USED - ZERO
+            //400015Ah - NOT USED - ZERO
         case 0x400015A:
-        //4000206h - NOT USED - ZERO
+            //4000206h - NOT USED - ZERO
         case 0x4000206:
-        //400020Ah - NOT USED - ZERO
+            //400020Ah - NOT USED - ZERO
         case 0x400020A:
-        //4000302h - NOT USED - ZERO
+            //4000302h - NOT USED - ZERO
         case 0x4000302:
             break;
         default:
