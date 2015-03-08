@@ -718,123 +718,60 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         //400008Ah through 400008Fh - NOT USED - ZERO/GLITCHED
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000090:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0, data & 0xFF);
-            break;
         //4000091h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000091:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x1, data & 0xFF);
-            break;
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000092:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x2, data & 0xFF);
-            break;
         //4000093h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000093:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x3, data & 0xFF);
-            break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000094:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x4, data & 0xFF);
-            break;
         //4000095h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000095:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x5, data & 0xFF);
-            break;
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000096:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x6, data & 0xFF);
-            break;
         //4000097h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000097:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x7, data & 0xFF);
-            break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000098:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x8, data & 0xFF);
-            break;
         //4000099h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000099:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x9, data & 0xFF);
-            break;
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009A:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xA, data & 0xFF);
-            break;
         //400009Bh - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009B:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xB, data & 0xFF);
-            break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009C:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xC, data & 0xFF);
-            break;
         //400009Dh - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009D:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xD, data & 0xFF);
-            break;
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009E:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xE, data & 0xFF);
-            break;
         //400009Fh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009F:
             this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xF, data & 0xFF);
+            this.sound.writeWAVE8(((address | 0) - 0x4000090) | 0, data | 0);
             break;
         //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
         case 0x40000A0:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOA(data & 0xFF);
-            break;
         //40000A1h - FIFO_A_L - FIFO Channel A First Word (W)
         case 0x40000A1:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOA(data & 0xFF);
-            break;
         //40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
         case 0x40000A2:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOA(data & 0xFF);
-            break;
         //40000A3h - FIFO_A_H - FIFO Channel A Second Word (W)
         case 0x40000A3:
             this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOA(data & 0xFF);
+            this.sound.writeFIFOA8(data | 0);
             break;
         //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
         case 0x40000A4:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOB(data & 0xFF);
-            break;
         //40000A5h - FIFO_B_L - FIFO Channel B First Word (W)
         case 0x40000A5:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOB(data & 0xFF);
-            break;
         //40000A6h - FIFO_B_H - FIFO Channel B Second Word (W)
         case 0x40000A6:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOB(data & 0xFF);
-            break;
         //40000A7h - FIFO_B_H - FIFO Channel B Second Word (W)
         case 0x40000A7:
             this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOB(data & 0xFF);
+            this.sound.writeFIFOB8(data | 0);
             break;
         //40000A8h through 40000AFh - NOT USED - GLITCHED
         //40000B0h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
@@ -1695,75 +1632,36 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
         //400008Ah through 400008Fh - NOT USED - ZERO/GLITCHED
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000090:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0, data & 0xFF);
-            this.sound.writeWAVE(0x1, (data >> 8) & 0xFF);
-            break;
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000092:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x2, data & 0xFF);
-            this.sound.writeWAVE(0x3, (data >> 8) & 0xFF);
-            break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000094:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x4, data & 0xFF);
-            this.sound.writeWAVE(0x5, (data >> 8) & 0xFF);
-            break;
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000096:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x6, data & 0xFF);
-            this.sound.writeWAVE(0x7, (data >> 8) & 0xFF);
-            break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000098:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x8, data & 0xFF);
-            this.sound.writeWAVE(0x9, (data >> 8) & 0xFF);
-            break;
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009A:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xA, data & 0xFF);
-            this.sound.writeWAVE(0xB, (data >> 8) & 0xFF);
-            break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009C:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xC, data & 0xFF);
-            this.sound.writeWAVE(0xD, (data >> 8) & 0xFF);
-            break;
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009E:
             this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xE, data & 0xFF);
-            this.sound.writeWAVE(0xF, (data >> 8) & 0xFF);
+            this.sound.writeWAVE16(((address | 0) - 0x4000090) >> 1, data | 0);
             break;
         //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
         case 0x40000A0:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOA(data & 0xFF);
-            this.sound.writeFIFOA((data >> 8) & 0xFF);
-            break;
         //40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
         case 0x40000A2:
             this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOA(data & 0xFF);
-            this.sound.writeFIFOA((data >> 8) & 0xFF);
+            this.sound.writeFIFOA16(data | 0);
             break;
         //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
         case 0x40000A4:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOB(data & 0xFF);
-            this.sound.writeFIFOB((data >> 8) & 0xFF);
-            break;
         //40000A6h - FIFO_B_H - FIFO Channel B Second Word (W)
         case 0x40000A6:
             this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOB(data & 0xFF);
-            this.sound.writeFIFOB((data >> 8) & 0xFF);
+            this.sound.writeFIFOB16(data | 0);
             break;
         //40000A8h through 40000AFh - NOT USED - GLITCHED
         //40000B0h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
@@ -2386,56 +2284,29 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000090:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0, data & 0xFF);
-            this.sound.writeWAVE(0x1, (data >> 8) & 0xFF);
-            this.sound.writeWAVE(0x2, (data >> 16) & 0xFF);
-            this.sound.writeWAVE(0x3, data >>> 24);
-            break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000094:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x4, data & 0xFF);
-            this.sound.writeWAVE(0x5, (data >> 8) & 0xFF);
-            this.sound.writeWAVE(0x6, (data >> 16) & 0xFF);
-            this.sound.writeWAVE(0x7, data >>> 24);
-            break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000098:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0x8, data & 0xFF);
-            this.sound.writeWAVE(0x9, (data >> 8) & 0xFF);
-            this.sound.writeWAVE(0xA, (data >> 16) & 0xFF);
-            this.sound.writeWAVE(0xB, data >>> 24);
-            break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009C:
             this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE(0xC, data & 0xFF);
-            this.sound.writeWAVE(0xD, (data >> 8) & 0xFF);
-            this.sound.writeWAVE(0xE, (data >> 16) & 0xFF);
-            this.sound.writeWAVE(0xF, data >>> 24);
+            this.sound.writeWAVE32(((address | 0) - 0x4000090) >> 2, data | 0);
             break;
         //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
         //40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
         case 0x40000A0:
             this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOA(data & 0xFF);
-            this.sound.writeFIFOA((data >> 8) & 0xFF);
-            this.sound.writeFIFOA((data >> 16) & 0xFF);
-            this.sound.writeFIFOA(data >>> 24);
+            this.sound.writeFIFOA32(data | 0);
             break;
         //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
         //40000A6h - FIFO_B_H - FIFO Channel B Second Word (W)
         case 0x40000A4:
             this.IOCore.updateTimerClocking();
-            this.sound.writeFIFOB(data & 0xFF);
-            this.sound.writeFIFOB((data >> 8) & 0xFF);
-            this.sound.writeFIFOB((data >> 16) & 0xFF);
-            this.sound.writeFIFOB(data >>> 24);
+            this.sound.writeFIFOB32(data | 0);
             break;
         //40000A8h through 40000AFh - NOT USED - GLITCHED
         //40000B0h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
@@ -3313,83 +3184,38 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
         //400008Fh - NOT USED - GLITCHED
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000090:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(0) | 0;
-            break;
         //4000091h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000091:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(1) | 0;
-            break;
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000092:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(2) | 0;
-            break;
         //4000093h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000093:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(3) | 0;
-            break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000094:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(4) | 0;
-            break;
         //4000095h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000095:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(5) | 0;
-            break;
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000096:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(6) | 0;
-            break;
         //4000097h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000097:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(7) | 0;
-            break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000098:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(8) | 0;
-            break;
         //4000099h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000099:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(9) | 0;
-            break;
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009A:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(10) | 0;
-            break;
         //400009Bh - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009B:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(11) | 0;
-            break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009C:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(12) | 0;
-            break;
         //400009Dh - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009D:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(13) | 0;
-            break;
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009E:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(14) | 0;
-            break;
         //400009Fh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009F:
             this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(15) | 0;
+            data = this.sound.readWAVE8(((address | 0) - 0x4000090) | 0) | 0;
             break;
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
@@ -3927,43 +3753,22 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
         //400008Eh - NOT USED - GLITCHED
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000090:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(0) | (this.sound.readWAVE(1) << 8);
-            break;
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000092:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(2) | (this.sound.readWAVE(3) << 8);
-            break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000094:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(4) | (this.sound.readWAVE(5) << 8);
-            break;
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000096:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(6) | (this.sound.readWAVE(7) << 8);
-            break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000098:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(8) | (this.sound.readWAVE(9) << 8);
-            break;
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009A:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(10) | (this.sound.readWAVE(11) << 8);
-            break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009C:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(12) | (this.sound.readWAVE(13) << 8);
-            break;
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009E:
             this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(14) | (this.sound.readWAVE(15) << 8);
+            data = this.sound.readWAVE16(((address | 0) - 0x4000090) >> 1) | 0;
             break;
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
@@ -4131,37 +3936,37 @@ GameBoyAdvanceMemory.prototype.readIO16LessCalled = function (address) {
     address = address | 0;
     var data = 0;
     switch (address & -2) {
-            //400004Ch - MOSAIC - Mosaic Size (W)
+        //400004Ch - MOSAIC - Mosaic Size (W)
         case 0x400004C:
-            //400004Eh - NOT USED - ZERO
+        //400004Eh - NOT USED - ZERO
         case 0x400004E:
-            //4000066h - NOT USED - ZERO
+        //4000066h - NOT USED - ZERO
         case 0x4000066:
-            //400006Ah - NOT USED - ZERO
+        //400006Ah - NOT USED - ZERO
         case 0x400006A:
-            //400006Eh - NOT USED - ZERO
+        //400006Eh - NOT USED - ZERO
         case 0x400006E:
-            //4000076h - NOT USED - ZERO
+        //4000076h - NOT USED - ZERO
         case 0x4000076:
-            //400007Ah - NOT USED - ZERO
+        //400007Ah - NOT USED - ZERO
         case 0x400007A:
-            //400007Eh - NOT USED - ZERO
+        //400007Eh - NOT USED - ZERO
         case 0x400007E:
-            //4000086h - NOT USED - ZERO
+        //4000086h - NOT USED - ZERO
         case 0x4000086:
-            //400008Ah - NOT USED - ZERO
+        //400008Ah - NOT USED - ZERO
         case 0x400008A:
-            //4000136h - NOT USED - ZERO
+        //4000136h - NOT USED - ZERO
         case 0x4000136:
-            //4000142h - NOT USED - ZERO
+        //4000142h - NOT USED - ZERO
         case 0x4000142:
-            //400015Ah - NOT USED - ZERO
+        //400015Ah - NOT USED - ZERO
         case 0x400015A:
-            //4000206h - NOT USED - ZERO
+        //4000206h - NOT USED - ZERO
         case 0x4000206:
-            //400020Ah - NOT USED - ZERO
+        //400020Ah - NOT USED - ZERO
         case 0x400020A:
-            //4000302h - NOT USED - ZERO
+        //4000302h - NOT USED - ZERO
         case 0x4000302:
             break;
         default:
@@ -4323,38 +4128,17 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
         //4000090h - WAVE_RAM0_L - Channel 3 Wave Pattern RAM (W/R)
         //4000092h - WAVE_RAM0_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000090:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(0) |
-            (this.sound.readWAVE(1) << 8) |
-            (this.sound.readWAVE(2) << 16) |
-            (this.sound.readWAVE(3) << 24);
-            break;
         //4000094h - WAVE_RAM1_L - Channel 3 Wave Pattern RAM (W/R)
         //4000096h - WAVE_RAM1_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000094:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(4) |
-            (this.sound.readWAVE(5) << 8) |
-            (this.sound.readWAVE(6) << 16) |
-            (this.sound.readWAVE(7) << 24);
-            break;
         //4000098h - WAVE_RAM2_L - Channel 3 Wave Pattern RAM (W/R)
         //400009Ah - WAVE_RAM2_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x4000098:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(8) |
-            (this.sound.readWAVE(9) << 8) |
-            (this.sound.readWAVE(10) << 16) |
-            (this.sound.readWAVE(11) << 24);
-            break;
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009C:
             this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE(12) |
-            (this.sound.readWAVE(13) << 8) |
-            (this.sound.readWAVE(14) << 16) |
-            (this.sound.readWAVE(15) << 24);
+            data = this.sound.readWAVE32(((address | 0) - 0x4000090) >> 2) | 0;
             break;
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)

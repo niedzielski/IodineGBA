@@ -337,22 +337,61 @@ else {
         this.CGBFolder();
     }
 }
-GameBoyAdvanceSound.prototype.writeWAVE = function (address, data) {
+GameBoyAdvanceSound.prototype.writeWAVE8 = function (address, data) {
     address = address | 0;
     data = data | 0;
-    this.channel3.writeWAVE(address | 0, data | 0);
+    this.channel3.writeWAVE8(address | 0, data | 0);
 }
-GameBoyAdvanceSound.prototype.readWAVE = function (address) {
-    return this.channel3.readWAVE(address | 0) | 0;
+GameBoyAdvanceSound.prototype.readWAVE8 = function (address) {
+    address | 0
+    return this.channel3.readWAVE8(address | 0) | 0;
 }
-GameBoyAdvanceSound.prototype.writeFIFOA = function (data) {
+GameBoyAdvanceSound.prototype.writeWAVE16 = function (address, data) {
+    address = address | 0;
     data = data | 0;
-    this.FIFOABuffer.push(data | 0);
+    this.channel3.writeWAVE16(address | 0, data | 0);
+}
+GameBoyAdvanceSound.prototype.readWAVE16 = function (address) {
+    address | 0
+    return this.channel3.readWAVE16(address | 0) | 0;
+}
+GameBoyAdvanceSound.prototype.writeWAVE32 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    this.channel3.writeWAVE32(address | 0, data | 0);
+}
+GameBoyAdvanceSound.prototype.readWAVE32 = function (address) {
+    address | 0
+    return this.channel3.readWAVE32(address | 0) | 0;
+}
+GameBoyAdvanceSound.prototype.writeFIFOA8 = function (data) {
+    data = data | 0;
+    this.FIFOABuffer.push8(data | 0);
     this.checkFIFOAPendingSignal();
 }
-GameBoyAdvanceSound.prototype.writeFIFOB = function (data) {
+GameBoyAdvanceSound.prototype.writeFIFOB8 = function (data) {
     data = data | 0;
-    this.FIFOBBuffer.push(data | 0);
+    this.FIFOBBuffer.push8(data | 0);
+    this.checkFIFOBPendingSignal();
+}
+GameBoyAdvanceSound.prototype.writeFIFOA16 = function (data) {
+    data = data | 0;
+    this.FIFOABuffer.push16(data | 0);
+    this.checkFIFOAPendingSignal();
+}
+GameBoyAdvanceSound.prototype.writeFIFOB16 = function (data) {
+    data = data | 0;
+    this.FIFOBBuffer.push16(data | 0);
+    this.checkFIFOBPendingSignal();
+}
+GameBoyAdvanceSound.prototype.writeFIFOA32 = function (data) {
+    data = data | 0;
+    this.FIFOABuffer.push32(data | 0);
+    this.checkFIFOAPendingSignal();
+}
+GameBoyAdvanceSound.prototype.writeFIFOB32 = function (data) {
+    data = data | 0;
+    this.FIFOBBuffer.push32(data | 0);
     this.checkFIFOBPendingSignal();
 }
 GameBoyAdvanceSound.prototype.checkFIFOAPendingSignal = function () {
