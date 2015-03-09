@@ -41,9 +41,9 @@ function GameBoyAdvanceChannel3Synth(sound) {
     this.PCM = getInt8Array(0x40);
     this.PCM16 = getUint16View(this.PCM);
     this.PCM32 = getInt32View(this.PCM);
-    this.WAVERAM = getUint8Array(0x20);
-    this.WAVERAM16 = getUint16View(this.WAVERAM);
-    this.WAVERAM32 = getInt32View(this.WAVERAM);
+    this.WAVERAM8 = getUint8Array(0x20);
+    this.WAVERAM16 = getUint16View(this.WAVERAM8);
+    this.WAVERAM32 = getInt32View(this.WAVERAM8);
 }
 GameBoyAdvanceChannel3Synth.prototype.disabled = function () {
     //Clear NR30:
@@ -109,7 +109,7 @@ GameBoyAdvanceChannel3Synth.prototype.outputLevelSecondaryCache = function () {
 }
 GameBoyAdvanceChannel3Synth.prototype.readWAVE8 = function (address) {
     address = ((address | 0) + (this.WAVERAMBankAccessed >> 1)) | 0;
-    return this.WAVERAM[address | 0] | 0;
+    return this.WAVERAM8[address | 0] | 0;
 }
 if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceChannel3Synth.prototype.writeWAVE8 = function (address, data) {
@@ -173,7 +173,7 @@ else {
             this.sound.audioJIT();
         }
         address += this.WAVERAMBankAccessed >> 1;
-        this.WAVERAM[address] = data & 0xFF;
+        this.WAVERAM8[address] = data & 0xFF;
         address <<= 1;
         this.PCM[address] = (data >> 4) & 0xF;
         this.PCM[address | 1] = data & 0xF;
@@ -184,8 +184,8 @@ else {
         }
         address += this.WAVERAMBankAccessed >> 2;
         address <<= 1;
-        this.WAVERAM[address] = data & 0xFF;
-        this.WAVERAM[address | 1] = (data >> 8) & 0xFF;
+        this.WAVERAM8[address] = data & 0xFF;
+        this.WAVERAM8[address | 1] = (data >> 8) & 0xFF;
         address <<= 1;
         this.PCM[address] = (data >> 4) & 0xF;
         this.PCM[address | 1] = data & 0xF;
@@ -198,10 +198,10 @@ else {
         }
         address += this.WAVERAMBankAccessed >> 3;
         address <<= 2;
-        this.WAVERAM[address] = data & 0xFF;
-        this.WAVERAM[address | 1] = (data >> 8) & 0xFF;
-        this.WAVERAM[address | 2] = (data >> 16) & 0xFF;
-        this.WAVERAM[address | 3] = data >>> 24;
+        this.WAVERAM8[address] = data & 0xFF;
+        this.WAVERAM8[address | 1] = (data >> 8) & 0xFF;
+        this.WAVERAM8[address | 2] = (data >> 16) & 0xFF;
+        this.WAVERAM8[address | 3] = data >>> 24;
         address <<= 1;
         this.PCM[address] = (data >> 4) & 0xF;
         this.PCM[address | 1] = data & 0xF;
@@ -214,12 +214,12 @@ else {
     }
     GameBoyAdvanceChannel3Synth.prototype.readWAVE16 = function (address) {
         address += this.WAVERAMBankAccessed >> 1;
-        return (this.WAVERAM[address] | (this.WAVERAM[address | 1] << 8));
+        return (this.WAVERAM8[address] | (this.WAVERAM8[address | 1] << 8));
     }
     GameBoyAdvanceChannel3Synth.prototype.readWAVE32 = function (address) {
         address += this.WAVERAMBankAccessed >> 1;
-        return (this.WAVERAM[address] | (this.WAVERAM[address | 1] << 8) |
-                (this.WAVERAM[address | 2] << 16) | (this.WAVERAM[address | 3] << 24));
+        return (this.WAVERAM8[address] | (this.WAVERAM8[address | 1] << 8) |
+                (this.WAVERAM8[address | 2] << 16) | (this.WAVERAM8[address | 3] << 24));
     }
 }
 GameBoyAdvanceChannel3Synth.prototype.enableCheck = function () {
