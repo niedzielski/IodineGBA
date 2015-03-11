@@ -17,7 +17,6 @@
  */
 function GameBoyAdvanceGraphics(IOCore) {
     this.IOCore = IOCore;
-    this.settings = IOCore.settings;
     this.coreExposed = IOCore.coreExposed;
     this.initializeIO();
     this.initializeRenderer();
