@@ -2566,77 +2566,79 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
             }
     }
 }
-GameBoyAdvanceMemory.prototype.writeVRAM8 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess();
-    this.gfx.writeVRAM8(address | 0, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeVRAM16 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess();
-    this.gfx.writeVRAM16(address | 0, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeVRAM32 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess32();
-    this.gfx.writeVRAM32(address | 0, data | 0);
-}
-GameBoyAdvanceMemory.prototype.writeOAM8 = function (address, data) {
-    this.IOCore.updateGraphicsClocking();
-    this.wait.OAMAccess();
-}
-GameBoyAdvanceMemory.prototype.writeOAM16 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.OAMAccess();
-    this.gfx.writeOAM16(address & 0x3FE, data & 0xFFFF);
-}
-GameBoyAdvanceMemory.prototype.writeOAM32 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.OAMAccess();
-    this.gfx.writeOAM32(address & 0x3FC, data | 0);
-}
 if (typeof Math.imul == "function") {
     //Math.imul found, insert the optimized path in:
-    GameBoyAdvanceMemory.prototype.writePalette8 = function (address, data) {
+    GameBoyAdvanceMemory.prototype.writeVRAM8Preliminary = function (address, data) {
         address = address | 0;
         data = data | 0;
         this.IOCore.updateGraphicsClocking();
-        this.wait.VRAMAccess();
-        this.gfx.writePalette16(address & 0x3FE, Math.imul(data & 0xFF, 0x101) | 0);
+        switch (address >> 24) {
+            case 0x5:
+                this.wait.VRAMAccess();
+                this.gfx.writePalette16(address & 0x3FE, Math.imul(data & 0xFF, 0x101) | 0);
+                break;
+            case 0x6:
+                this.wait.VRAMAccess();
+                this.gfx.writeVRAM8(address | 0, data | 0);
+                break;
+            default:
+                this.wait.OAMAccess();
+        }
     }
 }
 else {
     //Math.imul not found, use the compatibility method:
-    GameBoyAdvanceMemory.prototype.writePalette8 = function (address, data) {
-        data = data & 0xFF;
+    GameBoyAdvanceMemory.prototype.writeVRAM8Preliminary = function (address, data) {
         this.IOCore.updateGraphicsClocking();
-        this.wait.VRAMAccess();
-        this.gfx.writePalette16(address & 0x3FE, (data * 0x101) | 0);
+        switch (address >> 24) {
+            case 0x5:
+                this.wait.VRAMAccess();
+                this.gfx.writePalette16(address & 0x3FE, (data & 0xFF) * 0x101);
+                break;
+            case 0x6:
+                this.wait.VRAMAccess();
+                this.gfx.writeVRAM8(address, data);
+                break;
+            default:
+                this.wait.OAMAccess();
+        }
     }
 }
-GameBoyAdvanceMemory.prototype.writePalette16 = function (address, data) {
+GameBoyAdvanceMemory.prototype.writeVRAM16Preliminary = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess();
-    this.gfx.writePalette16(address & 0x3FE, data & 0xFFFF);
+    switch (address >> 24) {
+        case 0x5:
+            this.wait.VRAMAccess();
+            this.gfx.writePalette16(address & 0x3FE, data & 0xFFFF);
+            break;
+        case 0x6:
+            this.wait.VRAMAccess();
+            this.gfx.writeVRAM16(address | 0, data | 0);
+            break;
+        default:
+            this.wait.OAMAccess();
+            this.gfx.writeOAM16(address & 0x3FE, data & 0xFFFF);
+    }
 }
-GameBoyAdvanceMemory.prototype.writePalette32 = function (address, data) {
+GameBoyAdvanceMemory.prototype.writeVRAM32Preliminary = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess32();
-    this.gfx.writePalette32(address & 0x3FC, data | 0);
+    switch (address >> 24) {
+        case 0x5:
+            this.wait.VRAMAccess32();
+            this.gfx.writePalette32(address & 0x3FC, data | 0);
+            break;
+        case 0x6:
+            this.wait.VRAMAccess32();
+            this.gfx.writeVRAM32(address | 0, data | 0);
+            break;
+        default:
+            this.wait.OAMAccess();
+            this.gfx.writeOAM32(address & 0x3FC, data | 0);
+    }
 }
 GameBoyAdvanceMemory.prototype.writeROM8 = function (address, data) {
     address = address | 0;
@@ -4307,95 +4309,100 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
     }
     return data | 0;
 }
-GameBoyAdvanceMemory.prototype.readVRAM8 = function (address) {
+GameBoyAdvanceMemory.prototype.readVRAM8Preliminary = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess();
-    return this.gfx.readVRAM8(address | 0) | 0;
+    var data = 0;
+    switch (address >> 24) {
+        case 0x5:
+            this.wait.VRAMAccess();
+            data = this.gfx.readPalette(address | 0) | 0;
+            break;
+        case 0x6:
+            this.wait.VRAMAccess();
+            data = this.gfx.readVRAM8(address | 0) | 0;
+            break;
+        default:
+            this.wait.OAMAccess();
+            data = this.gfx.readOAM(address | 0) | 0;
+    }
+    return data | 0;
 }
-GameBoyAdvanceMemory.prototype.readVRAM16 = function (address) {
+GameBoyAdvanceMemory.prototype.readVRAM16Preliminary = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess();
-    return this.gfx.readVRAM16(address | 0) | 0;
+    var data = 0;
+    switch (address >> 24) {
+        case 0x5:
+            this.wait.VRAMAccess();
+            data = this.gfx.readPalette16(address | 0) | 0;
+            break;
+        case 0x6:
+            this.wait.VRAMAccess();
+            data = this.gfx.readVRAM16(address | 0) | 0;
+            break;
+        default:
+            this.wait.OAMAccess();
+            data = this.gfx.readOAM16(address | 0) | 0;
+    }
+    return data | 0;
 }
-GameBoyAdvanceMemory.prototype.readVRAM16CPU = function (address) {
+GameBoyAdvanceMemory.prototype.readVRAM16CPUPreliminary = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess();
-    return this.gfx.readVRAM16(address | 0) | 0;
+    var data = 0;
+    switch (address >> 24) {
+        case 0x5:
+            this.wait.VRAMAccess16CPU();
+            data = this.gfx.readPalette16(address | 0) | 0;
+            break;
+        case 0x6:
+            this.wait.VRAMAccess16CPU();
+            data = this.gfx.readVRAM16(address | 0) | 0;
+            break;
+        default:
+            this.wait.OAMAccessCPU();
+            data = this.gfx.readOAM16(address | 0) | 0;
+    }
+    return data | 0;
 }
-GameBoyAdvanceMemory.prototype.readVRAM32 = function (address) {
+GameBoyAdvanceMemory.prototype.readVRAM32Preliminary = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess32();
-    return this.gfx.readVRAM32(address | 0) | 0;
+    var data = 0;
+    switch (address >> 24) {
+        case 0x5:
+            this.wait.VRAMAccess32();
+            data = this.gfx.readPalette32(address | 0) | 0;
+            break;
+        case 0x6:
+            this.wait.VRAMAccess32();
+            data = this.gfx.readVRAM32(address | 0) | 0;
+            break;
+        default:
+            this.wait.OAMAccess();
+            data = this.gfx.readOAM32(address | 0) | 0;
+    }
+    return data | 0;
 }
-GameBoyAdvanceMemory.prototype.readVRAM32CPU = function (address) {
+GameBoyAdvanceMemory.prototype.readVRAM32CPUPreliminary = function (address) {
     address = address | 0;
     this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess32CPU();
-    return this.gfx.readVRAM32(address | 0) | 0;
-}
-GameBoyAdvanceMemory.prototype.readOAM8 = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.OAMAccess();
-    return this.gfx.readOAM(address & 0x3FF) | 0;
-}
-GameBoyAdvanceMemory.prototype.readOAM16 = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.OAMAccess();
-    return this.gfx.readOAM16(address & 0x3FE) | 0;
-}
-GameBoyAdvanceMemory.prototype.readOAM16CPU = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.OAMAccessCPU();
-    return this.gfx.readOAM16(address & 0x3FE) | 0;
-}
-GameBoyAdvanceMemory.prototype.readOAM32 = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.OAMAccess();
-    return this.gfx.readOAM32(address & 0x3FC) | 0;
-}
-GameBoyAdvanceMemory.prototype.readOAM32CPU = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.OAMAccessCPU();
-    return this.gfx.readOAM32(address & 0x3FC) | 0;
-}
-GameBoyAdvanceMemory.prototype.readPalette8 = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess();
-    return this.gfx.readPalette(address & 0x3FF) | 0;
-}
-GameBoyAdvanceMemory.prototype.readPalette16 = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess();
-    return this.gfx.readPalette16(address & 0x3FE) | 0;
-}
-GameBoyAdvanceMemory.prototype.readPalette16CPU = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess16CPU();
-    return this.gfx.readPalette16(address & 0x3FE) | 0;
-}
-GameBoyAdvanceMemory.prototype.readPalette32 = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess32();
-    return this.gfx.readPalette32(address & 0x3FC) | 0;
-}
-GameBoyAdvanceMemory.prototype.readPalette32CPU = function (address) {
-    address = address | 0;
-    this.IOCore.updateGraphicsClocking();
-    this.wait.VRAMAccess32CPU();
-    return this.gfx.readPalette32(address & 0x3FC) | 0;
+    var data = 0;
+    switch (address >> 24) {
+        case 0x5:
+            this.wait.VRAMAccess32CPU();
+            data = this.gfx.readPalette32(address | 0) | 0;
+            break;
+        case 0x6:
+            this.wait.VRAMAccess32CPU();
+            data = this.gfx.readVRAM32(address | 0) | 0;
+            break;
+        default:
+            this.wait.OAMAccessCPU();
+            data = this.gfx.readOAM32(address | 0) | 0;
+    }
+    return data | 0;
 }
 GameBoyAdvanceMemory.prototype.readROM8 = function (address) {
     address = address | 0;
@@ -4544,8 +4551,7 @@ GameBoyAdvanceMemory.prototype.loadBIOS = function () {
 }
 function generateMemoryTopLevelDispatch() {
     function compileMemoryReadDispatch(readUnused, readExternalWRAM, readInternalWRAM,
-                                       readIODispatch, readPalette, readVRAM, readOAM,
-                                       readROM, readROM2, readSRAM, readBIOS) {
+                                       readIODispatch, readVRAM, readROM, readROM2, readSRAM, readBIOS) {
         var code = "address = address | 0;var data = 0;switch (address >> 24) {";
         /*
          Decoder for the nibble at bits 24-27
@@ -4579,17 +4585,17 @@ function generateMemoryTopLevelDispatch() {
          BG/OBJ Palette RAM (05000000-050003FF)
          Unused (05000400-05FFFFFF)
          */
-        code += "case 0x5:{data = this." + readPalette + "(address | 0) | 0;break};";
+        code += "case 0x5:";
         /*
          VRAM - Video RAM (06000000-06017FFF)
          Unused (06018000-06FFFFFF)
          */
-        code += "case 0x6:{data = this." + readVRAM + "(address | 0) | 0;break};";
+        code += "case 0x6:";
         /*
          OAM - OBJ Attributes (07000000-070003FF)
          Unused (07000400-07FFFFFF)
          */
-        code += "case 0x7:{data = this." + readOAM + "(address | 0) | 0;break};";
+        code += "case 0x7:{data = this." + readVRAM + "(address | 0) | 0;break};";
         /*
          Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
          */
@@ -4632,8 +4638,7 @@ function generateMemoryTopLevelDispatch() {
         return Function("address", code);
     }
     function compileMemoryWriteDispatch(writeUnused, writeExternalWRAM, writeInternalWRAM,
-                                        writeIODispatch, writePalette, writeVRAM,
-                                        writeOAM, writeROM, writeSRAM) {
+                                        writeIODispatch, writeVRAM, writeROM, writeSRAM) {
         var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
         /*
          Decoder for the nibble at bits 24-27
@@ -4666,17 +4671,17 @@ function generateMemoryTopLevelDispatch() {
          BG/OBJ Palette RAM (05000000-050003FF)
          Unused (05000400-05FFFFFF)
          */
-        code += "case 0x5:{this." + writePalette + "(address | 0, data | 0);break};";
+        code += "case 0x5:";
         /*
          VRAM - Video RAM (06000000-06017FFF)
          Unused (06018000-06FFFFFF)
          */
-        code += "case 0x6:{this." + writeVRAM + "(address | 0, data | 0);break};";
+        code += "case 0x6:";
         /*
          OAM - OBJ Attributes (07000000-070003FF)
          Unused (07000400-07FFFFFF)
          */
-        code += "case 0x7:{this." + writeOAM + "(address | 0, data | 0);break};";
+        code += "case 0x7:{this." + writeVRAM + "(address | 0, data | 0);break};";
         /*
          Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
          */
@@ -4724,9 +4729,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                         "readInternalWRAM8",
                                                                                         "readInternalWRAM8",
                                                                                         "readIODispatch8",
-                                                                                        "readPalette8",
-                                                                                        "readVRAM8",
-                                                                                        "readOAM8",
+                                                                                        "readVRAM8Preliminary",
                                                                                         "readROM8",
                                                                                         "readROM28",
                                                                                         "readSRAM8",
@@ -4737,9 +4740,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                         "readExternalWRAM8",
                                                                                         "readInternalWRAM8",
                                                                                         "readIODispatch8",
-                                                                                        "readPalette8",
-                                                                                        "readVRAM8",
-                                                                                        "readOAM8",
+                                                                                        "readVRAM8Preliminary",
                                                                                         "readROM8",
                                                                                         "readROM28",
                                                                                         "readSRAM8",
@@ -4750,9 +4751,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                         "readUnused8",
                                                                                         "readUnused8",
                                                                                         "readIODispatch8",
-                                                                                        "readPalette8",
-                                                                                        "readVRAM8",
-                                                                                        "readOAM8",
+                                                                                        "readVRAM8Preliminary",
                                                                                         "readROM8",
                                                                                         "readROM28",
                                                                                         "readSRAM8",
@@ -4765,9 +4764,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeInternalWRAM8",
                                                                                          "writeInternalWRAM8",
                                                                                          "writeIODispatch8",
-                                                                                         "writePalette8",
-                                                                                         "writeVRAM8",
-                                                                                         "writeOAM8",
+                                                                                         "writeVRAM8Preliminary",
                                                                                          "writeROM8",
                                                                                          "writeSRAM8"
                                                                                          ),
@@ -4776,9 +4773,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeExternalWRAM8",
                                                                                          "writeInternalWRAM8",
                                                                                          "writeIODispatch8",
-                                                                                         "writePalette8",
-                                                                                         "writeVRAM8",
-                                                                                         "writeOAM8",
+                                                                                         "writeVRAM8Preliminary",
                                                                                          "writeROM8",
                                                                                          "writeSRAM8"
                                                                                          ),
@@ -4787,9 +4782,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeUnused",
                                                                                          "writeUnused",
                                                                                          "writeIODispatch8",
-                                                                                         "writePalette8",
-                                                                                         "writeVRAM8",
-                                                                                         "writeOAM8",
+                                                                                         "writeVRAM8Preliminary",
                                                                                          "writeROM8",
                                                                                          "writeSRAM8"
                                                                                          )
@@ -4800,9 +4793,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readInternalWRAM16",
                                                                                          "readInternalWRAM16",
                                                                                          "readIODispatch16",
-                                                                                         "readPalette16",
-                                                                                         "readVRAM16",
-                                                                                         "readOAM16",
+                                                                                         "readVRAM16Preliminary",
                                                                                          "readROM16",
                                                                                          "readROM216",
                                                                                          "readSRAM16",
@@ -4813,9 +4804,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readExternalWRAM16",
                                                                                          "readInternalWRAM16",
                                                                                          "readIODispatch16",
-                                                                                         "readPalette16",
-                                                                                         "readVRAM16",
-                                                                                         "readOAM16",
+                                                                                         "readVRAM16Preliminary",
                                                                                          "readROM16",
                                                                                          "readROM216",
                                                                                          "readSRAM16",
@@ -4826,9 +4815,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readUnused16",
                                                                                          "readUnused16",
                                                                                          "readIODispatch16",
-                                                                                         "readPalette16",
-                                                                                         "readVRAM16",
-                                                                                         "readOAM16",
+                                                                                         "readVRAM16Preliminary",
                                                                                          "readROM16",
                                                                                          "readROM216",
                                                                                          "readSRAM16",
@@ -4841,9 +4828,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readInternalWRAM16CPU",
                                                                                             "readInternalWRAM16CPU",
                                                                                             "readIODispatch16CPU",
-                                                                                            "readPalette16CPU",
-                                                                                            "readVRAM16CPU",
-                                                                                            "readOAM16CPU",
+                                                                                            "readVRAM16CPUPreliminary",
                                                                                             "readROM16CPU",
                                                                                             "readROM216CPU",
                                                                                             "readSRAM16CPU",
@@ -4854,9 +4839,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readExternalWRAM16CPU",
                                                                                             "readInternalWRAM16CPU",
                                                                                             "readIODispatch16CPU",
-                                                                                            "readPalette16CPU",
-                                                                                            "readVRAM16CPU",
-                                                                                            "readOAM16CPU",
+                                                                                            "readVRAM16CPUPreliminary",
                                                                                             "readROM16CPU",
                                                                                             "readROM216CPU",
                                                                                             "readSRAM16CPU",
@@ -4867,9 +4850,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readUnused16CPU",
                                                                                             "readUnused16CPU",
                                                                                             "readIODispatch16CPU",
-                                                                                            "readPalette16CPU",
-                                                                                            "readVRAM16CPU",
-                                                                                            "readOAM16CPU",
+                                                                                            "readVRAM16CPUPreliminary",
                                                                                             "readROM16CPU",
                                                                                             "readROM216CPU",
                                                                                             "readSRAM16CPU",
@@ -4882,9 +4863,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeInternalWRAM16",
                                                                                           "writeInternalWRAM16",
                                                                                           "writeIODispatch16",
-                                                                                          "writePalette16",
-                                                                                          "writeVRAM16",
-                                                                                          "writeOAM16",
+                                                                                          "writeVRAM16Preliminary",
                                                                                           "writeROM16",
                                                                                           "writeSRAM16"
                                                                                           ),
@@ -4893,9 +4872,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeExternalWRAM16",
                                                                                           "writeInternalWRAM16",
                                                                                           "writeIODispatch16",
-                                                                                          "writePalette16",
-                                                                                          "writeVRAM16",
-                                                                                          "writeOAM16",
+                                                                                          "writeVRAM16Preliminary",
                                                                                           "writeROM16",
                                                                                           "writeSRAM16"
                                                                                           ),
@@ -4904,9 +4881,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeUnused",
                                                                                           "writeUnused",
                                                                                           "writeIODispatch16",
-                                                                                          "writePalette16",
-                                                                                          "writeVRAM16",
-                                                                                          "writeOAM16",
+                                                                                          "writeVRAM16Preliminary",
                                                                                           "writeROM16",
                                                                                           "writeSRAM16"
                                                                                           )
@@ -4917,9 +4892,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readInternalWRAM32",
                                                                                          "readInternalWRAM32",
                                                                                          "readIODispatch32",
-                                                                                         "readPalette32",
-                                                                                         "readVRAM32",
-                                                                                         "readOAM32",
+                                                                                         "readVRAM32Preliminary",
                                                                                          "readROM32",
                                                                                          "readROM232",
                                                                                          "readSRAM32",
@@ -4930,9 +4903,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readExternalWRAM32",
                                                                                          "readInternalWRAM32",
                                                                                          "readIODispatch32",
-                                                                                         "readPalette32",
-                                                                                         "readVRAM32",
-                                                                                         "readOAM32",
+                                                                                         "readVRAM32Preliminary",
                                                                                          "readROM32",
                                                                                          "readROM232",
                                                                                          "readSRAM32",
@@ -4943,9 +4914,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readUnused32",
                                                                                          "readUnused32",
                                                                                          "readIODispatch32",
-                                                                                         "readPalette32",
-                                                                                         "readVRAM32",
-                                                                                         "readOAM32",
+                                                                                         "readVRAM32Preliminary",
                                                                                          "readROM32",
                                                                                          "readROM232",
                                                                                          "readSRAM32",
@@ -4958,9 +4927,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readInternalWRAM32CPU",
                                                                                             "readInternalWRAM32CPU",
                                                                                             "readIODispatch32CPU",
-                                                                                            "readPalette32CPU",
-                                                                                            "readVRAM32CPU",
-                                                                                            "readOAM32CPU",
+                                                                                            "readVRAM32CPUPreliminary",
                                                                                             "readROM32CPU",
                                                                                             "readROM232CPU",
                                                                                             "readSRAM32CPU",
@@ -4971,9 +4938,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readExternalWRAM32CPU",
                                                                                             "readInternalWRAM32CPU",
                                                                                             "readIODispatch32CPU",
-                                                                                            "readPalette32CPU",
-                                                                                            "readVRAM32CPU",
-                                                                                            "readOAM32CPU",
+                                                                                            "readVRAM32CPUPreliminary",
                                                                                             "readROM32CPU",
                                                                                             "readROM232CPU",
                                                                                             "readSRAM32CPU",
@@ -4984,9 +4949,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readUnused32CPU",
                                                                                             "readUnused32CPU",
                                                                                             "readIODispatch32CPU",
-                                                                                            "readPalette32CPU",
-                                                                                            "readVRAM32CPU",
-                                                                                            "readOAM32CPU",
+                                                                                            "readVRAM32CPUPreliminary",
                                                                                             "readROM32CPU",
                                                                                             "readROM232CPU",
                                                                                             "readSRAM32CPU",
@@ -4999,9 +4962,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeInternalWRAM32",
                                                                                           "writeInternalWRAM32",
                                                                                           "writeIODispatch32",
-                                                                                          "writePalette32",
-                                                                                          "writeVRAM32",
-                                                                                          "writeOAM32",
+                                                                                          "writeVRAM32Preliminary",
                                                                                           "writeROM32",
                                                                                           "writeSRAM32"
                                                                                           ),
@@ -5010,9 +4971,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeExternalWRAM32",
                                                                                           "writeInternalWRAM32",
                                                                                           "writeIODispatch32",
-                                                                                          "writePalette32",
-                                                                                          "writeVRAM32",
-                                                                                          "writeOAM32",
+                                                                                          "writeVRAM32Preliminary",
                                                                                           "writeROM32",
                                                                                           "writeSRAM32"
                                                                                           ),
@@ -5021,9 +4980,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                           "writeUnused",
                                                                                           "writeUnused",
                                                                                           "writeIODispatch32",
-                                                                                          "writePalette32",
-                                                                                          "writeVRAM32",
-                                                                                          "writeOAM32",
+                                                                                          "writeVRAM32Preliminary",
                                                                                           "writeROM32",
                                                                                           "writeSRAM32"
                                                                                           )
