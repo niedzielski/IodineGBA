@@ -37,11 +37,15 @@ function GameBoyAdvanceMemory(IOCore) {
     this.memoryRead8 = this.memoryRead8Generated[1];
     this.memoryWrite8 = this.memoryWrite8Generated[1];
     this.memoryRead16 = this.memoryRead16Generated[1];
+    this.memoryReadDMA16 = this.memoryReadDMA16Generated[1];
     this.memoryReadCPU16 = this.memoryReadCPU16Generated[1];
     this.memoryWrite16 = this.memoryWrite16Generated[1];
+    this.memoryWriteDMA16 = this.memoryWriteDMA16Generated[1];
     this.memoryRead32 = this.memoryRead32Generated[1];
+    this.memoryReadDMA32 = this.memoryReadDMA32Generated[1];
     this.memoryReadCPU32 = this.memoryReadCPU32Generated[1];
     this.memoryWrite32 = this.memoryWrite32Generated[1];
+    this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[1];
 }
 GameBoyAdvanceMemory.prototype.loadReferences = function () {
     //Initialize the various handler objects:
@@ -2622,6 +2626,27 @@ GameBoyAdvanceMemory.prototype.writeVRAM16Preliminary = function (address, data)
             this.gfx.writeOAM16(address & 0x3FE, data & 0xFFFF);
     }
 }
+GameBoyAdvanceMemory.prototype.writePalette16 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    this.IOCore.updateGraphicsClocking();
+    this.wait.VRAMAccess();
+    this.gfx.writePalette16(address & 0x3FE, data & 0xFFFF);
+}
+GameBoyAdvanceMemory.prototype.writeVRAM16 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    this.IOCore.updateGraphicsClocking();
+    this.wait.VRAMAccess();
+    this.gfx.writeVRAM16(address | 0, data | 0);
+}
+GameBoyAdvanceMemory.prototype.writeOBJ16 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    this.IOCore.updateGraphicsClocking();
+    this.wait.OAMAccess();
+    this.gfx.writeOAM16(address & 0x3FE, data & 0xFFFF);
+}
 GameBoyAdvanceMemory.prototype.writeVRAM32Preliminary = function (address, data) {
     address = address | 0;
     data = data | 0;
@@ -2639,6 +2664,27 @@ GameBoyAdvanceMemory.prototype.writeVRAM32Preliminary = function (address, data)
             this.wait.OAMAccess();
             this.gfx.writeOAM32(address & 0x3FC, data | 0);
     }
+}
+GameBoyAdvanceMemory.prototype.writePalette32 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    this.IOCore.updateGraphicsClocking();
+    this.wait.VRAMAccess32();
+    this.gfx.writePalette32(address & 0x3FC, data | 0);
+}
+GameBoyAdvanceMemory.prototype.writeVRAM32 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    this.IOCore.updateGraphicsClocking();
+    this.wait.VRAMAccess32();
+    this.gfx.writeVRAM32(address | 0, data | 0);
+}
+GameBoyAdvanceMemory.prototype.writeOBJ32 = function (address, data) {
+    address = address | 0;
+    data = data | 0;
+    this.IOCore.updateGraphicsClocking();
+    this.wait.OAMAccess();
+    this.gfx.writeOAM32(address & 0x3FC, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeROM8 = function (address, data) {
     address = address | 0;
@@ -2686,35 +2732,48 @@ GameBoyAdvanceMemory.prototype.remapWRAM = function (data) {
         switch (data | 0) {
             case 0:
                 //Mirror Internal RAM to External:
-                this.memoryWrite8 = this.memoryWrite8Generated[0];
                 this.memoryRead8 = this.memoryRead8Generated[0];
-                this.memoryWrite16 = this.memoryWrite16Generated[0];
+                this.memoryWrite8 = this.memoryWrite8Generated[0];
                 this.memoryRead16 = this.memoryRead16Generated[0];
+                this.memoryReadDMA16 = this.memoryReadDMA16Generated[0];
                 this.memoryReadCPU16 = this.memoryReadCPU16Generated[0];
-                this.memoryWrite32 = this.memoryWrite32Generated[0];
+                this.memoryWrite16 = this.memoryWrite16Generated[0];
+                this.memoryWriteDMA16 = this.memoryWriteDMA16Generated[0];
                 this.memoryRead32 = this.memoryRead32Generated[0];
+                this.memoryReadDMA32 = this.memoryReadDMA32Generated[0];
                 this.memoryReadCPU32 = this.memoryReadCPU32Generated[0];
+                this.memoryWrite32 = this.memoryWrite32Generated[0];
+                this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[0];
                 break;
             case 0x20:
                 //Use External RAM:
-                this.memoryWrite8 = this.memoryWrite8Generated[1];
                 this.memoryRead8 = this.memoryRead8Generated[1];
-                this.memoryWrite16 = this.memoryWrite16Generated[1];
+                this.memoryWrite8 = this.memoryWrite8Generated[1];
                 this.memoryRead16 = this.memoryRead16Generated[1];
+                this.memoryReadDMA16 = this.memoryReadDMA16Generated[1];
                 this.memoryReadCPU16 = this.memoryReadCPU16Generated[1];
-                this.memoryWrite32 = this.memoryWrite32Generated[1];
+                this.memoryWrite16 = this.memoryWrite16Generated[1];
+                this.memoryWriteDMA16 = this.memoryWriteDMA16Generated[1];
                 this.memoryRead32 = this.memoryRead32Generated[1];
+                this.memoryReadDMA32 = this.memoryReadDMA32Generated[1];
                 this.memoryReadCPU32 = this.memoryReadCPU32Generated[1];
+                this.memoryWrite32 = this.memoryWrite32Generated[1];
+                this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[1];
                 break;
             default:
-                this.memoryWrite8 = this.memoryWrite8Generated[2];
+                //WRAM Disabled:
                 this.memoryRead8 = this.memoryRead8Generated[2];
-                this.memoryWrite16 = this.memoryWrite16Generated[2];
+                this.memoryWrite8 = this.memoryWrite8Generated[2];
                 this.memoryRead16 = this.memoryRead16Generated[2];
+                this.memoryReadDMA16 = this.memoryReadDMA16Generated[2];
                 this.memoryReadCPU16 = this.memoryReadCPU16Generated[2];
-                this.memoryWrite32 = this.memoryWrite32Generated[2];
+                this.memoryWrite16 = this.memoryWrite16Generated[2];
+                this.memoryWriteDMA16 = this.memoryWriteDMA16Generated[2];
                 this.memoryRead32 = this.memoryRead32Generated[2];
+                this.memoryReadDMA32 = this.memoryReadDMA32Generated[2];
                 this.memoryReadCPU32 = this.memoryReadCPU32Generated[2];
+                this.memoryWrite32 = this.memoryWrite32Generated[2];
+                this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[2];
         }
         this.WRAMControlFlags = data | 0;
     }
@@ -4550,6 +4609,7 @@ GameBoyAdvanceMemory.prototype.loadBIOS = function () {
     }
 }
 function generateMemoryTopLevelDispatch() {
+    //Generic memory read dispatch generator:
     function compileMemoryReadDispatch(readUnused, readExternalWRAM, readInternalWRAM,
                                        readIODispatch, readVRAM, readROM, readROM2, readSRAM, readBIOS) {
         var code = "address = address | 0;var data = 0;switch (address >> 24) {";
@@ -4637,6 +4697,62 @@ function generateMemoryTopLevelDispatch() {
         code += "}return data | 0;";
         return Function("address", code);
     }
+    //Optimized for DMA 0:
+    function compileMemoryDMAReadDispatch(readUnused, readExternalWRAM, readInternalWRAM,
+                                       readIODispatch, readVRAM, readBIOS) {
+        var code = "address = address | 0;var data = 0;switch (address >> 24) {";
+        /*
+         Decoder for the nibble at bits 24-27
+         (Top 4 bits of the address falls through to default (unused),
+         so the next nibble down is used for dispatch.):
+         */
+        /*
+         BIOS Area (00000000-00003FFF)
+         Unused (00004000-01FFFFFF)
+         */
+        code += "case 0:{data = this." + readBIOS + "(address | 0) | 0;break};";
+        /*
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         WRAM - On-board Work RAM (02000000-0203FFFF)
+         Unused (02040000-02FFFFFF)
+         */
+        code += "case 0x2:{data = this." + readExternalWRAM + "(address | 0) | 0;break};";
+        /*
+         WRAM - In-Chip Work RAM (03000000-03007FFF)
+         Unused (03008000-03FFFFFF)
+         */
+        code += "case 0x3:{data = this." + readInternalWRAM + "(address | 0) | 0;break};";
+        /*
+         I/O Registers (04000000-040003FE)
+         Unused (04000400-04FFFFFF)
+         */
+        code += "case 0x4:{data = this." + readIODispatch + "(address | 0) | 0;break};";
+        /*
+         BG/OBJ Palette RAM (05000000-050003FF)
+         Unused (05000400-05FFFFFF)
+         */
+        code += "case 0x5:";
+        /*
+         VRAM - Video RAM (06000000-06017FFF)
+         Unused (06018000-06FFFFFF)
+         */
+        code += "case 0x6:";
+        /*
+         OAM - OBJ Attributes (07000000-070003FF)
+         Unused (07000400-07FFFFFF)
+         */
+        code += "case 0x7:{data = this." + readVRAM + "(address | 0) | 0;break};";
+        /*
+         Unused, DMA 0 cannot read past 07FFFFFF:
+         */
+        code += "default:{data = this." + readUnused + "(" + ((readUnused.slice(0, 12) == "readUnused32") ? "" : "address | 0") + ") | 0};";
+        //Generate the function:
+        code += "}return data | 0;";
+        return Function("address", code);
+    }
+    //Graphics should not be handled as often for this one:
     function compileMemoryWriteDispatch(writeUnused, writeExternalWRAM, writeInternalWRAM,
                                         writeIODispatch, writeVRAM, writeROM, writeSRAM) {
         var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
@@ -4723,6 +4839,148 @@ function generateMemoryTopLevelDispatch() {
         code += "}";
         return Function("address", "data", code);
     }
+    //Graphics calls slightly faster in this one, at the expense of other calls:
+    function compileMemoryWriteDispatch2(writeUnused, writeExternalWRAM, writeInternalWRAM,
+                                        writeIODispatch, writePalette, writeVRAM, writeOAM, writeROM, writeSRAM) {
+        var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
+        /*
+         Decoder for the nibble at bits 24-27
+         (Top 4 bits of the address falls through to default (unused),
+         so the next nibble down is used for dispatch.):
+         */
+        /*
+         BIOS Area (00000000-00003FFF)
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         WRAM - On-board Work RAM (02000000-0203FFFF)
+         Unused (02040000-02FFFFFF)
+         */
+        code += "case 0x2:{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+        /*
+         WRAM - In-Chip Work RAM (03000000-03007FFF)
+         Unused (03008000-03FFFFFF)
+         */
+        code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        /*
+         I/O Registers (04000000-040003FE)
+         Unused (04000400-04FFFFFF)
+         */
+        code += "case 0x4:{this." + writeIODispatch + "(address | 0, data | 0);break};";
+        /*
+         BG/OBJ Palette RAM (05000000-050003FF)
+         Unused (05000400-05FFFFFF)
+         */
+        code += "case 0x5:{this." + writePalette + "(address | 0, data | 0);break};";
+        /*
+         VRAM - Video RAM (06000000-06017FFF)
+         Unused (06018000-06FFFFFF)
+         */
+        code += "case 0x6:{this." + writeVRAM + "(address | 0, data | 0);break};";
+        /*
+         OAM - OBJ Attributes (07000000-070003FF)
+         Unused (07000400-07FFFFFF)
+         */
+        code += "case 0x7:{this." + writeOAM + "(address | 0, data | 0);break};";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
+         */
+        code += "case 0x8:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
+         */
+        code += "case 0x9:";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
+         */
+        code += "case 0xA:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
+         */
+        code += "case 0xB:";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
+         */
+        code += "case 0xC:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
+         */
+        code += "case 0xD:{this." + writeROM + "(address | 0, data | 0);break};";
+        /*
+         Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+         */
+        code += "case 0xE:";
+        /*
+         Game Pak SRAM  (max 64 KBytes) - 8bit Bus width (0E000000-0E00FFFF)
+         Mirrored up to 0FFFFFFF
+         */
+        code += "case 0xF:{this." + writeSRAM + "(address | 0, data | 0);break};";
+        /*
+         Unused (10000000-FFFFFFFF)
+         */
+        code += "default:{this." + writeUnused + "()}";
+        //Generate the function:
+        code += "}";
+        return Function("address", "data", code);
+    }
+    //Optimized for DMA 0-2:
+    function compileMemoryDMAWriteDispatch(writeUnused, writeExternalWRAM, writeInternalWRAM,
+                                        writeIODispatch, writePalette, writeVRAM, writeOAM) {
+        var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
+        /*
+         Decoder for the nibble at bits 24-27
+         (Top 4 bits of the address falls through to default (unused),
+         so the next nibble down is used for dispatch.):
+         */
+        /*
+         BIOS Area (00000000-00003FFF)
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         WRAM - On-board Work RAM (02000000-0203FFFF)
+         Unused (02040000-02FFFFFF)
+         */
+        code += "case 0x2:{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+        /*
+         WRAM - In-Chip Work RAM (03000000-03007FFF)
+         Unused (03008000-03FFFFFF)
+         */
+        code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        /*
+         I/O Registers (04000000-040003FE)
+         Unused (04000400-04FFFFFF)
+         */
+        code += "case 0x4:{this." + writeIODispatch + "(address | 0, data | 0);break};";
+        /*
+         BG/OBJ Palette RAM (05000000-050003FF)
+         Unused (05000400-05FFFFFF)
+         */
+        code += "case 0x5:{this." + writePalette + "(address | 0, data | 0);break};";
+        /*
+         VRAM - Video RAM (06000000-06017FFF)
+         Unused (06018000-06FFFFFF)
+         */
+        code += "case 0x6:{this." + writeVRAM + "(address | 0, data | 0);break};";
+        /*
+         OAM - OBJ Attributes (07000000-070003FF)
+         Unused (07000400-07FFFFFF)
+         */
+        code += "case 0x7:{this." + writeOAM + "(address | 0, data | 0);break};";
+        /*
+         Unused, DMA 0-2 cannot write past 07FFFFFF:
+         */
+        code += "default:{this." + writeUnused + "()}";
+        //Generate the function:
+        code += "}";
+        return Function("address", "data", code);
+    }
+    //Generic 8-Bit Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryRead8Generated = [
                                                              compileMemoryReadDispatch(
                                                                                         "readUnused8",
@@ -4758,6 +5016,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                         "readBIOS8"
                                                                                         )
                                                              ];
+    //Generic 8-Bit Write Dispatch:
     GameBoyAdvanceMemory.prototype.memoryWrite8Generated = [
                                                              compileMemoryWriteDispatch(
                                                                                          "writeUnused",
@@ -4787,6 +5046,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeSRAM8"
                                                                                          )
                                                              ];
+    //Generic 16-Bit Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryRead16Generated = [
                                                               compileMemoryReadDispatch(
                                                                                          "readUnused16",
@@ -4822,6 +5082,34 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readBIOS16"
                                                                                          )
                                                               ];
+    //DMA 0 Optimized 16-Bit Read Dispatch:
+    GameBoyAdvanceMemory.prototype.memoryReadDMA16Generated = [
+                                                            compileMemoryDMAReadDispatch(
+                                                                                      "readUnused16",
+                                                                                      "readInternalWRAM16",
+                                                                                      "readInternalWRAM16",
+                                                                                      "readIODispatch16",
+                                                                                      "readVRAM16Preliminary",
+                                                                                      "readBIOS16"
+                                                                                      ),
+                                                            compileMemoryDMAReadDispatch(
+                                                                                      "readUnused16",
+                                                                                      "readExternalWRAM16",
+                                                                                      "readInternalWRAM16",
+                                                                                      "readIODispatch16",
+                                                                                      "readVRAM16Preliminary",
+                                                                                      "readBIOS16"
+                                                                                      ),
+                                                            compileMemoryDMAReadDispatch(
+                                                                                      "readUnused16",
+                                                                                      "readUnused16",
+                                                                                      "readUnused16",
+                                                                                      "readIODispatch16",
+                                                                                      "readVRAM16Preliminary",
+                                                                                      "readBIOS16"
+                                                                                      )
+                                                            ];
+    //Generic 16-Bit Instruction Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryReadCPU16Generated = [
                                                                  compileMemoryReadDispatch(
                                                                                             "readUnused16CPU",
@@ -4857,35 +5145,73 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readBIOS16CPU"
                                                                                             )
                                                                  ];
+    //Generic 16-Bit Write Dispatch:
     GameBoyAdvanceMemory.prototype.memoryWrite16Generated = [
-                                                              compileMemoryWriteDispatch(
+                                                              compileMemoryWriteDispatch2(
                                                                                           "writeUnused",
                                                                                           "writeInternalWRAM16",
                                                                                           "writeInternalWRAM16",
                                                                                           "writeIODispatch16",
-                                                                                          "writeVRAM16Preliminary",
+                                                                                          "writePalette16",
+                                                                                          "writeVRAM16",
+                                                                                          "writeOBJ16",
                                                                                           "writeROM16",
                                                                                           "writeSRAM16"
                                                                                           ),
-                                                              compileMemoryWriteDispatch(
+                                                              compileMemoryWriteDispatch2(
                                                                                           "writeUnused",
                                                                                           "writeExternalWRAM16",
                                                                                           "writeInternalWRAM16",
                                                                                           "writeIODispatch16",
-                                                                                          "writeVRAM16Preliminary",
+                                                                                          "writePalette16",
+                                                                                          "writeVRAM16",
+                                                                                          "writeOBJ16",
                                                                                           "writeROM16",
                                                                                           "writeSRAM16"
                                                                                           ),
-                                                              compileMemoryWriteDispatch(
+                                                              compileMemoryWriteDispatch2(
                                                                                           "writeUnused",
                                                                                           "writeUnused",
                                                                                           "writeUnused",
                                                                                           "writeIODispatch16",
-                                                                                          "writeVRAM16Preliminary",
+                                                                                          "writePalette16",
+                                                                                          "writeVRAM16",
+                                                                                          "writeOBJ16",
                                                                                           "writeROM16",
                                                                                           "writeSRAM16"
                                                                                           )
                                                               ];
+    //DMA 0-2 Optimized 16-Bit Write Dispatch:
+    GameBoyAdvanceMemory.prototype.memoryWriteDMA16Generated = [
+                                                             compileMemoryDMAWriteDispatch(
+                                                                                         "writeUnused",
+                                                                                         "writeInternalWRAM16",
+                                                                                         "writeInternalWRAM16",
+                                                                                         "writeIODispatch16",
+                                                                                         "writePalette16",
+                                                                                         "writeVRAM16",
+                                                                                         "writeOBJ16"
+                                                                                         ),
+                                                             compileMemoryDMAWriteDispatch(
+                                                                                         "writeUnused",
+                                                                                         "writeExternalWRAM16",
+                                                                                         "writeInternalWRAM16",
+                                                                                         "writeIODispatch16",
+                                                                                         "writePalette16",
+                                                                                         "writeVRAM16",
+                                                                                         "writeOBJ16"
+                                                                                         ),
+                                                             compileMemoryDMAWriteDispatch(
+                                                                                         "writeUnused",
+                                                                                         "writeUnused",
+                                                                                         "writeUnused",
+                                                                                         "writeIODispatch16",
+                                                                                         "writePalette16",
+                                                                                         "writeVRAM16",
+                                                                                         "writeOBJ16"
+                                                                                         )
+                                                             ];
+    //Generic 32-Bit Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryRead32Generated = [
                                                               compileMemoryReadDispatch(
                                                                                          "readUnused32",
@@ -4921,6 +5247,34 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "readBIOS32"
                                                                                          )
                                                               ];
+    //DMA 0 Optimized 32-Bit Read Dispatch:
+    GameBoyAdvanceMemory.prototype.memoryReadDMA32Generated = [
+                                                               compileMemoryDMAReadDispatch(
+                                                                                            "readUnused32",
+                                                                                            "readInternalWRAM32",
+                                                                                            "readInternalWRAM32",
+                                                                                            "readIODispatch32",
+                                                                                            "readVRAM32Preliminary",
+                                                                                            "readBIOS32"
+                                                                                            ),
+                                                               compileMemoryDMAReadDispatch(
+                                                                                            "readUnused32",
+                                                                                            "readExternalWRAM32",
+                                                                                            "readInternalWRAM32",
+                                                                                            "readIODispatch32",
+                                                                                            "readVRAM32Preliminary",
+                                                                                            "readBIOS32"
+                                                                                            ),
+                                                               compileMemoryDMAReadDispatch(
+                                                                                            "readUnused32",
+                                                                                            "readUnused32",
+                                                                                            "readUnused32",
+                                                                                            "readIODispatch32",
+                                                                                            "readVRAM32Preliminary",
+                                                                                            "readBIOS32"
+                                                                                            )
+                                                               ];
+    //Generic 32-Bit Instruction Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryReadCPU32Generated = [
                                                                  compileMemoryReadDispatch(
                                                                                             "readUnused32CPU",
@@ -4956,34 +5310,71 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readBIOS32CPU"
                                                                                             )
                                                                  ];
+    //Generic 32-Bit Write Dispatch:
     GameBoyAdvanceMemory.prototype.memoryWrite32Generated = [
-                                                              compileMemoryWriteDispatch(
+                                                              compileMemoryWriteDispatch2(
                                                                                           "writeUnused",
                                                                                           "writeInternalWRAM32",
                                                                                           "writeInternalWRAM32",
                                                                                           "writeIODispatch32",
-                                                                                          "writeVRAM32Preliminary",
+                                                                                          "writePalette32",
+                                                                                          "writeVRAM32",
+                                                                                          "writeOBJ32",
                                                                                           "writeROM32",
                                                                                           "writeSRAM32"
                                                                                           ),
-                                                              compileMemoryWriteDispatch(
+                                                              compileMemoryWriteDispatch2(
                                                                                           "writeUnused",
                                                                                           "writeExternalWRAM32",
                                                                                           "writeInternalWRAM32",
                                                                                           "writeIODispatch32",
-                                                                                          "writeVRAM32Preliminary",
+                                                                                          "writePalette32",
+                                                                                          "writeVRAM32",
+                                                                                          "writeOBJ32",
                                                                                           "writeROM32",
                                                                                           "writeSRAM32"
                                                                                           ),
-                                                              compileMemoryWriteDispatch(
+                                                              compileMemoryWriteDispatch2(
                                                                                           "writeUnused",
                                                                                           "writeUnused",
                                                                                           "writeUnused",
                                                                                           "writeIODispatch32",
-                                                                                          "writeVRAM32Preliminary",
+                                                                                          "writePalette32",
+                                                                                          "writeVRAM32",
+                                                                                          "writeOBJ32",
                                                                                           "writeROM32",
                                                                                           "writeSRAM32"
                                                                                           )
                                                               ];
+    //DMA 0-2 Optimized 32-Bit Write Dispatch:
+    GameBoyAdvanceMemory.prototype.memoryWriteDMA32Generated = [
+                                                             compileMemoryDMAWriteDispatch(
+                                                                                         "writeUnused",
+                                                                                         "writeInternalWRAM32",
+                                                                                         "writeInternalWRAM32",
+                                                                                         "writeIODispatch32",
+                                                                                         "writePalette32",
+                                                                                         "writeVRAM32",
+                                                                                         "writeOBJ32"
+                                                                                         ),
+                                                             compileMemoryDMAWriteDispatch(
+                                                                                         "writeUnused",
+                                                                                         "writeExternalWRAM32",
+                                                                                         "writeInternalWRAM32",
+                                                                                         "writeIODispatch32",
+                                                                                         "writePalette32",
+                                                                                         "writeVRAM32",
+                                                                                         "writeOBJ32"
+                                                                                         ),
+                                                             compileMemoryDMAWriteDispatch(
+                                                                                         "writeUnused",
+                                                                                         "writeUnused",
+                                                                                         "writeUnused",
+                                                                                         "writeIODispatch32",
+                                                                                         "writePalette32",
+                                                                                         "writeVRAM32",
+                                                                                         "writeOBJ32"
+                                                                                         )
+                                                             ];
 }
 generateMemoryTopLevelDispatch();
