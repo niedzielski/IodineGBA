@@ -4630,12 +4630,19 @@ function generateMemoryTopLevelDispatch() {
          WRAM - On-board Work RAM (02000000-0203FFFF)
          Unused (02040000-02FFFFFF)
          */
-        code += "case 0x2:{data = this." + readExternalWRAM + "(address | 0) | 0;break};";
+        if (readExternalWRAM.slice(0, 10) != "readUnused") {
+            code += "case 0x2:";
+            if (readExternalWRAM.slice(0, 12) != "readInternal") {
+                code += "{data = this." + readExternalWRAM + "(address | 0) | 0;break};";
+            }
+        }
         /*
          WRAM - In-Chip Work RAM (03000000-03007FFF)
          Unused (03008000-03FFFFFF)
          */
-        code += "case 0x3:{data = this." + readInternalWRAM + "(address | 0) | 0;break};";
+        if (readInternalWRAM.slice(0, 10) != "readUnused") {
+            code += "case 0x3:{data = this." + readInternalWRAM + "(address | 0) | 0;break};";
+        }
         /*
          I/O Registers (04000000-040003FE)
          Unused (04000400-04FFFFFF)
@@ -4718,12 +4725,19 @@ function generateMemoryTopLevelDispatch() {
          WRAM - On-board Work RAM (02000000-0203FFFF)
          Unused (02040000-02FFFFFF)
          */
-        code += "case 0x2:{data = this." + readExternalWRAM + "(address | 0) | 0;break};";
+        if (readExternalWRAM.slice(0, 10) != "readUnused") {
+            code += "case 0x2:";
+            if (readExternalWRAM.slice(0, 12) != "readInternal") {
+                code += "{data = this." + readExternalWRAM + "(address | 0) | 0;break};";
+            }
+        }
         /*
          WRAM - In-Chip Work RAM (03000000-03007FFF)
          Unused (03008000-03FFFFFF)
          */
-        code += "case 0x3:{data = this." + readInternalWRAM + "(address | 0) | 0;break};";
+        if (readInternalWRAM.slice(0, 10) != "readUnused") {
+            code += "case 0x3:{data = this." + readInternalWRAM + "(address | 0) | 0;break};";
+        }
         /*
          I/O Registers (04000000-040003FE)
          Unused (04000400-04FFFFFF)
@@ -4772,12 +4786,19 @@ function generateMemoryTopLevelDispatch() {
          WRAM - On-board Work RAM (02000000-0203FFFF)
          Unused (02040000-02FFFFFF)
          */
-        code += "case 0x2:{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+        if (writeExternalWRAM != "writeUnused") {
+            code += "case 0x2:";
+            if (writeExternalWRAM.slice(0, 13) != "writeInternal") {
+                code += "{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+            }
+        }
         /*
          WRAM - In-Chip Work RAM (03000000-03007FFF)
          Unused (03008000-03FFFFFF)
          */
-        code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        if (writeInternalWRAM != "writeUnused") {
+            code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        }
         /*
          I/O Registers (04000000-040003FE)
          Unused (04000400-04FFFFFF)
@@ -4859,12 +4880,19 @@ function generateMemoryTopLevelDispatch() {
          WRAM - On-board Work RAM (02000000-0203FFFF)
          Unused (02040000-02FFFFFF)
          */
-        code += "case 0x2:{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+        if (writeExternalWRAM != "writeUnused") {
+            code += "case 0x2:";
+            if (writeExternalWRAM.slice(0, 13) != "writeInternal") {
+                code += "{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+            }
+        }
         /*
          WRAM - In-Chip Work RAM (03000000-03007FFF)
          Unused (03008000-03FFFFFF)
          */
-        code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        if (writeInternalWRAM != "writeUnused") {
+            code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        }
         /*
          I/O Registers (04000000-040003FE)
          Unused (04000400-04FFFFFF)
@@ -4946,12 +4974,19 @@ function generateMemoryTopLevelDispatch() {
          WRAM - On-board Work RAM (02000000-0203FFFF)
          Unused (02040000-02FFFFFF)
          */
-        code += "case 0x2:{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+        if (writeExternalWRAM != "writeUnused") {
+            code += "case 0x2:";
+            if (writeExternalWRAM.slice(0, 13) != "writeInternal") {
+                code += "{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+            }
+        }
         /*
          WRAM - In-Chip Work RAM (03000000-03007FFF)
          Unused (03008000-03FFFFFF)
          */
-        code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        if (writeInternalWRAM != "writeUnused") {
+            code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        }
         /*
          I/O Registers (04000000-040003FE)
          Unused (04000400-04FFFFFF)
