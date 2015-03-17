@@ -120,9 +120,7 @@ GameBoyAdvanceDMA3.prototype.writeDMAControl1 = function (data) {
     if ((data | 0) > 0x7F) {
         if ((this.enabled | 0) == 0) {
             this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            if ((this.enabled | 0) > 0) {
-                this.enableDMAChannel();
-            }
+            this.enableDMAChannel();
         }
         /*
          DMA seems to not allow changing its type while it's running.
