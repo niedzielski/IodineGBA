@@ -17,7 +17,6 @@
  */
 function GameBoyAdvanceCartridge(IOCore) {
     this.IOCore = IOCore;
-    this.initialize();
 }
 GameBoyAdvanceCartridge.prototype.initialize = function () {
     this.flash_is128 = false;

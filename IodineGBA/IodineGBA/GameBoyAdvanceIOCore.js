@@ -31,7 +31,7 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     this.coreExposed = coreExposed;
     this.BIOS = BIOS;
     this.ROM = ROM;
-    //Initialize the various handler objects:
+    //Build the core object layout:
     this.memory = new GameBoyAdvanceMemory(this);
     this.dma = new GameBoyAdvanceDMA(this);
     this.gfx = new GameBoyAdvanceGraphics(this);
@@ -44,9 +44,24 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     this.saves = new GameBoyAdvanceSaves(this);
     this.wait = new GameBoyAdvanceWait(this);
     this.cpu = new GameBoyAdvanceCPU(this);
-    this.ARM = this.cpu.ARM;
-    this.THUMB = this.cpu.THUMB;
-    this.memory.loadReferences();
+    //Now initialize each component:
+    this.memory.initialize();
+    this.dma.initialize();
+    this.gfx.initialize();
+    this.sound.initialize();
+    this.timer.initialize();
+    this.irq.initialize();
+    this.serial.initialize();
+    this.joypad.initialize();
+    this.cartridge.initialize();
+    this.saves.initialize();
+    this.wait.initialize();
+    this.cpu.initialize();
+}
+GameBoyAdvanceIO.prototype.assignInstructionCoreReferences = function (ARM, THUMB) {
+    //Passed here once the CPU component is initialized:
+    this.ARM = ARM;
+    this.THUMB = THUMB;
 }
 GameBoyAdvanceIO.prototype.enter = function (CPUCyclesTotal) {
     //Find out how many clocks to iterate through this run:

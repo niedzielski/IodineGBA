@@ -17,7 +17,6 @@
  */
 function GameBoyAdvanceDMA(IOCore) {
     this.IOCore = IOCore;
-    this.initialize();
 }
 GameBoyAdvanceDMA.prototype.DMA_REQUEST_TYPE = {
     PROHIBITED:        0,
@@ -169,6 +168,10 @@ GameBoyAdvanceDMA.prototype.update = function () {
 GameBoyAdvanceDMA.prototype.perform = function () {
     //Call the correct channel to process:
     this.currentDMA.handleDMACopy();
+}
+GameBoyAdvanceDMA.prototype.updateFetch = function (data) {
+    data = data | 0;
+    this.fetch = data | 0;
 }
 GameBoyAdvanceDMA.prototype.nextEventTime = function () {
     var clocks = this.channels[0].nextEventTime() | 0;

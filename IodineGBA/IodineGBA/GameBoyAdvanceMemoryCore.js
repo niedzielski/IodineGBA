@@ -18,6 +18,8 @@
 function GameBoyAdvanceMemory(IOCore) {
     //Reference to the emulator core:
     this.IOCore = IOCore;
+}
+GameBoyAdvanceMemory.prototype.initialize = function () {
     //WRAM Map Control Stuff:
     this.WRAMControlFlags = 0x20;
     //Load the BIOS:
@@ -46,8 +48,6 @@ function GameBoyAdvanceMemory(IOCore) {
     this.memoryReadCPU32 = this.memoryReadCPU32Generated[1];
     this.memoryWrite32 = this.memoryWrite32Generated[1];
     this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[1];
-}
-GameBoyAdvanceMemory.prototype.loadReferences = function () {
     //Initialize the various handler objects:
     this.dma = this.IOCore.dma;
     this.gfx = this.IOCore.gfx;

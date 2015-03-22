@@ -19,9 +19,8 @@ function GameBoyAdvanceSound(IOCore) {
     //Build references:
     this.IOCore = IOCore;
     this.coreExposed = this.IOCore.coreExposed;
-    this.initializePAPU();
 }
-GameBoyAdvanceSound.prototype.initializePAPU = function () {
+GameBoyAdvanceSound.prototype.initialize = function () {
     //Did the emulator core initialize us for output yet?
     this.preprocessInitialization(false);
     //Initialize start:

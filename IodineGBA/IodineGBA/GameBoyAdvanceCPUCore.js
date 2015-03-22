@@ -19,15 +19,15 @@ function GameBoyAdvanceCPU(IOCore) {
     this.IOCore = IOCore;
     this.memory = this.IOCore.memory;
     this.wait = this.IOCore.wait;
-    this.mul64ResultHigh = 0;    //Scratch MUL64.
-    this.mul64ResultLow = 0;    //Scratch MUL64.
-    this.initialize();
 }
 GameBoyAdvanceCPU.prototype.initialize = function () {
+    this.mul64ResultHigh = 0;    //Scratch MUL64.
+    this.mul64ResultLow = 0;    //Scratch MUL64.
     this.initializeRegisters();
     this.ARM = new ARMInstructionSet(this);
     this.THUMB = new THUMBInstructionSet(this);
     //this.swi = new GameBoyAdvanceSWI(this);
+    this.IOCore.assignInstructionCoreReferences(this.ARM, this.THUMB);
 }
 GameBoyAdvanceCPU.prototype.initializeRegisters = function () {
     /*

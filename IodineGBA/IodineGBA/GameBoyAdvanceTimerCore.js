@@ -18,7 +18,6 @@
 function GameBoyAdvanceTimer(IOCore) {
     //Build references:
     this.IOCore = IOCore;
-    this.initialize();
 }
 GameBoyAdvanceTimer.prototype.prescalarLookup = [
     0,
@@ -27,9 +26,6 @@ GameBoyAdvanceTimer.prototype.prescalarLookup = [
     0xA
 ];
 GameBoyAdvanceTimer.prototype.initialize = function () {
-    this.initializeTimers();
-}
-GameBoyAdvanceTimer.prototype.initializeTimers = function () {
     this.timer0Counter = 0;
     this.timer0Reload = 0;
     this.timer0Control = 0;

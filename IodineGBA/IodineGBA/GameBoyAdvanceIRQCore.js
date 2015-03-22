@@ -18,9 +18,8 @@
 function GameBoyAdvanceIRQ(IOCore) {
     //Build references:
     this.IOCore = IOCore;
-    this.initializeIRQState();
 }
-GameBoyAdvanceIRQ.prototype.initializeIRQState = function () {
+GameBoyAdvanceIRQ.prototype.initialize = function () {
     this.interruptsEnabled = 0;
     this.interruptsRequested = 0;
     this.IME = false;

@@ -18,6 +18,8 @@
 function GameBoyAdvanceGraphics(IOCore) {
     this.IOCore = IOCore;
     this.coreExposed = IOCore.coreExposed;
+}
+GameBoyAdvanceGraphics.prototype.initialize = function () {
     this.initializeIO();
     this.initializeRenderer();
 }

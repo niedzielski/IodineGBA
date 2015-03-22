@@ -17,7 +17,6 @@
  */
 function GameBoyAdvanceSaves(IOCore) {
     this.cartridge = IOCore.cartridge;
-    this.initialize();
 }
 GameBoyAdvanceSaves.prototype.initialize = function () {
     this.saveType = 0;

@@ -17,7 +17,6 @@
  */
 function GameBoyAdvanceJoyPad(IOCore) {
     this.IOCore = IOCore;
-    this.initialize();
 }
 GameBoyAdvanceJoyPad.prototype.initialize = function () {
     this.keyInput = 0x3FF;
