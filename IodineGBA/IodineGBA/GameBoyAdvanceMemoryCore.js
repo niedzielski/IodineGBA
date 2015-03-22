@@ -2608,24 +2608,6 @@ else {
         }
     }
 }
-GameBoyAdvanceMemory.prototype.writeVRAM16Preliminary = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.IOCore.updateGraphicsClocking();
-    switch (address >> 24) {
-        case 0x5:
-            this.wait.VRAMAccess();
-            this.gfx.writePalette16(address & 0x3FE, data & 0xFFFF);
-            break;
-        case 0x6:
-            this.wait.VRAMAccess();
-            this.gfx.writeVRAM16(address | 0, data | 0);
-            break;
-        default:
-            this.wait.OAMAccess();
-            this.gfx.writeOAM16(address & 0x3FE, data & 0xFFFF);
-    }
-}
 GameBoyAdvanceMemory.prototype.writePalette16 = function (address, data) {
     address = address | 0;
     data = data | 0;
@@ -2646,24 +2628,6 @@ GameBoyAdvanceMemory.prototype.writeOBJ16 = function (address, data) {
     this.IOCore.updateGraphicsClocking();
     this.wait.OAMAccess();
     this.gfx.writeOAM16(address & 0x3FE, data & 0xFFFF);
-}
-GameBoyAdvanceMemory.prototype.writeVRAM32Preliminary = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    this.IOCore.updateGraphicsClocking();
-    switch (address >> 24) {
-        case 0x5:
-            this.wait.VRAMAccess32();
-            this.gfx.writePalette32(address & 0x3FC, data | 0);
-            break;
-        case 0x6:
-            this.wait.VRAMAccess32();
-            this.gfx.writeVRAM32(address | 0, data | 0);
-            break;
-        default:
-            this.wait.OAMAccess();
-            this.gfx.writeOAM32(address & 0x3FC, data | 0);
-    }
 }
 GameBoyAdvanceMemory.prototype.writePalette32 = function (address, data) {
     address = address | 0;
