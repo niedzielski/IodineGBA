@@ -219,7 +219,7 @@ GameBoyAdvanceDMA2.prototype.copySound = function (source) {
     this.wait.singleClock();
     this.IOCore.updateTimerClocking();
     this.sound.writeFIFOB32(data | 0);
-    this.decrementWordCount(source | 0, 0x40000A4, 4);
+    this.soundDMAUpdate(source | 0);
     this.DMACore.updateFetch(data | 0);
 }
 GameBoyAdvanceDMA2.prototype.decrementWordCount = function (source, destination, transferred) {
@@ -239,6 +239,41 @@ GameBoyAdvanceDMA2.prototype.decrementWordCount = function (source, destination,
     //Save the new word count:
     this.wordCountShadow = wordCountShadow | 0;
 }
+GameBoyAdvanceDMA2.prototype.soundDMAUpdate = function (source) {
+    source = source | 0;
+    //Decrement the word count:
+    this.wordCountShadow = ((this.wordCountShadow | 0) - 1) & 0x3FFF;
+    if ((this.wordCountShadow | 0) == 0) {
+        //DMA transfer ended, handle accordingly:
+        //Reset pending requests:
+        this.pending = 0;
+        //Check Repeat Status:
+        if ((this.repeat | 0) == 0) {
+            //Disable the enable bit:
+            this.enabled = 0;
+        }
+        else {
+            //Repeating the dma:
+            //Direct Sound DMA Hardwired To Wordcount Of 4:
+            this.wordCountShadow = 0x4;
+        }
+        //Assert the FIFO B DMA request signal:
+        this.sound.checkFIFOBPendingSignal();
+        //Run the DMA channel checks:
+        this.DMACore.update();
+        //Check to see if we should flag for IRQ:
+        this.checkIRQTrigger();
+    }
+    //Update source address:
+    switch (this.sourceControl | 0) {
+        case 0:    //Increment
+        case 3:    //Forbidden (VBA has it increment)
+            this.sourceShadow = ((source | 0) + 4) | 0;
+            break;
+        case 1:
+            this.sourceShadow = ((source | 0) - 4) | 0;
+    }
+}
 GameBoyAdvanceDMA2.prototype.finalizeDMA = function (source, destination, transferred) {
     source = source | 0;
     destination = destination | 0;
@@ -253,14 +288,8 @@ GameBoyAdvanceDMA2.prototype.finalizeDMA = function (source, destination, transf
     }
     else {
         //Repeating the dma:
-        if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
-            //Direct Sound DMA Hardwired To Wordcount Of 4:
-            wordCountShadow = 0x4;
-        }
-        else {
-            //Reload word count:
-            wordCountShadow = this.wordCount | 0;
-        }
+        //Reload word count:
+        wordCountShadow = this.wordCount | 0;
     }
     //Assert the FIFO B DMA request signal:
     this.sound.checkFIFOBPendingSignal();
@@ -290,19 +319,16 @@ GameBoyAdvanceDMA2.prototype.finalDMAAddresses = function (source, destination, 
         case 1:    //Decrement
             this.sourceShadow = ((source | 0) - (transferred | 0)) | 0;
     }
-    //Don't update destination if in FIFO DMA mode:
-    if ((this.enabled | 0) != (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
-        //Update destination address:
-        switch (this.destinationControl | 0) {
-            case 0:    //Increment
-                this.destinationShadow = ((destination | 0) + (transferred | 0)) | 0;
-                break;
-            case 1:    //Decrement
-                this.destinationShadow = ((destination | 0) - (transferred | 0)) | 0;
-                break;
-            case 3:    //Reload
-                this.destinationShadow = this.destination | 0;
-        }
+    //Update destination address:
+    switch (this.destinationControl | 0) {
+        case 0:    //Increment
+            this.destinationShadow = ((destination | 0) + (transferred | 0)) | 0;
+            break;
+        case 1:    //Decrement
+            this.destinationShadow = ((destination | 0) - (transferred | 0)) | 0;
+            break;
+        case 3:    //Reload
+            this.destinationShadow = this.destination | 0;
     }
 }
 GameBoyAdvanceDMA2.prototype.incrementDMAAddresses = function (source, destination, transferred) {
@@ -318,17 +344,14 @@ GameBoyAdvanceDMA2.prototype.incrementDMAAddresses = function (source, destinati
         case 1:
             this.sourceShadow = ((source | 0) - (transferred | 0)) | 0;
     }
-    //Don't update destination if in FIFO DMA mode:
-    if ((this.enabled | 0) != (this.DMA_REQUEST_TYPE.FIFO_B | 0)) {
-        //Update destination address:
-        switch (this.destinationControl | 0) {
-            case 0:    //Increment
-            case 3:    //Increment
-                this.destinationShadow = ((destination | 0) + (transferred | 0)) | 0;
-                break;
-            case 1:    //Decrement
-                this.destinationShadow = ((destination | 0) - (transferred | 0)) | 0;
-        }
+    //Update destination address:
+    switch (this.destinationControl | 0) {
+        case 0:    //Increment
+        case 3:    //Increment
+            this.destinationShadow = ((destination | 0) + (transferred | 0)) | 0;
+            break;
+        case 1:    //Decrement
+            this.destinationShadow = ((destination | 0) - (transferred | 0)) | 0;
     }
 }
 GameBoyAdvanceDMA2.prototype.nextEventTime = function () {
