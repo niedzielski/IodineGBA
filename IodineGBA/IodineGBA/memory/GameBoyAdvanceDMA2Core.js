@@ -158,8 +158,6 @@ GameBoyAdvanceDMA2.prototype.enableDMAChannel = function () {
         this.sound.checkFIFOBPendingSignal();
         //Direct Sound DMA Hardwired To Wordcount Of 4:
         this.wordCountShadow = 0x4;
-        //Destination Hardwired to 0x40000A4:
-        this.destination = 0x40000A4;
     }
     else {
         if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
@@ -168,11 +166,11 @@ GameBoyAdvanceDMA2.prototype.enableDMAChannel = function () {
         }
         //Shadow copy the word count:
         this.wordCountShadow = this.wordCount | 0;
+        //Shadow copy the destination address:
+        this.destinationShadow = this.destination | 0;
     }
     //Shadow copy the source address:
     this.sourceShadow = this.source | 0;
-    //Shadow copy the destination address:
-    this.destinationShadow = this.destination | 0;
     //Run some DMA channel activity checks:
     this.DMACore.update();
 }
