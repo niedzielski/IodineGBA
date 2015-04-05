@@ -25,12 +25,6 @@ GameBoyAdvanceDMA3.prototype.DMA_ENABLE_TYPE = [            //DMA Channel 3 Mapp
     0x4,
     0x20
 ];
-GameBoyAdvanceDMA3.prototype.DMA_REQUEST_TYPE = {
-    IMMEDIATE:      0x1,
-    V_BLANK:        0x2,
-    H_BLANK:        0x4,
-    DISPLAY_SYNC:   0x20
-}
 GameBoyAdvanceDMA3.prototype.initialize = function () {
     this.enabled = 0;
     this.pending = 0;
@@ -247,6 +241,18 @@ GameBoyAdvanceDMA3.prototype.readDMAControl16 = function () {
     }
     return data | 0;
 }
+GameBoyAdvanceDMA3.prototype.getMatchStatus = function () {
+    return this.enabled & this.pending;
+}
+GameBoyAdvanceDMA3.prototype.gfxDisplaySyncRequest = function () {
+    this.requestDMA(0x20);
+}
+GameBoyAdvanceDMA3.prototype.gfxDisplaySyncEnableCheck = function () {
+	//Reset the display sync & reassert DMA enable line:
+    this.enabled &= ~0x20;
+	this.requestDisplaySync();
+    this.DMACore.update();
+}
 GameBoyAdvanceDMA3.prototype.requestDMA = function (DMAType) {
     DMAType = DMAType | 0;
     if ((this.enabled & DMAType) > 0) {
@@ -257,16 +263,16 @@ GameBoyAdvanceDMA3.prototype.requestDMA = function (DMAType) {
 GameBoyAdvanceDMA3.prototype.requestDisplaySync = function () {
 	//Called from LCD controller state machine on line 162:
     if ((this.displaySyncEnable | 0) != 0) {
-        this.enabled = this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0;
+        this.enabled = 0x20;
         this.displaySyncEnable = 0;
     }
 }
 GameBoyAdvanceDMA3.prototype.enableDMAChannel = function () {
-    if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
+    if ((this.enabled | 0) == 0x1) {
         //Flag immediate DMA transfers for processing now:
-        this.pending = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
+        this.pending = 0x1;
     }
-	else if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.DISPLAY_SYNC | 0)) {
+	else if ((this.enabled | 0) == 0x20) {
         //Trigger display sync DMA shadow enable and auto-check on line 162:
         this.enabled = 0;
 		this.displaySyncEnable = 1;
@@ -336,7 +342,7 @@ GameBoyAdvanceDMA3.prototype.finalizeDMA = function (source, destination, transf
     //Reset pending requests:
     this.pending = 0;
     //Check Repeat Status:
-    if ((this.repeat | 0) == 0 || (this.enabled | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
+    if ((this.repeat | 0) == 0 || (this.enabled | 0) == 0x1) {
         //Disable the enable bit:
         this.enabled = 0;
     }

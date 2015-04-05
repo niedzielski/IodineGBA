@@ -25,12 +25,6 @@ GameBoyAdvanceDMA1.prototype.DMA_ENABLE_TYPE = [            //DMA Channel 1 Mapp
     0x4,
     0x8
 ];
-GameBoyAdvanceDMA1.prototype.DMA_REQUEST_TYPE = {
-    IMMEDIATE:      0x1,
-    V_BLANK:        0x2,
-    H_BLANK:        0x4,
-    FIFO_A:         0x8
-}
 GameBoyAdvanceDMA1.prototype.initialize = function () {
     this.enabled = 0;
     this.pending = 0;
@@ -243,6 +237,12 @@ GameBoyAdvanceDMA1.prototype.readDMAControl16 = function () {
     }
     return data | 0;
 }
+GameBoyAdvanceDMA1.prototype.getMatchStatus = function () {
+    return this.enabled & this.pending;
+}
+GameBoyAdvanceDMA1.prototype.soundFIFOARequest = function () {
+    this.requestDMA(0x8);
+}
 GameBoyAdvanceDMA1.prototype.requestDMA = function (DMAType) {
     DMAType = DMAType | 0;
     if ((this.enabled & DMAType) > 0) {
@@ -251,16 +251,16 @@ GameBoyAdvanceDMA1.prototype.requestDMA = function (DMAType) {
     }
 }
 GameBoyAdvanceDMA1.prototype.enableDMAChannel = function () {
-    if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.FIFO_A | 0)) {
+    if ((this.enabled | 0) == 0x8) {
         //Assert the FIFO A DMA request signal:
         this.sound.checkFIFOAPendingSignal();
         //Direct Sound DMA Hardwired To Wordcount Of 4:
         this.wordCountShadow = 0x4;
     }
     else {
-        if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
+        if ((this.enabled | 0) == 0x1) {
             //Flag immediate DMA transfers for processing now:
-            this.pending = this.DMA_REQUEST_TYPE.IMMEDIATE | 0;
+            this.pending = 0x1;
         }
         //Shadow copy the word count:
         this.wordCountShadow = this.wordCount | 0;
@@ -276,7 +276,7 @@ GameBoyAdvanceDMA1.prototype.handleDMACopy = function () {
     //Get the source addess:
     var source = this.sourceShadow | 0;
     //Transfer Data:
-    if ((this.enabled | 0) == (this.DMA_REQUEST_TYPE.FIFO_A | 0)) {
+    if ((this.enabled | 0) == 0x8) {
         //32-bit Transfer:
         this.copySound(source | 0);
     }
@@ -378,7 +378,7 @@ GameBoyAdvanceDMA1.prototype.finalizeDMA = function (source, destination, transf
     //Reset pending requests:
     this.pending = 0;
     //Check Repeat Status:
-    if ((this.repeat | 0) == 0 || (this.enabled | 0) == (this.DMA_REQUEST_TYPE.IMMEDIATE | 0)) {
+    if ((this.repeat | 0) == 0 || (this.enabled | 0) == 0x1) {
         //Disable the enable bit:
         this.enabled = 0;
     }

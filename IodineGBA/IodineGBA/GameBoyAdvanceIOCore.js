@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2014 Grant Galitz
+ * Copyright (C) 2012-2015 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -62,6 +62,15 @@ GameBoyAdvanceIO.prototype.assignInstructionCoreReferences = function (ARM, THUM
     //Passed here once the CPU component is initialized:
     this.ARM = ARM;
     this.THUMB = THUMB;
+}
+GameBoyAdvanceIO.prototype.assignDMAChannelReferences = function (channel0, channel1, channel2, channel3) {
+    //Passed here once the DMA component is initialized:
+    this.dmaChannel0 = channel0;
+    this.dmaChannel1 = channel1;
+    this.dmaChannel2 = channel2;
+    this.dmaChannel3 = channel3;
+    //Pass references down to the memory core:
+    this.memory.assignDMAChannelReferences(channel0, channel1, channel2, channel3);
 }
 GameBoyAdvanceIO.prototype.enter = function (CPUCyclesTotal) {
     //Find out how many clocks to iterate through this run:

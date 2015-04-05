@@ -151,7 +151,7 @@ GameBoyAdvanceEEPROMChip.prototype.addressMode = function (data) {
     switch (this.bitsProcessed | 0) {
         //6 bit address mode:
         case 0x6:
-            if ((this.IOCore.dma.channels[3].wordCountShadow | 0) >= (((this.mode | 0) == 2) ? 0x4A : 0xA)) {
+            if ((this.IOCore.dmaChannel3.wordCountShadow | 0) >= (((this.mode | 0) == 2) ? 0x4A : 0xA)) {
                 this.largestSizePossible = 0x2000;
                 this.allocate();
                 break;

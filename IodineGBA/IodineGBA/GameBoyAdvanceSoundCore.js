@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2014 Grant Galitz
+ * Copyright (C) 2012-2015 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,6 +21,8 @@ function GameBoyAdvanceSound(IOCore) {
     this.coreExposed = this.IOCore.coreExposed;
 }
 GameBoyAdvanceSound.prototype.initialize = function () {
+    this.dmaChannel1 = this.IOCore.dmaChannel1;
+    this.dmaChannel2 = this.IOCore.dmaChannel2;
     //Did the emulator core initialize us for output yet?
     this.preprocessInitialization(false);
     //Initialize start:
@@ -394,12 +396,12 @@ GameBoyAdvanceSound.prototype.writeFIFOB32 = function (data) {
 }
 GameBoyAdvanceSound.prototype.checkFIFOAPendingSignal = function () {
     if (this.FIFOABuffer.requestingDMA()) {
-        this.IOCore.dma.soundFIFOARequest();
+        this.dmaChannel1.soundFIFOARequest();
     }
 }
 GameBoyAdvanceSound.prototype.checkFIFOBPendingSignal = function () {
     if (this.FIFOBBuffer.requestingDMA()) {
-        this.IOCore.dma.soundFIFOBRequest();
+        this.dmaChannel2.soundFIFOBRequest();
     }
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundAFIFOClear = function () {

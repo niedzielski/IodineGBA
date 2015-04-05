@@ -61,6 +61,7 @@ GameBoyAdvanceMemory.prototype.initialize = function () {
     this.saves = this.IOCore.saves;
 }
 GameBoyAdvanceMemory.prototype.assignDMAChannelReferences = function (channel0, channel1, channel2, channel3) {
+    //Passed here once the DMA component is initialized:
     this.dmaChannel0 = channel0;
     this.dmaChannel1 = channel1;
     this.dmaChannel2 = channel2;
