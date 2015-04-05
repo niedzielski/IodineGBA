@@ -18,27 +18,24 @@
 function GameBoyAdvanceDMA(IOCore) {
     this.IOCore = IOCore;
 }
-GameBoyAdvanceDMA.prototype.V_BLANK_SIGNAL = 0x2;
-GameBoyAdvanceDMA.prototype.H_BLANK_SIGNAL = 0x4;
 GameBoyAdvanceDMA.prototype.initialize = function () {
-    this.dmaChannel0 = new GameBoyAdvanceDMA0(this);
-    this.dmaChannel1 = new GameBoyAdvanceDMA1(this);
-    this.dmaChannel2 = new GameBoyAdvanceDMA2(this);
-    this.dmaChannel3 = new GameBoyAdvanceDMA3(this);
+    this.dmaChannel0 = this.IOCore.dmaChannel0;
+    this.dmaChannel1 = this.IOCore.dmaChannel1;
+    this.dmaChannel2 = this.IOCore.dmaChannel2;
+    this.dmaChannel3 = this.IOCore.dmaChannel3;
     this.currentMatch = -1;
     this.fetch = 0;
-    this.IOCore.assignDMAChannelReferences(this.dmaChannel0, this.dmaChannel1, this.dmaChannel2, this.dmaChannel3);
 }
 GameBoyAdvanceDMA.prototype.getCurrentFetchValue = function () {
     return this.fetch | 0;
 }
 GameBoyAdvanceDMA.prototype.gfxHBlankRequest = function () {
     //Pass H-Blank signal to all DMA channels:
-    this.requestDMA(this.H_BLANK_SIGNAL | 0);
+    this.requestDMA(0x4);
 }
 GameBoyAdvanceDMA.prototype.gfxVBlankRequest = function () {
     //Pass V-Blank signal to all DMA channels:
-    this.requestDMA(this.V_BLANK_SIGNAL | 0);
+    this.requestDMA(0x2);
 }
 GameBoyAdvanceDMA.prototype.requestDMA = function (DMAType) {
     DMAType = DMAType | 0;

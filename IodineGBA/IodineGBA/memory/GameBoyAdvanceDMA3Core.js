@@ -15,9 +15,8 @@
  * GNU General Public License for more details.
  *
  */
-function GameBoyAdvanceDMA3(dma) {
-    this.DMACore = dma;
-    this.initialize();
+function GameBoyAdvanceDMA3(IOCore) {
+    this.IOCore = IOCore;
 }
 GameBoyAdvanceDMA3.prototype.DMA_ENABLE_TYPE = [            //DMA Channel 3 Mapping:
     0x1,
@@ -42,7 +41,7 @@ GameBoyAdvanceDMA3.prototype.initialize = function () {
     this.destinationControl = 0;
     this.gamePakDMA = 0;
 	this.displaySyncEnable = 0;
-    this.IOCore = this.DMACore.IOCore;
+    this.DMACore = this.IOCore.dma;
     this.memory = this.IOCore.memory;
     this.gfx = this.IOCore.gfx;
     this.irq = this.IOCore.irq;

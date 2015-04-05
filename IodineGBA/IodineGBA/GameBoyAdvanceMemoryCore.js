@@ -49,6 +49,10 @@ GameBoyAdvanceMemory.prototype.initialize = function () {
     this.memoryWrite32 = this.memoryWrite32Generated[1];
     this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[1];
     //Initialize the various handler objects:
+    this.dmaChannel0 = this.IOCore.dmaChannel0;
+    this.dmaChannel1 = this.IOCore.dmaChannel1;
+    this.dmaChannel2 = this.IOCore.dmaChannel2;
+    this.dmaChannel3 = this.IOCore.dmaChannel3;
     this.gfx = this.IOCore.gfx;
     this.sound = this.IOCore.sound;
     this.timer = this.IOCore.timer;
@@ -59,13 +63,6 @@ GameBoyAdvanceMemory.prototype.initialize = function () {
     this.wait = this.IOCore.wait;
     this.cpu = this.IOCore.cpu;
     this.saves = this.IOCore.saves;
-}
-GameBoyAdvanceMemory.prototype.assignDMAChannelReferences = function (channel0, channel1, channel2, channel3) {
-    //Passed here once the DMA component is initialized:
-    this.dmaChannel0 = channel0;
-    this.dmaChannel1 = channel1;
-    this.dmaChannel2 = channel2;
-    this.dmaChannel3 = channel3;
 }
 GameBoyAdvanceMemory.prototype.writeExternalWRAM8 = function (address, data) {
     address = address | 0;

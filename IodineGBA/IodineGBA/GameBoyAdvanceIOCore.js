@@ -34,6 +34,10 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     //Build the core object layout:
     this.memory = new GameBoyAdvanceMemory(this);
     this.dma = new GameBoyAdvanceDMA(this);
+    this.dmaChannel0 = new GameBoyAdvanceDMA0(this);
+    this.dmaChannel1 = new GameBoyAdvanceDMA1(this);
+    this.dmaChannel2 = new GameBoyAdvanceDMA2(this);
+    this.dmaChannel3 = new GameBoyAdvanceDMA3(this);
     this.gfx = new GameBoyAdvanceGraphics(this);
     this.sound = new GameBoyAdvanceSound(this);
     this.timer = new GameBoyAdvanceTimer(this);
@@ -47,6 +51,10 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     //Now initialize each component:
     this.memory.initialize();
     this.dma.initialize();
+    this.dmaChannel0.initialize();
+    this.dmaChannel1.initialize();
+    this.dmaChannel2.initialize();
+    this.dmaChannel3.initialize();
     this.gfx.initialize();
     this.sound.initialize();
     this.timer.initialize();
@@ -62,15 +70,6 @@ GameBoyAdvanceIO.prototype.assignInstructionCoreReferences = function (ARM, THUM
     //Passed here once the CPU component is initialized:
     this.ARM = ARM;
     this.THUMB = THUMB;
-}
-GameBoyAdvanceIO.prototype.assignDMAChannelReferences = function (channel0, channel1, channel2, channel3) {
-    //Passed here once the DMA component is initialized:
-    this.dmaChannel0 = channel0;
-    this.dmaChannel1 = channel1;
-    this.dmaChannel2 = channel2;
-    this.dmaChannel3 = channel3;
-    //Pass references down to the memory core:
-    this.memory.assignDMAChannelReferences(channel0, channel1, channel2, channel3);
 }
 GameBoyAdvanceIO.prototype.enter = function (CPUCyclesTotal) {
     //Find out how many clocks to iterate through this run:
