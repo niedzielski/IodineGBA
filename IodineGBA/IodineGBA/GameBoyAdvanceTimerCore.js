@@ -230,8 +230,8 @@ GameBoyAdvanceTimer.prototype.writeTM0CNT8_2 = function (data) {
     data = data | 0;
     this.IOCore.updateTimerClocking();
     this.IOCore.sound.audioJIT();
-    this.timer0Control = data | 0;
-    if ((data | 0) > 0x7F) {
+    this.timer0Control = data & 0xFF;
+    if ((data & 0x80) != 0) {
         if (!this.timer0Enabled) {
             this.timer0Counter = this.timer0Reload | 0;
             this.timer0Enabled = true;
@@ -241,7 +241,7 @@ GameBoyAdvanceTimer.prototype.writeTM0CNT8_2 = function (data) {
     else {
         this.timer0Enabled = false;
     }
-    this.timer0IRQ = ((data & 0x40) == 0x40);
+    this.timer0IRQ = ((data & 0x40) != 0);
     this.timer0PrescalarShifted = this.prescalarLookup[data & 0x03] | 0;
     this.timer0Prescalar = 1 << (this.timer0PrescalarShifted | 0);
     this.IOCore.updateCoreEventTime();
@@ -315,8 +315,8 @@ GameBoyAdvanceTimer.prototype.writeTM1CNT8_2 = function (data) {
     data = data | 0;
     this.IOCore.updateTimerClocking();
     this.IOCore.sound.audioJIT();
-    this.timer1Control = data | 0;
-    if ((data | 0) > 0x7F) {
+    this.timer1Control = data & 0xFF;
+    if ((data & 0x80) != 0) {
         if (!this.timer1Enabled) {
             this.timer1Counter = this.timer1Reload | 0;
             this.timer1Enabled = true;
@@ -326,8 +326,8 @@ GameBoyAdvanceTimer.prototype.writeTM1CNT8_2 = function (data) {
     else {
         this.timer1Enabled = false;
     }
-    this.timer1IRQ = ((data & 0x40) == 0x40);
-    this.timer1CountUp = ((data & 0x4) == 0x4);
+    this.timer1IRQ = ((data & 0x40) != 0);
+    this.timer1CountUp = ((data & 0x4) != 0);
     this.timer1PrescalarShifted = this.prescalarLookup[data & 0x03] | 0;
     this.timer1Prescalar = 1 << (this.timer1PrescalarShifted | 0);
     this.preprocessTimer1();
@@ -400,8 +400,8 @@ GameBoyAdvanceTimer.prototype.writeTM2CNT8_1 = function (data) {
 GameBoyAdvanceTimer.prototype.writeTM2CNT8_2 = function (data) {
     data = data | 0;
     this.IOCore.updateTimerClocking();
-    this.timer2Control = data | 0;
-    if ((data | 0) > 0x7F) {
+    this.timer2Control = data & 0xFF;
+    if ((data & 0x80) != 0) {
         if (!this.timer2Enabled) {
             this.timer2Counter = this.timer2Reload | 0;
             this.timer2Enabled = true;
@@ -483,8 +483,8 @@ GameBoyAdvanceTimer.prototype.writeTM3CNT8_1 = function (data) {
 GameBoyAdvanceTimer.prototype.writeTM3CNT8_2 = function (data) {
     data = data | 0;
     this.IOCore.updateTimerClocking();
-    this.timer3Control = data | 0;
-    if ((data | 0) > 0x7F) {
+    this.timer3Control = data & 0xFF;
+    if ((data & 0x80) != 0) {
         if (!this.timer3Enabled) {
             this.timer3Counter = this.timer3Reload | 0;
             this.timer3Enabled = true;
@@ -494,8 +494,8 @@ GameBoyAdvanceTimer.prototype.writeTM3CNT8_2 = function (data) {
     else {
         this.timer3Enabled = false;
     }
-    this.timer3IRQ = ((data & 0x40) == 0x40);
-    this.timer3CountUp = ((data & 0x4) == 0x4);
+    this.timer3IRQ = ((data & 0x40) != 0);
+    this.timer3CountUp = ((data & 0x4) != 0);
     this.timer3PrescalarShifted = this.prescalarLookup[data & 0x03] | 0;
     this.timer3Prescalar = 1 << (this.timer3PrescalarShifted | 0);
     this.preprocesstimer3();

@@ -984,7 +984,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
             break;
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
         case 0x4000102:
-            this.timer.writeTM0CNT8_2(ddata | 0);
+            this.timer.writeTM0CNT8_2(data | 0);
             break;
         //4000103h - TM0CNT_H - Timer 0 Control (R/W)
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
