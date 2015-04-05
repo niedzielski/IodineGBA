@@ -780,203 +780,195 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         //40000A8h through 40000AFh - NOT USED - GLITCHED
         //40000B0h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
         case 0x40000B0:
-            this.dma.writeDMASource0(0, data & 0xFF);
+            this.dma.channel0.writeDMASource8_0(data | 0);
             break;
         //40000B1h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
         case 0x40000B1:
-            this.dma.writeDMASource1(0, data & 0xFF);
+            this.dma.channel0.writeDMASource8_1(data | 0);
             break;
         //40000B2h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
         case 0x40000B2:
-            this.dma.writeDMASource2(0, data & 0xFF);
+            this.dma.channel0.writeDMASource8_2(data | 0);
             break;
         //40000B3h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
         case 0x40000B3:
-            this.dma.writeDMASource3(0, data & 0x7);    //Mask out the unused bits.
+            this.dma.channel0.writeDMASource8_3(data | 0);
             break;
         //40000B4h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)
         case 0x40000B4:
-            this.dma.writeDMADestination0(0, data & 0xFF);
+            this.dma.channel0.writeDMADestination8_0(data | 0);
             break;
         //40000B5h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)
         case 0x40000B5:
-            this.dma.writeDMADestination1(0, data & 0xFF);
+            this.dma.channel0.writeDMADestination8_1(data | 0);
             break;
         //40000B6h - DMA0DAH - DMA 0 Destination Address (W) (internal memory)
         case 0x40000B6:
-            this.dma.writeDMADestination2(0, data & 0xFF);
+            this.dma.channel0.writeDMADestination8_2(data | 0);
             break;
         //40000B7h - DMA0DAH - DMA 0 Destination Address (W) (internal memory)
         case 0x40000B7:
-            this.dma.writeDMADestination3(0, data & 0x7);
+            this.dma.channel0.writeDMADestination8_3(data | 0);
             break;
         //40000B8h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)
         case 0x40000B8:
-            this.dma.writeDMAWordCount0(0, data & 0xFF);
+            this.dma.channel0.writeDMAWordCount8_0(data | 0);
             break;
         //40000B9h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)
         case 0x40000B9:
-            this.dma.writeDMAWordCount1(0, data & 0x3F);
+            this.dma.channel0.writeDMAWordCount8_1(data | 0);
             break;
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
         case 0x40000BA:
-            this.dma.writeDMAControl0(0, data & 0xFF);
+            this.dma.channel0.writeDMAControl8_0(data | 0);
             break;
         //40000BBh - DMA0CNT_H - DMA 0 Control (R/W)
         case 0x40000BB:
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(0, data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel0.writeDMAControl8_1(data | 0);
             break;
         //40000BCh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
         case 0x40000BC:
-            this.dma.writeDMASource0(1, data & 0xFF);
+            this.dma.channel1.writeDMASource8_0(data | 0);
             break;
         //40000BDh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
         case 0x40000BD:
-            this.dma.writeDMASource1(1, data & 0xFF);
+            this.dma.channel1.writeDMASource8_1(data | 0);
             break;
         //40000BEh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
         case 0x40000BE:
-            this.dma.writeDMASource2(1, data & 0xFF);
+            this.dma.channel1.writeDMASource8_2(data | 0);
             break;
         //40000BFh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
         case 0x40000BF:
-            this.dma.writeDMASource3(1, data & 0xF);    //Mask out the unused bits.
+            this.dma.channel1.writeDMASource8_3(data | 0);
             break;
         //40000C0h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
         case 0x40000C0:
-            this.dma.writeDMADestination0(1, data & 0xFF);
+            this.dma.channel1.writeDMADestination8_0(data | 0);
             break;
         //40000C1h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
         case 0x40000C1:
-            this.dma.writeDMADestination1(1, data & 0xFF);
+            this.dma.channel1.writeDMADestination8_1(data | 0);
             break;
         //40000C2h - DMA1DAH - DMA 1 Destination Address (W) (internal memory)
         case 0x40000C2:
-            this.dma.writeDMADestination2(1, data & 0xFF);
+            this.dma.channel1.writeDMADestination8_2(data | 0);
             break;
         //40000C3h - DMA1DAH - DMA 1 Destination Address (W) (internal memory)
         case 0x40000C3:
-            this.dma.writeDMADestination3(1, data & 0x7);
+            this.dma.channel1.writeDMADestination8_3(data | 0);
             break;
         //40000C4h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)
         case 0x40000C4:
-            this.dma.writeDMAWordCount0(1, data & 0xFF);
+            this.dma.channel1.writeDMAWordCount8_0(data | 0);
             break;
         //40000C5h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)
         case 0x40000C5:
-            this.dma.writeDMAWordCount1(1, data & 0x3F);
+            this.dma.channel1.writeDMAWordCount8_1(data | 0);
             break;
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
         case 0x40000C6:
-            this.dma.writeDMAControl0(1, data & 0xFF);
+            this.dma.channel1.writeDMAControl8_0(data | 0);
             break;
         //40000C7h - DMA1CNT_H - DMA 1 Control (R/W)
         case 0x40000C7:
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(1, data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel1.writeDMAControl8_1(data | 0);
             break;
         //40000C8h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
         case 0x40000C8:
-            this.dma.writeDMASource0(2, data & 0xFF);
+            this.dma.channel2.writeDMASource8_0(data | 0);
             break;
         //40000C9h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
         case 0x40000C9:
-            this.dma.writeDMASource1(2, data & 0xFF);
+            this.dma.channel2.writeDMASource8_1(data | 0);
             break;
         //40000CAh - DMA2SAH - DMA 2 Source Address (W) (internal memory)
         case 0x40000CA:
-            this.dma.writeDMASource2(2, data & 0xFF);
+            this.dma.channel2.writeDMASource8_2(data | 0);
             break;
         //40000CBh - DMA2SAH - DMA 2 Source Address (W) (internal memory)
         case 0x40000CB:
-            this.dma.writeDMASource3(2, data & 0xF);    //Mask out the unused bits.
+            this.dma.channel2.writeDMASource8_3(data | 0);
             break;
         //40000CCh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)
         case 0x40000CC:
-            this.dma.writeDMADestination0(2, data & 0xFF);
+            this.dma.channel2.writeDMADestination8_0(data | 0);
             break;
         //40000CDh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)
         case 0x40000CD:
-            this.dma.writeDMADestination1(2, data & 0xFF);
+            this.dma.channel2.writeDMADestination8_1(data | 0);
             break;
         //40000CEh - DMA2DAH - DMA 2 Destination Address (W) (internal memory)
         case 0x40000CE:
-            this.dma.writeDMADestination2(2, data & 0xFF);
+            this.dma.channel2.writeDMADestination8_2(data | 0);
             break;
         //40000CFh - DMA2DAH - DMA 2 Destination Address (W) (internal memory)
         case 0x40000CF:
-            this.dma.writeDMADestination3(2, data & 0x7);
+            this.dma.channel2.writeDMADestination8_3(data | 0);
             break;
         //40000D0h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)
         case 0x40000D0:
-            this.dma.writeDMAWordCount0(2, data & 0xFF);
+            this.dma.channel2.writeDMAWordCount8_0(data | 0);
             break;
         //40000D1h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)
         case 0x40000D1:
-            this.dma.writeDMAWordCount1(2, data & 0x3F);
+            this.dma.channel2.writeDMAWordCount8_1(data | 0);
             break;
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
         case 0x40000D2:
-            this.dma.writeDMAControl0(2, data & 0xFF);
+            this.dma.channel2.writeDMAControl8_0(data | 0);
             break;
         //40000D3h - DMA2CNT_H - DMA 2 Control (R/W)
         case 0x40000D3:
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(2, data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel2.writeDMAControl8_1(data | 0);
             break;
         //40000D4h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
         case 0x40000D4:
-            this.dma.writeDMASource0(3, data & 0xFF);
+            this.dma.channel3.writeDMASource8_0(data | 0);
             break;
         //40000D5h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
         case 0x40000D5:
-            this.dma.writeDMASource1(3, data & 0xFF);
+            this.dma.channel3.writeDMASource8_1(data | 0);
             break;
         //40000D6h - DMA3SAH - DMA 3 Source Address (W) (internal memory)
         case 0x40000D6:
-            this.dma.writeDMASource2(3, data & 0xFF);
+            this.dma.channel3.writeDMASource8_2(data | 0);
             break;
         //40000D7h - DMA3SAH - DMA 3 Source Address (W) (internal memory)
         case 0x40000D7:
-            this.dma.writeDMASource3(3, data & 0xF);    //Mask out the unused bits.
+            this.dma.channel3.writeDMASource8_3(data | 0);
             break;
         //40000D8h - DMA3DAD - DMA 3 Destination Address (W) (internal memory)
         case 0x40000D8:
-            this.dma.writeDMADestination0(3, data & 0xFF);
+            this.dma.channel3.writeDMADestination8_0(data | 0);
             break;
         //40000D9h - DMA3DAD - DMA 3 Destination Address (W) (internal memory)
         case 0x40000D9:
-            this.dma.writeDMADestination1(3, data & 0xFF);
+            this.dma.channel3.writeDMADestination8_1(data | 0);
             break;
         //40000DAh - DMA3DAH - DMA 3 Destination Address (W) (internal memory)
         case 0x40000DA:
-            this.dma.writeDMADestination2(3, data & 0xFF);
+            this.dma.channel3.writeDMADestination8_2(data | 0);
             break;
         //40000DBh - DMA3DAH - DMA 3 Destination Address (W) (internal memory)
         case 0x40000DB:
-            this.dma.writeDMADestination3(3, data & 0xF);
+            this.dma.channel3.writeDMADestination8_3(data | 0);
             break;
         //40000DCh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)
         case 0x40000DC:
-            this.dma.writeDMAWordCount0(3, data & 0xFF);
+            this.dma.channel3.writeDMAWordCount8_0(data | 0);
             break;
         //40000DDh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)
         case 0x40000DD:
-            this.dma.writeDMAWordCount1(3, data & 0xFF);
+            this.dma.channel3.writeDMAWordCount8_1(data | 0);
             break;
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
         case 0x40000DE:
-            this.dma.writeDMAControl0(3, data & 0xFF);
+            this.dma.channel3.writeDMAControl8_0(data | 0);
             break;
         //40000DFh - DMA3CNT_H - DMA 3 Control (R/W)
         case 0x40000DF:
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(3, data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel3.writeDMAControl8_1(data | 0);
             break;
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
@@ -1670,131 +1662,99 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
         //40000A8h through 40000AFh - NOT USED - GLITCHED
         //40000B0h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
         case 0x40000B0:
-            this.dma.writeDMASource0(0, data & 0xFF);
-            this.dma.writeDMASource1(0, (data >> 8) & 0xFF);
+            this.dma.channel0.writeDMASource16_0(data | 0);
             break;
         //40000B2h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
         case 0x40000B2:
-            this.dma.writeDMASource2(0, data & 0xFF);
-            this.dma.writeDMASource3(0, (data >> 8) & 0x7);    //Mask out the unused bits.
+            this.dma.channel0.writeDMASource16_1(data | 0);
             break;
         //40000B4h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)
         case 0x40000B4:
-            this.dma.writeDMADestination0(0, data & 0xFF);
-            this.dma.writeDMADestination1(0, (data >> 8) & 0xFF);
+            this.dma.channel0.writeDMADestination16_0(data | 0);
             break;
         //40000B6h - DMA0DAH - DMA 0 Destination Address (W) (internal memory)
         case 0x40000B6:
-            this.dma.writeDMADestination2(0, data & 0xFF);
-            this.dma.writeDMADestination3(0, (data >> 8) & 0x7);
+            this.dma.channel0.writeDMADestination16_1(data | 0);
             break;
         //40000B8h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)
         case 0x40000B8:
-            this.dma.writeDMAWordCount0(0, data & 0xFF);
-            this.dma.writeDMAWordCount1(0, (data >> 8) & 0x3F);
+            this.dma.channel0.writeDMAWordCount16(data | 0);
             break;
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
         case 0x40000BA:
-            this.dma.writeDMAControl0(0, data & 0xFF);
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(0, (data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel0.writeDMAControl16(data | 0);
             break;
         //40000BCh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
         case 0x40000BC:
-            this.dma.writeDMASource0(1, data & 0xFF);
-            this.dma.writeDMASource1(1, (data >> 8) & 0xFF);
+            this.dma.channel1.writeDMASource16_0(data | 0);
             break;
         //40000BEh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
         case 0x40000BE:
-            this.dma.writeDMASource2(1, data & 0xFF);
-            this.dma.writeDMASource3(1, (data >> 8) & 0xF);    //Mask out the unused bits.
+            this.dma.channel1.writeDMASource16_1(data | 0);
             break;
         //40000C0h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
         case 0x40000C0:
-            this.dma.writeDMADestination0(1, data & 0xFF);
-            this.dma.writeDMADestination1(1, (data >> 8) & 0xFF);
+            this.dma.channel1.writeDMADestination16_0(data | 0);
             break;
         //40000C2h - DMA1DAH - DMA 1 Destination Address (W) (internal memory)
         case 0x40000C2:
-            this.dma.writeDMADestination2(1, data & 0xFF);
-            this.dma.writeDMADestination3(1, (data >> 8) & 0x7);
+            this.dma.channel1.writeDMADestination16_1(data | 0);
             break;
         //40000C4h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)
         case 0x40000C4:
-            this.dma.writeDMAWordCount0(1, data & 0xFF);
-            this.dma.writeDMAWordCount1(1, (data >> 8) & 0x3F);
+            this.dma.channel1.writeDMAWordCount16(data | 0);
             break;
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
         case 0x40000C6:
-            this.dma.writeDMAControl0(1, data & 0xFF);
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(1, (data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel1.writeDMAControl16(data | 0);
             break;
         //40000C8h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
         case 0x40000C8:
-            this.dma.writeDMASource0(2, data & 0xFF);
-            this.dma.writeDMASource1(2, (data >> 8) & 0xFF);
+            this.dma.channel2.writeDMASource16_0(data | 0);
             break;
         //40000CAh - DMA2SAH - DMA 2 Source Address (W) (internal memory)
         case 0x40000CA:
-            this.dma.writeDMASource2(2, data & 0xFF);
-            this.dma.writeDMASource3(2, (data >> 8) & 0xF);    //Mask out the unused bits.
+            this.dma.channel2.writeDMASource16_1(data | 0);
             break;
         //40000CCh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)
         case 0x40000CC:
-            this.dma.writeDMADestination0(2, data & 0xFF);
-            this.dma.writeDMADestination1(2, (data >> 8) & 0xFF);
+            this.dma.channel2.writeDMADestination16_0(data | 0);
             break;
         //40000CEh - DMA2DAH - DMA 2 Destination Address (W) (internal memory)
         case 0x40000CE:
-            this.dma.writeDMADestination2(2, data & 0xFF);
-            this.dma.writeDMADestination3(2, (data >> 8) & 0x7);
+            this.dma.channel2.writeDMADestination16_1(data | 0);
             break;
         //40000D0h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)
         case 0x40000D0:
-            this.dma.writeDMAWordCount0(2, data & 0xFF);
-            this.dma.writeDMAWordCount1(2, (data >> 8) & 0x3F);
+            this.dma.channel2.writeDMAWordCount16(data | 0);
             break;
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
         case 0x40000D2:
-            this.dma.writeDMAControl0(2, data & 0xFF);
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(2, (data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel2.writeDMAControl16(data | 0);
             break;
         //40000D4h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
         case 0x40000D4:
-            this.dma.writeDMASource0(3, data & 0xFF);
-            this.dma.writeDMASource1(3, (data >> 8) & 0xFF);
+            this.dma.channel3.writeDMASource16_0(data | 0);
             break;
         //40000D6h - DMA3SAH - DMA 3 Source Address (W) (internal memory)
         case 0x40000D6:
-            this.dma.writeDMASource2(3, data & 0xFF);
-            this.dma.writeDMASource3(3, (data >> 8) & 0xF);    //Mask out the unused bits.
+            this.dma.channel3.writeDMASource16_1(data | 0);
             break;
         //40000D8h - DMA3DAD - DMA 3 Destination Address (W) (internal memory)
         case 0x40000D8:
-            this.dma.writeDMADestination0(3, data & 0xFF);
-            this.dma.writeDMADestination1(3, (data >> 8) & 0xFF);
+            this.dma.channel3.writeDMADestination16_0(data | 0);
             break;
         //40000DAh - DMA3DAH - DMA 3 Destination Address (W) (internal memory)
         case 0x40000DA:
-            this.dma.writeDMADestination2(3, data & 0xFF);
-            this.dma.writeDMADestination3(3, (data >> 8) & 0xF);
+            this.dma.channel3.writeDMADestination16_1(data | 0);
             break;
         //40000DCh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)
         case 0x40000DC:
-            this.dma.writeDMAWordCount0(3, data & 0xFF);
-            this.dma.writeDMAWordCount1(3, (data >> 8) & 0xFF);
+            this.dma.channel3.writeDMAWordCount16(data | 0);
             break;
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
         case 0x40000DE:
-            this.dma.writeDMAControl0(3, data & 0xFF);
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(3, (data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel3.writeDMAControl16(data | 0);
             break;
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
@@ -2316,106 +2276,62 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //40000B0h - DMA0SAH - DMA 0 Source Address (W) (internal memory)
         //40000B2h - DMA0SAD - DMA 0 Source Address (W) (internal memory)
         case 0x40000B0:
-            this.dma.writeDMASource0(0, data & 0xFF);
-            this.dma.writeDMASource1(0, (data >> 8) & 0xFF);
-            this.dma.writeDMASource2(0, (data >> 16) & 0xFF);
-            this.dma.writeDMASource3(0, (data >> 24) & 0x7);    //Mask out the unused bits.
+            this.dma.channel0.writeDMASource32(data | 0);
             break;
         //40000B4h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)
         //40000B6h - DMA0DAH - DMA 0 Destination Address (W) (internal memory)
         case 0x40000B4:
-            this.dma.writeDMADestination0(0, data & 0xFF);
-            this.dma.writeDMADestination1(0, (data >> 8) & 0xFF);
-            this.dma.writeDMADestination2(0, (data >> 16) & 0xFF);
-            this.dma.writeDMADestination3(0, (data >> 24) & 0x7);
+            this.dma.channel0.writeDMADestination32(data | 0);
             break;
         //40000B8h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
         case 0x40000B8:
-            this.dma.writeDMAWordCount0(0, data & 0xFF);
-            this.dma.writeDMAWordCount1(0, (data >> 8) & 0x3F);
-            this.dma.writeDMAControl0(0, (data >> 16) & 0xFF);
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(0, data >>> 24);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel0.writeDMAControl32(data | 0);
             break;
         //40000BCh - DMA1SAD - DMA 1 Source Address (W) (internal memory)
         //40000BEh - DMA1SAH - DMA 1 Source Address (W) (internal memory)
         case 0x40000BC:
-            this.dma.writeDMASource0(1, data & 0xFF);
-            this.dma.writeDMASource1(1, (data >> 8) & 0xFF);
-            this.dma.writeDMASource2(1, (data >> 16) & 0xFF);
-            this.dma.writeDMASource3(1, (data >> 24) & 0xF);    //Mask out the unused bits.
+            this.dma.channel1.writeDMASource32(data | 0);
             break;
         //40000C0h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)
         //40000C2h - DMA1DAH - DMA 1 Destination Address (W) (internal memory)
         case 0x40000C0:
-            this.dma.writeDMADestination0(1, data & 0xFF);
-            this.dma.writeDMADestination1(1, (data >> 8) & 0xFF);
-            this.dma.writeDMADestination2(1, (data >> 16) & 0xFF);
-            this.dma.writeDMADestination3(1, (data >> 24) & 0x7);
+            this.dma.channel1.writeDMADestination32(data | 0);
             break;
         //40000C4h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
         case 0x40000C4:
-            this.dma.writeDMAWordCount0(1, data & 0xFF);
-            this.dma.writeDMAWordCount1(1, (data >> 8) & 0x3F);
-            this.dma.writeDMAControl0(1, (data >> 16) & 0xFF);
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(1, data >>> 24);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel1.writeDMAControl32(data | 0);
             break;
         //40000C8h - DMA2SAD - DMA 2 Source Address (W) (internal memory)
         //40000CAh - DMA2SAH - DMA 2 Source Address (W) (internal memory)
         case 0x40000C8:
-            this.dma.writeDMASource0(2, data & 0xFF);
-            this.dma.writeDMASource1(2, (data >> 8) & 0xFF);
-            this.dma.writeDMASource2(2, (data >> 16) & 0xFF);
-            this.dma.writeDMASource3(2, (data >> 24) & 0xF);    //Mask out the unused bits.
+            this.dma.channel2.writeDMASource32(data | 0);
             break;
         //40000CCh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)
         //40000CEh - DMA2DAH - DMA 2 Destination Address (W) (internal memory)
         case 0x40000CC:
-            this.dma.writeDMADestination0(2, data & 0xFF);
-            this.dma.writeDMADestination1(2, (data >> 8) & 0xFF);
-            this.dma.writeDMADestination2(2, (data >> 16) & 0xFF);
-            this.dma.writeDMADestination3(2, (data >> 24) & 0x7);
+            this.dma.channel2.writeDMADestination32(data | 0);
             break;
         //40000D0h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
         case 0x40000D0:
-            this.dma.writeDMAWordCount0(2, data & 0xFF);
-            this.dma.writeDMAWordCount1(2, (data >> 8) & 0x3F);
-            this.dma.writeDMAControl0(2, (data >> 16) & 0xFF);
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(2, data >>> 24);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel2.writeDMAControl32(data | 0);
             break;
         //40000D4h - DMA3SAD - DMA 3 Source Address (W) (internal memory)
         //40000D6h - DMA3SAH - DMA 3 Source Address (W) (internal memory)
         case 0x40000D4:
-            this.dma.writeDMASource0(3, data & 0xFF);
-            this.dma.writeDMASource1(3, (data >> 8) & 0xFF);
-            this.dma.writeDMASource2(3, (data >> 16) & 0xFF);
-            this.dma.writeDMASource3(3, (data >> 24) & 0xF);    //Mask out the unused bits.
+            this.dma.channel3.writeDMASource32(data | 0);
             break;
         //40000D8h - DMA3DAD - DMA 3 Destination Address (W) (internal memory)
         //40000DAh - DMA3DAH - DMA 3 Destination Address (W) (internal memory)
         case 0x40000D8:
-            this.dma.writeDMADestination0(3, data & 0xFF);
-            this.dma.writeDMADestination1(3, (data >> 8) & 0xFF);
-            this.dma.writeDMADestination2(3, (data >> 16) & 0xFF);
-            this.dma.writeDMADestination3(3, (data >> 24) & 0xF);
+            this.dma.channel3.writeDMADestination32(data | 0);
             break;
         //40000DCh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
         case 0x40000DC:
-            this.dma.writeDMAWordCount0(3, data & 0xFF);
-            this.dma.writeDMAWordCount1(3, (data >> 8) & 0xFF);
-            this.dma.writeDMAControl0(3, (data >> 16) & 0xFF);
-            this.IOCore.updateCoreClocking();
-            this.dma.writeDMAControl1(3, data >>> 24);
-            this.IOCore.updateCoreEventTime();
+            this.dma.channel3.writeDMAControl32(data | 0);
             break;
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
@@ -3245,38 +3161,38 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
         case 0x40000BA:
-            data = this.dma.readDMAControl0(0) | 0;
+            data = this.dma.channel0.readDMAControl8_0() | 0;
             break;
         //40000BBh - DMA0CNT_H - DMA 0 Control (R/W)
         case 0x40000BB:
-            data = this.dma.readDMAControl1(0) | 0;
+            data = this.dma.channel0.readDMAControl8_1() | 0;
             break;
         //40000BCh through 40000C5h - WRITE ONLY
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
         case 0x40000C6:
-            data = this.dma.readDMAControl0(1) | 0;
+            data = this.dma.channel1.readDMAControl8_0() | 0;
             break;
         //40000C7h - DMA1CNT_H - DMA 1 Control (R/W)
         case 0x40000C7:
-            data = this.dma.readDMAControl1(1) | 0;
+            data = this.dma.channel1.readDMAControl8_1() | 0;
             break;
         //40000C8h through 40000D1h - WRITE ONLY
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
         case 0x40000D2:
-            data = this.dma.readDMAControl0(2) | 0;
+            data = this.dma.channel2.readDMAControl8_0() | 0;
             break;
         //40000D3h - DMA2CNT_H - DMA 2 Control (R/W)
         case 0x40000D3:
-            data = this.dma.readDMAControl1(2) | 0;
+            data = this.dma.channel2.readDMAControl8_1() | 0;
             break;
         //40000D4h through 40000DDh - WRITE ONLY
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
         case 0x40000DE:
-            data = this.dma.readDMAControl0(3) | 0;
+            data = this.dma.channel3.readDMAControl8_0() | 0;
             break;
         //40000DFh - DMA3CNT_H - DMA 3 Control (R/W)
         case 0x40000DF:
-            data = this.dma.readDMAControl1(3) | 0;
+            data = this.dma.channel3.readDMAControl8_1() | 0;
             break;
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
@@ -3798,22 +3714,22 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
         case 0x40000BA:
-            data = this.dma.readDMAControl0(0) | (this.dma.readDMAControl1(0) << 8);
+            data = this.dma.channel0.readDMAControl16() | 0;
             break;
         //40000BCh through 40000C5h - WRITE ONLY
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
         case 0x40000C6:
-            data = this.dma.readDMAControl0(1) | (this.dma.readDMAControl1(1) << 8);
+            data = this.dma.channel1.readDMAControl16() | 0;
             break;
         //40000C8h through 40000D1h - WRITE ONLY
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
         case 0x40000D2:
-            data = this.dma.readDMAControl0(2) | (this.dma.readDMAControl1(2) << 8);
+            data = this.dma.channel2.readDMAControl16() | 0;
             break;
         //40000D4h through 40000DDh - WRITE ONLY
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
         case 0x40000DE:
-            data = this.dma.readDMAControl0(3) | (this.dma.readDMAControl1(3) << 8);
+            data = this.dma.channel3.readDMAControl16() | 0;
             break;
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
@@ -4168,22 +4084,22 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
         case 0x40000B8:
-            data = (this.dma.readDMAControl0(0) << 16) | (this.dma.readDMAControl1(0) << 24);
+            data = this.dma.channel0.readDMAControl16() << 16;
             break;
         //40000BCh through 40000C5h - WRITE ONLY
         //40000C6h - DMA1CNT_H - DMA 1 Control (R/W)
         case 0x40000C4:
-            data = (this.dma.readDMAControl0(1) << 16) | (this.dma.readDMAControl1(1) << 24);
+            data = this.dma.channel1.readDMAControl16() << 16;
             break;
         //40000C8h through 40000D1h - WRITE ONLY
         //40000D2h - DMA2CNT_H - DMA 2 Control (R/W)
         case 0x40000D0:
-            data = (this.dma.readDMAControl0(2) << 16) | (this.dma.readDMAControl1(2) << 24);
+            data = this.dma.channel2.readDMAControl16() << 16;
             break;
         //40000D4h through 40000DDh - WRITE ONLY
         //40000DEh - DMA3CNT_H - DMA 3 Control (R/W)
         case 0x40000DC:
-            data = (this.dma.readDMAControl0(3) << 16) | (this.dma.readDMAControl1(3) << 24);
+            data = this.dma.channel3.readDMAControl16() << 16;
             break;
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
@@ -4549,7 +4465,7 @@ GameBoyAdvanceMemory.prototype.readUnused16IO = function (address) {
 GameBoyAdvanceMemory.prototype.readUnused16CPU = function (address) {
     address = address | 0;
     this.IOCore.updateCoreSingle();
-    return (this.IOCore.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+    return (this.cpu.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused32 = function () {
     this.wait.singleClock();
@@ -4557,7 +4473,7 @@ GameBoyAdvanceMemory.prototype.readUnused32 = function () {
 }
 GameBoyAdvanceMemory.prototype.readUnused32CPU = function () {
     this.IOCore.updateCoreSingle();
-    return this.IOCore.getCurrentFetchValue() | 0;
+    return this.cpu.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.loadBIOS = function () {
     //Ensure BIOS is of correct length:
