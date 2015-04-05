@@ -3677,7 +3677,7 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         case 0x4000104:
-            data = this.timer.readTM1CNT16();
+            data = this.timer.readTM1CNT16() | 0;
             break;
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
         case 0x4000106:
