@@ -976,78 +976,54 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         case 0x4000100:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM0CNT_L0(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM0CNT8_0(data | 0);
             break;
         //4000101h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         case 0x4000101:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM0CNT_L1(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM0CNT8_1(data | 0);
             break;
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
         case 0x4000102:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM0CNT_H(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM0CNT8_2(ddata | 0);
             break;
         //4000103h - TM0CNT_H - Timer 0 Control (R/W)
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         case 0x4000104:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM1CNT_L0(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM1CNT8_0(data | 0);
             break;
         //4000105h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         case 0x4000105:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM1CNT_L1(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM1CNT8_1(data | 0);
             break;
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
         case 0x4000106:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM1CNT_H(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM1CNT8_2(data | 0);
             break;
         //4000107h - TM1CNT_H - Timer 1 Control (R/W)
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         case 0x4000108:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM2CNT_L0(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM2CNT8_0(data | 0);
             break;
         //4000109h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         case 0x4000109:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM2CNT_L1(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM2CNT8_1(data | 0);
             break;
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
         case 0x400010A:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM2CNT_H(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM2CNT8_2(data | 0);
             break;
         //400010Bh - TM2CNT_H - Timer 2 Control (R/W)
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         case 0x400010C:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM3CNT_L0(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM3CNT8_0(data | 0);
             break;
         //400010Dh - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         case 0x400010D:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM3CNT_L1(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM3CNT8_1(data | 0);
             break;
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
         case 0x400010E:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM3CNT_H(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM3CNT8_2(data | 0);
             break;
         //400010Fh - TM3CNT_H - Timer 3 Control (R/W)
         //4000110h through 400011Fh - NOT USED - GLITCHED
@@ -1762,55 +1738,35 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         case 0x4000100:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM0CNT_L0(data & 0xFF);
-            this.timer.writeTM0CNT_L1((data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM0CNT16(data | 0);
             break;
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
         case 0x4000102:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM0CNT_H(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM0CNT8_2(data | 0);
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         case 0x4000104:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM1CNT_L0(data & 0xFF);
-            this.timer.writeTM1CNT_L1((data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM1CNT16(data | 0);
             break;
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
         case 0x4000106:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM1CNT_H(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM1CNT8_2(data | 0);
             break;
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         case 0x4000108:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM2CNT_L0(data & 0xFF);
-            this.timer.writeTM2CNT_L1((data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM2CNT16(data | 0);
             break;
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
         case 0x400010A:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM2CNT_H(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM2CNT8_2(data | 0);
             break;
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         case 0x400010C:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM3CNT_L0(data & 0xFF);
-            this.timer.writeTM3CNT_L1((data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM3CNT16(data | 0);
             break;
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
         case 0x400010E:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM3CNT_H(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM3CNT8_2(data | 0);
             break;
         //4000110h through 400011Fh - NOT USED - GLITCHED
         //4000120h - Serial Data A (R/W)
@@ -2340,38 +2296,22 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
         case 0x4000100:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM0CNT_L0(data & 0xFF);
-            this.timer.writeTM0CNT_L1((data >> 8) & 0xFF);
-            this.timer.writeTM0CNT_H((data >> 16) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM0CNT32(data | 0);
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
         case 0x4000104:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM1CNT_L0(data & 0xFF);
-            this.timer.writeTM1CNT_L1((data >> 8) & 0xFF);
-            this.timer.writeTM1CNT_H((data >> 16) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM1CNT32(data | 0);
             break;
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
         case 0x4000108:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM2CNT_L0(data & 0xFF);
-            this.timer.writeTM2CNT_L1((data >> 8) & 0xFF);
-            this.timer.writeTM2CNT_H((data >> 16) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM2CNT32(data | 0);
             break;
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
         case 0x400010C:
-            this.IOCore.updateTimerClocking();
-            this.timer.writeTM3CNT_L0(data & 0xFF);
-            this.timer.writeTM3CNT_L1((data >> 8) & 0xFF);
-            this.timer.writeTM3CNT_H((data >> 16) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.timer.writeTM3CNT32(data | 0);
             break;
         //4000110h through 400011Fh - NOT USED - GLITCHED
         //4000120h - Serial Data A (R/W)
@@ -3200,59 +3140,51 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         case 0x4000100:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM0CNT_L0() | 0;
+            data = this.timer.readTM0CNT8_0() | 0;
             break;
         //4000101h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         case 0x4000101:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM0CNT_L1() | 0;
+            data = this.timer.readTM0CNT8_1() | 0;
             break;
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
         case 0x4000102:
-            data = this.timer.readTM0CNT_H() | 0;
+            data = this.timer.readTM0CNT8_2() | 0;
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         case 0x4000104:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM1CNT_L0() | 0;
+            data = this.timer.readTM1CNT8_0() | 0;
             break;
         //4000105h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         case 0x4000105:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM1CNT_L1() | 0;
+            data = this.timer.readTM1CNT8_1() | 0;
             break;
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
         case 0x4000106:
-            data = this.timer.readTM1CNT_H() | 0;
+            data = this.timer.readTM1CNT8_2() | 0;
             break;
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         case 0x4000108:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM2CNT_L0() | 0;
+            data = this.timer.readTM2CNT8_0() | 0;
             break;
         //4000109h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         case 0x4000109:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM2CNT_L1() | 0;
+            data = this.timer.readTM2CNT8_1() | 0;
             break;
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
         case 0x400010A:
-            data = this.timer.readTM2CNT_H() | 0;
+            data = this.timer.readTM2CNT8_2() | 0;
             break;
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         case 0x400010C:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM3CNT_L0() | 0;
+            data = this.timer.readTM3CNT8_0() | 0;
             break;
         //400010Dh - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         case 0x400010D:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM3CNT_L1() | 0;
+            data = this.timer.readTM3CNT8_1() | 0;
             break;
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
         case 0x400010E:
-            data = this.timer.readTM3CNT_H() | 0;
+            data = this.timer.readTM3CNT8_2() | 0;
             break;
         //4000110h through 400011Fh - NOT USED - GLITCHED
         //4000120h - Serial Data A (R/W)
@@ -3737,39 +3669,35 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
         //40000E0h through 40000FFh - NOT USED - GLITCHED
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         case 0x4000100:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM0CNT_L0() | (this.timer.readTM0CNT_L1() << 8);
+            data = this.timer.readTM0CNT16() | 0;
             break;
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
         case 0x4000102:
-            data = this.timer.readTM0CNT_H() | 0;
+            data = this.timer.readTM0CNT8_2() | 0;
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         case 0x4000104:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM1CNT_L0() | (this.timer.readTM1CNT_L1() << 8);
+            data = this.timer.readTM1CNT16();
             break;
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
         case 0x4000106:
-            data = this.timer.readTM1CNT_H() | 0;
+            data = this.timer.readTM1CNT8_2() | 0;
             break;
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         case 0x4000108:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM2CNT_L0() | (this.timer.readTM2CNT_L1() << 8);
+            data = this.timer.readTM2CNT16() | 0;
             break;
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
         case 0x400010A:
-            data = this.timer.readTM2CNT_H() | 0;
+            data = this.timer.readTM2CNT8_2() | 0;
             break;
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         case 0x400010C:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM3CNT_L0() | (this.timer.readTM3CNT_L1() << 8);
+            data = this.timer.readTM3CNT16() | 0;
             break;
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
         case 0x400010E:
-            data = this.timer.readTM3CNT_H() | 0;
+            data = this.timer.readTM3CNT8_2() | 0;
             break;
         //4000110h through 400011Fh - NOT USED - GLITCHED
         //4000120h - Serial Data A (R/W)
@@ -4108,34 +4036,22 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
         //4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)
         //4000102h - TM0CNT_H - Timer 0 Control (R/W)
         case 0x4000100:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM0CNT_L0() |
-            (this.timer.readTM0CNT_L1() << 8) |
-            (this.timer.readTM0CNT_H() << 16);
+            data = this.timer.readTM0CNT32() | 0;
             break;
         //4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)
         //4000106h - TM1CNT_H - Timer 1 Control (R/W)
         case 0x4000104:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM1CNT_L0() |
-            (this.timer.readTM1CNT_L1() << 8) |
-            (this.timer.readTM1CNT_H() << 16);
+            data = this.timer.readTM1CNT32() | 0;
             break;
         //4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)
         //400010Ah - TM2CNT_H - Timer 2 Control (R/W)
         case 0x4000108:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM2CNT_L0() |
-            (this.timer.readTM2CNT_L1() << 8) |
-            (this.timer.readTM2CNT_H() << 16);
+            data = this.timer.readTM2CNT32() | 0;
             break;
         //400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)
         //400010Eh - TM3CNT_H - Timer 3 Control (R/W)
         case 0x400010C:
-            this.IOCore.updateTimerClocking();
-            data = this.timer.readTM3CNT_L0() |
-            (this.timer.readTM3CNT_L1() << 8) |
-            (this.timer.readTM3CNT_H() << 16);
+            data = this.timer.readTM3CNT32() | 0;
             break;
         //4000110h through 400011Fh - NOT USED - GLITCHED
         //4000120h - Serial Data A (R/W)
