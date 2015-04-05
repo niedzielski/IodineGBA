@@ -1104,11 +1104,11 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         //4000131h - KEYINPUT - Key Status (R)
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
         case 0x4000132:
-            this.joypad.writeKeyControl0(data & 0xFF);
+            this.joypad.writeKeyControl8_0(data | 0);
             break;
         //4000133h - KEYCNT - Key Interrupt Control (R/W)
         case 0x4000133:
-            this.joypad.writeKeyControl1(data & 0xFF);
+            this.joypad.writeKeyControl8_1(data | 0);
             break;
         //4000134h - RCNT (R/W) - Mode Selection
         case 0x4000134:
@@ -1815,8 +1815,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
         //4000130h - KEYINPUT - Key Status (R)
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
         case 0x4000132:
-            this.joypad.writeKeyControl0(data & 0xFF);
-            this.joypad.writeKeyControl1((data >> 8) & 0xFF);
+            this.joypad.writeKeyControl16(data | 0);
             break;
         //4000134h - RCNT (R/W) - Mode Selection
         case 0x4000134:
@@ -2348,8 +2347,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000130h - KEYINPUT - Key Status (R)
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
         case 0x4000130:
-            this.joypad.writeKeyControl0((data >> 16) & 0xFF);
-            this.joypad.writeKeyControl1(data >>> 24);
+            this.joypad.writeKeyControl16(data >> 16);
             break;
         //4000134h - RCNT (R/W) - Mode Selection
         case 0x4000134:
@@ -3250,19 +3248,19 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
         //400012Ch through 400012Fh - NOT USED - GLITCHED
         //4000130h - KEYINPUT - Key Status (R)
         case 0x4000130:
-            data = this.joypad.readKeyStatus0() | 0;
+            data = this.joypad.readKeyStatus8_0() | 0;
             break;
         //4000131h - KEYINPUT - Key Status (R)
         case 0x4000131:
-            data = this.joypad.readKeyStatus1() | 0;
+            data = this.joypad.readKeyStatus8_1() | 0;
             break;
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
         case 0x4000132:
-            data = this.joypad.readKeyControl0() | 0;
+            data = this.joypad.readKeyControl8_0() | 0;
             break;
         //4000133h - KEYCNT - Key Interrupt Control (R/W)
         case 0x4000133:
-            data = this.joypad.readKeyControl1() | 0;
+            data = this.joypad.readKeyControl8_1() | 0;
             break;
         //4000134h - RCNT (R/W) - Mode Selection
         case 0x4000134:
@@ -3733,11 +3731,11 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
         //400012Ch through 400012Fh - NOT USED - GLITCHED
         //4000130h - KEYINPUT - Key Status (R)
         case 0x4000130:
-            data = this.joypad.readKeyStatus0() | (this.joypad.readKeyStatus1() << 8);
+            data = this.joypad.readKeyStatus16() | 0;
             break;
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
         case 0x4000132:
-            data = this.joypad.readKeyControl0() | (this.joypad.readKeyControl1() << 8);
+            data = this.joypad.readKeyControl16() | 0;
             break;
         //4000134h - RCNT (R/W) - Mode Selection
         case 0x4000134:
@@ -4085,10 +4083,7 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
         //4000130h - KEYINPUT - Key Status (R)
         //4000132h - KEYCNT - Key Interrupt Control (R/W)
         case 0x4000130:
-            data = this.joypad.readKeyStatus0() |
-            (this.joypad.readKeyStatus1() << 8) |
-            (this.joypad.readKeyControl0() << 16) |
-            (this.joypad.readKeyControl1() << 24);
+            data = this.joypad.readKeyStatusControl32() | 0;
             break;
         //4000134h - RCNT (R/W) - Mode Selection
         //4000136h - NOT USED - ZERO
