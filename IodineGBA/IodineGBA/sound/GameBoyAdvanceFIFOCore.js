@@ -20,7 +20,7 @@ function GameBoyAdvanceFIFO() {
     this.position = 0;
     this.buffer = getInt8Array(0x20);
 }
-GameBoyAdvanceFIFO.prototype.push8 = function (sample) {
+GameBoyAdvanceFIFO.prototype.push = function (sample) {
     sample = sample | 0;
     var writePosition = ((this.position | 0) + (this.count | 0)) | 0;
     this.buffer[writePosition & 0x1F] = (sample << 24) >> 24;
@@ -29,10 +29,13 @@ GameBoyAdvanceFIFO.prototype.push8 = function (sample) {
         this.count = ((this.count | 0) + 1) | 0;
     }
 }
+GameBoyAdvanceFIFO.prototype.push8 = function (sample) {
+    sample = sample | 0;
+    this.push32(sample | (sample << 8) | (sample << 16) | (sample << 24));
+}
 GameBoyAdvanceFIFO.prototype.push16 = function (sample) {
     sample = sample | 0;
-    this.push8(sample | 0);
-    this.push8(sample >> 8);
+    this.push32(sample | (sample << 16));
 }
 GameBoyAdvanceFIFO.prototype.push32 = function (sample) {
     sample = sample | 0;
