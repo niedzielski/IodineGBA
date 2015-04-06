@@ -31,18 +31,24 @@ GameBoyAdvanceFIFO.prototype.push = function (sample) {
 }
 GameBoyAdvanceFIFO.prototype.push8 = function (sample) {
     sample = sample | 0;
-    this.push32(sample | (sample << 8) | (sample << 16) | (sample << 24));
+    this.push(sample | 0);
+    this.push(sample | 0);
+    this.push(sample | 0);
+    this.push(sample | 0);
 }
 GameBoyAdvanceFIFO.prototype.push16 = function (sample) {
     sample = sample | 0;
-    this.push32(sample | (sample << 16));
+    this.push(sample | 0);
+    this.push(sample >> 8);
+    this.push(sample | 0);
+    this.push(sample >> 8);
 }
 GameBoyAdvanceFIFO.prototype.push32 = function (sample) {
     sample = sample | 0;
-    this.push8(sample | 0);
-    this.push8(sample >> 8);
-    this.push8(sample >> 16);
-    this.push8(sample >> 24);
+    this.push(sample | 0);
+    this.push(sample >> 8);
+    this.push(sample >> 16);
+    this.push(sample >> 24);
 }
 GameBoyAdvanceFIFO.prototype.shift = function () {
     var output = 0;
