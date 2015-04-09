@@ -295,7 +295,7 @@ GameBoyAdvanceDMA2.prototype.handleDMACopy = function () {
 GameBoyAdvanceDMA2.prototype.copy16 = function (source, destination) {
     source = source | 0;
     destination = destination | 0;
-    var data = this.memory.memoryRead16(source | 0) | 0;
+    var data = this.memory.memoryReadDMAFull16(source | 0) | 0;
     this.memory.memoryWriteDMA16(destination | 0, data | 0);
     this.decrementWordCount(source | 0, destination | 0, 2);
     this.DMACore.updateFetch(data | (data << 16));
@@ -303,14 +303,14 @@ GameBoyAdvanceDMA2.prototype.copy16 = function (source, destination) {
 GameBoyAdvanceDMA2.prototype.copy32 = function (source, destination) {
     source = source | 0;
     destination = destination | 0;
-    var data = this.memory.memoryRead32(source | 0) | 0;
+    var data = this.memory.memoryReadDMAFull32(source | 0) | 0;
     this.memory.memoryWriteDMA32(destination | 0, data | 0);
     this.decrementWordCount(source | 0, destination | 0, 4);
     this.DMACore.updateFetch(data | 0);
 }
 GameBoyAdvanceDMA2.prototype.copySound = function (source) {
     source = source | 0;
-    var data = this.memory.memoryRead32(source | 0) | 0;
+    var data = this.memory.memoryReadDMAFull32(source | 0) | 0;
     this.wait.singleClock();
     this.IOCore.updateTimerClocking();
     this.sound.writeFIFOB32(data | 0);

@@ -40,11 +40,13 @@ GameBoyAdvanceMemory.prototype.initialize = function () {
     this.memoryWrite8 = this.memoryWrite8Generated[1];
     this.memoryRead16 = this.memoryRead16Generated[1];
     this.memoryReadDMA16 = this.memoryReadDMA16Generated[1];
+    this.memoryReadDMAFull16 = this.memoryReadDMA16FullGenerated[1];
     this.memoryReadCPU16 = this.memoryReadCPU16Generated[1];
     this.memoryWrite16 = this.memoryWrite16Generated[1];
     this.memoryWriteDMA16 = this.memoryWriteDMA16Generated[1];
     this.memoryRead32 = this.memoryRead32Generated[1];
     this.memoryReadDMA32 = this.memoryReadDMA32Generated[1];
+    this.memoryReadDMAFull32 = this.memoryReadDMA32FullGenerated[1];
     this.memoryReadCPU32 = this.memoryReadCPU32Generated[1];
     this.memoryWrite32 = this.memoryWrite32Generated[1];
     this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[1];
@@ -755,8 +757,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         case 0x400009E:
         //400009Fh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009F:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE8(((address | 0) - 0x4000090) | 0, data | 0);
+            this.sound.writeWAVE8(address & 0xF, data | 0);
             break;
         //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
         case 0x40000A0:
@@ -766,7 +767,6 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         case 0x40000A2:
         //40000A3h - FIFO_A_H - FIFO Channel A Second Word (W)
         case 0x40000A3:
-            this.IOCore.updateTimerClocking();
             this.sound.writeFIFOA8(data | 0);
             break;
         //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
@@ -777,7 +777,6 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         case 0x40000A6:
         //40000A7h - FIFO_B_H - FIFO Channel B Second Word (W)
         case 0x40000A7:
-            this.IOCore.updateTimerClocking();
             this.sound.writeFIFOB8(data | 0);
             break;
         //40000A8h through 40000AFh - NOT USED - GLITCHED
@@ -1621,21 +1620,18 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
         case 0x400009C:
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009E:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE16(((address | 0) - 0x4000090) >> 1, data | 0);
+            this.sound.writeWAVE16(address & 0xF, data | 0);
             break;
         //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
         case 0x40000A0:
         //40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
         case 0x40000A2:
-            this.IOCore.updateTimerClocking();
             this.sound.writeFIFOA16(data | 0);
             break;
         //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
         case 0x40000A4:
         //40000A6h - FIFO_B_H - FIFO Channel B Second Word (W)
         case 0x40000A6:
-            this.IOCore.updateTimerClocking();
             this.sound.writeFIFOB16(data | 0);
             break;
         //40000A8h through 40000AFh - NOT USED - GLITCHED
@@ -2215,19 +2211,16 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009C:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeWAVE32(((address | 0) - 0x4000090) >> 2, data | 0);
+            this.sound.writeWAVE32(address & 0xF, data | 0);
             break;
         //40000A0h - FIFO_A_L - FIFO Channel A First Word (W)
         //40000A2h - FIFO_A_H - FIFO Channel A Second Word (W)
         case 0x40000A0:
-            this.IOCore.updateTimerClocking();
             this.sound.writeFIFOA32(data | 0);
             break;
         //40000A4h - FIFO_B_L - FIFO Channel B First Word (W)
         //40000A6h - FIFO_B_H - FIFO Channel B Second Word (W)
         case 0x40000A4:
-            this.IOCore.updateTimerClocking();
             this.sound.writeFIFOB32(data | 0);
             break;
         //40000A8h through 40000AFh - NOT USED - GLITCHED
@@ -2557,11 +2550,13 @@ GameBoyAdvanceMemory.prototype.remapWRAM = function (data) {
                 this.memoryWrite8 = this.memoryWrite8Generated[0];
                 this.memoryRead16 = this.memoryRead16Generated[0];
                 this.memoryReadDMA16 = this.memoryReadDMA16Generated[0];
+                this.memoryReadDMAFull16 = this.memoryReadDMA16FullGenerated[0];
                 this.memoryReadCPU16 = this.memoryReadCPU16Generated[0];
                 this.memoryWrite16 = this.memoryWrite16Generated[0];
                 this.memoryWriteDMA16 = this.memoryWriteDMA16Generated[0];
                 this.memoryRead32 = this.memoryRead32Generated[0];
                 this.memoryReadDMA32 = this.memoryReadDMA32Generated[0];
+                this.memoryReadDMAFull32 = this.memoryReadDMA32FullGenerated[0];
                 this.memoryReadCPU32 = this.memoryReadCPU32Generated[0];
                 this.memoryWrite32 = this.memoryWrite32Generated[0];
                 this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[0];
@@ -2572,11 +2567,13 @@ GameBoyAdvanceMemory.prototype.remapWRAM = function (data) {
                 this.memoryWrite8 = this.memoryWrite8Generated[1];
                 this.memoryRead16 = this.memoryRead16Generated[1];
                 this.memoryReadDMA16 = this.memoryReadDMA16Generated[1];
+                this.memoryReadDMAFull16 = this.memoryReadDMA16FullGenerated[1];
                 this.memoryReadCPU16 = this.memoryReadCPU16Generated[1];
                 this.memoryWrite16 = this.memoryWrite16Generated[1];
                 this.memoryWriteDMA16 = this.memoryWriteDMA16Generated[1];
                 this.memoryRead32 = this.memoryRead32Generated[1];
                 this.memoryReadDMA32 = this.memoryReadDMA32Generated[1];
+                this.memoryReadDMAFull32 = this.memoryReadDMA32FullGenerated[1];
                 this.memoryReadCPU32 = this.memoryReadCPU32Generated[1];
                 this.memoryWrite32 = this.memoryWrite32Generated[1];
                 this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[1];
@@ -2587,11 +2584,13 @@ GameBoyAdvanceMemory.prototype.remapWRAM = function (data) {
                 this.memoryWrite8 = this.memoryWrite8Generated[2];
                 this.memoryRead16 = this.memoryRead16Generated[2];
                 this.memoryReadDMA16 = this.memoryReadDMA16Generated[2];
+                this.memoryReadDMAFull16 = this.memoryReadDMA16FullGenerated[2];
                 this.memoryReadCPU16 = this.memoryReadCPU16Generated[2];
                 this.memoryWrite16 = this.memoryWrite16Generated[2];
                 this.memoryWriteDMA16 = this.memoryWriteDMA16Generated[2];
                 this.memoryRead32 = this.memoryRead32Generated[2];
                 this.memoryReadDMA32 = this.memoryReadDMA32Generated[2];
+                this.memoryReadDMAFull32 = this.memoryReadDMA32FullGenerated[2];
                 this.memoryReadCPU32 = this.memoryReadCPU32Generated[2];
                 this.memoryWrite32 = this.memoryWrite32Generated[2];
                 this.memoryWriteDMA32 = this.memoryWriteDMA32Generated[2];
@@ -2639,6 +2638,22 @@ if (__LITTLE_ENDIAN__) {
         }
         return data | 0;
     }
+    GameBoyAdvanceMemory.prototype.readBIOS16DMA = function (address) {
+        address = address | 0;
+        var data = 0;
+        this.wait.singleClock();
+        if ((address | 0) < 0x4000) {
+            address = address >> 1;
+            if ((this.cpu.registers[15] | 0) < 0x4000) {
+                //If reading from BIOS while executing it:
+                data = this.BIOS16[address & 0x1FFF] | 0;
+            }
+        }
+        else {
+            data = this.readUnused16IO(address | 0) | 0;
+        }
+        return data | 0;
+    }
     GameBoyAdvanceMemory.prototype.readBIOS16CPU = function (address) {
         address = address | 0;
         var data = 0;
@@ -2667,6 +2682,22 @@ if (__LITTLE_ENDIAN__) {
             else {
                 //Not allowed to read from BIOS while executing outside of it:
                 data = this.lastBIOSREAD | 0;
+            }
+        }
+        else {
+            data = this.IOCore.getCurrentFetchValue() | 0;
+        }
+        return data | 0;
+    }
+    GameBoyAdvanceMemory.prototype.readBIOS32DMA = function (address) {
+        address = address | 0;
+        var data = 0;
+        this.wait.singleClock();
+        if ((address | 0) < 0x4000) {
+            address = address >> 2;
+            if ((this.cpu.registers[15] | 0) < 0x4000) {
+                //If reading from BIOS while executing it:
+                data = this.BIOS32[address & 0xFFF] | 0;
             }
         }
         else {
@@ -4919,7 +4950,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readInternalWRAM16",
                                                                                       "readIODispatch16",
                                                                                       "readVRAM16Preliminary",
-                                                                                      "readBIOS16"
+                                                                                      "readBIOS16DMA"
                                                                                       ),
                                                             compileMemoryDMAReadDispatch(
                                                                                       "readUnused16",
@@ -4927,7 +4958,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readInternalWRAM16",
                                                                                       "readIODispatch16",
                                                                                       "readVRAM16Preliminary",
-                                                                                      "readBIOS16"
+                                                                                      "readBIOS16DMA"
                                                                                       ),
                                                             compileMemoryDMAReadDispatch(
                                                                                       "readUnused16",
@@ -4935,7 +4966,43 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readUnused16",
                                                                                       "readIODispatch16",
                                                                                       "readVRAM16Preliminary",
-                                                                                      "readBIOS16"
+                                                                                      "readBIOS16DMA"
+                                                                                      )
+                                                            ];
+    //DMA 1-3 Optimized 16-Bit Read Dispatch:
+    GameBoyAdvanceMemory.prototype.memoryReadDMA16FullGenerated = [
+                                                            compileMemoryReadDispatch(
+                                                                                      "readUnused16",
+                                                                                      "readInternalWRAM16",
+                                                                                      "readInternalWRAM16",
+                                                                                      "readIODispatch16",
+                                                                                      "readVRAM16Preliminary",
+                                                                                      "readROM16",
+                                                                                      "readROM216",
+                                                                                      "readSRAM16",
+                                                                                      "readBIOS16DMA"
+                                                                                      ),
+                                                            compileMemoryReadDispatch(
+                                                                                      "readUnused16",
+                                                                                      "readExternalWRAM16",
+                                                                                      "readInternalWRAM16",
+                                                                                      "readIODispatch16",
+                                                                                      "readVRAM16Preliminary",
+                                                                                      "readROM16",
+                                                                                      "readROM216",
+                                                                                      "readSRAM16",
+                                                                                      "readBIOS16DMA"
+                                                                                      ),
+                                                            compileMemoryReadDispatch(
+                                                                                      "readUnused16",
+                                                                                      "readUnused16",
+                                                                                      "readUnused16",
+                                                                                      "readIODispatch16",
+                                                                                      "readVRAM16Preliminary",
+                                                                                      "readROM16",
+                                                                                      "readROM216",
+                                                                                      "readSRAM16",
+                                                                                      "readBIOS16DMA"
                                                                                       )
                                                             ];
     //Generic 16-Bit Instruction Read Dispatch:
@@ -5084,7 +5151,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readInternalWRAM32",
                                                                                             "readIODispatch32",
                                                                                             "readVRAM32Preliminary",
-                                                                                            "readBIOS32"
+                                                                                            "readBIOS32DMA"
                                                                                             ),
                                                                compileMemoryDMAReadDispatch(
                                                                                             "readUnused32",
@@ -5092,7 +5159,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readInternalWRAM32",
                                                                                             "readIODispatch32",
                                                                                             "readVRAM32Preliminary",
-                                                                                            "readBIOS32"
+                                                                                            "readBIOS32DMA"
                                                                                             ),
                                                                compileMemoryDMAReadDispatch(
                                                                                             "readUnused32",
@@ -5100,9 +5167,45 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readUnused32",
                                                                                             "readIODispatch32",
                                                                                             "readVRAM32Preliminary",
-                                                                                            "readBIOS32"
+                                                                                            "readBIOS32DMA"
                                                                                             )
                                                                ];
+    //DMA 1-3 Optimized 32-Bit Read Dispatch:
+    GameBoyAdvanceMemory.prototype.memoryReadDMA32FullGenerated = [
+                                                            compileMemoryReadDispatch(
+                                                                                      "readUnused32",
+                                                                                      "readInternalWRAM32",
+                                                                                      "readInternalWRAM32",
+                                                                                      "readIODispatch32",
+                                                                                      "readVRAM32Preliminary",
+                                                                                      "readROM32",
+                                                                                      "readROM232",
+                                                                                      "readSRAM32",
+                                                                                      "readBIOS32DMA"
+                                                                                      ),
+                                                            compileMemoryReadDispatch(
+                                                                                      "readUnused32",
+                                                                                      "readExternalWRAM32",
+                                                                                      "readInternalWRAM32",
+                                                                                      "readIODispatch32",
+                                                                                      "readVRAM32Preliminary",
+                                                                                      "readROM32",
+                                                                                      "readROM232",
+                                                                                      "readSRAM32",
+                                                                                      "readBIOS32DMA"
+                                                                                      ),
+                                                            compileMemoryReadDispatch(
+                                                                                      "readUnused32",
+                                                                                      "readUnused32",
+                                                                                      "readUnused32",
+                                                                                      "readIODispatch32",
+                                                                                      "readVRAM32Preliminary",
+                                                                                      "readROM32",
+                                                                                      "readROM232",
+                                                                                      "readSRAM32",
+                                                                                      "readBIOS32DMA"
+                                                                                      )
+                                                            ];
     //Generic 32-Bit Instruction Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryReadCPU32Generated = [
                                                                  compileMemoryReadDispatch(
