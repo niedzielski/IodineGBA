@@ -156,9 +156,10 @@ GameBoyAdvanceDMA0.prototype.writeDMAControl8_1 = function (data) {
     this.dmaType = (data >> 4) & 0x3;
     this.irqFlagging = data & 0x40;
     if ((data & 0x80) != 0) {
-        if ((this.enabled | 0) == 0) {
+        if ((this.enabled | 0) != 1) {
+            var oldEnable = this.enabled | 0;
             this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            if ((this.enabled | 0) > 0) {
+            if ((oldEnable | 0) == 0 && (this.enabled | 0) > 0) {
                 this.enableDMAChannel();
             }
         }
@@ -186,9 +187,10 @@ GameBoyAdvanceDMA0.prototype.writeDMAControl16 = function (data) {
     this.dmaType = (data >> 12) & 0x3;
     this.irqFlagging = (data >> 8) & 0x40;
     if ((data & 0x8000) != 0) {
-        if ((this.enabled | 0) == 0) {
+        if ((this.enabled | 0) != 1) {
+            var oldEnable = this.enabled | 0;
             this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            if ((this.enabled | 0) > 0) {
+            if ((oldEnable | 0) == 0 && (this.enabled | 0) > 0) {
                 this.enableDMAChannel();
             }
         }

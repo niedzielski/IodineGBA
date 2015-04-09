@@ -159,9 +159,12 @@ GameBoyAdvanceDMA3.prototype.writeDMAControl8_1 = function (data) {
     this.dmaType = (data >> 4) & 0x3;
     this.irqFlagging = data & 0x40;
     if ((data & 0x80) != 0) {
-        if ((this.enabled | 0) == 0) {
+        if ((this.enabled | 0) != 1) {
+            var oldEnable = this.enabled | 0;
             this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            this.enableDMAChannel();
+            if ((oldEnable | 0) == 0) {
+                this.enableDMAChannel();
+            }
         }
         /*
          DMA seems to not allow changing its type while it's running.
@@ -188,9 +191,12 @@ GameBoyAdvanceDMA3.prototype.writeDMAControl16 = function (data) {
     this.dmaType = (data >> 12) & 0x3;
     this.irqFlagging = (data >> 8) & 0x40;
     if ((data & 0x8000) != 0) {
-        if ((this.enabled | 0) == 0) {
+        if ((this.enabled | 0) != 1) {
+            var oldEnable = this.enabled | 0;
             this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            this.enableDMAChannel();
+            if ((oldEnable | 0) == 0) {
+                this.enableDMAChannel();
+            }
         }
         /*
          DMA seems to not allow changing its type while it's running.
