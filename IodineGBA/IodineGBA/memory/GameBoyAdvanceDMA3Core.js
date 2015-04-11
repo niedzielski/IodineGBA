@@ -242,12 +242,15 @@ GameBoyAdvanceDMA3.prototype.enableDMAChannel = function (enabled) {
     if ((enabled | 0) != 0) {
         //If DMA was previously disabled, reload control registers:
         if ((this.enabled | 0) == 0) {
-            if ((this.dmaType | 0) == 0x3) {
-                //Trigger display sync DMA shadow enable and auto-check on line 162:
-                this.displaySyncEnableDelay = 0x20;
+            switch (this.dmaType | 0) {
+                case 0:
+                    //Flag immediate DMA transfers for processing now:
+                    this.pending = 0x1;
+                    break;
+                case 0x3:
+                    //Trigger display sync DMA shadow enable and auto-check on line 162:
+                    this.displaySyncEnableDelay = 0x20;
             }
-            //Flag immediate DMA transfers for processing now:
-            this.pending = 0x1;
             //Shadow copy the word count:
             this.wordCountShadow = this.wordCount | 0;
             //Shadow copy the source address:

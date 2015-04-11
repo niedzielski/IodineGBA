@@ -226,22 +226,22 @@ GameBoyAdvanceDMA2.prototype.enableDMAChannel = function (enabled) {
     if ((enabled | 0) != 0) {
         //If DMA was previously disabled, reload control registers:
         if ((this.enabled | 0) == 0) {
-            if ((this.dmaType | 0) == 0x3) {
-                //Direct Sound DMA Hardwired To Wordcount Of 4:
-                this.wordCountShadow = 0x4;
-            }
-            else {
-                //Flag immediate DMA transfers for processing now:
-                if ((this.dmaType | 0) == 1) {
+            switch (this.dmaType | 0) {
+                case 0x3:
+                    //Direct Sound DMA Hardwired To Wordcount Of 4:
+                    this.wordCountShadow = 0x4;
+                    break;
+                case 0:
+                    //Flag immediate DMA transfers for processing now:
                     this.pending = 0x1;
-                }
-                //Shadow copy the word count:
-                this.wordCountShadow = this.wordCount | 0;
-                //Shadow copy the destination address:
-                this.destinationShadow = this.destination | 0;
+                default:
+                    //Shadow copy the word count:
+                    this.wordCountShadow = this.wordCount | 0;
             }
             //Shadow copy the source address:
             this.sourceShadow = this.source | 0;
+            //Shadow copy the destination address:
+            this.destinationShadow = this.destination | 0;
         }
         //DMA type changed:
         this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
