@@ -157,24 +157,7 @@ GameBoyAdvanceDMA2.prototype.writeDMAControl8_1 = function (data) {
     this.is32Bit = data & 0x4;
     this.dmaType = (data >> 4) & 0x3;
     this.irqFlagging = data & 0x40;
-    if ((data & 0x80) != 0) {
-        if ((this.enabled | 0) != 1) {
-            var oldEnable = this.enabled | 0;
-            this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            if ((oldEnable | 0) == 0) {
-                this.enableDMAChannel();
-            }
-        }
-        /*
-         DMA seems to not allow changing its type while it's running.
-         Some games rely on this to not have broken audio (kirby's nightmare in dreamland).
-         */
-    }
-    else {
-        this.enabled = 0;
-        //this.pending = 0;
-        this.DMACore.update();
-    }
+    this.enableDMAChannel(data & 0x80);
     //Calculate next event:
     this.IOCore.updateCoreEventTime();
 }
@@ -188,24 +171,7 @@ GameBoyAdvanceDMA2.prototype.writeDMAControl16 = function (data) {
     this.is32Bit = (data >> 8) & 0x4;
     this.dmaType = (data >> 12) & 0x3;
     this.irqFlagging = (data >> 8) & 0x40;
-    if ((data & 0x8000) != 0) {
-        if ((this.enabled | 0) != 1) {
-            var oldEnable = this.enabled | 0;
-            this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            if ((oldEnable | 0) == 0) {
-                this.enableDMAChannel();
-            }
-        }
-        /*
-         DMA seems to not allow changing its type while it's running.
-         Some games rely on this to not have broken audio (kirby's nightmare in dreamland).
-         */
-    }
-    else {
-        this.enabled = 0;
-        //this.pending = 0;
-        this.DMACore.update();
-    }
+    this.enableDMAChannel(data & 0x8000);
     //Calculate next event:
     this.IOCore.updateCoreEventTime();
 }
@@ -255,25 +221,38 @@ GameBoyAdvanceDMA2.prototype.requestDMA = function (DMAType) {
         this.DMACore.update();
     }
 }
-GameBoyAdvanceDMA2.prototype.enableDMAChannel = function () {
-    if ((this.enabled | 0) == 0x10) {
-        //Assert the FIFO B DMA request signal:
+GameBoyAdvanceDMA2.prototype.enableDMAChannel = function (enabled) {
+    enabled = enabled | 0;
+    if ((enabled | 0) != 0) {
+        //If DMA was previously disabled, reload control registers:
+        if ((this.enabled | 0) == 0) {
+            if ((this.dmaType | 0) == 0x3) {
+                //Direct Sound DMA Hardwired To Wordcount Of 4:
+                this.wordCountShadow = 0x4;
+            }
+            else {
+                //Flag immediate DMA transfers for processing now:
+                if ((this.dmaType | 0) == 1) {
+                    this.pending = 0x1;
+                }
+                //Shadow copy the word count:
+                this.wordCountShadow = this.wordCount | 0;
+                //Shadow copy the destination address:
+                this.destinationShadow = this.destination | 0;
+            }
+            //Shadow copy the source address:
+            this.sourceShadow = this.source | 0;
+        }
+        //DMA type changed:
+        this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
+        //this.pending = this.pending & this.enabled;
+        //Assert the FIFO A DMA request signal:
         this.sound.checkFIFOBPendingSignal();
-        //Direct Sound DMA Hardwired To Wordcount Of 4:
-        this.wordCountShadow = 0x4;
     }
     else {
-        if ((this.enabled | 0) == 0x1) {
-            //Flag immediate DMA transfers for processing now:
-            this.pending = 0x1;
-        }
-        //Shadow copy the word count:
-        this.wordCountShadow = this.wordCount | 0;
-        //Shadow copy the destination address:
-        this.destinationShadow = this.destination | 0;
+        //DMA Disabled:
+        this.enabled = 0;
     }
-    //Shadow copy the source address:
-    this.sourceShadow = this.source | 0;
     //Run some DMA channel activity checks:
     this.DMACore.update();
 }

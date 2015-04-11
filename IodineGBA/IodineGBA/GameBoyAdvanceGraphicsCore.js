@@ -270,21 +270,23 @@ if (typeof Math.imul == "function") {
         }
         return nextEventTime | 0;
     }
-    GameBoyAdvanceGraphics.prototype.nextDisplaySyncEventTime = function () {
+    GameBoyAdvanceGraphics.prototype.nextDisplaySyncEventTime = function (delay) {
+        delay = delay | 0;
         var nextEventTime = 0;
-        if ((this.currentScanLine | 0) == 0) {
+        if ((this.currentScanLine | 0) >= 161 || (delay | 0) != 0) {
+            //Skip to line 2 metrics:
+            nextEventTime = (230 - (this.currentScanLine | 0)) | 0;
+            nextEventTime = Math.imul(nextEventTime | 0, 1232) | 0;
+            nextEventTime = ((nextEventTime | 0) - (this.LCDTicks | 0)) | 0;
+        }
+        else if ((this.currentScanLine | 0) == 0) {
             //Doesn't start until line 2:
             nextEventTime = (2464 - (this.LCDTicks | 0)) | 0;
         }
         else if ((this.currentScanLine | 0) < 161) {
             //Line 2 through line 161:
             nextEventTime = (1232 - (this.LCDTicks | 0)) | 0;
-        }
-        else {
-            //Skip to line 2 metrics:
-            nextEventTime = (230 - (this.currentScanLine | 0)) | 0;
-            nextEventTime = Math.imul(nextEventTime | 0, 1232) | 0;
-            nextEventTime = ((nextEventTime | 0) - (this.LCDTicks | 0)) | 0;
+            
         }
         return nextEventTime | 0;
     }

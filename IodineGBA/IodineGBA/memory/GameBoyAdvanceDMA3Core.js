@@ -40,7 +40,7 @@ GameBoyAdvanceDMA3.prototype.initialize = function () {
     this.sourceControl = 0;
     this.destinationControl = 0;
     this.gamePakDMA = 0;
-	this.displaySyncEnable = 0;
+	this.displaySyncEnableDelay = 0;
     this.DMACore = this.IOCore.dma;
     this.memory = this.IOCore.memory;
     this.gfx = this.IOCore.gfx;
@@ -158,24 +158,7 @@ GameBoyAdvanceDMA3.prototype.writeDMAControl8_1 = function (data) {
     this.gamePakDMA = data & 0x8;
     this.dmaType = (data >> 4) & 0x3;
     this.irqFlagging = data & 0x40;
-    if ((data & 0x80) != 0) {
-        if ((this.enabled | 0) != 1) {
-            var oldEnable = this.enabled | 0;
-            this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            if ((oldEnable | 0) == 0) {
-                this.enableDMAChannel();
-            }
-        }
-        /*
-         DMA seems to not allow changing its type while it's running.
-         Some games rely on this to not have broken audio (kirby's nightmare in dreamland).
-         */
-    }
-    else {
-        this.enabled = 0;
-        //this.pending = 0;
-        this.DMACore.update();
-    }
+    this.enableDMAChannel(data & 0x80);
     //Calculate next event:
     this.IOCore.updateCoreEventTime();
 }
@@ -190,24 +173,7 @@ GameBoyAdvanceDMA3.prototype.writeDMAControl16 = function (data) {
     this.gamePakDMA = (data >> 8) & 0x8;
     this.dmaType = (data >> 12) & 0x3;
     this.irqFlagging = (data >> 8) & 0x40;
-    if ((data & 0x8000) != 0) {
-        if ((this.enabled | 0) != 1) {
-            var oldEnable = this.enabled | 0;
-            this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
-            if ((oldEnable | 0) == 0) {
-                this.enableDMAChannel();
-            }
-        }
-        /*
-         DMA seems to not allow changing its type while it's running.
-         Some games rely on this to not have broken audio (kirby's nightmare in dreamland).
-         */
-    }
-    else {
-        this.enabled = 0;
-        //this.pending = 0;
-        this.DMACore.update();
-    }
+    this.enableDMAChannel(data & 0x8000);
     //Calculate next event:
     this.IOCore.updateCoreEventTime();
 }
@@ -250,45 +216,53 @@ GameBoyAdvanceDMA3.prototype.getMatchStatus = function () {
     return this.enabled & this.pending;
 }
 GameBoyAdvanceDMA3.prototype.gfxDisplaySyncRequest = function () {
-    this.requestDMA(0x20);
+    this.requestDMA(0x20 ^ this.displaySyncEnableDelay);
 }
 GameBoyAdvanceDMA3.prototype.gfxDisplaySyncEnableCheck = function () {
 	//Reset the display sync & reassert DMA enable line:
-    this.enabled &= ~0x20;
-	this.requestDisplaySync();
-    this.DMACore.update();
+    if ((this.enabled | 0) == 0x20) {
+        if ((this.displaySyncEnableDelay | 0) == 0x20) {
+            this.displaySyncEnableDelay = 0;
+        }
+        else {
+            this.enabled = 0;
+            this.DMACore.update();
+        }
+    }
 }
 GameBoyAdvanceDMA3.prototype.requestDMA = function (DMAType) {
     DMAType = DMAType | 0;
-    if ((this.enabled & DMAType) > 0) {
+    if ((this.enabled & DMAType) != 0) {
         this.pending = DMAType | 0;
         this.DMACore.update();
     }
 }
-GameBoyAdvanceDMA3.prototype.requestDisplaySync = function () {
-	//Called from LCD controller state machine on line 162:
-    if ((this.displaySyncEnable | 0) != 0) {
-        this.enabled = 0x20;
-        this.displaySyncEnable = 0;
+GameBoyAdvanceDMA3.prototype.enableDMAChannel = function (enabled) {
+    enabled = enabled | 0;
+    if ((enabled | 0) != 0) {
+        //If DMA was previously disabled, reload control registers:
+        if ((this.enabled | 0) == 0) {
+            if ((this.dmaType | 0) == 0x3) {
+                //Trigger display sync DMA shadow enable and auto-check on line 162:
+                this.displaySyncEnableDelay = 0x20;
+            }
+            //Flag immediate DMA transfers for processing now:
+            this.pending = 0x1;
+            //Shadow copy the word count:
+            this.wordCountShadow = this.wordCount | 0;
+            //Shadow copy the source address:
+            this.sourceShadow = this.source | 0;
+            //Shadow copy the destination address:
+            this.destinationShadow = this.destination | 0;
+        }
+        //DMA type changed:
+        this.enabled = this.DMA_ENABLE_TYPE[this.dmaType | 0] | 0;
+        this.pending = this.pending & this.enabled;
     }
-}
-GameBoyAdvanceDMA3.prototype.enableDMAChannel = function () {
-    if ((this.enabled | 0) == 0x1) {
-        //Flag immediate DMA transfers for processing now:
-        this.pending = 0x1;
-    }
-	else if ((this.enabled | 0) == 0x20) {
-        //Trigger display sync DMA shadow enable and auto-check on line 162:
+    else {
+        //DMA Disabled:
         this.enabled = 0;
-		this.displaySyncEnable = 1;
-		return;
     }
-    //Shadow copy the word count:
-    this.wordCountShadow = this.wordCount | 0;
-    //Shadow copy the source address:
-    this.sourceShadow = this.source | 0;
-    //Shadow copy the destination address:
-    this.destinationShadow = this.destination | 0;
     //Run some DMA channel activity checks:
     this.DMACore.update();
 }
@@ -429,7 +403,7 @@ GameBoyAdvanceDMA3.prototype.nextEventTime = function () {
             break;
             //DISPLAY_SYNC:
         case 0x20:
-            clocks = this.gfx.nextDisplaySyncEventTime() | 0;
+            clocks = this.gfx.nextDisplaySyncEventTime(this.displaySyncEnableDelay | 0) | 0;
     }
     return clocks | 0;
 }
