@@ -344,7 +344,8 @@ GameBoyAdvanceSound.prototype.writeWAVE8 = function (address, data) {
     this.channel3.writeWAVE8(address | 0, data | 0);
 }
 GameBoyAdvanceSound.prototype.readWAVE8 = function (address) {
-    address | 0
+    address = address | 0;
+    this.IOCore.updateTimerClocking();
     return this.channel3.readWAVE8(address | 0) | 0;
 }
 GameBoyAdvanceSound.prototype.writeWAVE16 = function (address, data) {
@@ -354,8 +355,9 @@ GameBoyAdvanceSound.prototype.writeWAVE16 = function (address, data) {
     this.channel3.writeWAVE16(address >> 1, data | 0);
 }
 GameBoyAdvanceSound.prototype.readWAVE16 = function (address) {
-    address | 0
-    return this.channel3.readWAVE16(address | 0) | 0;
+    address = address | 0;
+    this.IOCore.updateTimerClocking();
+    return this.channel3.readWAVE16(address >> 1) | 0;
 }
 GameBoyAdvanceSound.prototype.writeWAVE32 = function (address, data) {
     address = address | 0;
@@ -364,8 +366,9 @@ GameBoyAdvanceSound.prototype.writeWAVE32 = function (address, data) {
     this.channel3.writeWAVE32(address >> 2, data | 0);
 }
 GameBoyAdvanceSound.prototype.readWAVE32 = function (address) {
-    address | 0
-    return this.channel3.readWAVE32(address | 0) | 0;
+    address = address | 0;
+    this.IOCore.updateTimerClocking();
+    return this.channel3.readWAVE32(address >> 2) | 0;
 }
 GameBoyAdvanceSound.prototype.writeFIFOA8 = function (data) {
     data = data | 0;
@@ -414,11 +417,11 @@ GameBoyAdvanceSound.prototype.checkFIFOBPendingSignal = function () {
     }
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundAFIFOClear = function () {
-    this.FIFOABuffer.count = 0;
+    this.FIFOABuffer.clear();
     this.AGBDirectSoundATimerIncrement();
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundBFIFOClear = function () {
-    this.FIFOBBuffer.count = 0;
+    this.FIFOBBuffer.clear();
     this.AGBDirectSoundBTimerIncrement();
 }
 GameBoyAdvanceSound.prototype.AGBDirectSoundTimer0ClockTick = function () {

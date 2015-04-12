@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2014 Grant Galitz
+ * Copyright (C) 2012-2015 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -64,4 +64,7 @@ GameBoyAdvanceFIFO.prototype.requestingDMA = function () {
 }
 GameBoyAdvanceFIFO.prototype.samplesUntilDMATrigger = function () {
     return ((this.count | 0) - 0x10) | 0;
+}
+GameBoyAdvanceFIFO.prototype.clear = function () {
+    this.count = 0;
 }

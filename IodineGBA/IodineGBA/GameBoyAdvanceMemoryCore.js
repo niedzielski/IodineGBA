@@ -3127,8 +3127,7 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
         case 0x400009E:
         //400009Fh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009F:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE8(((address | 0) - 0x4000090) | 0) | 0;
+            data = this.sound.readWAVE8(address & 0xF) | 0;
             break;
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
@@ -3672,8 +3671,7 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
         case 0x400009C:
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009E:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE16(((address | 0) - 0x4000090) >> 1) | 0;
+            data = this.sound.readWAVE16(address & 0xF) | 0;
             break;
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)
@@ -4038,8 +4036,7 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
         //400009Ch - WAVE_RAM3_L - Channel 3 Wave Pattern RAM (W/R)
         //400009Eh - WAVE_RAM3_H - Channel 3 Wave Pattern RAM (W/R)
         case 0x400009C:
-            this.IOCore.updateTimerClocking();
-            data = this.sound.readWAVE32(((address | 0) - 0x4000090) >> 2) | 0;
+            data = this.sound.readWAVE32(address & 0xF) | 0;
             break;
         //40000A0h through 40000B9h - WRITE ONLY
         //40000BAh - DMA0CNT_H - DMA 0 Control (R/W)

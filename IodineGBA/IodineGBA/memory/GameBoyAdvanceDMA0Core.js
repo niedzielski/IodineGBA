@@ -211,7 +211,7 @@ GameBoyAdvanceDMA0.prototype.getMatchStatus = function () {
 }
 GameBoyAdvanceDMA0.prototype.requestDMA = function (DMAType) {
     DMAType = DMAType | 0;
-    if ((this.enabled & DMAType) == (DMAType | 0)) {
+    if ((this.enabled & DMAType) != 0) {
         this.pending = DMAType | 0;
         this.DMACore.update();
     }
