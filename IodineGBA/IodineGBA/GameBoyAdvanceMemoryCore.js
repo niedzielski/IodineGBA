@@ -5003,9 +5003,94 @@ function generateMemoryTopLevelDispatch() {
         code += "}";
         return Function("address", "data", code);
     }
-    //Optimized for DMA 3:
+    //Optimized for DMA 3 16 bit:
     function compileMemoryDMAWriteDispatch2(writeUnused, writeExternalWRAM, writeInternalWRAM,
-                                         writeIODispatch, writePalette, writeVRAM, writeOAM, writeROM) {
+                                         writeIODispatch, writePalette, writeVRAM, writeOAM, writeROM, writeROM2) {
+        var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
+        /*
+         Decoder for the nibble at bits 24-27
+         (Top 4 bits of the address falls through to default (unused),
+         so the next nibble down is used for dispatch.):
+         */
+        /*
+         BIOS Area (00000000-00003FFF)
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         Unused (00004000-01FFFFFF)
+         */
+        /*
+         WRAM - On-board Work RAM (02000000-0203FFFF)
+         Unused (02040000-02FFFFFF)
+         */
+        if (writeExternalWRAM != "writeUnused") {
+            code += "case 0x2:";
+            if (writeExternalWRAM.slice(0, 13) != "writeInternal") {
+                code += "{this." + writeExternalWRAM + "(address | 0, data | 0);break};";
+            }
+        }
+        /*
+         WRAM - In-Chip Work RAM (03000000-03007FFF)
+         Unused (03008000-03FFFFFF)
+         */
+        if (writeInternalWRAM != "writeUnused") {
+            code += "case 0x3:{this." + writeInternalWRAM + "(address | 0, data | 0);break};";
+        }
+        /*
+         I/O Registers (04000000-040003FE)
+         Unused (04000400-04FFFFFF)
+         */
+        code += "case 0x4:{this." + writeIODispatch + "(address | 0, data | 0);break};";
+        /*
+         BG/OBJ Palette RAM (05000000-050003FF)
+         Unused (05000400-05FFFFFF)
+         */
+        code += "case 0x5:{this." + writePalette + "(address | 0, data | 0);break};";
+        /*
+         VRAM - Video RAM (06000000-06017FFF)
+         Unused (06018000-06FFFFFF)
+         */
+        code += "case 0x6:{this." + writeVRAM + "(address | 0, data | 0);break};";
+        /*
+         OAM - OBJ Attributes (07000000-070003FF)
+         Unused (07000400-07FFFFFF)
+         */
+        code += "case 0x7:{this." + writeOAM + "(address | 0, data | 0);break};";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 0 (08000000-08FFFFFF)
+         */
+        code += "case 0x8:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 0 (09000000-09FFFFFF)
+         */
+        code += "case 0x9:";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 1 (0A000000-0AFFFFFF)
+         */
+        code += "case 0xA:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 1 (0B000000-0BFFFFFF)
+         */
+        code += "case 0xB:{this." + writeROM + "(address | 0, data | 0);break};";
+        /*
+         Game Pak ROM (max 16MB) - Wait State 2 (0C000000-0CFFFFFF)
+         */
+        code += "case 0xC:";
+        /*
+         Game Pak ROM/FlashROM (max 16MB) - Wait State 2 (0D000000-0DFFFFFF)
+         */
+        code += "case 0xD:{this." + writeROM2 + "(address | 0, data | 0);break};";
+        /*
+         Unused, DMA 3 cannot write past 0DFFFFFF:
+         */
+        code += "default:{this." + writeUnused + "()}";
+        //Generate the function:
+        code += "}";
+        return Function("address", "data", code);
+    }
+    //Optimized for DMA 3 32 bit:
+    function compileMemoryDMAWriteDispatch3(writeUnused, writeExternalWRAM, writeInternalWRAM,
+                                            writeIODispatch, writePalette, writeVRAM, writeOAM, writeROM) {
         var code = "address = address | 0;data = data | 0;switch (address >> 24) {";
         /*
          Decoder for the nibble at bits 24-27
@@ -5081,7 +5166,7 @@ function generateMemoryTopLevelDispatch() {
          */
         code += "case 0xD:{this." + writeROM + "(address | 0, data | 0);break};";
         /*
-         Unused, DMA 0-2 cannot write past 0DFFFFFF:
+         Unused, DMA 3 cannot write past 0DFFFFFF:
          */
         code += "default:{this." + writeUnused + "()}";
         //Generate the function:
@@ -5353,6 +5438,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writePalette16",
                                                                                          "writeVRAM16",
                                                                                          "writeOBJ16",
+                                                                                         "writeROM16",
                                                                                          "writeROM16DMA"
                                                                                          ),
                                                              compileMemoryDMAWriteDispatch2(
@@ -5363,6 +5449,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writePalette16",
                                                                                          "writeVRAM16",
                                                                                          "writeOBJ16",
+                                                                                         "writeROM16",
                                                                                          "writeROM16DMA"
                                                                                          ),
                                                              compileMemoryDMAWriteDispatch2(
@@ -5373,6 +5460,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writePalette16",
                                                                                          "writeVRAM16",
                                                                                          "writeOBJ16",
+                                                                                         "writeROM16",
                                                                                          "writeROM16DMA"
                                                                                          )
                                                              ];
@@ -5567,7 +5655,7 @@ function generateMemoryTopLevelDispatch() {
                                                              ];
     //DMA 3 Optimized 32-Bit Write Dispatch:
     GameBoyAdvanceMemory.prototype.memoryWriteDMA32FullGenerated = [
-                                                             compileMemoryDMAWriteDispatch2(
+                                                             compileMemoryDMAWriteDispatch3(
                                                                                          "writeUnused",
                                                                                          "writeInternalWRAM32",
                                                                                          "writeInternalWRAM32",
@@ -5577,7 +5665,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeOBJ32",
                                                                                          "writeROM32"
                                                                                          ),
-                                                             compileMemoryDMAWriteDispatch2(
+                                                             compileMemoryDMAWriteDispatch3(
                                                                                          "writeUnused",
                                                                                          "writeExternalWRAM32",
                                                                                          "writeInternalWRAM32",
@@ -5587,7 +5675,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                          "writeOBJ32",
                                                                                          "writeROM32"
                                                                                          ),
-                                                             compileMemoryDMAWriteDispatch2(
+                                                             compileMemoryDMAWriteDispatch3(
                                                                                          "writeUnused",
                                                                                          "writeUnused",
                                                                                          "writeUnused",

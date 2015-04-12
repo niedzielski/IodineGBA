@@ -86,36 +86,33 @@ GameBoyAdvanceEEPROMChip.prototype.read16 = function () {
 }
 GameBoyAdvanceEEPROMChip.prototype.write16 = function (data) {
     data = data & 0x1;
-    if (this.IOCore.inDMA()) {
-        //Writes only work in DMA:
-        switch (this.mode | 0) {
-                //Idle Mode:
-            case 0:
-                this.mode = data | 0;
-                break;
-                //Select Mode:
-            case 0x1:
-                this.selectMode(data | 0);
-                break;
-                //Address Mode (Write):
-            case 0x2:
-                //Address Mode (Read):
-            case 0x3:
-                this.addressMode(data | 0);
-                break;
-                //Write Mode:
-            case 0x4:
-                this.writeMode(data | 0);
-                break;
-                //Ending bit of addressing:
-            case 0x5:
-            case 0x6:
-                this.endAddressing();
-                break;
-                //Read Mode:
-            default:
-                this.resetMode();
-        }
+    switch (this.mode | 0) {
+            //Idle Mode:
+        case 0:
+            this.mode = data | 0;
+            break;
+            //Select Mode:
+        case 0x1:
+            this.selectMode(data | 0);
+            break;
+            //Address Mode (Write):
+        case 0x2:
+            //Address Mode (Read):
+        case 0x3:
+            this.addressMode(data | 0);
+            break;
+            //Write Mode:
+        case 0x4:
+            this.writeMode(data | 0);
+            break;
+            //Ending bit of addressing:
+        case 0x5:
+        case 0x6:
+            this.endAddressing();
+            break;
+            //Read Mode:
+        default:
+            this.resetMode();
     }
 }
 GameBoyAdvanceEEPROMChip.prototype.selectMode = function (data) {
