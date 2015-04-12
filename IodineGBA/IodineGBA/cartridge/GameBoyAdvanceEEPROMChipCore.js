@@ -51,10 +51,6 @@ GameBoyAdvanceEEPROMChip.prototype.load = function (save) {
         this.saves = save;
     }
 }
-GameBoyAdvanceEEPROMChip.prototype.read8 = function () {
-    //Can't do real reading with 8-bit reads:
-    return 0x1;
-}
 GameBoyAdvanceEEPROMChip.prototype.read16 = function () {
     var data = 1;
     switch (this.mode | 0) {
@@ -87,13 +83,6 @@ GameBoyAdvanceEEPROMChip.prototype.read16 = function () {
             }
     }
     return data | 0;
-}
-GameBoyAdvanceEEPROMChip.prototype.read32 = function () {
-    //Can't do real reading with 32-bit reads:
-    return 0x10001;
-}
-GameBoyAdvanceEEPROMChip.prototype.write8 = function (data) {
-    //Fails on hardware
 }
 GameBoyAdvanceEEPROMChip.prototype.write16 = function (data) {
     data = data & 0x1;
@@ -128,9 +117,6 @@ GameBoyAdvanceEEPROMChip.prototype.write16 = function (data) {
                 this.resetMode();
         }
     }
-}
-GameBoyAdvanceEEPROMChip.prototype.write32 = function (data) {
-    //Fails on hardware
 }
 GameBoyAdvanceEEPROMChip.prototype.selectMode = function (data) {
     data = data | 0;

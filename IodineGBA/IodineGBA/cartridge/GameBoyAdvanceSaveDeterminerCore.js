@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2015 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -85,16 +85,6 @@ GameBoyAdvanceSaveDeterminer.prototype.writeGPIO32 = function (address, data) {
     data = data | 0;
     //GPIO (TODO):
 }
-GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM8 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
-        //EEPROM:
-        this.possible = this.flags.EEPROM | 0;
-        this.checkDetermination();
-        this.saveCore.writeEEPROM8(address | 0, data | 0);
-    }
-}
 GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM16 = function (address, data) {
     address = address | 0;
     data = data | 0;
@@ -105,26 +95,6 @@ GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM16 = function (address, data) 
         this.saveCore.writeEEPROM16(address | 0, data | 0);
     }
 }
-GameBoyAdvanceSaveDeterminer.prototype.writeEEPROM32 = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
-        //EEPROM:
-        this.possible = this.flags.EEPROM | 0;
-        this.checkDetermination();
-        this.saveCore.writeEEPROM32(address | 0, data | 0);
-    }
-}
-GameBoyAdvanceSaveDeterminer.prototype.readEEPROM8 = function (address) {
-    address = address | 0;
-    var data = 0;
-    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
-        //EEPROM:
-        this.possible = this.flags.EEPROM | 0;
-        this.checkDetermination();
-        return this.saveCore.readEEPROM8(address | 0) | 0;
-    }
-}
 GameBoyAdvanceSaveDeterminer.prototype.readEEPROM16 = function (address) {
     address = address | 0;
     var data = 0;
@@ -133,16 +103,6 @@ GameBoyAdvanceSaveDeterminer.prototype.readEEPROM16 = function (address) {
         this.possible = this.flags.EEPROM | 0;
         this.checkDetermination();
         return this.saveCore.readEEPROM16(address | 0) | 0;
-    }
-}
-GameBoyAdvanceSaveDeterminer.prototype.readEEPROM32 = function (address) {
-    address = address | 0;
-    var data = 0;
-    if ((this.possible & this.flags.EEPROM) == (this.flags.EEPROM | 0)) {
-        //EEPROM:
-        this.possible = this.flags.EEPROM | 0;
-        this.checkDetermination();
-        return this.saveCore.readEEPROM32(address | 0) | 0;
     }
 }
 GameBoyAdvanceSaveDeterminer.prototype.writeSRAM = function (address, data) {
