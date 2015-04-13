@@ -287,7 +287,7 @@ GameBoyAdvanceDMA3.prototype.copy16 = function (source, destination) {
     source = source | 0;
     destination = destination | 0;
     var data = this.memory.memoryReadDMAFull16(source | 0) | 0;
-    this.memory.memoryWriteDMAFull16(destination | 0, data | 0);
+    this.memory.memoryWrite16(destination | 0, data | 0);
     this.decrementWordCount(source | 0, destination | 0, 2);
     this.DMACore.updateFetch(data | (data << 16));
 }
@@ -295,7 +295,7 @@ GameBoyAdvanceDMA3.prototype.copy32 = function (source, destination) {
     source = source | 0;
     destination = destination | 0;
     var data = this.memory.memoryReadDMAFull32(source | 0) | 0;
-    this.memory.memoryWriteDMAFull32(destination | 0, data | 0);
+    this.memory.memoryWrite32(destination | 0, data | 0);
     this.decrementWordCount(source | 0, destination | 0, 4);
     this.DMACore.updateFetch(data | 0);
 }

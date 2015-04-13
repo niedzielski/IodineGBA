@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2015 Grant Galitz
+ * Copyright (C) 2012-2014 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -192,7 +192,24 @@ GameBoyAdvanceCartridge.prototype.readROM32 = function (address) {
     }
     return data | 0;
 }
-GameBoyAdvanceCartridge.prototype.readROM16DMA = function (address) {
+GameBoyAdvanceCartridge.prototype.readROM8Space2 = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((address | 0) >= 0xC4 && (address | 0) < 0xCA) {
+        //Possibly GPIO:
+        data = this.IOCore.saves.readGPIO8(address | 0) | 0;
+    }
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
+        //Possibly EEPROM:
+        data = this.IOCore.saves.readEEPROM8(address | 0) | 0;
+    }
+    else {
+        //Definitely ROM:
+        data = this.readROMOnly8(address | 0) | 0;
+    }
+    return data | 0;
+}
+GameBoyAdvanceCartridge.prototype.readROM16Space2 = function (address) {
     address = address | 0;
     var data = 0;
     if ((address | 0) >= 0xC4 && (address | 0) < 0xCA) {
@@ -209,12 +226,33 @@ GameBoyAdvanceCartridge.prototype.readROM16DMA = function (address) {
     }
     return data | 0;
 }
+GameBoyAdvanceCartridge.prototype.readROM32Space2 = function (address) {
+    address = address | 0;
+    var data = 0;
+    if ((address | 0) >= 0xC4 && (address | 0) < 0xCA) {
+        //Possibly GPIO:
+        data = this.IOCore.saves.readGPIO32(address | 0) | 0;
+    }
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
+        //Possibly EEPROM:
+        data = this.IOCore.saves.readEEPROM32(address | 0) | 0;
+    }
+    else {
+        //Definitely ROM:
+        data = this.readROMOnly32(address | 0) | 0;
+    }
+    return data | 0;
+}
 GameBoyAdvanceCartridge.prototype.writeROM8 = function (address, data) {
     address = address | 0;
     data = data | 0;
     if ((address | 0) >= 0xC4 && (address | 0) < 0xCA) {
         //GPIO Chip (RTC):
         this.IOCore.saves.writeGPIO8(address | 0, data | 0);
+    }
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
+        //Possibly EEPROM:
+        this.IOCore.saves.writeEEPROM8(address | 0, data | 0);
     }
 }
 GameBoyAdvanceCartridge.prototype.writeROM16 = function (address, data) {
@@ -224,6 +262,10 @@ GameBoyAdvanceCartridge.prototype.writeROM16 = function (address, data) {
         //GPIO Chip (RTC):
         this.IOCore.saves.writeGPIO16(address | 0, data | 0);
     }
+    else if ((address | 0) >= (this.EEPROMStart | 0)) {
+        //Possibly EEPROM:
+        this.IOCore.saves.writeEEPROM16(address | 0, data | 0);
+    }
 }
 GameBoyAdvanceCartridge.prototype.writeROM32 = function (address, data) {
     address = address | 0;
@@ -232,17 +274,9 @@ GameBoyAdvanceCartridge.prototype.writeROM32 = function (address, data) {
         //GPIO Chip (RTC):
         this.IOCore.saves.writeGPIO32(address | 0, data | 0);
     }
-}
-GameBoyAdvanceCartridge.prototype.writeROM16DMA = function (address, data) {
-    address = address | 0;
-    data = data | 0;
-    if ((address | 0) >= 0xC4 && (address | 0) < 0xCA) {
-        //GPIO Chip (RTC):
-        this.IOCore.saves.writeGPIO16(address | 0, data | 0);
-    }
     else if ((address | 0) >= (this.EEPROMStart | 0)) {
         //Possibly EEPROM:
-        this.IOCore.saves.writeEEPROM16(address | 0, data | 0);
+        this.IOCore.saves.writeEEPROM32(address | 0, data | 0);
     }
 }
 GameBoyAdvanceCartridge.prototype.nextIRQEventTime = function () {
