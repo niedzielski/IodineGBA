@@ -2752,6 +2752,22 @@ else {
             return this.readUnused16IO(address);
         }
     }
+    GameBoyAdvanceMemory.prototype.readBIOS16DMA = function (address) {
+        this.wait.singleClock();
+        if (address < 0x4000) {
+            if (this.cpu.registers[15] < 0x4000) {
+                //If reading from BIOS while executing it:
+                return this.BIOS[address & -2] | (this.BIOS[address | 1] << 8);
+            }
+            else {
+                //Not allowed to read from BIOS while executing outside of it:
+                return 0;
+            }
+        }
+        else {
+            return this.readUnused16IO(address);
+        }
+    }
     GameBoyAdvanceMemory.prototype.readBIOS16CPU = function (address) {
         this.IOCore.updateCoreSingle();
         if (address < 0x4000) {
@@ -2775,6 +2791,23 @@ else {
             else {
                 //Not allowed to read from BIOS while executing outside of it:
                 return this.lastBIOSREAD;
+            }
+        }
+        else {
+            return this.IOCore.getCurrentFetchValue();
+        }
+    }
+    GameBoyAdvanceMemory.prototype.readBIOS32DMA = function (address) {
+        this.wait.singleClock();
+        if (address < 0x4000) {
+            if (this.cpu.registers[15] < 0x4000) {
+                //If reading from BIOS while executing it:
+                address &= -4;
+                return this.BIOS[address] | (this.BIOS[address + 1] << 8) | (this.BIOS[address + 2] << 16)  | (this.BIOS[address + 3] << 24);
+            }
+            else {
+                //Not allowed to read from BIOS while executing outside of it:
+                return 0;
             }
         }
         else {
