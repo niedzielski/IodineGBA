@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2014 Grant Galitz
+ * Copyright (C) 2012-2015 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,83 +19,26 @@ function GameBoyAdvanceWait(IOCore) {
     this.IOCore = IOCore;
     this.memory = this.IOCore.memory;
 }
-GameBoyAdvanceWait.prototype.GAMEPAKWaitStateTable = [
-    5, 4, 3, 9
-];
 GameBoyAdvanceWait.prototype.initialize = function () {
     this.WRAMConfiguration = 0xD000020;     //WRAM configuration control register current data.
     this.WRAMWaitState = 3;                 //External WRAM wait state.
     this.SRAMWaitState = 5;                 //SRAM wait state.
-    this.nonSequential = 0x100;             //Non-sequential access bit-flag.
-    this.nonSequentialROM = 0;              //Non-sequential access bit-flag for ROM prebuffer bug emulation.
-    this.nonSequentialPrebuffer = 0x100;    //Non-sequential access bit-flag for ROM prebuffer emulation.
-    this.romPrebufferContinued = 0x100;     //Non-sequential access bit-flag for ROM prebuffer emulation.
-    this.ROMPrebuffer = 0;                  //Tracking of the size of the prebuffer cache.
-    this.prebufferClocks = 0;               //Tracking clocks for prebuffer cache.
     this.WAITCNT0 = 0;                      //WAITCNT0 control register data.
     this.WAITCNT1 = 0;                      //WAITCNT1 control register data.
     this.POSTBOOT = 0;                      //POSTBOOT control register data.
     this.isRendering = 1;                   //Are we doing memory during screen draw?
     this.isOAMRendering = 1;                //Are we doing memory during OAM draw?
-    //Create the wait state address translation cache:
-    this.waitStateClocks = getUint8Array(0x200);
-    this.waitStateClocksFull = getUint8Array(0x200);
-    //Wait State 0:
-    //Non-Synchronous:
-    this.waitStateClocks[0x108] = 5;
-    this.waitStateClocks[0x109] = 5;
-    //Synchronous:
-    this.waitStateClocks[0x8] = 3;
-    this.waitStateClocks[0x9] = 3;
-    //Non-Synchronous Full:
-    this.waitStateClocksFull[0x108] = 8;
-    this.waitStateClocksFull[0x109] = 8;
-    //Synchronous Full:
-    this.waitStateClocksFull[0x8] = 6;
-    this.waitStateClocksFull[0x9] = 6;
-    //Wait State 1:
-    //Non-Synchronous:
-    this.waitStateClocks[0x10A] = 5;
-    this.waitStateClocks[0x10B] = 5;
-    //Synchronous:
-    this.waitStateClocks[0xA] = 3;
-    this.waitStateClocks[0xB] = 3;
-    //Non-Synchronous Full:
-    this.waitStateClocksFull[0x10A] = 8;
-    this.waitStateClocksFull[0x10B] = 8;
-    //Synchronous Full:
-    this.waitStateClocksFull[0xA] = 6;
-    this.waitStateClocksFull[0xB] = 6;
-    //Wait State 2:
-    //Non-Synchronous:
-    this.waitStateClocks[0x10C] = 5;
-    this.waitStateClocks[0x10D] = 5;
-    //Synchronous:
-    this.waitStateClocks[0xC] = 3;
-    this.waitStateClocks[0xD] = 3;
-    //Non-Synchronous Full:
-    this.waitStateClocksFull[0x10C] = 8;
-    this.waitStateClocksFull[0x10D] = 8;
-    //Synchronous Full:
-    this.waitStateClocksFull[0xC] = 6;
-    this.waitStateClocksFull[0xD] = 6;
-    //Initialize out some dynamic references:
-    this.getROMRead16 = this.getROMRead16NoPrefetch;
-    this.getROMRead32 = this.getROMRead32NoPrefetch;
-    this.CPUInternalCyclePrefetch = this.CPUInternalCycleNoPrefetch;
-    this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleNoPrefetch;
+    this.gamePakWait = new GameBoyAdvanceGamePakWait(this);
 }
 GameBoyAdvanceWait.prototype.writeWAITCNT0 = function (data) {
     data = data | 0;
-    this.SRAMWaitState = this.GAMEPAKWaitStateTable[data & 0x3] | 0;
-    this.waitStateClocks[0x108] = this.waitStateClocks[0x109] = this.GAMEPAKWaitStateTable[(data >> 2) & 0x3] | 0;
-    this.waitStateClocks[0x8] = this.waitStateClocks[0x9] =  ((data & 0x10) == 0x10) ? 0x2 : 0x3;
-    this.waitStateClocksFull[0x8] = this.waitStateClocksFull[0x9] = ((((this.waitStateClocks[0x8] | 0) - 1) << 1) + 1) | 0;
-    this.waitStateClocks[0x10A] = this.waitStateClocks[0x10B] = this.GAMEPAKWaitStateTable[(data >> 5) & 0x3] | 0;
-    this.waitStateClocks[0xA] = this.waitStateClocks[0xB] =  (data > 0x7F) ? 0x2 : 0x5;
-    this.waitStateClocksFull[0xA] = this.waitStateClocksFull[0xB] = ((((this.waitStateClocks[0xA] | 0) - 1) << 1) + 1) | 0;
-    this.waitStateClocksFull[0x108] = this.waitStateClocksFull[0x109] = ((this.waitStateClocks[0x108] | 0) + (this.waitStateClocks[0x8] | 0) - 1) | 0;
-    this.waitStateClocksFull[0x10A] = this.waitStateClocksFull[0x10B] = ((this.waitStateClocks[0x10A] | 0) + (this.waitStateClocks[0xA] | 0) - 1) | 0;
+    if ((data & 0x3) < 0x3) {
+        this.SRAMWaitState = (5 - (data & 0x3)) | 0;
+    }
+    else {
+        this.SRAMWaitState = 9;
+    }
+    this.gamePakWait.writeWAITCNT0(data | 0);
     this.WAITCNT0 = data | 0;
 }
 GameBoyAdvanceWait.prototype.readWAITCNT0 = function () {
@@ -103,27 +46,7 @@ GameBoyAdvanceWait.prototype.readWAITCNT0 = function () {
 }
 GameBoyAdvanceWait.prototype.writeWAITCNT1 = function (data) {
     data = data | 0;
-    this.waitStateClocks[0x10C] = this.waitStateClocks[0x10D] = this.GAMEPAKWaitStateTable[data & 0x3] | 0;
-    this.waitStateClocks[0xC] = this.waitStateClocks[0xD] =  ((data & 0x4) == 0x4) ? 0x2 : 0x9;
-    this.waitStateClocksFull[0xC] = this.waitStateClocksFull[0xD] = ((((this.waitStateClocks[0xC] | 0) - 1) << 1) + 1) | 0;
-    this.waitStateClocksFull[0x10C] = this.waitStateClocksFull[0x10D] = ((this.waitStateClocks[0x10C] | 0) + (this.waitStateClocks[0xC] | 0) - 1) | 0;
-    if ((data & 0x40) == 0) {
-        this.ROMPrebuffer = 0;
-        this.prebufferClocks = 0;
-        this.getROMRead16 = this.getROMRead16NoPrefetch;
-        this.getROMRead32 = this.getROMRead32NoPrefetch;
-        this.CPUInternalCyclePrefetch = this.CPUInternalCycleNoPrefetch;
-        this.CPUInternalSingleCyclePrefetch = this.CPUInternalSingleCycleNoPrefetch;
-    }
-    else {
-        this.getROMRead16 = this.getROMRead16Prefetch;
-        this.getROMRead32 = this.getROMRead32Prefetch;
-        this.CPUInternalCyclePrefetch = this.multiClock;
-        this.CPUInternalSingleCyclePrefetch = this.singleClock;
-        this.nonSequentialROM = 0;
-        this.nonSequentialPrebuffer = 0x100;
-        this.romPrebufferContinued = 0x100;
-    }
+    this.gamePakWait.writeWAITCNT1(data | 0);
     this.WAITCNT1 = data & 0x5F;
 }
 GameBoyAdvanceWait.prototype.readWAITCNT1 = function () {
