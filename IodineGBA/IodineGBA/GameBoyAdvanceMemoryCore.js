@@ -2627,7 +2627,7 @@ GameBoyAdvanceMemory.prototype.readBIOS8 = function (address) {
         }
     }
     else {
-        data = this.readUnused8IO(address | 0) | 0;
+        data = this.readUnused8CPUBase(address | 0) | 0;
     }
     return data | 0;
 }
@@ -2648,7 +2648,7 @@ if (__LITTLE_ENDIAN__) {
             }
         }
         else {
-            data = this.readUnused16IO(address | 0) | 0;
+            data = this.readUnused16CPUBase(address | 0) | 0;
         }
         return data | 0;
     }
@@ -2664,7 +2664,7 @@ if (__LITTLE_ENDIAN__) {
             }
         }
         else {
-            data = this.readUnused16IO(address | 0) | 0;
+            data = this.readUnused16DMABase(address | 0) | 0;
         }
         return data | 0;
     }
@@ -2679,7 +2679,7 @@ if (__LITTLE_ENDIAN__) {
             this.lastBIOSREAD = data | 0;
         }
         else {
-            data = this.readUnused16IO(address | 0) | 0;
+            data = this.readUnused16CPUBase(address | 0) | 0;
         }
         return data | 0;
     }
@@ -2699,7 +2699,7 @@ if (__LITTLE_ENDIAN__) {
             }
         }
         else {
-            data = this.IOCore.getCurrentFetchValue() | 0;
+            data = this.cpu.getCurrentFetchValue() | 0;
         }
         return data | 0;
     }
@@ -2715,7 +2715,7 @@ if (__LITTLE_ENDIAN__) {
             }
         }
         else {
-            data = this.IOCore.getCurrentFetchValue() | 0;
+            data = this.dma.getCurrentFetchValue() | 0;
         }
         return data | 0;
     }
@@ -2730,7 +2730,7 @@ if (__LITTLE_ENDIAN__) {
             this.lastBIOSREAD = data | 0;
         }
         else {
-            data = this.IOCore.getCurrentFetchValue() | 0;
+            data = this.cpu.getCurrentFetchValue() | 0;
         }
         return data | 0;
     }
@@ -2749,7 +2749,7 @@ else {
             }
         }
         else {
-            return this.readUnused16IO(address);
+            return this.readUnused16CPUBase(address);
         }
     }
     GameBoyAdvanceMemory.prototype.readBIOS16DMA = function (address) {
@@ -2765,7 +2765,7 @@ else {
             }
         }
         else {
-            return this.readUnused16IO(address);
+            return this.readUnused16DMABase(address);
         }
     }
     GameBoyAdvanceMemory.prototype.readBIOS16CPU = function (address) {
@@ -2777,7 +2777,7 @@ else {
             return data;
         }
         else {
-            return this.readUnused16IO(address);
+            return this.readUnused16CPUBase(address);
         }
     }
     GameBoyAdvanceMemory.prototype.readBIOS32 = function (address) {
@@ -2794,7 +2794,7 @@ else {
             }
         }
         else {
-            return this.IOCore.getCurrentFetchValue();
+            return this.cpu.getCurrentFetchValue();
         }
     }
     GameBoyAdvanceMemory.prototype.readBIOS32DMA = function (address) {
@@ -2811,7 +2811,7 @@ else {
             }
         }
         else {
-            return this.IOCore.getCurrentFetchValue();
+            return this.dma.getCurrentFetchValue();
         }
     }
     GameBoyAdvanceMemory.prototype.readBIOS32CPU = function (address) {
@@ -2824,7 +2824,7 @@ else {
             return data;
         }
         else {
-            return this.IOCore.getCurrentFetchValue();
+            return this.cpu.getCurrentFetchValue();
         }
     }
 }
@@ -3554,7 +3554,7 @@ GameBoyAdvanceMemory.prototype.readIO8LessCalled = function (address) {
             }
             else {
                 //Undefined Illegal I/O:
-                data = this.readUnused8IO(address | 0) | 0;
+                data = this.readUnused8CPUBase(address | 0) | 0;
             }
     }
     return data | 0;
@@ -3922,7 +3922,7 @@ GameBoyAdvanceMemory.prototype.readIO16LessCalled = function (address) {
             }
             else {
                 //Undefined Illegal I/O:
-                data = this.readUnused16IO(address | 0) | 0;
+                data = this.readUnused16MultiBase(address | 0) | 0;
             }
     }
     return data | 0;
@@ -4232,7 +4232,7 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
             }
             else {
                 //Undefined Illegal I/O:
-                data = this.IOCore.getCurrentFetchValue() | 0;
+                data = this.readUnused32MultiBase() | 0;
             }
     }
     return data | 0;
@@ -4436,33 +4436,53 @@ else {
 GameBoyAdvanceMemory.prototype.readUnused8 = function (address) {
     address = address | 0;
     this.wait.singleClock();
-    return (this.IOCore.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
+    return this.readUnused8CPUBase(address | 0) | 0;
 }
-GameBoyAdvanceMemory.prototype.readUnused8IO = function (address) {
+GameBoyAdvanceMemory.prototype.readUnused8CPUBase = function (address) {
     address = address | 0;
-    return (this.IOCore.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
+    return (this.cpu.getCurrentFetchValue() >> ((address & 0x3) << 3)) & 0xFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused16 = function (address) {
     address = address | 0;
     this.wait.singleClock();
-    return (this.IOCore.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
-}
-GameBoyAdvanceMemory.prototype.readUnused16IO = function (address) {
-    address = address | 0;
-    return (this.IOCore.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+    return this.readUnused16CPUBase(address | 0) | 0;
 }
 GameBoyAdvanceMemory.prototype.readUnused16CPU = function (address) {
     address = address | 0;
     this.IOCore.updateCoreSingle();
+    return this.readUnused16CPUBase(address | 0) | 0;
+}
+GameBoyAdvanceMemory.prototype.readUnused16CPUBase = function (address) {
+    address = address | 0;
     return (this.cpu.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+}
+GameBoyAdvanceMemory.prototype.readUnused16DMA = function (address) {
+    address = address | 0;
+    this.wait.singleClock();
+    return this.readUnused16DMABase(address | 0) | 0;
+}
+GameBoyAdvanceMemory.prototype.readUnused16DMABase = function (address) {
+    address = address | 0;
+    return (this.dma.getCurrentFetchValue() >> ((address & 0x2) << 3)) & 0xFFFF;
+}
+GameBoyAdvanceMemory.prototype.readUnused16MultiBase = function (address) {
+    address = address | 0;
+    return (this.readUnused32MultiBase() >> ((address & 0x2) << 3)) & 0xFFFF;
 }
 GameBoyAdvanceMemory.prototype.readUnused32 = function () {
     this.wait.singleClock();
-    return this.IOCore.getCurrentFetchValue() | 0;
+    return this.cpu.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.readUnused32CPU = function () {
     this.IOCore.updateCoreSingle();
     return this.cpu.getCurrentFetchValue() | 0;
+}
+GameBoyAdvanceMemory.prototype.readUnused32DMA = function () {
+    this.wait.singleClock();
+    return this.dma.getCurrentFetchValue() | 0;
+}
+GameBoyAdvanceMemory.prototype.readUnused32MultiBase = function () {
+    return this.IOCore.getCurrentFetchValue() | 0;
 }
 GameBoyAdvanceMemory.prototype.loadBIOS = function () {
     //Ensure BIOS is of correct length:
@@ -5160,7 +5180,7 @@ function generateMemoryTopLevelDispatch() {
     //DMA 0 Optimized 16-Bit Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryReadDMA16Generated = [
                                                             compileMemoryDMA0ReadDispatch(
-                                                                                      "readUnused16",
+                                                                                      "readUnused16DMA",
                                                                                       "readInternalWRAM16",
                                                                                       "readInternalWRAM16",
                                                                                       "readIODispatch16",
@@ -5168,7 +5188,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readBIOS16DMA"
                                                                                       ),
                                                             compileMemoryDMA0ReadDispatch(
-                                                                                      "readUnused16",
+                                                                                      "readUnused16DMA",
                                                                                       "readExternalWRAM16",
                                                                                       "readInternalWRAM16",
                                                                                       "readIODispatch16",
@@ -5176,9 +5196,9 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readBIOS16DMA"
                                                                                       ),
                                                             compileMemoryDMA0ReadDispatch(
-                                                                                      "readUnused16",
-                                                                                      "readUnused16",
-                                                                                      "readUnused16",
+                                                                                      "readUnused16DMA",
+                                                                                      "readUnused16DMA",
+                                                                                      "readUnused16DMA",
                                                                                       "readIODispatch16",
                                                                                       "readVRAM16Preliminary",
                                                                                       "readBIOS16DMA"
@@ -5187,7 +5207,7 @@ function generateMemoryTopLevelDispatch() {
     //DMA 1-3 Optimized 16-Bit Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryReadDMA16FullGenerated = [
                                                             compileMemoryDMAReadDispatch(
-                                                                                      "readUnused16",
+                                                                                      "readUnused16DMA",
                                                                                       "readInternalWRAM16",
                                                                                       "readInternalWRAM16",
                                                                                       "readIODispatch16",
@@ -5197,7 +5217,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readBIOS16DMA"
                                                                                       ),
                                                             compileMemoryDMAReadDispatch(
-                                                                                      "readUnused16",
+                                                                                      "readUnused16DMA",
                                                                                       "readExternalWRAM16",
                                                                                       "readInternalWRAM16",
                                                                                       "readIODispatch16",
@@ -5207,9 +5227,9 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readBIOS16DMA"
                                                                                       ),
                                                             compileMemoryDMAReadDispatch(
-                                                                                      "readUnused16",
-                                                                                      "readUnused16",
-                                                                                      "readUnused16",
+                                                                                      "readUnused16DMA",
+                                                                                      "readUnused16DMA",
+                                                                                      "readUnused16DMA",
                                                                                       "readIODispatch16",
                                                                                       "readVRAM16Preliminary",
                                                                                       "readROM16",
@@ -5391,7 +5411,7 @@ function generateMemoryTopLevelDispatch() {
     //DMA 0 Optimized 32-Bit Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryReadDMA32Generated = [
                                                                compileMemoryDMA0ReadDispatch(
-                                                                                            "readUnused32",
+                                                                                            "readUnused32DMA",
                                                                                             "readInternalWRAM32",
                                                                                             "readInternalWRAM32",
                                                                                             "readIODispatch32",
@@ -5399,7 +5419,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readBIOS32DMA"
                                                                                             ),
                                                                compileMemoryDMA0ReadDispatch(
-                                                                                            "readUnused32",
+                                                                                            "readUnused32DMA",
                                                                                             "readExternalWRAM32",
                                                                                             "readInternalWRAM32",
                                                                                             "readIODispatch32",
@@ -5407,9 +5427,9 @@ function generateMemoryTopLevelDispatch() {
                                                                                             "readBIOS32DMA"
                                                                                             ),
                                                                compileMemoryDMA0ReadDispatch(
-                                                                                            "readUnused32",
-                                                                                            "readUnused32",
-                                                                                            "readUnused32",
+                                                                                            "readUnused32DMA",
+                                                                                            "readUnused32DMA",
+                                                                                            "readUnused32DMA",
                                                                                             "readIODispatch32",
                                                                                             "readVRAM32Preliminary",
                                                                                             "readBIOS32DMA"
@@ -5418,7 +5438,7 @@ function generateMemoryTopLevelDispatch() {
     //DMA 1-3 Optimized 32-Bit Read Dispatch:
     GameBoyAdvanceMemory.prototype.memoryReadDMA32FullGenerated = [
                                                             compileMemoryDMAReadDispatch(
-                                                                                      "readUnused32",
+                                                                                      "readUnused32DMA",
                                                                                       "readInternalWRAM32",
                                                                                       "readInternalWRAM32",
                                                                                       "readIODispatch32",
@@ -5428,7 +5448,7 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readBIOS32DMA"
                                                                                       ),
                                                             compileMemoryDMAReadDispatch(
-                                                                                      "readUnused32",
+                                                                                      "readUnused32DMA",
                                                                                       "readExternalWRAM32",
                                                                                       "readInternalWRAM32",
                                                                                       "readIODispatch32",
@@ -5438,9 +5458,9 @@ function generateMemoryTopLevelDispatch() {
                                                                                       "readBIOS32DMA"
                                                                                       ),
                                                             compileMemoryDMAReadDispatch(
-                                                                                      "readUnused32",
-                                                                                      "readUnused32",
-                                                                                      "readUnused32",
+                                                                                      "readUnused32DMA",
+                                                                                      "readUnused32DMA",
+                                                                                      "readUnused32DMA",
                                                                                       "readIODispatch32",
                                                                                       "readVRAM32Preliminary",
                                                                                       "readROM32",
