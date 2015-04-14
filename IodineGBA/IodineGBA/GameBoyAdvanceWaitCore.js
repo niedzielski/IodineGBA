@@ -260,7 +260,9 @@ GameBoyAdvanceWait.prototype.multiClock = function (clocks) {
     this.IOCore.updateCore(clocks | 0);
     var address = this.IOCore.cpu.registers[15] | 0;
     if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
-        this.addPrebufferClocks(clocks | 0);
+        if ((this.clocks | 0) < 0xFF) {
+            this.clocks = ((this.clocks | 0) + (clocks | 0)) | 0;
+        }
     }
     else {
         this.resetPrebuffer();
@@ -271,7 +273,7 @@ GameBoyAdvanceWait.prototype.singleClock = function () {
     var address = this.IOCore.cpu.registers[15] | 0;
     if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
         if ((this.clocks | 0) < 0xFF) {
-            this.addPrebufferSingleClock();
+            this.clocks = ((this.clocks | 0) + 1) | 0;
         }
     }
     else {
@@ -279,15 +281,7 @@ GameBoyAdvanceWait.prototype.singleClock = function () {
     }
 }
 GameBoyAdvanceWait.prototype.addPrebufferSingleClock = function () {
-    if ((this.clocks | 0) < 0xFF) {
-        this.clocks = ((this.clocks | 0) + 1) | 0;
-    }
-}
-GameBoyAdvanceWait.prototype.addPrebufferClocks = function (clocks) {
-    clocks = clocks | 0;
-    if ((this.clocks | 0) < 0xFF) {
-        this.clocks = ((this.clocks | 0) + (clocks | 0)) | 0;
-    }
+    this.clocks = ((this.clocks | 0) + 1) | 0;
 }
 GameBoyAdvanceWait.prototype.decrementBufferSingle = function () {
     this.buffer = ((this.buffer | 0) - 1) | 0;
