@@ -28,12 +28,12 @@ GameBoyAdvanceWait.prototype.initialize = function () {
     this.POSTBOOT = 0;                      //POSTBOOT control register data.
     this.isRendering = 1;                   //Are we doing memory during screen draw?
     this.isOAMRendering = 1;                //Are we doing memory during OAM draw?
-    this.nonSequential = 0x100;             //Non-sequential access bit-flag.
+    this.nonSequential = 0x10;              //Non-sequential access bit-flag.
     this.buffer = 0;                        //Tracking of the size of the prebuffer cache.
     this.clocks = 0;                        //Tracking clocks for prebuffer cache.
     //Create the wait state address translation cache:
-    this.waitStateClocks16 = getUint8Array(0x200);
-    this.waitStateClocks32 = getUint8Array(0x200);
+    this.waitStateClocks16 = getUint8Array(0x20);
+    this.waitStateClocks32 = getUint8Array(0x20);
     //Wait State 0:
     this.setWaitState(0, 0);
     //Wait State 1:
@@ -81,12 +81,12 @@ GameBoyAdvanceWait.prototype.setWaitState = function (region, data) {
     region = region << 1;
     //Computing First Access:
     //8-16 bit access:
-    this.waitStateClocks16[0x108 | region] = firstAccess | 0;
-    this.waitStateClocks16[0x109 | region] = firstAccess | 0;
+    this.waitStateClocks16[0x18 | region] = firstAccess | 0;
+    this.waitStateClocks16[0x19 | region] = firstAccess | 0;
     //32 bit access:
     var accessTime = ((firstAccess | 0) + (secondAccess | 0)) | 0;
-    this.waitStateClocks32[0x108 | region] = accessTime | 0;
-    this.waitStateClocks32[0x109 | region] = accessTime | 0;
+    this.waitStateClocks32[0x18 | region] = accessTime | 0;
+    this.waitStateClocks32[0x19 | region] = accessTime | 0;
     //Computing Second Access:
     //8-16 bit access:
     this.waitStateClocks16[0x8 | region] = secondAccess | 0;
@@ -242,7 +242,7 @@ GameBoyAdvanceWait.prototype.checkPrebufferBug = function () {
 }
 GameBoyAdvanceWait.prototype.NonSequentialBroadcast = function () {
     //Flag as N cycle:
-    this.nonSequential = 0x100;
+    this.nonSequential = 0x10;
 }
 GameBoyAdvanceWait.prototype.NonSequentialBroadcastClear = function () {
     //PC branched:
