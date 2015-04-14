@@ -297,7 +297,7 @@ GameBoyAdvanceWait.prototype.resetPrebuffer = function () {
 GameBoyAdvanceWait.prototype.drainOverdueClocks = function () {
     if ((this.clocks | 0) < 0) {
         //Compute "overdue" clocks:
-        this.IOCore.updateCore((0 - (this.clocks | 0)) | 0);
+        this.IOCore.updateCoreNegative(this.clocks | 0);
         this.clocks = 0;
     }
 }
