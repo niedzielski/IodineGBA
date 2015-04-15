@@ -322,11 +322,16 @@ GameBoyAdvanceWait.prototype.drainOverdueClocksCPU = function () {
         this.IOCore.updateCoreSingle();
     }
 }
-GameBoyAdvanceWait.prototype.doGamePakFetch = function (address) {
+GameBoyAdvanceWait.prototype.doGamePakFetch16 = function (address) {
     address = address | 0;
     //Fetch 16 bit word into buffer:
     this.clocks = ((this.clocks | 0) - (this.waitStateClocks16[address | this.nonSequential] | 0)) | 0;
-    this.incrementBufferSingle();
+    this.nonSequential = 0;
+}
+GameBoyAdvanceWait.prototype.doGamePakFetch32 = function (address) {
+    address = address | 0;
+    //Fetch 16 bit word into buffer:
+    this.clocks = ((this.clocks | 0) - (this.waitStateClocks32[address | this.nonSequential] | 0)) | 0;
     this.nonSequential = 0;
 }
 GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
@@ -335,12 +340,15 @@ GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     //Instruction fetch is 1 clock wide minimum:
     this.addPrebufferSingleClock();
     //Need 16 bits minimum buffered:
-    if ((this.buffer | 0) < 1) {
-        //Fetch 16 bit word into buffer:
-        this.doGamePakFetch(address | 0);
+    switch (this.buffer | 0) {
+        case 0:
+            //Fetch 16 bit word into buffer:
+            this.doGamePakFetch16(address | 0);
+            break;
+        default:
+            //Decrement the buffer:
+            this.decrementBufferSingle();
     }
-    //Decrement the buffer:
-    this.decrementBufferSingle();
     //Clock the state:
     this.drainOverdueClocksCPU();
 }
@@ -356,12 +364,20 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
     //Instruction fetch is 1 clock wide minimum:
     this.addPrebufferSingleClock();
     //Need 32 bits minimum buffered:
-    while ((this.buffer | 0) < 2) {
-        //Fetch a 16 bit word into buffer:
-        this.doGamePakFetch(address | 0);
+    switch (this.buffer | 0) {
+        case 0:
+            //Fetch two 16 bit words into buffer:
+            this.doGamePakFetch32(address | 0);
+            break;
+        case 1:
+            //Fetch a 16 bit word into buffer:
+            this.doGamePakFetch16(address | 0);
+            this.buffer = 0;
+            break;
+        default:
+            //Decrement the buffer:
+            this.decrementBufferDouble();
     }
-    //Decrement the buffer:
-    this.decrementBufferDouble();
     //Clock the state:
     this.drainOverdueClocksCPU();
 }
