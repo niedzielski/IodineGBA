@@ -337,8 +337,6 @@ GameBoyAdvanceWait.prototype.doGamePakFetch32 = function (address) {
 GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     //Caching enabled:
     address = address | 0;
-    //Instruction fetch is 1 clock wide minimum:
-    this.addPrebufferSingleClock();
     //Need 16 bits minimum buffered:
     switch (this.buffer | 0) {
         case 0:
@@ -346,6 +344,8 @@ GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
             this.doGamePakFetch16(address | 0);
             break;
         default:
+            //Instruction fetch is 1 clock wide minimum:
+            this.addPrebufferSingleClock();
             //Decrement the buffer:
             this.decrementBufferSingle();
     }
@@ -375,6 +375,8 @@ GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
             this.buffer = 0;
             break;
         default:
+            //Instruction fetch is 1 clock wide minimum:
+            this.addPrebufferSingleClock();
             //Decrement the buffer:
             this.decrementBufferDouble();
     }
