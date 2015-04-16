@@ -16,10 +16,12 @@
  *
  */
 function GameBoyAdvanceWait(IOCore) {
+    //Build references:
     this.IOCore = IOCore;
-    this.memory = this.IOCore.memory;
 }
 GameBoyAdvanceWait.prototype.initialize = function () {
+    this.memory = this.IOCore.memory;
+    this.cpu = this.IOCore.cpu;
     this.WRAMConfiguration = 0xD000020;     //WRAM configuration control register current data.
     this.WRAMWaitState = 3;                 //External WRAM wait state.
     this.SRAMWaitState = 5;                 //SRAM wait state.
@@ -235,7 +237,7 @@ GameBoyAdvanceWait.prototype.CPUInternalSingleCycleNoPrefetch = function () {
 }
 GameBoyAdvanceWait.prototype.checkPrebufferBug = function () {
     //Issue a non-sequential cycle for the next read if we did an I-cycle:
-    var address = this.IOCore.cpu.registers[15] | 0;
+    var address = this.cpu.registers[15] | 0;
     if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
         this.NonSequentialBroadcast();
     }
@@ -258,7 +260,7 @@ GameBoyAdvanceWait.prototype.check128kAlignmentBug = function (address) {
 GameBoyAdvanceWait.prototype.multiClock = function (clocks) {
     clocks = clocks | 0;
     this.IOCore.updateCore(clocks | 0);
-    var address = this.IOCore.cpu.registers[15] | 0;
+    var address = this.cpu.registers[15] | 0;
     if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
         if ((this.clocks | 0) < 0xFF) {
             this.clocks = ((this.clocks | 0) + (clocks | 0)) | 0;
@@ -270,7 +272,7 @@ GameBoyAdvanceWait.prototype.multiClock = function (clocks) {
 }
 GameBoyAdvanceWait.prototype.singleClock = function () {
     this.IOCore.updateCoreSingle();
-    var address = this.IOCore.cpu.registers[15] | 0;
+    var address = this.cpu.registers[15] | 0;
     if ((address | 0) >= 0x8000000 && (address | 0) < 0xE000000) {
         if ((this.clocks | 0) < 0xFF) {
             this.clocks = ((this.clocks | 0) + 1) | 0;
@@ -282,9 +284,6 @@ GameBoyAdvanceWait.prototype.singleClock = function () {
 }
 GameBoyAdvanceWait.prototype.addPrebufferSingleClock = function () {
     this.clocks = ((this.clocks | 0) + 1) | 0;
-}
-GameBoyAdvanceWait.prototype.incrementBufferSingle = function () {
-    this.buffer = ((this.buffer | 0) + 1) | 0;
 }
 GameBoyAdvanceWait.prototype.decrementBufferSingle = function () {
     this.buffer = ((this.buffer | 0) - 1) | 0;
@@ -298,9 +297,18 @@ GameBoyAdvanceWait.prototype.resetPrebuffer = function () {
     this.buffer = 0;
 }
 GameBoyAdvanceWait.prototype.drainOverdueClocks = function () {
-    if ((this.clocks | 0) > 0) {
-        //Convert built up clocks to discrete buffer units:
-        this.computeClocks(this.IOCore.cpu.registers[15] | 0);
+    if ((this.clocks | 0) > 0 && (this.buffer | 0) < 8) {
+        var address = this.cpu.registers[15] | 0;
+        //Convert built up clocks to 16 bit word buffer units:
+        do {
+            this.clocks = ((this.clocks | 0) - (this.waitStateClocks16[address | 0] | 0)) | 0;
+            this.buffer = ((this.buffer | 0) + 1) | 0;
+        } while ((this.clocks | 0) > 0 && (this.buffer | 0) < 8);
+        //If we're deficient in clocks, fit them in before the access:
+        if ((this.clocks | 0) < 0) {
+            this.IOCore.updateCoreNegative(this.clocks | 0);
+            this.clocks = 0;
+        }
     }
 }
 GameBoyAdvanceWait.prototype.computeClocks = function (address) {
@@ -308,7 +316,7 @@ GameBoyAdvanceWait.prototype.computeClocks = function (address) {
     //Convert built up clocks to 16 bit word buffer units:
     while ((this.buffer | 0) < 8 && (this.clocks | 0) >= (this.waitStateClocks16[address | 0] | 0)) {
         this.clocks = ((this.clocks | 0) - (this.waitStateClocks16[address | 0] | 0)) | 0;
-        this.incrementBufferSingle();
+        this.buffer = ((this.buffer | 0) + 1) | 0;
     }
 }
 GameBoyAdvanceWait.prototype.drainOverdueClocksCPU = function () {

@@ -18,9 +18,9 @@
 function GameBoyAdvanceSound(IOCore) {
     //Build references:
     this.IOCore = IOCore;
-    this.coreExposed = this.IOCore.coreExposed;
 }
 GameBoyAdvanceSound.prototype.initialize = function () {
+    this.coreExposed = this.IOCore.coreExposed;
     this.dmaChannel1 = this.IOCore.dmaChannel1;
     this.dmaChannel2 = this.IOCore.dmaChannel2;
     //Did the emulator core initialize us for output yet?
