@@ -361,8 +361,6 @@ GameBoyAdvanceWait.prototype.getROMRead16NoPrefetch = function (address) {
 GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
     //Caching enabled:
     address = address | 0;
-    //Instruction fetch is 1 clock wide minimum:
-    this.addPrebufferSingleClock();
     //Need 32 bits minimum buffered:
     switch (this.buffer | 0) {
         case 0:
