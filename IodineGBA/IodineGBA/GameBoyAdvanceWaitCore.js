@@ -300,11 +300,11 @@ GameBoyAdvanceWait.prototype.resetPrebuffer = function () {
 GameBoyAdvanceWait.prototype.drainOverdueClocks = function () {
     if ((this.clocks | 0) > 0) {
         //Convert built up clocks to discrete buffer units:
-        this.computeClocks();
+        this.computeClocks(this.IOCore.cpu.registers[15] | 0);
     }
 }
-GameBoyAdvanceWait.prototype.computeClocks = function () {
-    var address = this.IOCore.cpu.registers[15] | 0;
+GameBoyAdvanceWait.prototype.computeClocks = function (address) {
+    address = address | 0;
     //Convert built up clocks to 16 bit word buffer units:
     while ((this.buffer | 0) < 8 && (this.clocks | 0) >= (this.waitStateClocks16[address | 0] | 0)) {
         this.clocks = ((this.clocks | 0) - (this.waitStateClocks16[address | 0] | 0)) | 0;
@@ -337,6 +337,8 @@ GameBoyAdvanceWait.prototype.doGamePakFetch32 = function (address) {
 GameBoyAdvanceWait.prototype.getROMRead16Prefetch = function (address) {
     //Caching enabled:
     address = address | 0;
+    //Resolve clocks to buffer units:
+    this.computeClocks(address | 0);
     //Need 16 bits minimum buffered:
     switch (this.buffer | 0) {
         case 0:
@@ -361,6 +363,8 @@ GameBoyAdvanceWait.prototype.getROMRead16NoPrefetch = function (address) {
 GameBoyAdvanceWait.prototype.getROMRead32Prefetch = function (address) {
     //Caching enabled:
     address = address | 0;
+    //Resolve clocks to buffer units:
+    this.computeClocks(address | 0);
     //Need 32 bits minimum buffered:
     switch (this.buffer | 0) {
         case 0:
