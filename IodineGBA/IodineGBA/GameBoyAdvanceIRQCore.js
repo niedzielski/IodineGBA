@@ -86,7 +86,7 @@ GameBoyAdvanceIRQ.prototype.readIF1 = function () {
     return this.interruptsRequested >> 8;
 }
 GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
-    var clocks = -1;
+    var clocks = 0x7FFFFFFF;
     clocks = this.findClosestEvent(clocks | 0, this.gfx.nextVBlankIRQEventTime() | 0, 0x1) | 0;
     clocks = this.findClosestEvent(clocks | 0, this.gfx.nextHBlankIRQEventTime() | 0, 0x2) | 0;
     clocks = this.findClosestEvent(clocks | 0, this.gfx.nextVCounterIRQEventTime() | 0, 0x4) | 0;
@@ -103,7 +103,7 @@ GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
     return clocks | 0;
 }
 GameBoyAdvanceIRQ.prototype.nextIRQEventTime = function () {
-    var clocks = -1;
+    var clocks = 0x7FFFFFFF;
     //Checks IME:
     if (this.IME) {
         clocks = this.nextEventTime() | 0;
@@ -115,14 +115,7 @@ GameBoyAdvanceIRQ.prototype.findClosestEvent = function (oldClocks, newClocks, f
     newClocks = newClocks | 0;
     flagID = flagID | 0;
     if ((this.interruptsEnabled & flagID) != 0) {
-        if ((newClocks | 0) >= 0) {
-            if ((oldClocks | 0) >= 0) {
-                oldClocks = Math.min(oldClocks | 0, newClocks | 0) | 0;
-            }
-            else {
-                oldClocks = newClocks | 0;
-            }
-        }
+        oldClocks = Math.min(oldClocks | 0, newClocks | 0) | 0;
     }
     return oldClocks | 0;
 }
