@@ -77,9 +77,9 @@ GameBoyAdvanceTimer.prototype.addClocks = function (clocks) {
     //See if timer channel 3 is enabled:
     this.clockTimer3(clocks | 0);
 }
-GameBoyAdvanceTimer.prototype.clockSoundTimers = function (clocks) {
-    clocks = clocks | 0;
-    for (var audioClocks = clocks | 0, predictedClocks = 0, overflowClocks = 0; (audioClocks | 0) > 0; audioClocks = ((audioClocks | 0) - (predictedClocks | 0)) | 0) {
+GameBoyAdvanceTimer.prototype.clockSoundTimers = function (audioClocks) {
+    audioClocks = audioClocks | 0;
+    for (var predictedClocks = 0, overflowClocks = 0; (audioClocks | 0) > 0; audioClocks = ((audioClocks | 0) - (predictedClocks | 0)) | 0) {
         overflowClocks = this.nextAudioTimerOverflow() | 0;
         predictedClocks = Math.min(audioClocks | 0, overflowClocks | 0) | 0;
         //See if timer channel 0 is enabled:
