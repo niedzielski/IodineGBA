@@ -45,8 +45,10 @@ GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
 }
 GameBoyAdvanceIRQ.prototype.writeIME = function (data) {
     data = data | 0;
-    this.IME = ((data & 0x1) << 31) >> 31;
+    this.IOCore.updateCoreClocking();
+    this.IME = (data << 31) >> 31;
     this.checkForIRQFire();
+    this.IOCore.updateCoreEventTime();
 }
 GameBoyAdvanceIRQ.prototype.readIME = function () {
     return this.IME & 0x1;
