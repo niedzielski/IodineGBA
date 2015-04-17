@@ -608,9 +608,9 @@ if (typeof Math.imul == "function") {
         numOverflows = numOverflows | 0;
         var eventTime = 0x7FFFFFFF;
         if (this.timer1Enabled) {
+            var reloadClocks = (0x10000 - (this.timer1Reload | 0)) | 0;
             if (this.timer1CountUp) {
                 var countUntilReload = (0x10000 - (this.timer1Counter | 0)) | 0;
-                var reloadClocks = (0x10000 - (this.timer1Reload | 0)) | 0;
                 reloadClocks = (reloadClocks | 0) * (numOverflows | 0);
                 eventTime = Math.min((countUntilReload | 0) + reloadClocks, 0x7FFFFFFF) | 0;
                 eventTime = this.nextTimer0Overflow(eventTime | 0) | 0;
@@ -618,7 +618,6 @@ if (typeof Math.imul == "function") {
             else {
                 numOverflows = ((numOverflows | 0) - 1) | 0;
                 var countUntilReload = this.nextTimer1OverflowBase() | 0;
-                var reloadClocks = (0x10000 - (this.timer1Reload | 0)) | 0;
                 reloadClocks = Math.imul(reloadClocks | 0, this.timer1Prescalar | 0) | 0;
                 reloadClocks = reloadClocks * numOverflows;
                 eventTime = Math.min((countUntilReload | 0) + reloadClocks, 0x7FFFFFFF) | 0;
@@ -649,9 +648,9 @@ if (typeof Math.imul == "function") {
         numOverflows = numOverflows | 0;
         var eventTime = 0x7FFFFFFF;
         if (this.timer2Enabled) {
+            var reloadClocks = (0x10000 - (this.timer2Reload | 0)) | 0;
             if (this.timer2CountUp) {
                 var countUntilReload = (0x10000 - (this.timer2Counter | 0)) | 0;
-                var reloadClocks = (0x10000 - (this.timer2Reload | 0)) | 0;
                 reloadClocks = (reloadClocks | 0) * (numOverflows | 0);
                 eventTime = Math.min((countUntilReload | 0) + reloadClocks, 0x7FFFFFFF) | 0;
                 eventTime = this.nextTimer1Overflow(eventTime | 0) | 0;
@@ -659,7 +658,6 @@ if (typeof Math.imul == "function") {
             else {
                 numOverflows = ((numOverflows | 0) - 1) | 0;
                 var countUntilReload = this.nextTimer2OverflowBase() | 0;
-                var reloadClocks = (0x10000 - (this.timer2Reload | 0)) | 0;
                 reloadClocks = Math.imul(reloadClocks | 0, this.timer2Prescalar | 0) | 0;
                 reloadClocks = reloadClocks * numOverflows;
                 eventTime = Math.min((countUntilReload | 0) + reloadClocks, 0x7FFFFFFF) | 0;
@@ -734,9 +732,9 @@ else {
         numOverflows = numOverflows | 0;
         var eventTime = 0x7FFFFFFF;
         if (this.timer1Enabled) {
+            var reloadClocks = (0x10000 - (this.timer1Reload | 0)) | 0;
             if (this.timer1CountUp) {
                 var countUntilReload = (0x10000 - (this.timer1Counter | 0)) | 0;
-                var reloadClocks = (0x10000 - (this.timer1Reload | 0)) | 0;
                 reloadClocks = (reloadClocks | 0) * (numOverflows | 0);
                 eventTime = Math.min((countUntilReload | 0) + reloadClocks, 0x7FFFFFFF) | 0;
                 eventTime = this.nextTimer0Overflow(eventTime | 0) | 0;
@@ -744,7 +742,6 @@ else {
             else {
                 numOverflows = ((numOverflows | 0) - 1) | 0;
                 var countUntilReload = this.nextTimer1OverflowBase() | 0;
-                var reloadClocks = (0x10000 - (this.timer1Reload | 0)) | 0;
                 reloadClocks = ((reloadClocks | 0) * (this.timer1Prescalar | 0)) | 0;
                 reloadClocks = reloadClocks * numOverflows;
                 eventTime = Math.min((countUntilReload | 0) + reloadClocks, 0x7FFFFFFF) | 0;
@@ -775,9 +772,9 @@ else {
         numOverflows = numOverflows | 0;
         var eventTime = 0x7FFFFFFF;
         if (this.timer2Enabled) {
+            var reloadClocks = (0x10000 - (this.timer2Reload | 0)) | 0;
             if (this.timer2CountUp) {
                 var countUntilReload = (0x10000 - (this.timer2Counter | 0)) | 0;
-                var reloadClocks = (0x10000 - (this.timer2Reload | 0)) | 0;
                 reloadClocks = (reloadClocks | 0) * (numOverflows | 0);
                 eventTime = Math.min((countUntilReload | 0) + reloadClocks, 0x7FFFFFFF) | 0;
                 eventTime = this.nextTimer1Overflow(eventTime | 0) | 0;
@@ -785,7 +782,6 @@ else {
             else {
                 numOverflows = ((numOverflows | 0) - 1) | 0;
                 var countUntilReload = this.nextTimer2OverflowBase() | 0;
-                var reloadClocks = (0x10000 - (this.timer2Reload | 0)) | 0;
                 reloadClocks = ((reloadClocks | 0) * (this.timer2Prescalar | 0)) | 0;
                 reloadClocks = reloadClocks * numOverflows;
                 eventTime = Math.min((countUntilReload | 0) + reloadClocks, 0x7FFFFFFF) | 0;
