@@ -22,7 +22,7 @@ function GameBoyAdvanceIRQ(IOCore) {
 GameBoyAdvanceIRQ.prototype.initialize = function () {
     this.interruptsEnabled = 0;
     this.interruptsRequested = 0;
-    this.IME = false;
+    this.IME = 0;
     this.gfx = this.IOCore.gfx;
     this.timer = this.IOCore.timer;
     this.dmaChannel0 = this.IOCore.dmaChannel0;
@@ -36,7 +36,7 @@ GameBoyAdvanceIRQ.prototype.IRQMatch = function () {
 }
 GameBoyAdvanceIRQ.prototype.checkForIRQFire = function () {
     //Tell the CPU core when the emulated hardware is triggering an IRQ:
-    this.IOCore.cpu.triggerIRQ((this.interruptsEnabled & this.interruptsRequested) != 0 && this.IME);
+    this.IOCore.cpu.triggerIRQ(this.interruptsEnabled & this.interruptsRequested & this.IME);
 }
 GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
     irqLineToSet = irqLineToSet | 0;
@@ -45,11 +45,11 @@ GameBoyAdvanceIRQ.prototype.requestIRQ = function (irqLineToSet) {
 }
 GameBoyAdvanceIRQ.prototype.writeIME = function (data) {
     data = data | 0;
-    this.IME = ((data & 0x1) == 0x1);
+    this.IME = ((data & 0x1) << 31) >> 31;
     this.checkForIRQFire();
 }
 GameBoyAdvanceIRQ.prototype.readIME = function () {
-    return (this.IME ? 1 : 0);
+    return this.IME & 0x1;
 }
 GameBoyAdvanceIRQ.prototype.writeIE0 = function (data) {
     data = data | 0;
@@ -105,7 +105,7 @@ GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
 GameBoyAdvanceIRQ.prototype.nextIRQEventTime = function () {
     var clocks = 0x7FFFFFFF;
     //Checks IME:
-    if (this.IME) {
+    if ((this.IME | 0) != 0) {
         clocks = this.nextEventTime() | 0;
     }
     return clocks | 0;
