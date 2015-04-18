@@ -237,7 +237,7 @@ if (typeof Math.imul == "function") {
     GameBoyAdvanceGraphics.prototype.nextVBlankEventTime = function () {
         var nextEventTime = (160 - (this.currentScanLine | 0)) | 0;
         if ((nextEventTime | 0) <= 0) {
-            nextEventTime = ((nextEventTime | 0) + 160) | 0;
+            nextEventTime = ((nextEventTime | 0) + 228) | 0;
         }
         nextEventTime = Math.imul(nextEventTime | 0, 1232) | 0;
         nextEventTime = ((nextEventTime | 0) - (this.LCDTicks | 0)) | 0;
