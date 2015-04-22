@@ -18,7 +18,7 @@
 function GameBoyAdvanceGraphicsRenderer(gfx, coreExposed, skippingBIOS) {
     this.gfx = gfx;
     this.coreExposed = coreExposed;
-    this.initializeIO();
+    this.initializeIO(skippingBIOS);
     this.initializeRenderer();
 }
 GameBoyAdvanceGraphicsRenderer.prototype.initializeIO = function (skippingBIOS) {
