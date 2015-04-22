@@ -30,13 +30,9 @@ GameBoyAdvanceGraphics.prototype.initialize = function () {
 }
 GameBoyAdvanceGraphics.prototype.initializeState = function (skippingBIOS) {
     //Initialize Pre-Boot:
-    this.inVBlank = false;
-    this.inHBlank = false;
     this.renderedScanLine = false;
-    this.VCounterMatch = false;
-    this.IRQVBlank = false;
-    this.IRQHBlank = false;
-    this.IRQVCounter = false;
+    this.statusFlags = 0;
+    this.IRQFlags = 0;
     this.VCounter = 0;
     this.currentScanLine = 0;
     this.LCDTicks = 0;
@@ -79,7 +75,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDNextLine = function () {
     /*We've now overflowed the LCD scan line state machine counter,
      which tells us we need to be on a new scan-line and refresh over.*/
     this.renderedScanLine = false;                                  //Unmark line render.
-    this.inHBlank = false;                                          //Un-mark HBlank.
+    this.statusFlags = this.statusFlags & 0x5;                      //Un-mark HBlank.
     //De-clock for starting on new scan-line:
     this.LCDTicks = ((this.LCDTicks | 0) - 1232) | 0;               //We start out at the beginning of the next line.
     //Increment scanline counter:
@@ -97,7 +93,7 @@ GameBoyAdvanceGraphics.prototype.clockLCDNextLine = function () {
                 this.dmaChannel3.gfxDisplaySyncEnableCheck();       //Display Sync. DMA reset on start of line 162.
                 break;
             case 227:
-                this.inVBlank = false;                              //Un-mark VBlank on start of last vblank line.
+                this.statusFlags = this.statusFlags & 0x6;          //Un-mark VBlank on start of last vblank line.
                 break;
             case 228:
                 this.currentScanLine = 0;                           //Reset scan-line to zero (First line of draw).
@@ -112,9 +108,9 @@ GameBoyAdvanceGraphics.prototype.clockLCDNextLine = function () {
     this.clockLCDState();
 }
 GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
-    if (!this.inHBlank) {                                           //If we were last in HBlank, don't run this again.
-        this.inHBlank = true;                                       //Mark HBlank.
-        if (this.IRQHBlank) {
+    if ((this.statusFlags & 0x2) == 0) {                            //If we were last in HBlank, don't run this again.
+        this.statusFlags = this.statusFlags | 0x2;                  //Mark HBlank.
+        if ((this.IRQFlags & 0x10) != 0) {
             this.irq.requestIRQ(0x2);                               //Check for IRQ.
         }
         if ((this.currentScanLine | 0) < 160) {
@@ -125,18 +121,18 @@ GameBoyAdvanceGraphics.prototype.updateHBlank = function () {
 }
 GameBoyAdvanceGraphics.prototype.checkVCounter = function () {
     if ((this.currentScanLine | 0) == (this.VCounter | 0)) {        //Check for VCounter match.
-        this.VCounterMatch = true;
-        if (this.IRQVCounter) {                                     //Check for VCounter IRQ.
+        this.statusFlags = this.statusFlags | 0x4;
+        if ((this.IRQFlags & 0x20) != 0) {                          //Check for VCounter IRQ.
             this.irq.requestIRQ(0x4);
         }
     }
     else {
-        this.VCounterMatch = false;
+        this.statusFlags = this.statusFlags & 0x3;
     }
 }
 GameBoyAdvanceGraphics.prototype.nextVBlankIRQEventTime = function () {
     var nextEventTime = 0x7FFFFFFF;
-    if (this.IRQVBlank) {
+    if ((this.IRQFlags & 0x8) != 0) {
         //Only give a time if we're allowed to irq:
         nextEventTime = this.nextVBlankEventTime() | 0;
     }
@@ -156,7 +152,7 @@ GameBoyAdvanceGraphics.prototype.nextHBlankEventTime = function () {
 }
 GameBoyAdvanceGraphics.prototype.nextHBlankIRQEventTime = function () {
     var nextEventTime = 0x7FFFFFFF;
-    if (this.IRQHBlank) {
+    if ((this.IRQFlags & 0x10) != 0) {
         //Only give a time if we're allowed to irq:
         nextEventTime = this.nextHBlankEventTime() | 0;
     }
@@ -164,7 +160,7 @@ GameBoyAdvanceGraphics.prototype.nextHBlankIRQEventTime = function () {
 }
 GameBoyAdvanceGraphics.prototype.nextVCounterIRQEventTime = function () {
     var nextEventTime = 0x7FFFFFFF;
-    if (this.IRQVCounter) {
+    if ((this.IRQFlags & 0x20) != 0) {
         //Only give a time if we're allowed to irq:
         nextEventTime = this.nextVCounterEventTime() | 0;
     }
@@ -245,48 +241,72 @@ else {
     }
 }
 GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
-    this.inVBlank = true;                                //Mark VBlank.
-    if (this.IRQVBlank) {                                //Check for VBlank IRQ.
+    this.statusFlags = this.statusFlags | 0x1;           //Mark VBlank.
+    if ((this.IRQFlags & 0x8) != 0) {                    //Check for VBlank IRQ.
         this.irq.requestIRQ(0x1);
     }
     this.renderer.ensureFraming();
     this.dma.gfxVBlankRequest();
 }
 GameBoyAdvanceGraphics.prototype.isRenderingCheckPreprocess = function () {
-    var isInVisibleLines = (!this.renderer.forcedBlank && !this.inVBlank);
-    var isRendering = (isInVisibleLines && !this.inHBlank) ? 2 : 1;
-    var isOAMRendering = (isInVisibleLines && (!this.inHBlank || !this.renderer.HBlankIntervalFree)) ? 2 : 1;
+    var isInVisibleLines = (!this.renderer.forcedBlank && (this.statusFlags & 0x1) == 0);
+    var isRendering = (isInVisibleLines && (this.statusFlags & 0x2) == 0) ? 2 : 1;
+    var isOAMRendering = (isInVisibleLines && ((this.statusFlags & 0x2) == 0 || !this.renderer.HBlankIntervalFree)) ? 2 : 1;
     this.wait.updateRenderStatus(isRendering | 0, isOAMRendering | 0);
 }
-GameBoyAdvanceGraphics.prototype.writeDISPSTAT0 = function (data) {
+GameBoyAdvanceGraphics.prototype.writeDISPSTAT8_0 = function (data) {
     data = data | 0;
+    this.IOCore.updateCoreClocking();
     //VBlank flag read only.
     //HBlank flag read only.
     //V-Counter flag read only.
     //Only LCD IRQ generation enablers can be set here:
-    this.IRQVBlank = ((data & 0x08) == 0x08);
-    this.IRQHBlank = ((data & 0x10) == 0x10);
-    this.IRQVCounter = ((data & 0x20) == 0x20);
+    this.IRQFlags = data & 0x38;
+    this.IOCore.updateCoreEventTime();
 }
-GameBoyAdvanceGraphics.prototype.readDISPSTAT0 = function () {
-    return ((this.inVBlank ? 0x1 : 0) |
-            (this.inHBlank ? 0x2 : 0) |
-            (this.VCounterMatch ? 0x4 : 0) |
-            (this.IRQVBlank ? 0x8 : 0) |
-            (this.IRQHBlank ? 0x10 : 0) |
-            (this.IRQVCounter ? 0x20 : 0));
-}
-GameBoyAdvanceGraphics.prototype.writeDISPSTAT1 = function (data) {
+GameBoyAdvanceGraphics.prototype.writeDISPSTAT8_1 = function (data) {
     data = data | 0;
+    data = data & 0xFF;
+    //V-Counter match value:
+    if ((data | 0) != (this.VCounter | 0)) {
+        this.IOCore.updateCoreClocking();
+        this.VCounter = data | 0;
+        this.checkVCounter();
+        this.IOCore.updateCoreEventTime();
+    }
+}
+GameBoyAdvanceGraphics.prototype.writeDISPSTAT16 = function (data) {
+    data = data | 0;
+    this.IOCore.updateCoreClocking();
+    //VBlank flag read only.
+    //HBlank flag read only.
+    //V-Counter flag read only.
+    //Only LCD IRQ generation enablers can be set here:
+    this.IRQFlags = data & 0x38;
+    data = (data >> 8) & 0xFF;
     //V-Counter match value:
     if ((data | 0) != (this.VCounter | 0)) {
         this.VCounter = data | 0;
         this.checkVCounter();
     }
+    this.IOCore.updateCoreEventTime();
 }
-GameBoyAdvanceGraphics.prototype.readDISPSTAT1 = function () {
+GameBoyAdvanceGraphics.prototype.readDISPSTAT8_0 = function () {
+    this.IOCore.updateGraphicsClocking();
+    return (this.statusFlags | this.IRQFlags);
+}
+GameBoyAdvanceGraphics.prototype.readDISPSTAT8_1 = function () {
     return this.VCounter | 0;
 }
-GameBoyAdvanceGraphics.prototype.readVCOUNT = function () {
+GameBoyAdvanceGraphics.prototype.readDISPSTAT8_2 = function () {
+    this.IOCore.updateGraphicsClocking();
     return this.currentScanLine | 0;
+}
+GameBoyAdvanceGraphics.prototype.readDISPSTAT16_0 = function () {
+    this.IOCore.updateGraphicsClocking();
+    return ((this.VCounter << 8) | this.statusFlags | this.IRQFlags);
+}
+GameBoyAdvanceGraphics.prototype.readDISPSTAT32 = function () {
+    this.IOCore.updateGraphicsClocking();
+    return ((this.currentScanLine << 16) | (this.VCounter << 8) | this.statusFlags | this.IRQFlags);
 }

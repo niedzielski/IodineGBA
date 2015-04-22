@@ -174,15 +174,11 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         //4000003h - Undocumented - Green Swap (R/W)
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000004:
-            this.IOCore.updateGraphicsClocking();
-            this.gfx.writeDISPSTAT0(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.gfx.writeDISPSTAT8_0(data | 0);
             break;
         //4000005h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000005:
-            this.IOCore.updateGraphicsClocking();
-            this.gfx.writeDISPSTAT1(data & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.gfx.writeDISPSTAT8_1(data | 0);
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         //4000007h - VCOUNT - Vertical Counter (Read only)
@@ -1260,10 +1256,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000004:
-            this.IOCore.updateGraphicsClocking();
-            this.gfx.writeDISPSTAT0(data & 0xFF);
-            this.gfx.writeDISPSTAT1((data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.gfx.writeDISPSTAT16(data | 0);
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
@@ -1918,10 +1911,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         //4000006h - VCOUNT - Vertical Counter (Read only)
         case 0x4000004:
-            this.IOCore.updateGraphicsClocking();
-            this.gfx.writeDISPSTAT0(data & 0xFF);
-            this.gfx.writeDISPSTAT1((data >> 8) & 0xFF);
-            this.IOCore.updateCoreEventTime();
+            this.gfx.writeDISPSTAT16(data | 0);
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
@@ -2959,18 +2949,15 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000004:
-            this.IOCore.updateGraphicsClocking();
-            data = this.gfx.readDISPSTAT0() | 0;
+            data = this.gfx.readDISPSTAT8_0() | 0;
             break;
         //4000005h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000005:
-            this.IOCore.updateGraphicsClocking();
-            data = this.gfx.readDISPSTAT1() | 0;
+            data = this.gfx.readDISPSTAT8_1() | 0;
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         case 0x4000006:
-            this.IOCore.updateGraphicsClocking();
-            data = this.gfx.readVCOUNT() | 0;
+            data = this.gfx.readDISPSTAT8_2() | 0;
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         case 0x4000008:
@@ -3582,13 +3569,11 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000004:
-            this.IOCore.updateGraphicsClocking();
-            data = this.gfx.readDISPSTAT0() | (this.gfx.readDISPSTAT1() << 8);
+            data = this.gfx.readDISPSTAT16_0() | 0;
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         case 0x4000006:
-            this.IOCore.updateGraphicsClocking();
-            data = this.gfx.readVCOUNT() | 0;
+            data = this.gfx.readDISPSTAT8_2() | 0;
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         case 0x4000008:
@@ -3949,10 +3934,7 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         //4000006h - VCOUNT - Vertical Counter (Read only)
         case 0x4000004:
-            this.IOCore.updateGraphicsClocking();
-            data = this.gfx.readDISPSTAT0() |
-            (this.gfx.readDISPSTAT1() << 8) |
-            (this.gfx.readVCOUNT() << 16);
+            data = this.gfx.readDISPSTAT32() | 0;
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
