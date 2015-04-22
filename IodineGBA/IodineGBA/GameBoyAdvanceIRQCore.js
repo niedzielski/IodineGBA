@@ -32,7 +32,7 @@ GameBoyAdvanceIRQ.prototype.initialize = function () {
 }
 GameBoyAdvanceIRQ.prototype.IRQMatch = function () {
     //Used to exit HALT:
-    return ((this.interruptsEnabled & this.interruptsRequested) != 0);
+    return (this.interruptsEnabled & this.interruptsRequested);
 }
 GameBoyAdvanceIRQ.prototype.checkForIRQFire = function () {
     //Tell the CPU core when the emulated hardware is triggering an IRQ:
