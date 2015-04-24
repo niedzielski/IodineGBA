@@ -1615,6 +1615,124 @@ ARMInstructionSet.prototype.LDMIA = function () {
 ARMInstructionSet.prototype.LDMIAW = function () {
     //Get the base address:
     var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the offset address:
+        var writebackAddress = this.getPositiveOffsetStartAddress(currentAddress | 0) | 0;
+        //Load register(s) from memory:
+        var count = 0; //writeback clock position tracking.
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                //Store writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(writebackAddress | 0);
+                }
+            }
+        }
+    }
+    else {
+        //Empty reglist loads PC:
+        this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
+        currentAddress = ((currentAddress | 0) + 4) | 0;
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+}
+ARMInstructionSet.prototype.LDMDA = function () {
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the offset address:
+        currentAddress = this.getNegativeOffsetStartAddress(currentAddress | 0) | 0;
+        //Load register(s) from memory:
+        for (var rListPosition = 0; (rListPosition | 0) < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+        //Updating the address bus back to PC fetch:
+        this.wait.NonSequentialBroadcast();
+    }
+    else {
+        //Empty reglist loads PC:
+        this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+}
+ARMInstructionSet.prototype.LDMDAW = function () {
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the offset address:
+        currentAddress = this.getNegativeOffsetStartAddress(currentAddress | 0) | 0;
+        var writebackAddress = currentAddress | 0;
+        //Load register(s) from memory:
+        var count = 0; //writeback clock position tracking.
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                //Store writeback immediately after the second register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(writebackAddress | 0);
+                }
+            }
+        }
+    }
+    else {
+        //Empty reglist loads PC:
+        this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
+        currentAddress = ((currentAddress | 0) - 4) | 0;
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+}
+ARMInstructionSet.prototype.LDMIB = function () {
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    if ((this.execute & 0xFFFF) > 0) {
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+    }
+    else {
+        //Empty reglist loads PC:
+        currentAddress = ((currentAddress | 0) + 4) | 0;
+        this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+}
+ARMInstructionSet.prototype.LDMIBW = function () {
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
     //Get the offset address:
     var writebackAddress = this.getPositiveOffsetStartAddress(currentAddress | 0) | 0;
     //Updating the address bus away from PC fetch:
@@ -1625,23 +1743,20 @@ ARMInstructionSet.prototype.LDMIAW = function () {
         for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Load a register from memory:
-                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
                 currentAddress = ((currentAddress | 0) + 4) | 0;
-                count = ((count | 0) + 1) | 0;
-                //Store writeback immediately after the second register load:
-                if ((count | 0) == 2) {
+                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                //Store writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
                     //Store the updated base address back into register:
                     this.guard16OffsetRegisterWrite(writebackAddress | 0);
                 }
             }
         }
-        if ((count | 0) < 2) {
-            //Store the updated base address back into register:
-            this.guard16OffsetRegisterWrite(writebackAddress | 0);
-        }
     }
     else {
         //Empty reglist loads PC:
+        currentAddress = ((currentAddress | 0) + 4) | 0;
         this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
         //Store the updated base address back into register:
         this.guard16OffsetRegisterWrite(writebackAddress | 0);
@@ -1649,125 +1764,65 @@ ARMInstructionSet.prototype.LDMIAW = function () {
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
 }
-ARMInstructionSet.prototype.LDMDA = function () {
-    //Only initialize the LDMDA sequence if the register list is non-empty:
-    if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
-        //Load register(s) from memory:
-        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
-            if ((this.execute & (1 << rListPosition)) != 0) {
-                //Load a register from memory:
-                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
-                currentAddress = ((currentAddress | 0) - 4) | 0;
-            }
-        }
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
-    }
-}
-ARMInstructionSet.prototype.LDMDAW = function () {
-    //Only initialize the LDMDA sequence if the register list is non-empty:
-    if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
-        //Load register(s) from memory:
-        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
-            if ((this.execute & (1 << rListPosition)) != 0) {
-                //Load a register from memory:
-                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
-                currentAddress = ((currentAddress | 0) - 4) | 0;
-            }
-        }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(currentAddress | 0);
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
-    }
-}
-ARMInstructionSet.prototype.LDMIB = function () {
-    //Only initialize the LDMIB sequence if the register list is non-empty:
-    if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
-        //Load register(s) from memory:
-        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
-            if ((this.execute & (1 << rListPosition)) != 0) {
-                //Load a register from memory:
-                currentAddress = ((currentAddress | 0) + 4) | 0;
-                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
-            }
-        }
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
-    }
-}
-ARMInstructionSet.prototype.LDMIBW = function () {
-    //Only initialize the LDMIB sequence if the register list is non-empty:
-    if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
-        //Load register(s) from memory:
-        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
-            if ((this.execute & (1 << rListPosition)) != 0) {
-                //Load a register from memory:
-                currentAddress = ((currentAddress | 0) + 4) | 0;
-                this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
-            }
-        }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(currentAddress | 0);
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
-    }
-}
 ARMInstructionSet.prototype.LDMDB = function () {
-    //Only initialize the LDMDB sequence if the register list is non-empty:
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
     if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
+        //Get the offset address:
+        currentAddress = this.getNegativeOffsetStartAddress(currentAddress | 0) | 0;
         //Load register(s) from memory:
-        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+        for (var rListPosition = 0; (rListPosition | 0) < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Load a register from memory:
-                currentAddress = ((currentAddress | 0) - 4) | 0;
                 this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
             }
         }
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
     }
+    else {
+        //Empty reglist loads PC:
+        currentAddress = ((currentAddress | 0) - 4) | 0;
+        this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
 }
 ARMInstructionSet.prototype.LDMDBW = function () {
-    //Only initialize the LDMDB sequence if the register list is non-empty:
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
     if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
+        //Get the offset address:
+        currentAddress = this.getNegativeOffsetStartAddress(currentAddress | 0) | 0;
+        var writebackAddress = currentAddress | 0;
         //Load register(s) from memory:
-        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+        var count = 0; //writeback clock position tracking.
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Load a register from memory:
-                currentAddress = ((currentAddress | 0) - 4) | 0;
                 this.guardRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                //Store writeback immediately after the second register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(writebackAddress | 0);
+                }
             }
         }
+    }
+    else {
+        //Empty reglist loads PC:
+        currentAddress = ((currentAddress | 0) - 4) | 0;
+        this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
         //Store the updated base address back into register:
         this.guard16OffsetRegisterWrite(currentAddress | 0);
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
     }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
 }
 ARMInstructionSet.prototype.LDMIAG = function () {
     //Get the base address:
@@ -1794,6 +1849,122 @@ ARMInstructionSet.prototype.LDMIAG = function () {
 ARMInstructionSet.prototype.LDMIAWG = function () {
     //Get the base address:
     var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the offset address:
+        var writebackAddress = this.getPositiveOffsetStartAddress(currentAddress | 0) | 0;
+        //Load register(s) from memory:
+        var count = 0; //writeback clock position tracking.
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                //Store writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(writebackAddress | 0);
+                }
+            }
+        }
+    }
+    else {
+        //Empty reglist loads PC:
+        this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
+        currentAddress = ((currentAddress | 0) + 4) | 0;
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+}
+ARMInstructionSet.prototype.LDMDAG = function () {
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Get the offset address:
+    currentAddress = this.getNegativeOffsetStartAddress(currentAddress | 0) | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    if ((this.execute & 0xFFFF) > 0) {
+        //Load register(s) from memory:
+        for (var rListPosition = 0; (rListPosition | 0) < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+    }
+    else {
+        //Empty reglist loads PC:
+        this.guardUserRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+}
+ARMInstructionSet.prototype.LDMDAWG = function () {
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    if ((this.execute & 0xFFFF) > 0) {
+        //Get the offset address:
+        currentAddress = this.getNegativeOffsetStartAddress(currentAddress | 0) | 0;
+        var writebackAddress = currentAddress | 0;
+        //Load register(s) from memory:
+        var count = 0; //writeback clock position tracking.
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                //Store writeback immediately after the second register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(writebackAddress | 0);
+                }
+            }
+        }
+    }
+    else {
+        //Empty reglist loads PC:
+        this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
+        currentAddress = ((currentAddress | 0) - 4) | 0;
+        //Store the updated base address back into register:
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+}
+ARMInstructionSet.prototype.LDMIBG = function () {
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
+    if ((this.execute & 0xFFFF) > 0) {
+        //Load register(s) from memory:
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
+            if ((this.execute & (1 << rListPosition)) != 0) {
+                //Load a register from memory:
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+            }
+        }
+    }
+    else {
+        //Empty reglist loads PC:
+        currentAddress = ((currentAddress | 0) + 4) | 0;
+        this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
+}
+ARMInstructionSet.prototype.LDMIBWG = function () {
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
     //Get the offset address:
     var writebackAddress = this.getPositiveOffsetStartAddress(currentAddress | 0) | 0;
     //Updating the address bus away from PC fetch:
@@ -1804,23 +1975,20 @@ ARMInstructionSet.prototype.LDMIAWG = function () {
         for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Load a register from memory:
-                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
                 currentAddress = ((currentAddress | 0) + 4) | 0;
-                count = ((count | 0) + 1) | 0;
-                //Store writeback immediately after the second register load:
-                if ((count | 0) == 2) {
+                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                //Store writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
                     //Store the updated base address back into register:
                     this.guard16OffsetRegisterWrite(writebackAddress | 0);
                 }
             }
         }
-        if ((count | 0) < 2) {
-            //Store the updated base address back into register:
-            this.guard16OffsetRegisterWrite(writebackAddress | 0);
-        }
     }
     else {
         //Empty reglist loads PC:
+        currentAddress = ((currentAddress | 0) + 4) | 0;
         this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
         //Store the updated base address back into register:
         this.guard16OffsetRegisterWrite(writebackAddress | 0);
@@ -1828,125 +1996,65 @@ ARMInstructionSet.prototype.LDMIAWG = function () {
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
 }
-ARMInstructionSet.prototype.LDMDAG = function () {
-    //Only initialize the LDMDA sequence if the register list is non-empty:
-    if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
-        //Load register(s) from memory:
-        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
-            if ((this.execute & (1 << rListPosition)) != 0) {
-                //Load a register from memory:
-                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
-                currentAddress = ((currentAddress | 0) - 4) | 0;
-            }
-        }
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
-    }
-}
-ARMInstructionSet.prototype.LDMDAWG = function () {
-    //Only initialize the LDMDA sequence if the register list is non-empty:
-    if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
-        //Load register(s) from memory:
-        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
-            if ((this.execute & (1 << rListPosition)) != 0) {
-                //Load a register from memory:
-                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
-                currentAddress = ((currentAddress | 0) - 4) | 0;
-            }
-        }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(currentAddress | 0);
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
-    }
-}
-ARMInstructionSet.prototype.LDMIBG = function () {
-    //Only initialize the LDMIB sequence if the register list is non-empty:
-    if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
-        //Load register(s) from memory:
-        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
-            if ((this.execute & (1 << rListPosition)) != 0) {
-                //Load a register from memory:
-                currentAddress = ((currentAddress | 0) + 4) | 0;
-                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
-            }
-        }
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
-    }
-}
-ARMInstructionSet.prototype.LDMIBWG = function () {
-    //Only initialize the LDMIB sequence if the register list is non-empty:
-    if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
-        //Load register(s) from memory:
-        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
-            if ((this.execute & (1 << rListPosition)) != 0) {
-                //Load a register from memory:
-                currentAddress = ((currentAddress | 0) + 4) | 0;
-                this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
-            }
-        }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(currentAddress | 0);
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
-    }
-}
 ARMInstructionSet.prototype.LDMDBG = function () {
-    //Only initialize the LDMDB sequence if the register list is non-empty:
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
     if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
+        //Get the offset address:
+        currentAddress = this.getNegativeOffsetStartAddress(currentAddress | 0) | 0;
         //Load register(s) from memory:
-        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+        for (var rListPosition = 0; (rListPosition | 0) < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Load a register from memory:
-                currentAddress = ((currentAddress | 0) - 4) | 0;
                 this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
             }
         }
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
     }
+    else {
+        //Empty reglist loads PC:
+        currentAddress = ((currentAddress | 0) - 4) | 0;
+        this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
+    }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
 }
 ARMInstructionSet.prototype.LDMDBWG = function () {
-    //Only initialize the LDMDB sequence if the register list is non-empty:
+    //Get the base address:
+    var currentAddress = this.read16OffsetRegister() | 0;
+    //Updating the address bus away from PC fetch:
+    this.wait.NonSequentialBroadcast();
     if ((this.execute & 0xFFFF) > 0) {
-        //Get the base address:
-        var currentAddress = this.read16OffsetRegister() | 0;
-        //Updating the address bus away from PC fetch:
-        this.wait.NonSequentialBroadcast();
+        //Get the offset address:
+        currentAddress = this.getNegativeOffsetStartAddress(currentAddress | 0) | 0;
+        var writebackAddress = currentAddress | 0;
         //Load register(s) from memory:
-        for (var rListPosition = 0xF; rListPosition > -1; rListPosition = ((rListPosition | 0) - 1) | 0) {
+        var count = 0; //writeback clock position tracking.
+        for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Load a register from memory:
-                currentAddress = ((currentAddress | 0) - 4) | 0;
                 this.guardUserRegisterWriteLDM(rListPosition | 0, this.memory.memoryRead32(currentAddress | 0) | 0);
+                currentAddress = ((currentAddress | 0) + 4) | 0;
+                //Store writeback immediately after the second register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(writebackAddress | 0);
+                }
             }
         }
+    }
+    else {
+        //Empty reglist loads PC:
+        currentAddress = ((currentAddress | 0) - 4) | 0;
+        this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
         //Store the updated base address back into register:
         this.guard16OffsetRegisterWrite(currentAddress | 0);
-        //Updating the address bus back to PC fetch:
-        this.wait.NonSequentialBroadcast();
     }
+    //Updating the address bus back to PC fetch:
+    this.wait.NonSequentialBroadcast();
 }
 ARMInstructionSet.prototype.LoadStoreMultiple = function () {
     this.incrementProgramCounter();
