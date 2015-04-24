@@ -282,8 +282,14 @@ ARMInstructionSet.prototype.guardUserRegisterWriteLDM = function (address, data)
     address = address | 0;
     data = data | 0;
     if ((address | 0) < 0xF) {
-        //PC isn't in the list, do user-mode:
-        this.guardUserRegisterWrite(address | 0, data | 0);
+        if ((this.execute & 0x8000) != 0) {
+            //PC is in the list, don't do user-mode:
+            this.writeRegister(address | 0, data | 0);
+        }
+        else {
+            //PC isn't in the list, do user-mode:
+            this.guardUserRegisterWrite(address | 0, data | 0);
+        }
     }
     else {
         this.guardProgramCounterRegisterWriteCPSR(data | 0);
