@@ -1680,7 +1680,7 @@ ARMInstructionSet.prototype.LDMIAW = function () {
     else {
         //Empty reglist loads PC:
         this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
-        currentAddress = ((currentAddress | 0) + 4) | 0;
+        currentAddress = ((currentAddress | 0) + 0x40) | 0;
     }
     //Store the updated base address back into register:
     this.guard16OffsetRegisterWrite(currentAddress | 0);
@@ -1736,7 +1736,7 @@ ARMInstructionSet.prototype.LDMDAW = function () {
     else {
         //Empty reglist loads PC:
         this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
-        currentAddress = ((currentAddress | 0) - 4) | 0;
+        currentAddress = ((currentAddress | 0) - 0x40) | 0;
         //Store the updated base address back into register:
         this.guard16OffsetRegisterWrite(currentAddress | 0);
     }
@@ -1783,7 +1783,7 @@ ARMInstructionSet.prototype.LDMIBW = function () {
     }
     else {
         //Empty reglist loads PC:
-        currentAddress = ((currentAddress | 0) + 4) | 0;
+        currentAddress = ((currentAddress | 0) + 0x40) | 0;
         this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
     }
     //Store the updated base address back into register:
@@ -1838,7 +1838,7 @@ ARMInstructionSet.prototype.LDMDBW = function () {
     }
     else {
         //Empty reglist loads PC:
-        currentAddress = ((currentAddress | 0) - 4) | 0;
+        currentAddress = ((currentAddress | 0) - 0x40) | 0;
         this.guardRegisterWriteLDM(0xF, this.memory.memoryRead32(currentAddress | 0) | 0);
         //Store the updated base address back into register:
         this.guard16OffsetRegisterWrite(currentAddress | 0);
@@ -1886,7 +1886,7 @@ ARMInstructionSet.prototype.LDMIAWG = function () {
     else {
         //Empty reglist loads PC:
         this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
-        currentAddress = ((currentAddress | 0) + 4) | 0;
+        currentAddress = ((currentAddress | 0) + 0x40) | 0;
     }
     //Store the updated base address back into register:
     this.guard16OffsetRegisterWrite(currentAddress | 0);
@@ -1940,7 +1940,7 @@ ARMInstructionSet.prototype.LDMDAWG = function () {
     else {
         //Empty reglist loads PC:
         this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
-        currentAddress = ((currentAddress | 0) - 4) | 0;
+        currentAddress = ((currentAddress | 0) - 0x40) | 0;
         //Store the updated base address back into register:
         this.guard16OffsetRegisterWrite(currentAddress | 0);
     }
@@ -1987,7 +1987,7 @@ ARMInstructionSet.prototype.LDMIBWG = function () {
     }
     else {
         //Empty reglist loads PC:
-        currentAddress = ((currentAddress | 0) + 4) | 0;
+        currentAddress = ((currentAddress | 0) + 0x40) | 0;
         this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
     }
     //Store the updated base address back into register:
@@ -2042,7 +2042,7 @@ ARMInstructionSet.prototype.LDMDBWG = function () {
     }
     else {
         //Empty reglist loads PC:
-        currentAddress = ((currentAddress | 0) - 4) | 0;
+        currentAddress = ((currentAddress | 0) - 0x40) | 0;
         this.guardProgramCounterRegisterWriteCPSR(this.memory.memoryRead32(currentAddress | 0) | 0);
         //Store the updated base address back into register:
         this.guard16OffsetRegisterWrite(currentAddress | 0);
