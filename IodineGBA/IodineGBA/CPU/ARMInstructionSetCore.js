@@ -1348,8 +1348,6 @@ ARMInstructionSet.prototype.STMDAW = function () {
                 }
             }
         }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(finalAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1396,8 +1394,6 @@ ARMInstructionSet.prototype.STMIBW = function () {
                 }
             }
         }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1448,8 +1444,6 @@ ARMInstructionSet.prototype.STMDBW = function () {
                 }
             }
         }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(finalAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1496,8 +1490,6 @@ ARMInstructionSet.prototype.STMIAWG = function () {
                 }
             }
         }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1548,8 +1540,6 @@ ARMInstructionSet.prototype.STMDAWG = function () {
                 }
             }
         }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(finalAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1596,8 +1586,6 @@ ARMInstructionSet.prototype.STMIBWG = function () {
                 }
             }
         }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1648,8 +1636,6 @@ ARMInstructionSet.prototype.STMDBWG = function () {
                 }
             }
         }
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(finalAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
