@@ -104,6 +104,13 @@ ARMInstructionSet.prototype.getNegativeOffsetStartAddress = function (currentAdd
     currentAddress = ((currentAddress | 0) - (offset | 0)) | 0;
     return currentAddress | 0;
 }
+ARMInstructionSet.prototype.getPositiveOffsetStartAddress = function (currentAddress) {
+    //Used for LDMD/STMD:
+    currentAddress = currentAddress | 0;
+    var offset = this.getPopCount() << 2;
+    currentAddress = ((currentAddress | 0) + (offset | 0)) | 0;
+    return currentAddress | 0;
+}
 ARMInstructionSet.prototype.writeRegister = function (address, data) {
     //Unguarded non-pc register write:
     address = address | 0;
@@ -254,21 +261,6 @@ ARMInstructionSet.prototype.guardUserRegisterWrite = function (address, data) {
                 //User-Mode Register Write Inside Non-User-Mode:
                 this.writeUserRegister(address | 0, data | 0);
             }
-    }
-}
-ARMInstructionSet.prototype.guardRegisterWriteSTM = function (address) {
-    address = address | 0;
-    /*
-     http://www.keil.com/support/man/docs/armasm/armasm_dom1361289906470.htm
-     In ARM or 16-bit Thumb instructions, if Rn is in reglist, and writeback is specified with the ! suffix:
-     If the instruction is STM{addr_mode}{cond} and Rn is the lowest-numbered register in reglist,
-     the initial value of Rn is stored.
-     */
-    var shifter = (this.execute >> 0x10) & 0xF;
-    var temp = this.execute >> (shifter | 0);
-    if ((temp & 0x1) == 0 || ((temp | 0) << (shifter | 0)) != (this.execute | 0)) {
-        //Store the updated base address back into register:
-        this.guard16OffsetRegisterWrite(address | 0);
     }
 }
 ARMInstructionSet.prototype.guardRegisterWriteLDM = function (address, data) {
@@ -1288,18 +1280,24 @@ ARMInstructionSet.prototype.STMIAW = function () {
     if ((this.execute & 0xFFFF) > 0) {
         //Get the base address:
         var currentAddress = this.read16OffsetRegister() | 0;
+        var finalAddress = this.getPositiveOffsetStartAddress(currentAddress | 0) | 0;
         //Updating the address bus away from PC fetch:
         this.wait.NonSequentialBroadcast();
         //Push register(s) into memory:
+        var count = 0;
         for (var rListPosition = 0; rListPosition < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 this.memory.memoryWrite32(currentAddress | 0, this.readRegister(rListPosition | 0) | 0);
                 currentAddress = ((currentAddress | 0) + 4) | 0;
+                //Compute writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(finalAddress | 0);
+                }
             }
         }
-        //Store the updated base address back into register:
-        this.guardRegisterWriteSTM(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1336,15 +1334,22 @@ ARMInstructionSet.prototype.STMDAW = function () {
         //Updating the address bus away from PC fetch:
         this.wait.NonSequentialBroadcast();
         //Push register(s) into memory:
+        var count = 0;
         for (var rListPosition = 0; (rListPosition | 0) < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 currentAddress = ((currentAddress | 0) + 4) | 0;
                 this.memory.memoryWrite32(currentAddress | 0, this.readRegister(rListPosition | 0) | 0);
+                //Compute writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(finalAddress | 0);
+                }
             }
         }
         //Store the updated base address back into register:
-        this.guardRegisterWriteSTM(finalAddress | 0);
+        this.guard16OffsetRegisterWrite(finalAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1373,18 +1378,26 @@ ARMInstructionSet.prototype.STMIBW = function () {
     if ((this.execute & 0xFFFF) > 0) {
         //Get the base address:
         var currentAddress = this.read16OffsetRegister() | 0;
+        var finalAddress = this.getPositiveOffsetStartAddress(currentAddress | 0) | 0;
         //Updating the address bus away from PC fetch:
         this.wait.NonSequentialBroadcast();
         //Push register(s) into memory:
+        var count = 0;
         for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 currentAddress = ((currentAddress | 0) + 4) | 0;
                 this.memory.memoryWrite32(currentAddress | 0, this.readRegister(rListPosition | 0) | 0);
+                //Compute writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(finalAddress | 0);
+                }
             }
         }
         //Store the updated base address back into register:
-        this.guardRegisterWriteSTM(currentAddress | 0);
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1421,15 +1434,22 @@ ARMInstructionSet.prototype.STMDBW = function () {
         //Updating the address bus away from PC fetch:
         this.wait.NonSequentialBroadcast();
         //Push register(s) into memory:
+        var count = 0;
         for (var rListPosition = 0; (rListPosition | 0) < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 this.memory.memoryWrite32(currentAddress | 0, this.readRegister(rListPosition | 0) | 0);
                 currentAddress = ((currentAddress | 0) + 4) | 0;
+                //Compute writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(finalAddress | 0);
+                }
             }
         }
         //Store the updated base address back into register:
-        this.guardRegisterWriteSTM(finalAddress | 0);
+        this.guard16OffsetRegisterWrite(finalAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1458,18 +1478,26 @@ ARMInstructionSet.prototype.STMIAWG = function () {
     if ((this.execute & 0xFFFF) > 0) {
         //Get the base address:
         var currentAddress = this.read16OffsetRegister() | 0;
+        var finalAddress = this.getPositiveOffsetStartAddress(currentAddress | 0) | 0;
         //Updating the address bus away from PC fetch:
         this.wait.NonSequentialBroadcast();
         //Push register(s) into memory:
+        var count = 0;
         for (var rListPosition = 0; rListPosition < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
                 currentAddress = ((currentAddress | 0) + 4) | 0;
+                //Compute writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(finalAddress | 0);
+                }
             }
         }
         //Store the updated base address back into register:
-        this.guardRegisterWriteSTM(currentAddress | 0);
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1506,15 +1534,22 @@ ARMInstructionSet.prototype.STMDAWG = function () {
         //Updating the address bus away from PC fetch:
         this.wait.NonSequentialBroadcast();
         //Push register(s) into memory:
+        var count = 0;
         for (var rListPosition = 0; (rListPosition | 0) < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 currentAddress = ((currentAddress | 0) + 4) | 0;
                 this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+                //Compute writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(finalAddress | 0);
+                }
             }
         }
         //Store the updated base address back into register:
-        this.guardRegisterWriteSTM(finalAddress | 0);
+        this.guard16OffsetRegisterWrite(finalAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1543,18 +1578,26 @@ ARMInstructionSet.prototype.STMIBWG = function () {
     if ((this.execute & 0xFFFF) > 0) {
         //Get the base address:
         var currentAddress = this.read16OffsetRegister() | 0;
+        var finalAddress = this.getPositiveOffsetStartAddress(currentAddress | 0) | 0;
         //Updating the address bus away from PC fetch:
         this.wait.NonSequentialBroadcast();
         //Push register(s) into memory:
+        var count = 0;
         for (var rListPosition = 0; rListPosition < 0x10;  rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 currentAddress = ((currentAddress | 0) + 4) | 0;
                 this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
+                //Compute writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(finalAddress | 0);
+                }
             }
         }
         //Store the updated base address back into register:
-        this.guardRegisterWriteSTM(currentAddress | 0);
+        this.guard16OffsetRegisterWrite(currentAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
@@ -1591,15 +1634,22 @@ ARMInstructionSet.prototype.STMDBWG = function () {
         //Updating the address bus away from PC fetch:
         this.wait.NonSequentialBroadcast();
         //Push register(s) into memory:
+        var count = 0;
         for (var rListPosition = 0; (rListPosition | 0) < 0x10; rListPosition = ((rListPosition | 0) + 1) | 0) {
             if ((this.execute & (1 << rListPosition)) != 0) {
                 //Push a register into memory:
                 this.memory.memoryWrite32(currentAddress | 0, this.guardUserRegisterReadSTM(rListPosition | 0) | 0);
                 currentAddress = ((currentAddress | 0) + 4) | 0;
+                //Compute writeback immediately after the first register load:
+                if ((count | 0) == 0) {
+                    count = 1;
+                    //Store the updated base address back into register:
+                    this.guard16OffsetRegisterWrite(finalAddress | 0);
+                }
             }
         }
         //Store the updated base address back into register:
-        this.guardRegisterWriteSTM(finalAddress | 0);
+        this.guard16OffsetRegisterWrite(finalAddress | 0);
         //Updating the address bus back to PC fetch:
         this.wait.NonSequentialBroadcast();
     }
