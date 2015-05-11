@@ -1,7 +1,7 @@
 JavaScript GameBoy Advance Emulator
 =================================
 
-**Copyright (C) 2010 - 2014 Grant Galitz**
+**Copyright (C) 2010 - 2015 Grant Galitz**
 
 A GameBoy Advance emulator that utilizes HTML5 canvas and JavaScript audio APIs to provide a full emulation of the console.
 
@@ -47,6 +47,10 @@ Screenshots
 * **Wario Land 4:**
     
     ![Wario Land 4](http://i.imgur.com/eaDqCxuh.png “Wario Land 4”)
+    
+* **Golden Sun:**
+    
+    ![Golden Sun](http://i.imgur.com/EctuZxo.png “Golden Sun”)
 
 * **Game & Watch Gallery 4:**
     
