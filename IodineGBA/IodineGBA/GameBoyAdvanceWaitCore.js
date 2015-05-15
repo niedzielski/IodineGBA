@@ -34,7 +34,7 @@ GameBoyAdvanceWait.prototype.initialize = function () {
     this.buffer = 0;                        //Tracking of the size of the prebuffer cache.
     this.clocks = 0;                        //Tracking clocks for prebuffer cache.
     //Create the wait state address translation cache:
-    this.waitStateClocks16 = getUint8Array(0x200);
+    this.waitStateClocks16 = getUint8Array(0x20);
     this.waitStateClocks32 = getUint8Array(0x20);
     //Wait State 0:
     this.setWaitState(0, 0);
@@ -440,6 +440,7 @@ GameBoyAdvanceWait.prototype.SRAMAccess = function () {
     this.multiClock(this.SRAMWaitState | 0);
 }
 GameBoyAdvanceWait.prototype.SRAMAccessCPU = function () {
+    this.resetPrebuffer();
     this.IOCore.updateCore(this.SRAMWaitState | 0);
 }
 GameBoyAdvanceWait.prototype.VRAMAccess = function () {
