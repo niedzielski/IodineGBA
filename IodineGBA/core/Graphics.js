@@ -20,15 +20,14 @@ function GameBoyAdvanceGraphics(IOCore) {
     this.IOCore = IOCore;
 }
 GameBoyAdvanceGraphics.prototype.initialize = function () {
-    var skippingBIOS = !this.IOCore.BIOSFound || this.IOCore.settings.SKIPBoot;
-    this.renderer = new GameBoyAdvanceGraphicsRenderer(this, this.IOCore.coreExposed, skippingBIOS);
+    this.gfxProxy = this.IOCore.gfxProxy;
     this.dma = this.IOCore.dma;
     this.dmaChannel3 = this.IOCore.dmaChannel3;
     this.irq = this.IOCore.irq;
     this.wait = this.IOCore.wait;
-    this.initializeState(skippingBIOS);
+    this.initializeState();
 }
-GameBoyAdvanceGraphics.prototype.initializeState = function (skippingBIOS) {
+GameBoyAdvanceGraphics.prototype.initializeState = function () {
     //Initialize Pre-Boot:
     this.renderedScanLine = false;
     this.statusFlags = 0;
@@ -36,7 +35,7 @@ GameBoyAdvanceGraphics.prototype.initializeState = function (skippingBIOS) {
     this.VCounter = 0;
     this.currentScanLine = 0;
     this.LCDTicks = 0;
-    if (skippingBIOS) {
+    if (!this.IOCore.BIOSFound || this.IOCore.settings.SKIPBoot) {
         //BIOS entered the ROM at line 0x7C:
         this.currentScanLine = 0x7C;
     }
@@ -57,7 +56,7 @@ GameBoyAdvanceGraphics.prototype.clockScanLine = function () {
     if (!this.renderedScanLine) {                                            //If we rendered the scanline, don't run this again.
         this.renderedScanLine = true;                                        //Mark rendering.
         if ((this.currentScanLine | 0) < 160) {
-            this.renderer.incrementScanLineQueue();                          //Tell the gfx JIT to queue another line to draw.
+            this.gfxProxy.incrementScanLineQueue();                          //Tell the gfx JIT to queue another line to draw.
         }
     }
 }
@@ -245,13 +244,13 @@ GameBoyAdvanceGraphics.prototype.updateVBlankStart = function () {
     if ((this.IRQFlags & 0x8) != 0) {                    //Check for VBlank IRQ.
         this.irq.requestIRQ(0x1);
     }
-    this.renderer.ensureFraming();
+    this.gfxProxy.ensureFraming();
     this.dma.gfxVBlankRequest();
 }
 GameBoyAdvanceGraphics.prototype.isRenderingCheckPreprocess = function () {
-    var isInVisibleLines = (!this.renderer.forcedBlank && (this.statusFlags & 0x1) == 0);
+    var isInVisibleLines = ((this.gfxProxy.IOData8[0] & 0x80) == 0 && (this.statusFlags & 0x1) == 0);
     var isRendering = (isInVisibleLines && (this.statusFlags & 0x2) == 0) ? 2 : 1;
-    var isOAMRendering = (isInVisibleLines && ((this.statusFlags & 0x2) == 0 || !this.renderer.HBlankIntervalFree)) ? 2 : 1;
+    var isOAMRendering = (isInVisibleLines && ((this.statusFlags & 0x2) == 0 || (this.gfxProxy.IOData8[0] & 0x20) == 0)) ? 2 : 1;
     this.wait.updateRenderStatus(isRendering | 0, isOAMRendering | 0);
 }
 GameBoyAdvanceGraphics.prototype.writeDISPSTAT8_0 = function (data) {

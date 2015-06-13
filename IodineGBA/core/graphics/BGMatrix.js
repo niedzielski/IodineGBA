@@ -20,7 +20,12 @@ function GameBoyAdvanceBGMatrixRenderer(gfx, BGLayer) {
     this.BGLayer = BGLayer | 0;
     this.VRAM = this.gfx.VRAM;
     this.palette = this.gfx.palette256;
-    this.bgAffineRenderer = this.gfx.bgAffineRenderer[BGLayer & 0x1];
+    if ((BGLayer & 0x1) == 0) {
+        this.bgAffineRenderer = this.gfx.bgAffineRenderer0;
+    }
+    else {
+        this.bgAffineRenderer = this.gfx.bgAffineRenderer1;
+    }
     this.screenSizePreprocess();
     this.screenBaseBlockPreprocess();
     this.characterBaseBlockPreprocess();
