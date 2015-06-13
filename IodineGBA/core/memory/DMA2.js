@@ -41,7 +41,7 @@ GameBoyAdvanceDMA2.prototype.initialize = function () {
     this.destinationControl = 0;
     this.DMACore = this.IOCore.dma;
     this.memory = this.IOCore.memory;
-    this.gfx = this.IOCore.gfx;
+    this.gfxState = this.IOCore.gfxState;
     this.irq = this.IOCore.irq;
     this.sound = this.IOCore.sound;
     this.wait = this.IOCore.wait;
@@ -439,11 +439,11 @@ GameBoyAdvanceDMA2.prototype.nextEventTime = function () {
     switch (this.enabled | 0) {
             //V_BLANK
         case 0x2:
-            clocks = this.gfx.nextVBlankEventTime() | 0;
+            clocks = this.gfxState.nextVBlankEventTime() | 0;
             break;
             //H_BLANK:
         case 0x4:
-            clocks = this.gfx.nextHBlankDMAEventTime() | 0;
+            clocks = this.gfxState.nextHBlankDMAEventTime() | 0;
             break;
             //FIFO_B:
         case 0x10:

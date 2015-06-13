@@ -58,8 +58,8 @@ GameBoyAdvanceMemory.prototype.initialize = function () {
     this.dmaChannel1 = this.IOCore.dmaChannel1;
     this.dmaChannel2 = this.IOCore.dmaChannel2;
     this.dmaChannel3 = this.IOCore.dmaChannel3;
-    this.gfx = this.IOCore.gfx;
-    this.gfxProxy = this.IOCore.gfxProxy;
+    this.gfxState = this.IOCore.gfxState;
+    this.gfxRenderer = this.IOCore.gfxRenderer;
     this.sound = this.IOCore.sound;
     this.timer = this.IOCore.timer;
     this.irq = this.IOCore.irq;
@@ -159,328 +159,328 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
     switch (address | 0) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
         case 0x4000000:
-            this.gfxProxy.writeDISPCNT8_0(data | 0);
+            this.gfxRenderer.writeDISPCNT8_0(data | 0);
             break;
         //4000001h - DISPCNT - LCD Control (Read/Write)
         case 0x4000001:
-            this.gfxProxy.writeDISPCNT8_1(data | 0);
+            this.gfxRenderer.writeDISPCNT8_1(data | 0);
             break;
         //4000002h - Undocumented - Green Swap (R/W)
         case 0x4000002:
-            this.gfxProxy.writeDISPCNT8_2(data | 0);
+            this.gfxRenderer.writeDISPCNT8_2(data | 0);
             break;
         //4000003h - Undocumented - Green Swap (R/W)
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000004:
-            this.gfx.writeDISPSTAT8_0(data | 0);
+            this.gfxState.writeDISPSTAT8_0(data | 0);
             break;
         //4000005h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000005:
-            this.gfx.writeDISPSTAT8_1(data | 0);
+            this.gfxState.writeDISPSTAT8_1(data | 0);
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         //4000007h - VCOUNT - Vertical Counter (Read only)
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         case 0x4000008:
-            this.gfxProxy.writeBG0CNT8_0(data | 0);
+            this.gfxRenderer.writeBG0CNT8_0(data | 0);
             break;
         //4000009h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         case 0x4000009:
-            this.gfxProxy.writeBG0CNT8_1(data | 0);
+            this.gfxRenderer.writeBG0CNT8_1(data | 0);
             break;
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
         case 0x400000A:
-            this.gfxProxy.writeBG1CNT8_0(data | 0);
+            this.gfxRenderer.writeBG1CNT8_0(data | 0);
             break;
         //400000Bh - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
         case 0x400000B:
-            this.gfxProxy.writeBG1CNT8_1(data | 0);
+            this.gfxRenderer.writeBG1CNT8_1(data | 0);
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         case 0x400000C:
-            this.gfxProxy.writeBG2CNT8_0(data | 0);
+            this.gfxRenderer.writeBG2CNT8_0(data | 0);
             break;
         //400000Dh - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         case 0x400000D:
-            this.gfxProxy.writeBG2CNT8_1(data | 0);
+            this.gfxRenderer.writeBG2CNT8_1(data | 0);
             break;
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
         case 0x400000E:
-            this.gfxProxy.writeBG3CNT8_0(data | 0);
+            this.gfxRenderer.writeBG3CNT8_0(data | 0);
             break;
         //400000Fh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
         case 0x400000F:
-            this.gfxProxy.writeBG3CNT8_1(data | 0);
+            this.gfxRenderer.writeBG3CNT8_1(data | 0);
             break;
         //4000010h - BG0HOFS - BG0 X-Offset (W)
         case 0x4000010:
-            this.gfxProxy.writeBG0HOFS8_0(data | 0);
+            this.gfxRenderer.writeBG0HOFS8_0(data | 0);
             break;
         //4000011h - BG0HOFS - BG0 X-Offset (W)
         case 0x4000011:
-            this.gfxProxy.writeBG0HOFS8_1(data | 0);
+            this.gfxRenderer.writeBG0HOFS8_1(data | 0);
             break;
         //4000012h - BG0VOFS - BG0 Y-Offset (W)
         case 0x4000012:
-            this.gfxProxy.writeBG0VOFS8_0(data | 0);
+            this.gfxRenderer.writeBG0VOFS8_0(data | 0);
             break;
         //4000013h - BG0VOFS - BG0 Y-Offset (W)
         case 0x4000013:
-            this.gfxProxy.writeBG0VOFS8_1(data | 0);
+            this.gfxRenderer.writeBG0VOFS8_1(data | 0);
             break;
         //4000014h - BG1HOFS - BG1 X-Offset (W)
         case 0x4000014:
-            this.gfxProxy.writeBG1HOFS8_0(data | 0);
+            this.gfxRenderer.writeBG1HOFS8_0(data | 0);
             break;
         //4000015h - BG1HOFS - BG1 X-Offset (W)
         case 0x4000015:
-            this.gfxProxy.writeBG1HOFS8_1(data | 0);
+            this.gfxRenderer.writeBG1HOFS8_1(data | 0);
             break;
         //4000016h - BG1VOFS - BG1 Y-Offset (W)
         case 0x4000016:
-            this.gfxProxy.writeBG1VOFS8_0(data | 0);
+            this.gfxRenderer.writeBG1VOFS8_0(data | 0);
             break;
         //4000017h - BG1VOFS - BG1 Y-Offset (W)
         case 0x4000017:
-            this.gfxProxy.writeBG1VOFS8_1(data | 0);
+            this.gfxRenderer.writeBG1VOFS8_1(data | 0);
             break;
         //4000018h - BG2HOFS - BG2 X-Offset (W)
         case 0x4000018:
-            this.gfxProxy.writeBG2HOFS8_0(data | 0);
+            this.gfxRenderer.writeBG2HOFS8_0(data | 0);
             break;
         //4000019h - BG2HOFS - BG2 X-Offset (W)
         case 0x4000019:
-            this.gfxProxy.writeBG2HOFS8_1(data | 0);
+            this.gfxRenderer.writeBG2HOFS8_1(data | 0);
             break;
         //400001Ah - BG2VOFS - BG2 Y-Offset (W)
         case 0x400001A:
-            this.gfxProxy.writeBG2VOFS8_0(data | 0);
+            this.gfxRenderer.writeBG2VOFS8_0(data | 0);
             break;
         //400001Bh - BG2VOFS - BG2 Y-Offset (W)
         case 0x400001B:
-            this.gfxProxy.writeBG2VOFS8_1(data | 0);
+            this.gfxRenderer.writeBG2VOFS8_1(data | 0);
             break;
         //400001Ch - BG3HOFS - BG3 X-Offset (W)
         case 0x400001C:
-            this.gfxProxy.writeBG3HOFS8_0(data | 0);
+            this.gfxRenderer.writeBG3HOFS8_0(data | 0);
             break;
         //400001Dh - BG3HOFS - BG3 X-Offset (W)
         case 0x400001D:
-            this.gfxProxy.writeBG3HOFS8_1(data | 0);
+            this.gfxRenderer.writeBG3HOFS8_1(data | 0);
             break;
         //400001Eh - BG3VOFS - BG3 Y-Offset (W)
         case 0x400001E:
-            this.gfxProxy.writeBG3VOFS8_0(data | 0);
+            this.gfxRenderer.writeBG3VOFS8_0(data | 0);
             break;
         //400001Fh - BG3VOFS - BG3 Y-Offset (W)
         case 0x400001F:
-            this.gfxProxy.writeBG3VOFS8_1(data | 0);
+            this.gfxRenderer.writeBG3VOFS8_1(data | 0);
             break;
         //4000020h - BG2PA - BG2 Rotation/Scaling Parameter A (alias dx) (W)
         case 0x4000020:
-            this.gfxProxy.writeBG2PA8_0(data | 0);
+            this.gfxRenderer.writeBG2PA8_0(data | 0);
             break;
         //4000021h - BG2PA - BG2 Rotation/Scaling Parameter A (alias dx) (W)
         case 0x4000021:
-            this.gfxProxy.writeBG2PA8_1(data | 0);
+            this.gfxRenderer.writeBG2PA8_1(data | 0);
             break;
         //4000022h - BG2PB - BG2 Rotation/Scaling Parameter B (alias dmx) (W)
         case 0x4000022:
-            this.gfxProxy.writeBG2PB8_0(data | 0);
+            this.gfxRenderer.writeBG2PB8_0(data | 0);
             break;
         //4000023h - BG2PB - BG2 Rotation/Scaling Parameter B (alias dmx) (W)
         case 0x4000023:
-            this.gfxProxy.writeBG2PB8_1(data | 0);
+            this.gfxRenderer.writeBG2PB8_1(data | 0);
             break;
         //4000024h - BG2PC - BG2 Rotation/Scaling Parameter C (alias dy) (W)
         case 0x4000024:
-            this.gfxProxy.writeBG2PC8_0(data | 0);
+            this.gfxRenderer.writeBG2PC8_0(data | 0);
             break;
         //4000025h - BG2PC - BG2 Rotation/Scaling Parameter C (alias dy) (W)
         case 0x4000025:
-            this.gfxProxy.writeBG2PC8_1(data | 0);
+            this.gfxRenderer.writeBG2PC8_1(data | 0);
             break;
         //4000026h - BG2PD - BG2 Rotation/Scaling Parameter D (alias dmy) (W)
         case 0x4000026:
-            this.gfxProxy.writeBG2PD8_0(data | 0);
+            this.gfxRenderer.writeBG2PD8_0(data | 0);
             break;
         //4000027h - BG2PD - BG2 Rotation/Scaling Parameter D (alias dmy) (W)
         case 0x4000027:
-            this.gfxProxy.writeBG2PD8_1(data | 0);
+            this.gfxRenderer.writeBG2PD8_1(data | 0);
             break;
         //4000028h - BG2X_L - BG2 Reference Point X-Coordinate, lower 16 bit (W)
         case 0x4000028:
-            this.gfxProxy.writeBG2X8_0(data | 0);
+            this.gfxRenderer.writeBG2X8_0(data | 0);
             break;
         //4000029h - BG2X_L - BG2 Reference Point X-Coordinate, lower 16 bit (W)
         case 0x4000029:
-            this.gfxProxy.writeBG2X8_1(data | 0);
+            this.gfxRenderer.writeBG2X8_1(data | 0);
             break;
         //400002Ah - BG2X_H - BG2 Reference Point X-Coordinate, upper 12 bit (W)
         case 0x400002A:
-            this.gfxProxy.writeBG2X8_2(data | 0);
+            this.gfxRenderer.writeBG2X8_2(data | 0);
             break;
         //400002Bh - BG2X_H - BG2 Reference Point X-Coordinate, upper 12 bit (W)
         case 0x400002B:
-            this.gfxProxy.writeBG2X8_3(data | 0);
+            this.gfxRenderer.writeBG2X8_3(data | 0);
             break;
         //400002Ch - BG2Y_L - BG2 Reference Point Y-Coordinate, lower 16 bit (W)
         case 0x400002C:
-            this.gfxProxy.writeBG2Y8_0(data | 0);
+            this.gfxRenderer.writeBG2Y8_0(data | 0);
             break;
         //400002Dh - BG2Y_L - BG2 Reference Point Y-Coordinate, lower 16 bit (W)
         case 0x400002D:
-            this.gfxProxy.writeBG2Y8_1(data | 0);
+            this.gfxRenderer.writeBG2Y8_1(data | 0);
             break;
         //400002Eh - BG2Y_H - BG2 Reference Point Y-Coordinate, upper 12 bit (W)
         case 0x400002E:
-            this.gfxProxy.writeBG2Y8_2(data | 0);
+            this.gfxRenderer.writeBG2Y8_2(data | 0);
             break;
         //400002Fh - BG2Y_H - BG2 Reference Point Y-Coordinate, upper 12 bit (W)
         case 0x400002F:
-            this.gfxProxy.writeBG2Y8_3(data | 0);
+            this.gfxRenderer.writeBG2Y8_3(data | 0);
             break;
         //4000030h - BG3PA - BG3 Rotation/Scaling Parameter A (alias dx) (W)
         case 0x4000030:
-            this.gfxProxy.writeBG3PA8_0(data | 0);
+            this.gfxRenderer.writeBG3PA8_0(data | 0);
             break;
         //4000031h - BG3PA - BG3 Rotation/Scaling Parameter A (alias dx) (W)
         case 0x4000031:
-            this.gfxProxy.writeBG3PA8_1(data | 0);
+            this.gfxRenderer.writeBG3PA8_1(data | 0);
             break;
         //4000032h - BG3PB - BG3 Rotation/Scaling Parameter B (alias dmx) (W)
         case 0x4000032:
-            this.gfxProxy.writeBG3PB8_0(data | 0);
+            this.gfxRenderer.writeBG3PB8_0(data | 0);
             break;
         //4000033h - BG3PB - BG3 Rotation/Scaling Parameter B (alias dmx) (W)
         case 0x4000033:
-            this.gfxProxy.writeBG3PB8_1(data | 0);
+            this.gfxRenderer.writeBG3PB8_1(data | 0);
             break;
         //4000034h - BG3PC - BG3 Rotation/Scaling Parameter C (alias dy) (W)
         case 0x4000034:
-            this.gfxProxy.writeBG3PC8_0(data | 0);
+            this.gfxRenderer.writeBG3PC8_0(data | 0);
             break;
         //4000035h - BG3PC - BG3 Rotation/Scaling Parameter C (alias dy) (W)
         case 0x4000035:
-            this.gfxProxy.writeBG3PC8_1(data | 0);
+            this.gfxRenderer.writeBG3PC8_1(data | 0);
             break;
         //4000036h - BG3PD - BG3 Rotation/Scaling Parameter D (alias dmy) (W)
         case 0x4000036:
-            this.gfxProxy.writeBG3PD8_0(data | 0);
+            this.gfxRenderer.writeBG3PD8_0(data | 0);
             break;
         //4000037h - BG3PD - BG3 Rotation/Scaling Parameter D (alias dmy) (W)
         case 0x4000037:
-            this.gfxProxy.writeBG3PD8_1(data | 0);
+            this.gfxRenderer.writeBG3PD8_1(data | 0);
             break;
         //4000038h - BG3X_L - BG3 Reference Point X-Coordinate, lower 16 bit (W)
         case 0x4000038:
-            this.gfxProxy.writeBG3X8_0(data | 0);
+            this.gfxRenderer.writeBG3X8_0(data | 0);
             break;
         //4000039h - BG3X_L - BG3 Reference Point X-Coordinate, lower 16 bit (W)
         case 0x4000039:
-            this.gfxProxy.writeBG3X8_1(data | 0);
+            this.gfxRenderer.writeBG3X8_1(data | 0);
             break;
         //400003Ah - BG3X_H - BG3 Reference Point X-Coordinate, upper 12 bit (W)
         case 0x400003A:
-            this.gfxProxy.writeBG3X8_2(data | 0);
+            this.gfxRenderer.writeBG3X8_2(data | 0);
             break;
         //400003Bh - BG3X_H - BG3 Reference Point X-Coordinate, upper 12 bit (W)
         case 0x400003B:
-            this.gfxProxy.writeBG3X8_3(data | 0);
+            this.gfxRenderer.writeBG3X8_3(data | 0);
             break;
         //400003Ch - BG3Y_L - BG3 Reference Point Y-Coordinate, lower 16 bit (W)
         case 0x400003C:
-            this.gfxProxy.writeBG3Y8_0(data | 0);
+            this.gfxRenderer.writeBG3Y8_0(data | 0);
             break;
         //400003Dh - BGY_L - BG3 Reference Point Y-Coordinate, lower 16 bit (W)
         case 0x400003D:
-            this.gfxProxy.writeBG3Y8_1(data | 0);
+            this.gfxRenderer.writeBG3Y8_1(data | 0);
             break;
         //400003Eh - BG3Y_H - BG3 Reference Point Y-Coordinate, upper 12 bit (W)
         case 0x400003E:
-            this.gfxProxy.writeBG3Y8_2(data | 0);
+            this.gfxRenderer.writeBG3Y8_2(data | 0);
             break;
         //400003Fh - BG3Y_H - BG3 Reference Point Y-Coordinate, upper 12 bit (W)
         case 0x400003F:
-            this.gfxProxy.writeBG3Y8_3(data | 0);
+            this.gfxRenderer.writeBG3Y8_3(data | 0);
             break;
         //4000040h - WIN0H - Window 0 Horizontal Dimensions (W)
         case 0x4000040:
-            this.gfxProxy.writeWIN0XCOORDRight8(data | 0);
+            this.gfxRenderer.writeWIN0XCOORDRight8(data | 0);
             break;
         //4000041h - WIN0H - Window 0 Horizontal Dimensions (W)
         case 0x4000041:
-            this.gfxProxy.writeWIN0XCOORDLeft8(data | 0);
+            this.gfxRenderer.writeWIN0XCOORDLeft8(data | 0);
             break;
         //4000042h - WIN1H - Window 1 Horizontal Dimensions (W)
         case 0x4000042:
-            this.gfxProxy.writeWIN1XCOORDRight8(data | 0);
+            this.gfxRenderer.writeWIN1XCOORDRight8(data | 0);
             break;
         //4000043h - WIN1H - Window 1 Horizontal Dimensions (W)
         case 0x4000043:
-            this.gfxProxy.writeWIN1XCOORDLeft8(data | 0);
+            this.gfxRenderer.writeWIN1XCOORDLeft8(data | 0);
             break;
         //4000044h - WIN0V - Window 0 Vertical Dimensions (W)
         case 0x4000044:
-            this.gfxProxy.writeWIN0YCOORDBottom8(data | 0);
+            this.gfxRenderer.writeWIN0YCOORDBottom8(data | 0);
             break;
         //4000045h - WIN0V - Window 0 Vertical Dimensions (W)
         case 0x4000045:
-            this.gfxProxy.writeWIN0YCOORDTop8(data | 0);
+            this.gfxRenderer.writeWIN0YCOORDTop8(data | 0);
             break;
         //4000046h - WIN1V - Window 1 Vertical Dimensions (W)
         case 0x4000046:
-            this.gfxProxy.writeWIN1YCOORDBottom8(data | 0);
+            this.gfxRenderer.writeWIN1YCOORDBottom8(data | 0);
             break;
         //4000047h - WIN1V - Window 1 Vertical Dimensions (W)
         case 0x4000047:
-            this.gfxProxy.writeWIN1YCOORDTop8(data | 0);
+            this.gfxRenderer.writeWIN1YCOORDTop8(data | 0);
             break;
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
         case 0x4000048:
-            this.gfxProxy.writeWIN0IN8(data | 0);
+            this.gfxRenderer.writeWIN0IN8(data | 0);
             break;
         //4000049h - WININ - Control of Inside of Window(s) (R/W)
         case 0x4000049:
-            this.gfxProxy.writeWIN1IN8(data | 0);
+            this.gfxRenderer.writeWIN1IN8(data | 0);
             break;
         //400004Ah- WINOUT - Control of Outside of Windows (R/W)
         case 0x400004A:
-            this.gfxProxy.writeWINOUT8(data | 0);
+            this.gfxRenderer.writeWINOUT8(data | 0);
             break;
         //400004AB- WINOUT - Inside of OBJ Window (R/W)
         case 0x400004B:
-            this.gfxProxy.writeWINOBJIN8(data | 0);
+            this.gfxRenderer.writeWINOBJIN8(data | 0);
             break;
         //400004Ch - MOSAIC - Mosaic Size (W)
         case 0x400004C:
-            this.gfxProxy.writeMOSAIC8_0(data | 0);
+            this.gfxRenderer.writeMOSAIC8_0(data | 0);
             break;
         //400004Dh - MOSAIC - Mosaic Size (W)
         case 0x400004D:
-            this.gfxProxy.writeMOSAIC8_1(data | 0);
+            this.gfxRenderer.writeMOSAIC8_1(data | 0);
             break;
         //400004Eh - NOT USED - ZERO
         //400004Fh - NOT USED - ZERO
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
         case 0x4000050:
-            this.gfxProxy.writeBLDCNT8_0(data | 0);
+            this.gfxRenderer.writeBLDCNT8_0(data | 0);
             break;
         //4000051h - BLDCNT - Color Special Effects Selection (R/W)
         case 0x4000051:
-            this.gfxProxy.writeBLDCNT8_1(data | 0);
+            this.gfxRenderer.writeBLDCNT8_1(data | 0);
             break;
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
         case 0x4000052:
-            this.gfxProxy.writeBLDALPHA8_0(data | 0);
+            this.gfxRenderer.writeBLDALPHA8_0(data | 0);
             break;
         //4000053h - BLDALPHA - Alpha Blending Coefficients (R/W)
         case 0x4000053:
-            this.gfxProxy.writeBLDALPHA8_1(data | 0);
+            this.gfxRenderer.writeBLDALPHA8_1(data | 0);
             break;
         //4000054h - BLDY - Brightness (Fade-In/Out) Coefficient (W)
         case 0x4000054:
-            this.gfxProxy.writeBLDY8(data | 0);
+            this.gfxRenderer.writeBLDY8(data | 0);
             break;
         //4000055h through 400005Fh - NOT USED - ZERO/GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
@@ -1160,169 +1160,169 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
     switch (address & -2) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
         case 0x4000000:
-            this.gfxProxy.writeDISPCNT16(data | 0);
+            this.gfxRenderer.writeDISPCNT16(data | 0);
             break;
         //4000002h - Undocumented - Green Swap (R/W)
         case 0x4000002:
-            this.gfxProxy.writeDISPCNT8_2(data | 0);
+            this.gfxRenderer.writeDISPCNT8_2(data | 0);
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000004:
-            this.gfx.writeDISPSTAT16(data | 0);
+            this.gfxState.writeDISPSTAT16(data | 0);
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         case 0x4000008:
-            this.gfxProxy.writeBG0CNT16(data | 0);
+            this.gfxRenderer.writeBG0CNT16(data | 0);
             break;
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
         case 0x400000A:
-            this.gfxProxy.writeBG1CNT16(data | 0);
+            this.gfxRenderer.writeBG1CNT16(data | 0);
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         case 0x400000C:
-            this.gfxProxy.writeBG2CNT16(data | 0);
+            this.gfxRenderer.writeBG2CNT16(data | 0);
             break;
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
         case 0x400000E:
-            this.gfxProxy.writeBG3CNT16(data | 0);
+            this.gfxRenderer.writeBG3CNT16(data | 0);
             break;
         //4000010h - BG0HOFS - BG0 X-Offset (W)
         case 0x4000010:
-            this.gfxProxy.writeBG0HOFS16(data | 0);
+            this.gfxRenderer.writeBG0HOFS16(data | 0);
             break;
         //4000012h - BG0VOFS - BG0 Y-Offset (W)
         case 0x4000012:
-            this.gfxProxy.writeBG0VOFS16(data | 0);
+            this.gfxRenderer.writeBG0VOFS16(data | 0);
             break;
         //4000014h - BG1HOFS - BG1 X-Offset (W)
         case 0x4000014:
-            this.gfxProxy.writeBG1HOFS16(data | 0);
+            this.gfxRenderer.writeBG1HOFS16(data | 0);
             break;
         //4000016h - BG1VOFS - BG1 Y-Offset (W)
         case 0x4000016:
-            this.gfxProxy.writeBG1VOFS16(data | 0);
+            this.gfxRenderer.writeBG1VOFS16(data | 0);
             break;
         //4000018h - BG2HOFS - BG2 X-Offset (W)
         case 0x4000018:
-            this.gfxProxy.writeBG2HOFS16(data | 0);
+            this.gfxRenderer.writeBG2HOFS16(data | 0);
             break;
         //400001Ah - BG2VOFS - BG2 Y-Offset (W)
         case 0x400001A:
-            this.gfxProxy.writeBG2VOFS16(data | 0);
+            this.gfxRenderer.writeBG2VOFS16(data | 0);
             break;
         //400001Ch - BG3HOFS - BG3 X-Offset (W)
         case 0x400001C:
-            this.gfxProxy.writeBG3HOFS16(data | 0);
+            this.gfxRenderer.writeBG3HOFS16(data | 0);
             break;
         //400001Eh - BG3VOFS - BG3 Y-Offset (W)
         case 0x400001E:
-            this.gfxProxy.writeBG3VOFS16(data | 0);
+            this.gfxRenderer.writeBG3VOFS16(data | 0);
             break;
         //4000020h - BG2PA - BG2 Rotation/Scaling Parameter A (alias dx) (W)
         case 0x4000020:
-            this.gfxProxy.writeBG2PA16(data | 0);
+            this.gfxRenderer.writeBG2PA16(data | 0);
             break;
         //4000022h - BG2PB - BG2 Rotation/Scaling Parameter B (alias dmx) (W)
         case 0x4000022:
-            this.gfxProxy.writeBG2PB16(data | 0);
+            this.gfxRenderer.writeBG2PB16(data | 0);
             break;
         //4000024h - BG2PC - BG2 Rotation/Scaling Parameter C (alias dy) (W)
         case 0x4000024:
-            this.gfxProxy.writeBG2PC16(data | 0);
+            this.gfxRenderer.writeBG2PC16(data | 0);
             break;
         //4000026h - BG2PD - BG2 Rotation/Scaling Parameter D (alias dmy) (W)
         case 0x4000026:
-            this.gfxProxy.writeBG2PD16(data | 0);
+            this.gfxRenderer.writeBG2PD16(data | 0);
             break;
         //4000028h - BG2X_L - BG2 Reference Point X-Coordinate, lower 16 bit (W)
         case 0x4000028:
-            this.gfxProxy.writeBG2X16_0(data | 0);
+            this.gfxRenderer.writeBG2X16_0(data | 0);
             break;
         //400002Ah - BG2X_H - BG2 Reference Point X-Coordinate, upper 12 bit (W)
         case 0x400002A:
-            this.gfxProxy.writeBG2X16_1(data | 0);
+            this.gfxRenderer.writeBG2X16_1(data | 0);
             break;
         //400002Ch - BG2Y_L - BG2 Reference Point Y-Coordinate, lower 16 bit (W)
         case 0x400002C:
-            this.gfxProxy.writeBG2Y16_0(data | 0);
+            this.gfxRenderer.writeBG2Y16_0(data | 0);
             break;
         //400002Eh - BG2Y_H - BG2 Reference Point Y-Coordinate, upper 12 bit (W)
         case 0x400002E:
-            this.gfxProxy.writeBG2Y16_1(data | 0);
+            this.gfxRenderer.writeBG2Y16_1(data | 0);
             break;
         //4000030h - BG3PA - BG3 Rotation/Scaling Parameter A (alias dx) (W)
         case 0x4000030:
-            this.gfxProxy.writeBG3PA16(data | 0);
+            this.gfxRenderer.writeBG3PA16(data | 0);
             break;
         //4000032h - BG3PB - BG3 Rotation/Scaling Parameter B (alias dmx) (W)
         case 0x4000032:
-            this.gfxProxy.writeBG3PB16(data | 0);
+            this.gfxRenderer.writeBG3PB16(data | 0);
             break;
         //4000034h - BG3PC - BG3 Rotation/Scaling Parameter C (alias dy) (W)
         case 0x4000034:
-            this.gfxProxy.writeBG3PC16(data | 0);
+            this.gfxRenderer.writeBG3PC16(data | 0);
             break;
         //4000036h - BG3PD - BG3 Rotation/Scaling Parameter D (alias dmy) (W)
         case 0x4000036:
-            this.gfxProxy.writeBG3PD16(data | 0);
+            this.gfxRenderer.writeBG3PD16(data | 0);
             break;
         //4000038h - BG3X_L - BG3 Reference Point X-Coordinate, lower 16 bit (W)
         case 0x4000038:
-            this.gfxProxy.writeBG3X16_0(data | 0);
+            this.gfxRenderer.writeBG3X16_0(data | 0);
             break;
         //400003Ah - BG3X_H - BG3 Reference Point X-Coordinate, upper 12 bit (W)
         case 0x400003A:
-            this.gfxProxy.writeBG3X16_1(data | 0);
+            this.gfxRenderer.writeBG3X16_1(data | 0);
             break;
         //400003Ch - BG3Y_L - BG3 Reference Point Y-Coordinate, lower 16 bit (W)
         case 0x400003C:
-            this.gfxProxy.writeBG3Y16_0(data | 0);
+            this.gfxRenderer.writeBG3Y16_0(data | 0);
             break;
         //400003Eh - BG3Y_H - BG3 Reference Point Y-Coordinate, upper 12 bit (W)
         case 0x400003E:
-            this.gfxProxy.writeBG3Y16_1(data | 0);
+            this.gfxRenderer.writeBG3Y16_1(data | 0);
             break;
         //4000040h - WIN0H - Window 0 Horizontal Dimensions (W)
         case 0x4000040:
-            this.gfxProxy.writeWIN0XCOORD16(data | 0);
+            this.gfxRenderer.writeWIN0XCOORD16(data | 0);
             break;
         //4000042h - WIN1H - Window 1 Horizontal Dimensions (W)
         case 0x4000042:
-            this.gfxProxy.writeWIN1XCOORD16(data | 0);
+            this.gfxRenderer.writeWIN1XCOORD16(data | 0);
             break;
         //4000044h - WIN0V - Window 0 Vertical Dimensions (W)
         case 0x4000044:
-            this.gfxProxy.writeWIN0YCOORD16(data | 0);
+            this.gfxRenderer.writeWIN0YCOORD16(data | 0);
             break;
         //4000046h - WIN1V - Window 1 Vertical Dimensions (W)
         case 0x4000046:
-            this.gfxProxy.writeWIN1YCOORD16(data | 0);
+            this.gfxRenderer.writeWIN1YCOORD16(data | 0);
             break;
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
         case 0x4000048:
-            this.gfxProxy.writeWININ16(data | 0);
+            this.gfxRenderer.writeWININ16(data | 0);
             break;
         //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
         case 0x400004A:
-            this.gfxProxy.writeWINOUT16(data | 0);
+            this.gfxRenderer.writeWINOUT16(data | 0);
             break;
         //400004Ch - MOSAIC - Mosaic Size (W)
         case 0x400004C:
-            this.gfxProxy.writeMOSAIC16(data | 0);
+            this.gfxRenderer.writeMOSAIC16(data | 0);
             break;
         //400004Eh - NOT USED - ZERO
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
         case 0x4000050:
-            this.gfxProxy.writeBLDCNT16(data | 0);
+            this.gfxRenderer.writeBLDCNT16(data | 0);
             break;
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
         case 0x4000052:
-            this.gfxProxy.writeBLDALPHA16(data | 0);
+            this.gfxRenderer.writeBLDALPHA16(data | 0);
             break;
         //4000054h - BLDY - Brightness (Fade-In/Out) Coefficient (W)
         case 0x4000054:
-            this.gfxProxy.writeBLDY8(data | 0);
+            this.gfxRenderer.writeBLDY8(data | 0);
             break;
         //4000055h through 400005Fh - NOT USED - ZERO/GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
@@ -1734,111 +1734,111 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
         //4000002h - Undocumented - Green Swap (R/W)
         case 0x4000000:
-            this.gfxProxy.writeDISPCNT32(data | 0);
+            this.gfxRenderer.writeDISPCNT32(data | 0);
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         //4000006h - VCOUNT - Vertical Counter (Read only)
         case 0x4000004:
-            this.gfx.writeDISPSTAT16(data | 0);
+            this.gfxState.writeDISPSTAT16(data | 0);
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
         case 0x4000008:
-            this.gfxProxy.writeBG0BG1CNT32(data | 0);
+            this.gfxRenderer.writeBG0BG1CNT32(data | 0);
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
         case 0x400000C:
-            this.gfxProxy.writeBG2BG3CNT32(data | 0);
+            this.gfxRenderer.writeBG2BG3CNT32(data | 0);
             break;
         //4000010h - BG0HOFS - BG0 X-Offset (W)
         //4000012h - BG0VOFS - BG0 Y-Offset (W)
         case 0x4000010:
-            this.gfxProxy.writeBG0OFS32(data | 0);
+            this.gfxRenderer.writeBG0OFS32(data | 0);
             break;
         //4000014h - BG1HOFS - BG1 X-Offset (W)
         //4000016h - BG1VOFS - BG1 Y-Offset (W)
         case 0x4000014:
-            this.gfxProxy.writeBG1OFS32(data | 0);
+            this.gfxRenderer.writeBG1OFS32(data | 0);
             break;
         //4000018h - BG2HOFS - BG2 X-Offset (W)
         //400001Ah - BG2VOFS - BG2 Y-Offset (W)
         case 0x4000018:
-            this.gfxProxy.writeBG2OFS32(data | 0);
+            this.gfxRenderer.writeBG2OFS32(data | 0);
             break;
         //400001Ch - BG3HOFS - BG3 X-Offset (W)
         //400001Eh - BG3VOFS - BG3 Y-Offset (W)
         case 0x400001C:
-            this.gfxProxy.writeBG3OFS32(data | 0);
+            this.gfxRenderer.writeBG3OFS32(data | 0);
             break;
         //4000020h - BG2PA - BG2 Rotation/Scaling Parameter A (alias dx) (W)
         //4000022h - BG2PB - BG2 Rotation/Scaling Parameter B (alias dmx) (W)
         case 0x4000020:
-            this.gfxProxy.writeBG2PAB32(data | 0);
+            this.gfxRenderer.writeBG2PAB32(data | 0);
             break;
         //4000024h - BG2PC - BG2 Rotation/Scaling Parameter C (alias dy) (W)
         //4000026h - BG2PD - BG2 Rotation/Scaling Parameter D (alias dmy) (W)
         case 0x4000024:
-            this.gfxProxy.writeBG2PCD32(data | 0);
+            this.gfxRenderer.writeBG2PCD32(data | 0);
             break;
         //4000028h - BG2X_L - BG2 Reference Point X-Coordinate, lower 16 bit (W)
         //400002Ah - BG2X_H - BG2 Reference Point X-Coordinate, upper 12 bit (W)
         case 0x4000028:
-            this.gfxProxy.writeBG2X32(data | 0);
+            this.gfxRenderer.writeBG2X32(data | 0);
             break;
         //400002Ch - BG2Y_L - BG2 Reference Point Y-Coordinate, lower 16 bit (W)
         //400002Eh - BG2Y_H - BG2 Reference Point Y-Coordinate, upper 12 bit (W)
         case 0x400002C:
-            this.gfxProxy.writeBG2Y32(data | 0);
+            this.gfxRenderer.writeBG2Y32(data | 0);
             break;
         //4000030h - BG3PA - BG3 Rotation/Scaling Parameter A (alias dx) (W)
         //4000032h - BG3PB - BG3 Rotation/Scaling Parameter B (alias dmx) (W)
         case 0x4000030:
-            this.gfxProxy.writeBG3PAB32(data | 0);
+            this.gfxRenderer.writeBG3PAB32(data | 0);
             break;
         //4000034h - BG3PC - BG3 Rotation/Scaling Parameter C (alias dy) (W)
         //4000036h - BG3PD - BG3 Rotation/Scaling Parameter D (alias dmy) (W)
         case 0x4000034:
-            this.gfxProxy.writeBG3PCD32(data | 0);
+            this.gfxRenderer.writeBG3PCD32(data | 0);
             break;
         //4000038h - BG3X_L - BG3 Reference Point X-Coordinate, lower 16 bit (W)
         //400003Ah - BG3X_H - BG3 Reference Point X-Coordinate, upper 12 bit (W)
         case 0x4000038:
-            this.gfxProxy.writeBG3X32(data | 0);
+            this.gfxRenderer.writeBG3X32(data | 0);
             break;
         //400003Ch - BG3Y_L - BG3 Reference Point Y-Coordinate, lower 16 bit (W)
         //400003Eh - BG3Y_H - BG3 Reference Point Y-Coordinate, upper 12 bit (W)
         case 0x400003C:
-            this.gfxProxy.writeBG3Y32(data | 0);
+            this.gfxRenderer.writeBG3Y32(data | 0);
             break;
         //4000040h - WIN0H - Window 0 Horizontal Dimensions (W)
         //4000042h - WIN1H - Window 1 Horizontal Dimensions (W)
         case 0x4000040:
-            this.gfxProxy.writeWINXCOORD32(data | 0);
+            this.gfxRenderer.writeWINXCOORD32(data | 0);
             break;
         //4000044h - WIN0V - Window 0 Vertical Dimensions (W)
         //4000046h - WIN1V - Window 1 Vertical Dimensions (W)
         case 0x4000044:
-            this.gfxProxy.writeWINYCOORD32(data | 0);
+            this.gfxRenderer.writeWINYCOORD32(data | 0);
             break;
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
         //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
         case 0x4000048:
-            this.gfxProxy.writeWINCONTROL32(data | 0);
+            this.gfxRenderer.writeWINCONTROL32(data | 0);
             break;
         //400004Ch - MOSAIC - Mosaic Size (W)
         //400004Eh - NOT USED - ZERO
         case 0x400004C:
-            this.gfxProxy.writeMOSAIC16(data | 0);
+            this.gfxRenderer.writeMOSAIC16(data | 0);
             break;
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
         case 0x4000050:
-            this.gfxProxy.writeBLDCNT32(data | 0);
+            this.gfxRenderer.writeBLDCNT32(data | 0);
             break;
         //4000054h - BLDY - Brightness (Fade-In/Out) Coefficient (W)
         case 0x4000054:
-            this.gfxProxy.writeBLDY8(data | 0);
+            this.gfxRenderer.writeBLDY8(data | 0);
             break;
         //4000055h through 400005Fh - NOT USED - ZERO/GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
@@ -2165,11 +2165,11 @@ if (typeof Math.imul == "function") {
         switch (address >> 24) {
             case 0x5:
                 this.wait.VRAMAccess();
-                this.gfxProxy.writePalette16(address & 0x3FE, Math.imul(data & 0xFF, 0x101) | 0);
+                this.gfxRenderer.writePalette16(address & 0x3FE, Math.imul(data & 0xFF, 0x101) | 0);
                 break;
             case 0x6:
                 this.wait.VRAMAccess();
-                this.gfxProxy.writeVRAM8(address | 0, data | 0);
+                this.gfxRenderer.writeVRAM8(address | 0, data | 0);
                 break;
             default:
                 this.wait.OAMAccess();
@@ -2183,11 +2183,11 @@ else {
         switch (address >> 24) {
             case 0x5:
                 this.wait.VRAMAccess();
-                this.gfxProxy.writePalette16(address & 0x3FE, (data & 0xFF) * 0x101);
+                this.gfxRenderer.writePalette16(address & 0x3FE, (data & 0xFF) * 0x101);
                 break;
             case 0x6:
                 this.wait.VRAMAccess();
-                this.gfxProxy.writeVRAM8(address, data);
+                this.gfxRenderer.writeVRAM8(address, data);
                 break;
             default:
                 this.wait.OAMAccess();
@@ -2199,42 +2199,42 @@ GameBoyAdvanceMemory.prototype.writePalette16 = function (address, data) {
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess();
-    this.gfxProxy.writePalette16(address & 0x3FE, data & 0xFFFF);
+    this.gfxRenderer.writePalette16(address & 0x3FE, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.writeVRAM16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess();
-    this.gfxProxy.writeVRAM16(address | 0, data | 0);
+    this.gfxRenderer.writeVRAM16(address | 0, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeOBJ16 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.OAMAccess();
-    this.gfxProxy.writeOAM16(address & 0x3FE, data & 0xFFFF);
+    this.gfxRenderer.writeOAM16(address & 0x3FE, data & 0xFFFF);
 }
 GameBoyAdvanceMemory.prototype.writePalette32 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess32();
-    this.gfxProxy.writePalette32(address & 0x3FC, data | 0);
+    this.gfxRenderer.writePalette32(address & 0x3FC, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeVRAM32 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.VRAMAccess32();
-    this.gfxProxy.writeVRAM32(address | 0, data | 0);
+    this.gfxRenderer.writeVRAM32(address | 0, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeOBJ32 = function (address, data) {
     address = address | 0;
     data = data | 0;
     this.IOCore.updateGraphicsClocking();
     this.wait.OAMAccess();
-    this.gfxProxy.writeOAM32(address & 0x3FC, data | 0);
+    this.gfxRenderer.writeOAM32(address & 0x3FC, data | 0);
 }
 GameBoyAdvanceMemory.prototype.writeROM8 = function (address, data) {
     address = address | 0;
@@ -2685,92 +2685,92 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
     switch (address | 0) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
         case 0x4000000:
-            data = this.gfxProxy.readDISPCNT8_0() | 0;
+            data = this.gfxRenderer.readDISPCNT8_0() | 0;
             break;
         //4000001h - DISPCNT - LCD Control (Read/Write)
         case 0x4000001:
-            data = this.gfxProxy.readDISPCNT8_1() | 0;
+            data = this.gfxRenderer.readDISPCNT8_1() | 0;
             break;
         //4000002h - Undocumented - Green Swap (R/W)
         case 0x4000002:
-            data = this.gfxProxy.readDISPCNT8_2() | 0;
+            data = this.gfxRenderer.readDISPCNT8_2() | 0;
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000004:
-            data = this.gfx.readDISPSTAT8_0() | 0;
+            data = this.gfxState.readDISPSTAT8_0() | 0;
             break;
         //4000005h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000005:
-            data = this.gfx.readDISPSTAT8_1() | 0;
+            data = this.gfxState.readDISPSTAT8_1() | 0;
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         case 0x4000006:
-            data = this.gfx.readDISPSTAT8_2() | 0;
+            data = this.gfxState.readDISPSTAT8_2() | 0;
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         case 0x4000008:
-            data = this.gfxProxy.readBG0CNT8_0() | 0;
+            data = this.gfxRenderer.readBG0CNT8_0() | 0;
             break;
         //4000009h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         case 0x4000009:
-            data = this.gfxProxy.readBG0CNT8_1() | 0;
+            data = this.gfxRenderer.readBG0CNT8_1() | 0;
             break;
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
         case 0x400000A:
-            data = this.gfxProxy.readBG1CNT8_0() | 0;
+            data = this.gfxRenderer.readBG1CNT8_0() | 0;
             break;
         //400000Bh - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
         case 0x400000B:
-            data = this.gfxProxy.readBG1CNT8_1() | 0;
+            data = this.gfxRenderer.readBG1CNT8_1() | 0;
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         case 0x400000C:
-            data = this.gfxProxy.readBG2CNT8_0() | 0;
+            data = this.gfxRenderer.readBG2CNT8_0() | 0;
             break;
         //400000Dh - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         case 0x400000D:
-            data = this.gfxProxy.readBG2CNT8_1() | 0;
+            data = this.gfxRenderer.readBG2CNT8_1() | 0;
             break;
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
         case 0x400000E:
-            data = this.gfxProxy.readBG3CNT8_0() | 0;
+            data = this.gfxRenderer.readBG3CNT8_0() | 0;
             break;
         //400000Fh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
         case 0x400000F:
-            data = this.gfxProxy.readBG3CNT8_1() | 0;
+            data = this.gfxRenderer.readBG3CNT8_1() | 0;
             break;
         //4000010h through 4000047h - WRITE ONLY
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
         case 0x4000048:
-            data = this.gfxProxy.readWIN0IN8() | 0;
+            data = this.gfxRenderer.readWIN0IN8() | 0;
             break;
         //4000049h - WININ - Control of Inside of Window(s) (R/W)
         case 0x4000049:
-            data = this.gfxProxy.readWIN1IN8() | 0;
+            data = this.gfxRenderer.readWIN1IN8() | 0;
             break;
         //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
         case 0x400004A:
-            data = this.gfxProxy.readWINOUT8() | 0;
+            data = this.gfxRenderer.readWINOUT8() | 0;
             break;
         //400004AB- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
         case 0x400004B:
-            data = this.gfxProxy.readWINOBJIN8() | 0;
+            data = this.gfxRenderer.readWINOBJIN8() | 0;
             break;
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
         case 0x4000050:
-            data = this.gfxProxy.readBLDCNT8_0() | 0;
+            data = this.gfxRenderer.readBLDCNT8_0() | 0;
             break;
         //4000051h - BLDCNT - Color Special Effects Selection (R/W)
         case 0x4000051:
-            data = this.gfxProxy.readBLDCNT8_1() | 0;
+            data = this.gfxRenderer.readBLDCNT8_1() | 0;
             break;
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
         case 0x4000052:
-            data = this.gfxProxy.readBLDALPHA8_0() | 0;
+            data = this.gfxRenderer.readBLDALPHA8_0() | 0;
             break;
         //4000053h - BLDALPHA - Alpha Blending Coefficients (R/W)
         case 0x4000053:
-            data = this.gfxProxy.readBLDALPHA8_1() | 0;
+            data = this.gfxRenderer.readBLDALPHA8_1() | 0;
             break;
         //4000054h through 400005Fh - NOT USED - GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
@@ -3307,52 +3307,52 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
     switch (address & -2) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
         case 0x4000000:
-            data = this.gfxProxy.readDISPCNT16() | 0;
+            data = this.gfxRenderer.readDISPCNT16() | 0;
             break;
         //4000002h - Undocumented - Green Swap (R/W)
         case 0x4000002:
-            data = this.gfxProxy.readDISPCNT8_2() | 0;
+            data = this.gfxRenderer.readDISPCNT8_2() | 0;
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         case 0x4000004:
-            data = this.gfx.readDISPSTAT16_0() | 0;
+            data = this.gfxState.readDISPSTAT16_0() | 0;
             break;
         //4000006h - VCOUNT - Vertical Counter (Read only)
         case 0x4000006:
-            data = this.gfx.readDISPSTAT8_2() | 0;
+            data = this.gfxState.readDISPSTAT8_2() | 0;
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         case 0x4000008:
-            data = this.gfxProxy.readBG0CNT16() | 0;
+            data = this.gfxRenderer.readBG0CNT16() | 0;
             break;
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
         case 0x400000A:
-            data = this.gfxProxy.readBG1CNT16() | 0;
+            data = this.gfxRenderer.readBG1CNT16() | 0;
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         case 0x400000C:
-            data = this.gfxProxy.readBG2CNT16() | 0;
+            data = this.gfxRenderer.readBG2CNT16() | 0;
             break;
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
         case 0x400000E:
-            data = this.gfxProxy.readBG3CNT16() | 0;
+            data = this.gfxRenderer.readBG3CNT16() | 0;
             break;
         //4000010h through 4000047h - WRITE ONLY
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
         case 0x4000048:
-            data = this.gfxProxy.readWININ16() | 0;
+            data = this.gfxRenderer.readWININ16() | 0;
             break;
         //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
         case 0x400004A:
-            data = this.gfxProxy.readWINOUT16() | 0;
+            data = this.gfxRenderer.readWINOUT16() | 0;
             break;
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
         case 0x4000050:
-            data = this.gfxProxy.readBLDCNT16() | 0;
+            data = this.gfxRenderer.readBLDCNT16() | 0;
             break;
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
         case 0x4000052:
-            data = this.gfxProxy.readBLDALPHA16() | 0;
+            data = this.gfxRenderer.readBLDALPHA16() | 0;
             break;
         //4000054h through 400005Fh - NOT USED - GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
@@ -3672,34 +3672,34 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
         //4000000h - DISPCNT - LCD Control (Read/Write)
         //4000002h - Undocumented - Green Swap (R/W)
         case 0x4000000:
-            data = this.gfxProxy.readDISPCNT32() | 0;
+            data = this.gfxRenderer.readDISPCNT32() | 0;
             break;
         //4000004h - DISPSTAT - General LCD Status (Read/Write)
         //4000006h - VCOUNT - Vertical Counter (Read only)
         case 0x4000004:
-            data = this.gfx.readDISPSTAT32() | 0;
+            data = this.gfxState.readDISPSTAT32() | 0;
             break;
         //4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)
         //400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)
         case 0x4000008:
-            data = this.gfxProxy.readBG0BG1CNT32() | 0;
+            data = this.gfxRenderer.readBG0BG1CNT32() | 0;
             break;
         //400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)
         //400000Eh - BG3CNT - BG3 Control (R/W) (BG Modes 0,2 only)
         case 0x400000C:
-            data = this.gfxProxy.readBG2BG3CNT32() | 0;
+            data = this.gfxRenderer.readBG2BG3CNT32() | 0;
             break;
         //4000010h through 4000047h - WRITE ONLY
         //4000048h - WININ - Control of Inside of Window(s) (R/W)
         //400004Ah- WINOUT - Control of Outside of Windows & Inside of OBJ Window (R/W)
         case 0x4000048:
-            data = this.gfxProxy.readWINCONTROL32() | 0;
+            data = this.gfxRenderer.readWINCONTROL32() | 0;
             break;
         //400004Ch - MOSAIC - Mosaic Size (W)
         //4000050h - BLDCNT - Color Special Effects Selection (R/W)
         //4000052h - BLDALPHA - Alpha Blending Coefficients (R/W)
         case 0x4000050:
-            data = this.gfxProxy.readBLDCNT32() | 0;
+            data = this.gfxRenderer.readBLDCNT32() | 0;
             break;
         //4000054h through 400005Fh - NOT USED - GLITCHED
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
@@ -3949,15 +3949,15 @@ GameBoyAdvanceMemory.prototype.readVRAM8Preliminary = function (address) {
     switch (address >> 24) {
         case 0x5:
             this.wait.VRAMAccess();
-            data = this.gfxProxy.readPalette8(address | 0) | 0;
+            data = this.gfxRenderer.readPalette8(address | 0) | 0;
             break;
         case 0x6:
             this.wait.VRAMAccess();
-            data = this.gfxProxy.readVRAM8(address | 0) | 0;
+            data = this.gfxRenderer.readVRAM8(address | 0) | 0;
             break;
         default:
             this.wait.OAMAccess();
-            data = this.gfxProxy.readOAM(address | 0) | 0;
+            data = this.gfxRenderer.readOAM(address | 0) | 0;
     }
     return data | 0;
 }
@@ -3968,15 +3968,15 @@ GameBoyAdvanceMemory.prototype.readVRAM16Preliminary = function (address) {
     switch (address >> 24) {
         case 0x5:
             this.wait.VRAMAccess();
-            data = this.gfxProxy.readPalette16(address | 0) | 0;
+            data = this.gfxRenderer.readPalette16(address | 0) | 0;
             break;
         case 0x6:
             this.wait.VRAMAccess();
-            data = this.gfxProxy.readVRAM16(address | 0) | 0;
+            data = this.gfxRenderer.readVRAM16(address | 0) | 0;
             break;
         default:
             this.wait.OAMAccess();
-            data = this.gfxProxy.readOAM16(address | 0) | 0;
+            data = this.gfxRenderer.readOAM16(address | 0) | 0;
     }
     return data | 0;
 }
@@ -3987,15 +3987,15 @@ GameBoyAdvanceMemory.prototype.readVRAM16CPUPreliminary = function (address) {
     switch (address >> 24) {
         case 0x5:
             this.wait.VRAMAccess16CPU();
-            data = this.gfxProxy.readPalette16(address | 0) | 0;
+            data = this.gfxRenderer.readPalette16(address | 0) | 0;
             break;
         case 0x6:
             this.wait.VRAMAccess16CPU();
-            data = this.gfxProxy.readVRAM16(address | 0) | 0;
+            data = this.gfxRenderer.readVRAM16(address | 0) | 0;
             break;
         default:
             this.wait.OAMAccessCPU();
-            data = this.gfxProxy.readOAM16(address | 0) | 0;
+            data = this.gfxRenderer.readOAM16(address | 0) | 0;
     }
     return data | 0;
 }
@@ -4006,15 +4006,15 @@ GameBoyAdvanceMemory.prototype.readVRAM32Preliminary = function (address) {
     switch (address >> 24) {
         case 0x5:
             this.wait.VRAMAccess32();
-            data = this.gfxProxy.readPalette32(address | 0) | 0;
+            data = this.gfxRenderer.readPalette32(address | 0) | 0;
             break;
         case 0x6:
             this.wait.VRAMAccess32();
-            data = this.gfxProxy.readVRAM32(address | 0) | 0;
+            data = this.gfxRenderer.readVRAM32(address | 0) | 0;
             break;
         default:
             this.wait.OAMAccess();
-            data = this.gfxProxy.readOAM32(address | 0) | 0;
+            data = this.gfxRenderer.readOAM32(address | 0) | 0;
     }
     return data | 0;
 }
@@ -4025,15 +4025,15 @@ GameBoyAdvanceMemory.prototype.readVRAM32CPUPreliminary = function (address) {
     switch (address >> 24) {
         case 0x5:
             this.wait.VRAMAccess32CPU();
-            data = this.gfxProxy.readPalette32(address | 0) | 0;
+            data = this.gfxRenderer.readPalette32(address | 0) | 0;
             break;
         case 0x6:
             this.wait.VRAMAccess32CPU();
-            data = this.gfxProxy.readVRAM32(address | 0) | 0;
+            data = this.gfxRenderer.readVRAM32(address | 0) | 0;
             break;
         default:
             this.wait.OAMAccessCPU();
-            data = this.gfxProxy.readOAM32(address | 0) | 0;
+            data = this.gfxRenderer.readOAM32(address | 0) | 0;
     }
     return data | 0;
 }

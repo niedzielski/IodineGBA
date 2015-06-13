@@ -23,7 +23,7 @@ GameBoyAdvanceIRQ.prototype.initialize = function () {
     this.interruptsEnabled = 0;
     this.interruptsRequested = 0;
     this.IME = 0;
-    this.gfx = this.IOCore.gfx;
+    this.gfxState = this.IOCore.gfxState;
     this.timer = this.IOCore.timer;
     this.dmaChannel0 = this.IOCore.dmaChannel0;
     this.dmaChannel1 = this.IOCore.dmaChannel1;
@@ -149,13 +149,13 @@ GameBoyAdvanceIRQ.prototype.readIRQ32 = function () {
 GameBoyAdvanceIRQ.prototype.nextEventTime = function () {
     var clocks = 0x7FFFFFFF;
     if ((this.interruptsEnabled & 0x1) != 0) {
-        clocks = this.gfx.nextVBlankIRQEventTime() | 0;
+        clocks = this.gfxState.nextVBlankIRQEventTime() | 0;
     }
     if ((this.interruptsEnabled & 0x2) != 0) {
-        clocks = Math.min(clocks | 0, this.gfx.nextHBlankIRQEventTime() | 0) | 0;
+        clocks = Math.min(clocks | 0, this.gfxState.nextHBlankIRQEventTime() | 0) | 0;
     }
     if ((this.interruptsEnabled & 0x4) != 0) {
-        clocks = Math.min(clocks | 0, this.gfx.nextVCounterIRQEventTime() | 0) | 0;
+        clocks = Math.min(clocks | 0, this.gfxState.nextVCounterIRQEventTime() | 0) | 0;
     }
     if ((this.interruptsEnabled & 0x8) != 0) {
         clocks = Math.min(clocks | 0, this.timer.nextTimer0IRQEventTime() | 0) | 0;

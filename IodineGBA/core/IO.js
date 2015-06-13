@@ -38,8 +38,8 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     this.dmaChannel1 = new GameBoyAdvanceDMA1(this);
     this.dmaChannel2 = new GameBoyAdvanceDMA2(this);
     this.dmaChannel3 = new GameBoyAdvanceDMA3(this);
-    this.gfx = new GameBoyAdvanceGraphics(this);
-    this.gfxProxy = new GameBoyAdvanceRendererProxy(this);
+    this.gfxState = new GameBoyAdvanceGraphics(this);
+    this.gfxRenderer = new GameBoyAdvanceRendererProxy(this);
     this.sound = new GameBoyAdvanceSound(this);
     this.timer = new GameBoyAdvanceTimer(this);
     this.irq = new GameBoyAdvanceIRQ(this);
@@ -56,8 +56,8 @@ function GameBoyAdvanceIO(settings, coreExposed, BIOS, ROM) {
     this.dmaChannel1.initialize();
     this.dmaChannel2.initialize();
     this.dmaChannel3.initialize();
-    this.gfx.initialize();
-    this.gfxProxy.initialize();
+    this.gfxState.initialize();
+    this.gfxRenderer.initialize();
     this.sound.initialize();
     this.timer.initialize();
     this.irq.initialize();
@@ -242,7 +242,7 @@ GameBoyAdvanceIO.prototype.updateCoreClocking = function () {
     //Decrement the clocks per iteration counter:
     this.cyclesToIterate = ((this.cyclesToIterate | 0) - (clocks | 0)) | 0;
     //Clock all components:
-    this.gfx.addClocks(((clocks | 0) - (this.graphicsClocks | 0)) | 0);
+    this.gfxState.addClocks(((clocks | 0) - (this.graphicsClocks | 0)) | 0);
     this.timer.addClocks(((clocks | 0) - (this.timerClocks | 0)) | 0);
     this.serial.addClocks(((clocks | 0) - (this.serialClocks | 0)) | 0);
     this.accumulatedClocks = 0;
@@ -252,7 +252,7 @@ GameBoyAdvanceIO.prototype.updateCoreClocking = function () {
 }
 GameBoyAdvanceIO.prototype.updateGraphicsClocking = function () {
     //Clock gfx component:
-    this.gfx.addClocks(((this.accumulatedClocks | 0) - (this.graphicsClocks | 0)) | 0);
+    this.gfxState.addClocks(((this.accumulatedClocks | 0) - (this.graphicsClocks | 0)) | 0);
     this.graphicsClocks = this.accumulatedClocks | 0;
 }
 GameBoyAdvanceIO.prototype.updateTimerClocking = function () {

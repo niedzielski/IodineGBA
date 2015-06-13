@@ -43,7 +43,7 @@ GameBoyAdvanceDMA3.prototype.initialize = function () {
 	this.displaySyncEnableDelay = 0;
     this.DMACore = this.IOCore.dma;
     this.memory = this.IOCore.memory;
-    this.gfx = this.IOCore.gfx;
+    this.gfxState = this.IOCore.gfxState;
     this.irq = this.IOCore.irq;
 }
 GameBoyAdvanceDMA3.prototype.writeDMASource8_0 = function (data) {
@@ -215,10 +215,10 @@ GameBoyAdvanceDMA3.prototype.readDMAControl16 = function () {
 GameBoyAdvanceDMA3.prototype.getMatchStatus = function () {
     return this.enabled & this.pending;
 }
-GameBoyAdvanceDMA3.prototype.gfxDisplaySyncRequest = function () {
+GameBoyAdvanceDMA3.prototype.gfxStateDisplaySyncRequest = function () {
     this.requestDMA(0x20 ^ this.displaySyncEnableDelay);
 }
-GameBoyAdvanceDMA3.prototype.gfxDisplaySyncEnableCheck = function () {
+GameBoyAdvanceDMA3.prototype.gfxStateDisplaySyncEnableCheck = function () {
 	//Reset the display sync & reassert DMA enable line:
     if ((this.enabled | 0) == 0x20) {
         if ((this.displaySyncEnableDelay | 0) == 0x20) {
@@ -398,15 +398,15 @@ GameBoyAdvanceDMA3.prototype.nextEventTime = function () {
     switch (this.enabled | 0) {
             //V_BLANK
         case 0x2:
-            clocks = this.gfx.nextVBlankEventTime() | 0;
+            clocks = this.gfxState.nextVBlankEventTime() | 0;
             break;
             //H_BLANK:
         case 0x4:
-            clocks = this.gfx.nextHBlankDMAEventTime() | 0;
+            clocks = this.gfxState.nextHBlankDMAEventTime() | 0;
             break;
             //DISPLAY_SYNC:
         case 0x20:
-            clocks = this.gfx.nextDisplaySyncEventTime(this.displaySyncEnableDelay | 0) | 0;
+            clocks = this.gfxState.nextDisplaySyncEventTime(this.displaySyncEnableDelay | 0) | 0;
     }
     return clocks | 0;
 }
