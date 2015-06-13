@@ -23,7 +23,7 @@ GameBoyAdvanceRendererProxy.prototype.initialize = function () {
     this.IOData8 = getUint8Array(20);
     this.IOData16 = getUint16View(this.IOData8);
     this.IOData32 = getInt32View(this.IOData8);
-    this.gfx = this.IOCore.gfx;
+    this.gfxState = this.IOCore.gfxState;
     this.renderer = new GameBoyAdvanceGraphicsRenderer(this.IOCore.coreExposed, !this.IOCore.BIOSFound || this.IOCore.settings.SKIPBoot);
 }
 GameBoyAdvanceRendererProxy.prototype.incrementScanLineQueue = function () {
@@ -38,7 +38,7 @@ GameBoyAdvanceRendererProxy.prototype.writeDISPCNT8_0 = function (data) {
     this.IOCore.updateGraphicsClocking();
     this.IOData8[0] = data | 0;
     this.renderer.writeDISPCNT8_0(data | 0);
-    this.gfx.isRenderingCheckPreprocess();
+    this.gfxState.isRenderingCheckPreprocess();
 }
 GameBoyAdvanceRendererProxy.prototype.readDISPCNT8_0 = function () {
     return this.IOData8[0] | 0;
@@ -70,7 +70,7 @@ if (__LITTLE_ENDIAN__) {
         this.IOCore.updateGraphicsClocking();
         this.IOData16[0] = data | 0;
         this.renderer.writeDISPCNT16(data | 0);
-        this.gfx.isRenderingCheckPreprocess();
+        this.gfxState.isRenderingCheckPreprocess();
     }
     GameBoyAdvanceRendererProxy.prototype.readDISPCNT16 = function () {
         return this.IOData16[0] | 0;
@@ -81,7 +81,7 @@ if (__LITTLE_ENDIAN__) {
         this.IOCore.updateGraphicsClocking();
         this.IOData32[0] = data | 0;
         this.renderer.writeDISPCNT32(data | 0);
-        this.gfx.isRenderingCheckPreprocess();
+        this.gfxState.isRenderingCheckPreprocess();
     }
     GameBoyAdvanceRendererProxy.prototype.readDISPCNT32 = function () {
         return this.IOData32[0] | 0;
@@ -95,7 +95,7 @@ else {
         this.IOData8[0] = data & 0xF7;
         this.IOData8[1] = data >> 8;
         this.renderer.writeDISPCNT16(data | 0);
-        this.gfx.isRenderingCheckPreprocess();
+        this.gfxState.isRenderingCheckPreprocess();
     }
     GameBoyAdvanceRendererProxy.prototype.readDISPCNT16 = function () {
         return this.IOData8[0] | (this.IOData8[1] << 8);
@@ -108,7 +108,7 @@ else {
         this.IOData8[1] = (data >> 8) & 0xFF;
         this.IOData8[2] = data >> 16;
         this.renderer.writeDISPCNT32(data | 0);
-        this.gfx.isRenderingCheckPreprocess();
+        this.gfxState.isRenderingCheckPreprocess();
     }
     GameBoyAdvanceRendererProxy.prototype.readDISPCNT32 = function () {
         return this.IOData8[0] | (this.IOData8[1] << 8) | (this.IOData8[2] << 16);
