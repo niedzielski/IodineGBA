@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2014 Grant Galitz
+ * Copyright (C) 2012-2015 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -223,9 +223,9 @@ GameBoyAdvanceSerial.prototype.writeSIOCNT0 = function (data) {
             //32-Bit:
             case 1:
                 this.SIOShiftClockExternal = data & 0x1;
-                this.SIOShiftClockDivider = ((data & 0x2) == 0x2) ? 0x8 : 0x40;
+                this.SIOShiftClockDivider = ((data & 0x2) != 0) ? 0x8 : 0x40;
                 this.SIOCNT0_DATA = data & 0xB;
-                if ((data & 0x80) == 0x80) {
+                if ((data & 0x80) != 0) {
                     if (!this.SIOTransferStarted) {
                         this.SIOTransferStarted = true;
                         this.serialBitsShifted = 0;
@@ -241,8 +241,8 @@ GameBoyAdvanceSerial.prototype.writeSIOCNT0 = function (data) {
                 this.SIOBaudRate = data & 0x3;
                 this.SIOShiftClockDivider = this.SIOMultiplayerBaudRate[this.SIOBaudRate | 0] | 0;
                 this.SIOMULT_PLAYER_NUMBER = (data >> 4) & 0x3;
-                this.SIOCOMMERROR = ((data & 0x40) == 0x40);
-                if ((data & 0x80) == 0x80) {
+                this.SIOCOMMERROR = ((data & 0x40) != 0);
+                if ((data & 0x80) != 0) {
                     if (!this.SIOTransferStarted) {
                         this.SIOTransferStarted = true;
                         if ((this.SIOMULT_PLAYER_NUMBER | 0) == 0) {
@@ -264,7 +264,7 @@ GameBoyAdvanceSerial.prototype.writeSIOCNT0 = function (data) {
                 this.SIOBaudRate = data & 0x3;
                 this.SIOShiftClockDivider = this.SIOMultiplayerBaudRate[this.SIOBaudRate | 0] | 0;
                 this.SIOCNT_UART_MISC = (data & 0xCF) >> 2;
-                this.SIOCNT_UART_CTS = ((data & 0x4) == 0x4);
+                this.SIOCNT_UART_CTS = ((data & 0x4) != 0);
         }
     }
 }
@@ -289,10 +289,10 @@ GameBoyAdvanceSerial.prototype.readSIOCNT0 = function () {
 GameBoyAdvanceSerial.prototype.writeSIOCNT1 = function (data) {
     this.SIOCNT_IRQ = data & 0x40;
     this.SIOCNT_MODE = (data >> 4) & 0x3;
-    this.SIOCNT_UART_RECV_ENABLE = ((data & 0x8) == 0x8);
-    this.SIOCNT_UART_SEND_ENABLE = ((data & 0x4) == 0x4);
-    this.SIOCNT_UART_PARITY_ENABLE = ((data & 0x2) == 0x2);
-    this.SIOCNT_UART_FIFO_ENABLE = ((data & 0x1) == 0x1);
+    this.SIOCNT_UART_RECV_ENABLE = ((data & 0x8) != 0);
+    this.SIOCNT_UART_SEND_ENABLE = ((data & 0x4) != 0);
+    this.SIOCNT_UART_PARITY_ENABLE = ((data & 0x2) != 0);
+    this.SIOCNT_UART_FIFO_ENABLE = ((data & 0x1) != 0);
 }
 GameBoyAdvanceSerial.prototype.readSIOCNT1 = function () {
     return (0x80 | this.SIOCNT_IRQ | (this.SIOCNT_MODE << 4) | ((this.SIOCNT_UART_RECV_ENABLE) ? 0x8 : 0) |
@@ -321,7 +321,7 @@ GameBoyAdvanceSerial.prototype.writeRCNT0 = function (data) {
         var oldDataBits = this.RCNTDataBits | 0;
         this.RCNTDataBits = data & 0xF;    //Device manually controls SI/SO/SC/SD here.
         this.RCNTDataBitFlow = data >> 4;
-        if (this.RCNTIRQ && ((oldDataBits ^ this.RCNTDataBits) & oldDataBits & 0x4) == 0x4) {
+        if (this.RCNTIRQ && ((oldDataBits ^ this.RCNTDataBits) & oldDataBits & 0x4) != 0) {
             //SI fell low, trigger IRQ:
             //this.IOCore.irq.requestIRQ(0x80);
         }
@@ -332,7 +332,7 @@ GameBoyAdvanceSerial.prototype.readRCNT0 = function () {
 }
 GameBoyAdvanceSerial.prototype.writeRCNT1 = function (data) {
     this.RCNTMode = data >> 6;
-    this.RCNTIRQ = ((data & 0x1) == 0x1);
+    this.RCNTIRQ = ((data & 0x1) != 0);
     if ((this.RCNTMode | 0) != 0x2) {
         //Force SI/SO/SC/SD to low as we're never "hooked" up:
         this.RCNTDataBits = 0;

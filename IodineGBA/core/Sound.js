@@ -766,16 +766,16 @@ GameBoyAdvanceSound.prototype.writeSOUNDCNT_H1 = function (data) {
     //NR61:
     data = data | 0;
     this.audioJIT();
-    this.AGBDirectSoundARightCanPlay = ((data & 0x1) == 0x1);
-    this.AGBDirectSoundALeftCanPlay = ((data & 0x2) == 0x2);
+    this.AGBDirectSoundARightCanPlay = ((data & 0x1) != 0);
+    this.AGBDirectSoundALeftCanPlay = ((data & 0x2) != 0);
     this.AGBDirectSoundATimer = (data & 0x4) >> 2;
-    if ((data & 0x08) == 0x08) {
+    if ((data & 0x08) != 0) {
         this.AGBDirectSoundAFIFOClear();
     }
-    this.AGBDirectSoundBRightCanPlay = ((data & 0x10) == 0x10);
-    this.AGBDirectSoundBLeftCanPlay = ((data & 0x20) == 0x20);
+    this.AGBDirectSoundBRightCanPlay = ((data & 0x10) != 0);
+    this.AGBDirectSoundBLeftCanPlay = ((data & 0x20) != 0);
     this.AGBDirectSoundBTimer = (data & 0x40) >> 6;
-    if ((data & 0x80) == 0x80) {
+    if ((data & 0x80) != 0) {
         this.AGBDirectSoundBFIFOClear();
     }
     this.nr61 = data | 0;

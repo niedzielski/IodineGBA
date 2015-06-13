@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2015 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -199,7 +199,7 @@ GameBoyAdvanceChannel4Synth.prototype.writeSOUND4CNT_L0 = function (data) {
 GameBoyAdvanceChannel4Synth.prototype.writeSOUND4CNT_L1 = function (data) {
     data = data | 0;
     //NR42:
-    this.envelopeType = ((data & 0x08) == 0x08);
+    this.envelopeType = ((data & 0x08) != 0);
     this.nr42 = data | 0;
     this.volumeEnableCheck();
 }
@@ -237,7 +237,7 @@ GameBoyAdvanceChannel4Synth.prototype.writeSOUND4CNT_H1 = function (data) {
         if ((this.totalLength | 0) == 0) {
             this.totalLength = 0x40;
         }
-        if ((data & 0x40) == 0x40) {
+        if ((data & 0x40) != 0) {
             this.sound.setNR52(0x8);
         }
     }

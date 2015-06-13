@@ -406,11 +406,11 @@ GameBoyAdvanceIO.prototype.deflagIterationEnd = function () {
 }
 GameBoyAdvanceIO.prototype.isStopped = function () {
     //Sound system uses this to emulate a unpowered audio output:
-    return ((this.systemStatus & 0x40) == 0x40);
+    return ((this.systemStatus & 0x40) != 0);
 }
 GameBoyAdvanceIO.prototype.inDMA = function () {
     //Save system uses this to detect dma:
-    return ((this.systemStatus & 0x10) == 0x10);
+    return ((this.systemStatus & 0x10) != 0);
 }
 GameBoyAdvanceIO.prototype.getCurrentFetchValue = function () {
     //Last valid value output for bad reads:

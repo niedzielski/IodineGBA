@@ -1016,7 +1016,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeWININ16 = function (data) {
 GameBoyAdvanceGraphicsRenderer.prototype.writeWINOUT8 = function (data) {
     data = data | 0;
     this.graphicsJIT();
-    this.WINOutside = data & 0x3F;
+    this.WINOutside = data | 0;
     this.compositorPreprocess();
 }
 GameBoyAdvanceGraphicsRenderer.prototype.writeWINOBJIN8 = function (data) {
@@ -1027,7 +1027,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeWINOBJIN8 = function (data) {
 GameBoyAdvanceGraphicsRenderer.prototype.writeWINOUT16 = function (data) {
     data = data | 0;
     this.graphicsJIT();
-    this.WINOutside = data & 0x3F;
+    this.WINOutside = data | 0;
     this.compositorPreprocess();
     this.objWindowRenderer.writeWINOBJIN8(data >> 8);
 }
@@ -1038,7 +1038,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeWINCONTROL32 = function (data) {
     this.window0Renderer.writeWININ8(data & 0xFF);
     //Window 1:
     this.window1Renderer.writeWININ8((data >> 8) & 0xFF);
-    this.WINOutside = (data >> 16) & 0x3F;
+    this.WINOutside = data >> 16;
     this.compositorPreprocess();
     this.objWindowRenderer.writeWINOBJIN8(data >>> 24);
 }

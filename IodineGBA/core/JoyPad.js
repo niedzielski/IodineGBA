@@ -97,7 +97,7 @@ GameBoyAdvanceJoyPad.prototype.keyRelease = function (keyReleased) {
     this.checkForMatch();
 }
 GameBoyAdvanceJoyPad.prototype.checkForMatch = function () {
-    if ((this.keyInterrupt & 0x8000) == 0x8000) {
+    if ((this.keyInterrupt & 0x8000) != 0) {
         if (((~this.keyInput) & this.keyInterrupt & 0x3FF) == (this.keyInterrupt & 0x3FF)) {
             this.IOCore.deflagStop();
             this.checkForIRQ();
@@ -109,7 +109,7 @@ GameBoyAdvanceJoyPad.prototype.checkForMatch = function () {
     }
 }
 GameBoyAdvanceJoyPad.prototype.checkForIRQ = function () {
-    if ((this.keyInterrupt & 0x4000) == 0x4000) {
+    if ((this.keyInterrupt & 0x4000) != 0) {
         this.IOCore.irq.requestIRQ(0x1000);
     }
 }

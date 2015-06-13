@@ -416,8 +416,8 @@ GameBoyAdvanceTimer.prototype.writeTM2CNT8_2 = function (data) {
     else {
         this.timer2Enabled = false;
     }
-    this.timer2IRQ = ((data & 0x40) == 0x40);
-    this.timer2CountUp = ((data & 0x4) == 0x4);
+    this.timer2IRQ = ((data & 0x40) != 0);
+    this.timer2CountUp = ((data & 0x4) != 0);
     this.timer2PrescalarShifted = this.prescalarLookup[data & 0x03] | 0;
     this.timer2Prescalar = 1 << (this.timer2PrescalarShifted | 0);
     this.preprocessTimer2();

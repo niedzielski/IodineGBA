@@ -2,7 +2,7 @@
 /*
  * This file is part of IodineGBA
  *
- * Copyright (C) 2012-2013 Grant Galitz
+ * Copyright (C) 2012-2015 Grant Galitz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -237,7 +237,7 @@ GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_L = function (data) {
     }
     this.lastTimeSweep = (data & 0x70) >> 4;
     this.frequencySweepDivider = data & 0x07;
-    this.decreaseSweep = ((data & 0x08) == 0x08);
+    this.decreaseSweep = ((data & 0x08) != 0);
     this.nr10 = data | 0;
     this.enableCheck();
 }
@@ -260,7 +260,7 @@ GameBoyAdvanceChannel1Synth.prototype.readSOUND1CNT_H1 = function () {
 GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_H1 = function (data) {
     data = data | 0;
     //NR12:
-    this.envelopeType = ((data & 0x08) == 0x08);
+    this.envelopeType = ((data & 0x08) != 0);
     this.nr12 = data | 0;
     this.volumeEnableCheck();
 }
@@ -277,7 +277,7 @@ GameBoyAdvanceChannel1Synth.prototype.readSOUND1CNT_X = function () {
 GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_X1 = function (data) {
     data = data | 0;
     //NR14:
-    this.consecutive = ((data & 0x40) == 0x0);
+    this.consecutive = ((data & 0x40) != 0);
     this.frequency = ((data & 0x7) << 8) | (this.frequency & 0xFF);
     this.FrequencyTracker = (0x800 - (this.frequency | 0)) << 4;
     if (data > 0x7F) {
@@ -296,7 +296,7 @@ GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_X1 = function (data) {
         else {
             this.sound.unsetNR52(0xFE);
         }
-        if ((data & 0x40) == 0x40) {
+        if ((data & 0x40) != 0) {
             this.sound.setNR52(0x1);
         }
         this.ShadowFrequency = this.frequency | 0;

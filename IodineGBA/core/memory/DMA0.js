@@ -313,7 +313,7 @@ GameBoyAdvanceDMA0.prototype.finalizeDMA = function (source, destination, transf
     return wordCountShadow | 0;
 }
 GameBoyAdvanceDMA0.prototype.checkIRQTrigger = function () {
-    if ((this.irqFlagging | 0) == 0x40) {
+    if ((this.irqFlagging | 0) != 0) {
         this.irq.requestIRQ(0x100);
     }
 }

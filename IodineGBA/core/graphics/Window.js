@@ -90,11 +90,11 @@ GameBoyAdvanceWindowRenderer.prototype.writeWINYCOORD16 = function (data) {
 }
 GameBoyAdvanceWindowRenderer.prototype.writeWININ8 = function (data) {
     data = data | 0;
-    this.WINBG0 = ((data & 0x01) == 0x01);
-    this.WINBG1 = ((data & 0x02) == 0x02);
-    this.WINBG2 = ((data & 0x04) == 0x04);
-    this.WINBG3 = ((data & 0x08) == 0x08);
-    this.WINOBJ = ((data & 0x10) == 0x10);
-    this.WINEffects = ((data & 0x20) == 0x20);
+    this.WINBG0 = ((data & 0x01) != 0);
+    this.WINBG1 = ((data & 0x02) != 0);
+    this.WINBG2 = ((data & 0x04) != 0);
+    this.WINBG3 = ((data & 0x08) != 0);
+    this.WINOBJ = ((data & 0x10) != 0);
+    this.WINEffects = ((data & 0x20) != 0);
     this.preprocess();
 }
