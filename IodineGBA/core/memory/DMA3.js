@@ -215,10 +215,10 @@ GameBoyAdvanceDMA3.prototype.readDMAControl16 = function () {
 GameBoyAdvanceDMA3.prototype.getMatchStatus = function () {
     return this.enabled & this.pending;
 }
-GameBoyAdvanceDMA3.prototype.gfxStateDisplaySyncRequest = function () {
+GameBoyAdvanceDMA3.prototype.gfxDisplaySyncRequest = function () {
     this.requestDMA(0x20 ^ this.displaySyncEnableDelay);
 }
-GameBoyAdvanceDMA3.prototype.gfxStateDisplaySyncEnableCheck = function () {
+GameBoyAdvanceDMA3.prototype.gfxDisplaySyncEnableCheck = function () {
 	//Reset the display sync & reassert DMA enable line:
     if ((this.enabled | 0) == 0x20) {
         if ((this.displaySyncEnableDelay | 0) == 0x20) {
