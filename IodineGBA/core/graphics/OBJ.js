@@ -41,6 +41,7 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
 if (__VIEWS_SUPPORTED__) {
     if (typeof getUint8Array(1).fill == "function") {
         GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
+            this.HBlankIntervalFree = 0;
             this.VRAM32 = this.gfx.VRAM32;
             this.OAMRAM = getUint8Array(0x400);
             this.OAMRAM16 = getUint16View(this.OAMRAM);
@@ -58,6 +59,7 @@ if (__VIEWS_SUPPORTED__) {
     }
     else {
         GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
+            this.HBlankIntervalFree = 0;
             this.VRAM32 = this.gfx.VRAM32;
             this.OAMRAM = getUint8Array(0x400);
             this.OAMRAM16 = getUint16View(this.OAMRAM);
@@ -83,6 +85,7 @@ if (__VIEWS_SUPPORTED__) {
 }
 else {
     GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
+        this.HBlankIntervalFree = 0;
         this.OAMRAM = getUint8Array(0x400);
         this.scratchBuffer = getInt32Array(240);
         this.scratchWindowBuffer = getInt32Array(240);
@@ -161,13 +164,23 @@ GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line, isOBJWin
     line = line | 0;
     isOBJWindow = isOBJWindow | 0;
     this.clearScratch();
-    for (var objNumber = 0; objNumber < 0x80; ++objNumber) {
-        this.renderSprite(line | 0, this.OAMTable[objNumber], isOBJWindow | 0);
+    if ((this.HBlankIntervalFree & 0x20) != 0) {
+        for (var objNumber = 0, cycleCount = 0; (objNumber | 0) < 0x80 && (cycleCount | 0) < 954; objNumber = ((objNumber | 0) + 1) | 0) {
+            var cycles = this.renderSprite(line | 0, this.OAMTable[objNumber], isOBJWindow | 0) | 0;
+            cycleCount = ((cycleCount | 0) + (cycles | 0)) | 0;
+        }
+    }
+    else {
+        for (var objNumber = 0, cycleCount = 0; (objNumber | 0) < 0x80 && (cycleCount | 0) < 1210; objNumber = ((objNumber | 0) + 1) | 0) {
+            var cycles = this.renderSprite(line | 0, this.OAMTable[objNumber], isOBJWindow | 0) | 0;
+            cycleCount = ((cycleCount | 0) + (cycles | 0)) | 0;
+        }
     }
 }
 GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJWindow) {
     line = line | 0;
     isOBJWindow = isOBJWindow | 0;
+    var cycles = 0;
     if (this.isDrawable(sprite, isOBJWindow | 0)) {
         if ((sprite.mosaic | 0) != 0) {
             //Correct line number for mosaic:
@@ -191,8 +204,11 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
         //Make a sprite line:
         ySize = ((ySize | 0) - 1) | 0;
         if ((yOffset & ySize) == (yOffset | 0)) {
+            cycles = xSize | 0;
             if ((sprite.matrix2D | 0) != 0) {
                 //Scale & Rotation:
+                cycles = cycles << 1;
+                cycles = ((cycles | 0) + 10) | 0;
                 this.renderMatrixSprite(sprite, xSize | 0, ((ySize | 0) + 1) | 0, yOffset | 0);
             }
             else {
@@ -207,6 +223,7 @@ GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJ
             this.outputSpriteToScratch(sprite, xSize | 0);
         }
     }
+    return cycles | 0;
 }
 if (typeof Math.imul == "function") {
     //Math.imul found, insert the optimized path in:
@@ -461,10 +478,12 @@ else {
     }
 }
 GameBoyAdvanceOBJRenderer.prototype.markSemiTransparent = function (xSize) {
+    xSize = xSize | 0;
     //Mark sprite pixels as semi-transparent:
-    while (--xSize > -1) {
+    do {
+        xSize = ((xSize | 0) - 1) | 0;
         this.scratchOBJBuffer[xSize | 0] |= 0x400000;
-    }
+    } while ((xSize | 0) > -1);
 }
 GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xSize) {
     xSize = xSize | 0;
@@ -485,8 +504,8 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
         //Normal:
         for (var xSource = 0; (xcoord | 0) < (xcoordEnd | 0); xcoord = ((xcoord | 0) + 1) | 0, xSource = ((xSource | 0) + 1) | 0) {
             var pixel = bitFlags | this.scratchOBJBuffer[xSource | 0];
-            //Overwrite by priority:
-            if ((xcoord | 0) > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
+            //Overwrite if transparent:
+            if ((xcoord | 0) > -1 && (this.targetBuffer[xcoord | 0] & 0x2000000) != 0) {
                 this.targetBuffer[xcoord | 0] = pixel | 0;
             }
         }
@@ -495,8 +514,8 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
         //Flipped Horizontally:
         for (var xSource = ((xSize | 0) - 1) | 0; (xcoord | 0) < (xcoordEnd | 0); xcoord = ((xcoord | 0) + 1) | 0, xSource = ((xSource | 0) - 1) | 0) {
             var pixel = bitFlags | this.scratchOBJBuffer[xSource | 0];
-            //Overwrite by priority:
-            if ((xcoord | 0) > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
+            //Overwrite if transparent:
+            if ((xcoord | 0) > -1 && (this.targetBuffer[xcoord | 0] & 0x2000000) != 0) {
                 this.targetBuffer[xcoord | 0] = pixel | 0;
             }
         }

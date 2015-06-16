@@ -486,21 +486,18 @@ GameBoyAdvanceMemory.prototype.writeIODispatch8 = function (address, data) {
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
         case 0x4000060:
             //NR10:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeSOUND1CNT_L(data & 0xFF);
+            this.sound.writeSOUND1CNT8_0(data | 0);
             break;
         //4000061h - NOT USED - ZERO
         //4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
         case 0x4000062:
             //NR11:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeSOUND1CNT_H0(data & 0xFF);
+            this.sound.writeSOUND1CNT8_2(data | 0);
             break;
         //4000063h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
         case 0x4000063:
             //NR12:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeSOUND1CNT_H1(data & 0xFF);
+            this.sound.writeSOUND1CNT8_3(data | 0);
             break;
         //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
         case 0x4000064:
@@ -1328,16 +1325,11 @@ GameBoyAdvanceMemory.prototype.writeIODispatch16 = function (address, data) {
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
         case 0x4000060:
             //NR10:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeSOUND1CNT_L(data & 0xFF);
+            this.sound.writeSOUND1CNT8_0(data | 0);
             break;
         //4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
         case 0x4000062:
-            //NR11:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeSOUND1CNT_H0(data & 0xFF);
-            //NR12:
-            this.sound.writeSOUND1CNT_H1((data >> 8) & 0xFF);
+            this.sound.writeSOUND1CNT16(data | 0);
             break;
         //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
         case 0x4000064:
@@ -1845,12 +1837,7 @@ GameBoyAdvanceMemory.prototype.writeIODispatch32 = function (address, data) {
         //4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
         case 0x4000060:
             //NR10:
-            this.IOCore.updateTimerClocking();
-            this.sound.writeSOUND1CNT_L(data & 0xFF);
-            //NR11:
-            this.sound.writeSOUND1CNT_H0((data >> 16) & 0xFF);
-            //NR12:
-            this.sound.writeSOUND1CNT_H1(data >>> 24);
+            this.sound.writeSOUND1CNT32(data | 0);
             break;
         //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
         //4000066h - NOT USED - ZERO
@@ -2776,17 +2763,17 @@ GameBoyAdvanceMemory.prototype.readIODispatch8 = function (address) {
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
         case 0x4000060:
             //NR10:
-            data = this.sound.readSOUND1CNT_L() | 0;
+            data = this.sound.readSOUND1CNT8_0() | 0;
             break;
         //4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
         case 0x4000062:
             //NR11:
-            data = this.sound.readSOUND1CNT_H0() | 0;
+            data = this.sound.readSOUND1CNT8_2() | 0;
             break;
         //4000063h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
         case 0x4000063:
             //NR12:
-            data = this.sound.readSOUND1CNT_H1() | 0;
+            data = this.sound.readSOUND1CNT8_3() | 0;
             break;
         //4000065h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
         case 0x4000065:
@@ -3358,13 +3345,13 @@ GameBoyAdvanceMemory.prototype.readIO16 = function (address) {
         //4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)
         case 0x4000060:
             //NR10:
-            data = this.sound.readSOUND1CNT_L() | 0;
+            data = this.sound.readSOUND1CNT8_0() | 0;
             break;
         //4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)
         case 0x4000062:
             //NR11:
             //NR12:
-            data = this.sound.readSOUND1CNT_H0() | (this.sound.readSOUND1CNT_H1() << 8);
+            data = this.sound.readSOUND1CNT8_2() | (this.sound.readSOUND1CNT8_3() << 8);
             break;
         //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
         case 0x4000064:
@@ -3708,9 +3695,9 @@ GameBoyAdvanceMemory.prototype.readIO32 = function (address) {
             //NR10:
             //NR11:
             //NR12:
-            data = this.sound.readSOUND1CNT_L() |
-            (this.sound.readSOUND1CNT_H0() << 16) |
-            (this.sound.readSOUND1CNT_H1() << 24);
+            data = this.sound.readSOUND1CNT8_0() |
+            (this.sound.readSOUND1CNT8_2() << 16) |
+            (this.sound.readSOUND1CNT8_3() << 24);
             break;
         //4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)
         //4000066h - NOT USED - ZERO

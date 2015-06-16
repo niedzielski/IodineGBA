@@ -223,11 +223,11 @@ GameBoyAdvanceChannel1Synth.prototype.computeAudioChannel = function () {
         this.DutyTracker = ((this.DutyTracker | 0) + 1) & 0x7;
     }
 }
-GameBoyAdvanceChannel1Synth.prototype.readSOUND1CNT_L = function () {
+GameBoyAdvanceChannel1Synth.prototype.readSOUND1CNT8_0 = function () {
     //NR10:
     return this.nr10 | 0;
 }
-GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_L = function (data) {
+GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT8_0 = function (data) {
     data = data | 0;
     //NR10:
     if (this.decreaseSweep && (data & 0x08) == 0) {
@@ -238,30 +238,31 @@ GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_L = function (data) {
     this.lastTimeSweep = (data & 0x70) >> 4;
     this.frequencySweepDivider = data & 0x07;
     this.decreaseSweep = ((data & 0x08) != 0);
-    this.nr10 = data | 0;
+    this.nr10 = data & 0xFF;
     this.enableCheck();
 }
-GameBoyAdvanceChannel1Synth.prototype.readSOUND1CNT_H0 = function () {
+GameBoyAdvanceChannel1Synth.prototype.readSOUND1CNT8_2 = function () {
     //NR11:
     return this.nr11 | 0;
 }
-GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_H0 = function (data) {
+GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT8_2 = function (data) {
     data = data | 0;
     //NR11:
+    data = data & 0xFF;
     this.CachedDuty = this.dutyLookup[data >> 6];
     this.totalLength = (0x40 - (data & 0x3F)) | 0;
     this.nr11 = data | 0;
     this.enableCheck();
 }
-GameBoyAdvanceChannel1Synth.prototype.readSOUND1CNT_H1 = function () {
+GameBoyAdvanceChannel1Synth.prototype.readSOUND1CNT8_3 = function () {
     //NR12:
     return this.nr12 | 0;
 }
-GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_H1 = function (data) {
+GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT8_3 = function (data) {
     data = data | 0;
     //NR12:
     this.envelopeType = ((data & 0x08) != 0);
-    this.nr12 = data | 0;
+    this.nr12 = data & 0xFF;
     this.volumeEnableCheck();
 }
 GameBoyAdvanceChannel1Synth.prototype.writeSOUND1CNT_X0 = function (data) {
