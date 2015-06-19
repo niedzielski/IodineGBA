@@ -219,7 +219,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_0 = function (data) {
     this.graphicsJIT();
     this.BGMode = data & 0x07;
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
-    this.objRenderer.HBlankIntervalFree = data & 0x20;
+    this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
     this.VRAMOneDimensional = ((data & 0x40) != 0);
     this.forcedBlank = ((data & 0x80) != 0);
     if ((this.BGMode | 0) > 2) {
@@ -242,7 +242,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT16 = function (data) {
     this.graphicsJIT();
     this.BGMode = data & 0x07;
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
-    this.objRenderer.HBlankIntervalFree = data & 0x20;
+    this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
     this.VRAMOneDimensional = ((data & 0x40) != 0);
     this.forcedBlank = ((data & 0x80) != 0);
     if ((this.BGMode | 0) > 2) {
@@ -256,7 +256,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT32 = function (data) {
     this.graphicsJIT();
     this.BGMode = data & 0x07;
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
-    this.objRenderer.HBlankIntervalFree = data & 0x20;
+    this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
     this.VRAMOneDimensional = ((data & 0x40) != 0);
     this.forcedBlank = ((data & 0x80) != 0);
     if ((this.BGMode | 0) > 2) {

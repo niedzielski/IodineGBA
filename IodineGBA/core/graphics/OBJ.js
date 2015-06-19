@@ -41,7 +41,7 @@ GameBoyAdvanceOBJRenderer.prototype.lookupYSize = [
 if (__VIEWS_SUPPORTED__) {
     if (typeof getUint8Array(1).fill == "function") {
         GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
-            this.HBlankIntervalFree = 0;
+            this.cyclesToRender = 1210;
             this.VRAM32 = this.gfx.VRAM32;
             this.OAMRAM = getUint8Array(0x400);
             this.OAMRAM16 = getUint16View(this.OAMRAM);
@@ -59,7 +59,7 @@ if (__VIEWS_SUPPORTED__) {
     }
     else {
         GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
-            this.HBlankIntervalFree = 0;
+            this.cyclesToRender = 1210;
             this.VRAM32 = this.gfx.VRAM32;
             this.OAMRAM = getUint8Array(0x400);
             this.OAMRAM16 = getUint16View(this.OAMRAM);
@@ -85,7 +85,7 @@ if (__VIEWS_SUPPORTED__) {
 }
 else {
     GameBoyAdvanceOBJRenderer.prototype.initialize = function () {
-        this.HBlankIntervalFree = 0;
+        this.cyclesToRender = 1210;
         this.OAMRAM = getUint8Array(0x400);
         this.scratchBuffer = getInt32Array(240);
         this.scratchWindowBuffer = getInt32Array(240);
@@ -164,65 +164,72 @@ GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line, isOBJWin
     line = line | 0;
     isOBJWindow = isOBJWindow | 0;
     this.clearScratch();
-    if ((this.HBlankIntervalFree & 0x20) != 0) {
-        for (var objNumber = 0, cycleCount = 0; (objNumber | 0) < 0x80 && (cycleCount | 0) < 954; objNumber = ((objNumber | 0) + 1) | 0) {
-            var cycles = this.renderSprite(line | 0, this.OAMTable[objNumber], isOBJWindow | 0) | 0;
-            cycleCount = ((cycleCount | 0) + (cycles | 0)) | 0;
-        }
-    }
-    else {
-        for (var objNumber = 0, cycleCount = 0; (objNumber | 0) < 0x80 && (cycleCount | 0) < 1210; objNumber = ((objNumber | 0) + 1) | 0) {
-            var cycles = this.renderSprite(line | 0, this.OAMTable[objNumber], isOBJWindow | 0) | 0;
-            cycleCount = ((cycleCount | 0) + (cycles | 0)) | 0;
-        }
+    var cycles = this.cyclesToRender | 0;
+    for (var objNumber = 0; (objNumber | 0) < 0x80; objNumber = ((objNumber | 0) + 1) | 0) {
+        cycles = this.renderSprite(line | 0, this.OAMTable[objNumber], isOBJWindow | 0, cycles | 0) | 0;
     }
 }
-GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJWindow) {
+GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJWindow, cycles) {
     line = line | 0;
     isOBJWindow = isOBJWindow | 0;
-    var cycles = 0;
-    if (this.isDrawable(sprite, isOBJWindow | 0)) {
-        if ((sprite.mosaic | 0) != 0) {
-            //Correct line number for mosaic:
-            line = ((line | 0) - (this.gfx.mosaicRenderer.getOBJMosaicYOffset(line | 0) | 0)) | 0;
-        }
-        //Obtain horizontal size info:
-        var xSize = this.lookupXSize[(sprite.shape << 2) | sprite.size] << (sprite.doubleSizeOrDisabled | 0);
-        //Obtain vertical size info:
-        var ySize = this.lookupYSize[(sprite.shape << 2) | sprite.size] << (sprite.doubleSizeOrDisabled | 0);
-        //Obtain some offsets:
-        var ycoord = sprite.ycoord | 0;
-        var yOffset = ((line | 0) - (ycoord | 0)) | 0;
-        //Overflow Correction:
-        if ((yOffset | 0) < 0 || (((ycoord | 0) + (ySize | 0)) | 0) > 0x100) {
-            /*
-             HW re-offsets any "negative" y-coord values to on-screen unsigned.
-             Also a bug triggers this on 8-bit ending coordinate overflow from large sprites.
-             */
-            yOffset = ((yOffset | 0) + 0x100) | 0;
-        }
-        //Make a sprite line:
-        ySize = ((ySize | 0) - 1) | 0;
-        if ((yOffset & ySize) == (yOffset | 0)) {
-            cycles = xSize | 0;
-            if ((sprite.matrix2D | 0) != 0) {
-                //Scale & Rotation:
-                cycles = cycles << 1;
-                cycles = ((cycles | 0) + 10) | 0;
-                this.renderMatrixSprite(sprite, xSize | 0, ((ySize | 0) + 1) | 0, yOffset | 0);
+    cycles = cycles | 0;
+    /*
+     Fake while loop to be able to break out before rendering.
+     We could just return -1 instead of break, but it might complicate
+     optimization by having more than one return statement.
+     */
+    do {
+        if (this.isDrawable(sprite, isOBJWindow | 0)) {
+            if ((sprite.mosaic | 0) != 0) {
+                //Correct line number for mosaic:
+                line = ((line | 0) - (this.gfx.mosaicRenderer.getOBJMosaicYOffset(line | 0) | 0)) | 0;
             }
-            else {
-                //Regular Scrolling:
-                this.renderNormalSprite(sprite, xSize | 0, ySize | 0, yOffset | 0);
+            //Obtain horizontal size info:
+            var xSize = this.lookupXSize[(sprite.shape << 2) | sprite.size] << (sprite.doubleSizeOrDisabled | 0);
+            //Obtain vertical size info:
+            var ySize = this.lookupYSize[(sprite.shape << 2) | sprite.size] << (sprite.doubleSizeOrDisabled | 0);
+            //Obtain some offsets:
+            var ycoord = sprite.ycoord | 0;
+            var yOffset = ((line | 0) - (ycoord | 0)) | 0;
+            //Overflow Correction:
+            if ((yOffset | 0) < 0 || (((ycoord | 0) + (ySize | 0)) | 0) > 0x100) {
+                /*
+                 HW re-offsets any "negative" y-coord values to on-screen unsigned.
+                 Also a bug triggers this on 8-bit ending coordinate overflow from large sprites.
+                 */
+                yOffset = ((yOffset | 0) + 0x100) | 0;
             }
-            //Mark for semi-transparent:
-            if ((sprite.mode | 0) == 1) {
-                this.markSemiTransparent(xSize | 0);
+            //Make a sprite line:
+            ySize = ((ySize | 0) - 1) | 0;
+            if ((yOffset & ySize) == (yOffset | 0)) {
+                var cyclesToSubtract = xSize | 0;
+                if ((sprite.matrix2D | 0) != 0) {
+                    //Scale & Rotation:
+                    cyclesToSubtract = cyclesToSubtract << 1;
+                    cyclesToSubtract = ((cyclesToSubtract | 0) + 10) | 0;
+                    cycles = ((cycles | 0) - (cyclesToSubtract | 0)) | 0;
+                    if ((cycles | 0) < 0) {
+                        break;
+                    }
+                    this.renderMatrixSprite(sprite, xSize | 0, ((ySize | 0) + 1) | 0, yOffset | 0);
+                }
+                else {
+                    //Regular Scrolling:
+                    cycles = ((cycles | 0) - (cyclesToSubtract | 0)) | 0;
+                    if ((cycles | 0) < 0) {
+                        break;
+                    }
+                    this.renderNormalSprite(sprite, xSize | 0, ySize | 0, yOffset | 0);
+                }
+                //Mark for semi-transparent:
+                if ((sprite.mode | 0) == 1) {
+                    this.markSemiTransparent(xSize | 0);
+                }
+                //Copy OBJ scratch buffer to scratch line buffer:
+                this.outputSpriteToScratch(sprite, xSize | 0);
             }
-            //Copy OBJ scratch buffer to scratch line buffer:
-            this.outputSpriteToScratch(sprite, xSize | 0);
         }
-    }
+    } while (false);
     return cycles | 0;
 }
 if (typeof Math.imul == "function") {
@@ -534,6 +541,15 @@ GameBoyAdvanceOBJRenderer.prototype.isDrawable = function (sprite, doWindowOBJ) 
         }
     }
     return false;
+}
+GameBoyAdvanceOBJRenderer.prototype.setHBlankIntervalFreeStatus = function (data) {
+    data = data | 0;
+    if ((data | 0) != 0) {
+        this.cyclesToRender = 954;
+    }
+    else {
+        this.cyclesToRender = 1210;
+    }
 }
 GameBoyAdvanceOBJRenderer.prototype.readOAM = function (address) {
     return this.OAMRAM[address & 0x3FF] | 0;
