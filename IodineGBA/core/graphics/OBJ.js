@@ -77,8 +77,8 @@ if (__VIEWS_SUPPORTED__) {
             this.targetBuffer.set(this.clearingBuffer);
         }
         GameBoyAdvanceOBJRenderer.prototype.initializeClearingBuffer = function () {
-            for (var position = 0; position < 240; ++position) {
-                this.clearingBuffer[position] = 0x3800000;
+            for (var position = 0; (position | 0) < 240; position = ((position | 0) + 1) | 0) {
+                this.clearingBuffer[position | 0] = 0x3800000;
             }
         }
     }
@@ -95,8 +95,8 @@ else {
         this.initializeOAMTable();
     }
     GameBoyAdvanceOBJRenderer.prototype.clearScratch = function () {
-        for (var position = 0; position < 240; ++position) {
-            this.targetBuffer[position] = 0x3800000;
+        for (var position = 0; (position | 0) < 240; position = ((position | 0) + 1) | 0) {
+            this.targetBuffer[position | 0] = 0x3800000;
         }
     }
 }
