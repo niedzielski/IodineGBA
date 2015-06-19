@@ -511,8 +511,8 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
         //Normal:
         for (var xSource = 0; (xcoord | 0) < (xcoordEnd | 0); xcoord = ((xcoord | 0) + 1) | 0, xSource = ((xSource | 0) + 1) | 0) {
             var pixel = bitFlags | this.scratchOBJBuffer[xSource | 0];
-            //Overwrite if transparent:
-            if ((xcoord | 0) > -1 && (this.targetBuffer[xcoord | 0] & 0x2000000) != 0) {
+            //Overwrite by priority:
+            if ((xcoord | 0) > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
                 this.targetBuffer[xcoord | 0] = pixel | 0;
             }
         }
@@ -521,8 +521,8 @@ GameBoyAdvanceOBJRenderer.prototype.outputSpriteToScratch = function (sprite, xS
         //Flipped Horizontally:
         for (var xSource = ((xSize | 0) - 1) | 0; (xcoord | 0) < (xcoordEnd | 0); xcoord = ((xcoord | 0) + 1) | 0, xSource = ((xSource | 0) - 1) | 0) {
             var pixel = bitFlags | this.scratchOBJBuffer[xSource | 0];
-            //Overwrite if transparent:
-            if ((xcoord | 0) > -1 && (this.targetBuffer[xcoord | 0] & 0x2000000) != 0) {
+            //Overwrite by priority:
+            if ((xcoord | 0) > -1 && (pixel & 0x3800000) < (this.targetBuffer[xcoord | 0] & 0x3800000)) {
                 this.targetBuffer[xcoord | 0] = pixel | 0;
             }
         }
