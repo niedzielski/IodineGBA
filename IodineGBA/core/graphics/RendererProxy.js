@@ -126,7 +126,7 @@ GameBoyAdvanceRendererProxy.prototype.readBG0CNT8_0 = function () {
 }
 GameBoyAdvanceRendererProxy.prototype.writeBG0CNT8_1 = function (data) {
     data = data | 0;
-    data = data & 0xDF;
+    data = data & 0xFF;
     this.IOCore.updateGraphicsClocking();
     this.IOData8[5] = data | 0;
     this.renderer.writeBG0CNT8_1(data | 0);
@@ -146,7 +146,7 @@ GameBoyAdvanceRendererProxy.prototype.readBG1CNT8_0 = function () {
 }
 GameBoyAdvanceRendererProxy.prototype.writeBG1CNT8_1 = function (data) {
     data = data | 0;
-    data = data & 0xDF;
+    data = data & 0xFF;
     this.IOCore.updateGraphicsClocking();
     this.IOData8[7] = data | 0;
     this.renderer.writeBG1CNT8_1(data | 0);
@@ -157,21 +157,21 @@ GameBoyAdvanceRendererProxy.prototype.readBG1CNT8_1 = function () {
 if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceRendererProxy.prototype.writeBG0CNT16 = function (data) {
         data = data | 0;
-        data = data & 0xDFCF;
+        data = data & 0xFFCF;
         this.IOCore.updateGraphicsClocking();
         this.IOData16[2] = data | 0;
         this.renderer.writeBG0CNT16(data | 0);
     }
     GameBoyAdvanceRendererProxy.prototype.writeBG1CNT16 = function (data) {
         data = data | 0;
-        data = data & 0xDFCF;
+        data = data & 0xFFCF;
         this.IOCore.updateGraphicsClocking();
         this.IOData16[3] = data | 0;
         this.renderer.writeBG1CNT16(data | 0);
     }
     GameBoyAdvanceRendererProxy.prototype.writeBG0BG1CNT32 = function (data) {
         data = data | 0;
-        data = data & 0xDFCFDFCF;
+        data = data & 0xFFCFFFCF;
         this.IOCore.updateGraphicsClocking();
         this.IOData32[1] = data | 0;
         this.renderer.writeBG0BG1CNT32(data | 0);
@@ -189,7 +189,7 @@ if (__LITTLE_ENDIAN__) {
 else {
     GameBoyAdvanceRendererProxy.prototype.writeBG0CNT16 = function (data) {
         data = data | 0;
-        data = data & 0xDFCF;
+        data = data & 0xFFCF;
         this.IOCore.updateGraphicsClocking();
         this.IOData8[4] = data & 0xFF;
         this.IOData8[5] = data >> 8;
@@ -197,7 +197,7 @@ else {
     }
     GameBoyAdvanceRendererProxy.prototype.writeBG1CNT16 = function (data) {
         data = data | 0;
-        data = data & 0xDFCF;
+        data = data & 0xFFCF;
         this.IOCore.updateGraphicsClocking();
         this.IOData8[6] = data & 0xFF;
         this.IOData8[7] = data >> 8;
@@ -205,7 +205,7 @@ else {
     }
     GameBoyAdvanceRendererProxy.prototype.writeBG0BG1CNT32 = function (data) {
         data = data | 0;
-        data = data & 0xDFCFDFCF;
+        data = data & 0xFFCFFFCF;
         this.IOCore.updateGraphicsClocking();
         this.IOData8[4] = data & 0xFF;
         this.IOData8[5] = (data >> 8) & 0xFF;

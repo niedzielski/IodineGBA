@@ -166,7 +166,7 @@ GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line, isOBJWin
     this.clearScratch();
     var cycles = this.cyclesToRender | 0;
     for (var objNumber = 0; (objNumber | 0) < 0x80; objNumber = ((objNumber | 0) + 1) | 0) {
-        cycles = this.renderSprite(line | 0, this.OAMTable[objNumber], isOBJWindow | 0, cycles | 0) | 0;
+        cycles = this.renderSprite(line | 0, this.OAMTable[objNumber | 0], isOBJWindow | 0, cycles | 0) | 0;
     }
 }
 GameBoyAdvanceOBJRenderer.prototype.renderSprite = function (line, sprite, isOBJWindow, cycles) {
