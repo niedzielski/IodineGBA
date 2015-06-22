@@ -1075,18 +1075,24 @@ ARMInstructionSet.prototype.LDRH = function () {
     var address = this.operand2OP_LoadStore1() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read16(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDRSH = function () {
     //Perform signed halfword load calculations:
     var address = this.operand2OP_LoadStore1() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite((this.CPUCore.read16(address | 0) << 16) >> 16);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDRSB = function () {
     //Perform signed byte load calculations:
     var address = this.operand2OP_LoadStore1() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite((this.CPUCore.read8(address | 0) << 24) >> 24);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRH2 = function () {
     //Perform halfword store calculations:
@@ -1099,18 +1105,24 @@ ARMInstructionSet.prototype.LDRH2 = function () {
     var address = this.operand2OP_LoadStore2() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read16(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDRSH2 = function () {
     //Perform signed halfword load calculations:
     var address = this.operand2OP_LoadStore2() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite((this.CPUCore.read16(address | 0) << 16) >> 16);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDRSB2 = function () {
     //Perform signed byte load calculations:
     var address = this.operand2OP_LoadStore2() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite((this.CPUCore.read8(address | 0) << 24) >> 24);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STR = function () {
     //Perform word store calculations:
@@ -1123,6 +1135,8 @@ ARMInstructionSet.prototype.LDR = function () {
     var address = this.operand2OP_LoadStore3(0) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRB = function () {
     //Perform byte store calculations:
@@ -1135,6 +1149,8 @@ ARMInstructionSet.prototype.LDRB = function () {
     var address = this.operand2OP_LoadStore3(0) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STR4 = function () {
     //Perform word store calculations:
@@ -1147,6 +1163,8 @@ ARMInstructionSet.prototype.LDR4 = function () {
     var address = this.operand2OP_LoadStore4() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRB4 = function () {
     //Perform byte store calculations:
@@ -1159,6 +1177,8 @@ ARMInstructionSet.prototype.LDRB4 = function () {
     var address = this.operand2OP_LoadStore4() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRT = function () {
     //Perform word store calculations (forced user-mode):
@@ -1171,6 +1191,8 @@ ARMInstructionSet.prototype.LDRT = function () {
     var address = this.operand2OP_LoadStore3(0xF) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRBT = function () {
     //Perform byte store calculations (forced user-mode):
@@ -1183,6 +1205,8 @@ ARMInstructionSet.prototype.LDRBT = function () {
     var address = this.operand2OP_LoadStore3(0xF) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STR2 = function () {
     //Perform word store calculations:
@@ -1195,6 +1219,8 @@ ARMInstructionSet.prototype.LDR2 = function () {
     var address = this.operand2OP_LoadStore5(0) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRB2 = function () {
     //Perform byte store calculations:
@@ -1207,6 +1233,8 @@ ARMInstructionSet.prototype.LDRB2 = function () {
     var address = this.operand2OP_LoadStore5(0) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRT2 = function () {
     //Perform word store calculations (forced user-mode):
@@ -1219,6 +1247,8 @@ ARMInstructionSet.prototype.LDRT2 = function () {
     var address = this.operand2OP_LoadStore5(0xF) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRBT2 = function () {
     //Perform byte store calculations (forced user-mode):
@@ -1231,6 +1261,8 @@ ARMInstructionSet.prototype.LDRBT2 = function () {
     var address = this.operand2OP_LoadStore5(0xF) | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STR3 = function () {
     //Perform word store calculations:
@@ -1243,6 +1275,8 @@ ARMInstructionSet.prototype.LDR3 = function () {
     var address = this.operand2OP_LoadStore6() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read32(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STRB3 = function () {
     //Perform byte store calculations:
@@ -1255,6 +1289,8 @@ ARMInstructionSet.prototype.LDRB3 = function () {
     var address = this.operand2OP_LoadStore6() | 0;
     //Read from memory location:
     this.guard12OffsetRegisterWrite(this.CPUCore.read8(address | 0) | 0);
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.STMIA = function () {
     //Only initialize the STMIA sequence if the register list is non-empty:
@@ -1661,6 +1697,8 @@ ARMInstructionSet.prototype.LDMIA = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMIAW = function () {
     //Get the base address:
@@ -1686,6 +1724,8 @@ ARMInstructionSet.prototype.LDMIAW = function () {
     this.guard16OffsetRegisterWrite(currentAddress | 0);
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMDA = function () {
     //Get the base address:
@@ -1712,6 +1752,8 @@ ARMInstructionSet.prototype.LDMDA = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMDAW = function () {
     //Get the base address:
@@ -1742,6 +1784,8 @@ ARMInstructionSet.prototype.LDMDAW = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMIB = function () {
     //Get the base address:
@@ -1765,6 +1809,8 @@ ARMInstructionSet.prototype.LDMIB = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMIBW = function () {
     //Get the base address:
@@ -1790,6 +1836,8 @@ ARMInstructionSet.prototype.LDMIBW = function () {
     this.guard16OffsetRegisterWrite(currentAddress | 0);
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMDB = function () {
     //Get the base address:
@@ -1815,6 +1863,8 @@ ARMInstructionSet.prototype.LDMDB = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMDBW = function () {
     //Get the base address:
@@ -1845,6 +1895,8 @@ ARMInstructionSet.prototype.LDMDBW = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMIAG = function () {
     //Get the base address:
@@ -1867,6 +1919,8 @@ ARMInstructionSet.prototype.LDMIAG = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMIAWG = function () {
     //Get the base address:
@@ -1892,6 +1946,8 @@ ARMInstructionSet.prototype.LDMIAWG = function () {
     this.guard16OffsetRegisterWrite(currentAddress | 0);
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMDAG = function () {
     //Get the base address:
@@ -1916,6 +1972,8 @@ ARMInstructionSet.prototype.LDMDAG = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMDAWG = function () {
     //Get the base address:
@@ -1946,6 +2004,8 @@ ARMInstructionSet.prototype.LDMDAWG = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMIBG = function () {
     //Get the base address:
@@ -1969,6 +2029,8 @@ ARMInstructionSet.prototype.LDMIBG = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMIBWG = function () {
     //Get the base address:
@@ -1994,6 +2056,8 @@ ARMInstructionSet.prototype.LDMIBWG = function () {
     this.guard16OffsetRegisterWrite(currentAddress | 0);
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMDBG = function () {
     //Get the base address:
@@ -2019,6 +2083,8 @@ ARMInstructionSet.prototype.LDMDBG = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LDMDBWG = function () {
     //Get the base address:
@@ -2049,6 +2115,8 @@ ARMInstructionSet.prototype.LDMDBWG = function () {
     }
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 ARMInstructionSet.prototype.LoadStoreMultiple = function () {
     this.incrementProgramCounter();

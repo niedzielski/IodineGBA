@@ -863,6 +863,8 @@ THUMBInstructionSet.prototype.LDRPC = function () {
     this.write8OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.STRreg = function () {
     //Store Word From Register
@@ -891,6 +893,8 @@ THUMBInstructionSet.prototype.LDRSBreg = function () {
     this.write0OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.LDRreg = function () {
     //Load Word Into Register
@@ -898,6 +902,8 @@ THUMBInstructionSet.prototype.LDRreg = function () {
     this.write0OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.LDRHreg = function () {
     //Load Half-Word Into Register
@@ -905,6 +911,8 @@ THUMBInstructionSet.prototype.LDRHreg = function () {
     this.write0OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.LDRBreg = function () {
     //Load Byte Into Register
@@ -912,6 +920,8 @@ THUMBInstructionSet.prototype.LDRBreg = function () {
     this.write0OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.LDRSHreg = function () {
     //Load Signed Half-Word Into Register
@@ -919,6 +929,8 @@ THUMBInstructionSet.prototype.LDRSHreg = function () {
     this.write0OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.STRimm5 = function () {
     //Store Word From Register
@@ -933,6 +945,8 @@ THUMBInstructionSet.prototype.LDRimm5 = function () {
     this.write0OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.STRBimm5 = function () {
     //Store Byte From Register
@@ -947,6 +961,8 @@ THUMBInstructionSet.prototype.LDRBimm5 = function () {
     this.write0OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.STRHimm5 = function () {
     //Store Half-Word From Register
@@ -961,6 +977,8 @@ THUMBInstructionSet.prototype.LDRHimm5 = function () {
     this.write0OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.STRSP = function () {
     //Store Word From Register
@@ -975,6 +993,8 @@ THUMBInstructionSet.prototype.LDRSP = function () {
     this.write8OffsetLowRegister(data | 0);
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.ADDPC = function () {
     //Add PC With Offset Into Register
@@ -1057,6 +1077,8 @@ THUMBInstructionSet.prototype.POP = function () {
     }
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.POPpc = function () {
     //Updating the address bus away from PC fetch:
@@ -1074,6 +1096,8 @@ THUMBInstructionSet.prototype.POPpc = function () {
     this.SPIncrementWord();
     //Updating the address bus back to PC fetch:
     this.wait.NonSequentialBroadcast();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.STMIA = function () {
     //Only initialize the STMIA sequence if the register list is non-empty:
@@ -1120,6 +1144,8 @@ THUMBInstructionSet.prototype.LDMIA = function () {
     }
     //Update PC:
     this.incrementProgramCounter();
+    //Internal Cycle:
+    this.wait.CPUInternalSingleCyclePrefetch();
 }
 THUMBInstructionSet.prototype.BEQ = function () {
     //Branch if EQual:
