@@ -12,6 +12,7 @@ function GameBoyAdvanceOBJWindowRenderer(gfx) {
     this.gfx = gfx;
 }
 GameBoyAdvanceOBJWindowRenderer.prototype.initialize = function () {
+    this.colorEffectsRenderer = this.gfx.colorEffectsRenderer;
     this.WINOBJOutside = 0;
     this.preprocess();
 }
@@ -80,21 +81,34 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderNormalScanLine = function (line,
             else {
                 //OAM Pixel Processing:
                 //Pass the highest two pixels to be arbitrated in the color effects processing:
-                lineBuffer[pixelPosition | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+                lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
             }
         }
     }
 }
 GameBoyAdvanceOBJWindowRenderer.prototype.renderScanLineWithEffects = function (line, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
-    //Arrange our layer stack so we can remove disabled and order for correct edge case priority:
-    if ((this.gfx.display & 0xE0) > 0) {
-        //Window registers can further disable background layers if one or more window layers enabled:
-        OBJBuffer = ((this.WINOBJOutside & 0x10) != 0) ? OBJBuffer : null;
-        BG0Buffer = ((this.WINOBJOutside & 0x1) != 0) ? BG0Buffer: null;
-        BG1Buffer = ((this.WINOBJOutside & 0x2) != 0) ? BG1Buffer: null;
-        BG2Buffer = ((this.WINOBJOutside & 0x4) != 0) ? BG2Buffer: null;
-        BG3Buffer = ((this.WINOBJOutside & 0x8) != 0) ? BG3Buffer: null;
+    line = line | 0;
+    if ((this.WINOBJOutside & 0x1) == 0) {
+        //BG Layer 0 Disabled:
+        BG0Buffer = null;
     }
+    if ((this.WINOBJOutside & 0x2) == 0) {
+        //BG Layer 1 Disabled:
+        BG1Buffer = null;
+    }
+    if ((this.WINOBJOutside & 0x4) == 0) {
+        //BG Layer 2 Disabled:
+        BG2Buffer = null;
+    }
+    if ((this.WINOBJOutside & 0x8) == 0) {
+        //BG Layer 3 Disabled:
+        BG3Buffer = null;
+    }
+    if ((this.WINOBJOutside & 0x10) == 0) {
+        //Sprite Layer Disabled:
+        OBJBuffer = null;
+    }
+    //Arrange our layer stack so we can remove disabled and order for correct edge case priority:
     var layerStack = this.gfx.compositor.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
     var stackDepth = layerStack.length | 0;
     var stackIndex = 0;
@@ -133,12 +147,12 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderScanLineWithEffects = function (
             if ((currentPixel & 0x400000) == 0) {
                 //Normal Pixel:
                 //Pass the highest two pixels to be arbitrated in the color effects processing:
-                lineBuffer[pixelPosition | 0] = this.gfx.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
+                lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
             }
             else {
                 //OAM Pixel Processing:
                 //Pass the highest two pixels to be arbitrated in the color effects processing:
-                lineBuffer[pixelPosition | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+                lineBuffer[pixelPosition | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
             }
         }
     }

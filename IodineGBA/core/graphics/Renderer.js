@@ -183,11 +183,26 @@ GameBoyAdvanceGraphicsRenderer.prototype.compositeLayers = function (OBJBuffer, 
     //Arrange our layer stack so we can remove disabled and order for correct edge case priority:
     if ((this.display & 0xE0) > 0) {
         //Window registers can further disable background layers if one or more window layers enabled:
-        OBJBuffer = ((this.WINOutside & 0x10) != 0) ? OBJBuffer : null;
-        BG0Buffer = ((this.WINOutside & 0x1) != 0) ? BG0Buffer : null;
-        BG1Buffer = ((this.WINOutside & 0x2) != 0) ? BG1Buffer : null;
-        BG2Buffer = ((this.WINOutside & 0x4) != 0) ? BG2Buffer : null;
-        BG3Buffer = ((this.WINOutside & 0x8) != 0) ? BG3Buffer : null;
+        if ((this.WINOutside & 0x1) == 0) {
+            //BG Layer 0 Disabled:
+            BG0Buffer = null;
+        }
+        if ((this.WINOutside & 0x2) == 0) {
+            //BG Layer 1 Disabled:
+            BG1Buffer = null;
+        }
+        if ((this.WINOutside & 0x4) == 0) {
+            //BG Layer 2 Disabled:
+            BG2Buffer = null;
+        }
+        if ((this.WINOutside & 0x8) == 0) {
+            //BG Layer 3 Disabled:
+            BG3Buffer = null;
+        }
+        if ((this.WINOutside & 0x10) == 0) {
+            //Sprite Layer Disabled:
+            OBJBuffer = null;
+        }
     }
     this.compositor.renderScanLine(0, 240, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
 }
