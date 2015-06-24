@@ -1,24 +1,19 @@
 "use strict";
 /*
- * This file is part of IodineGBA
- *
- * Copyright (C) 2012-2015 Grant Galitz
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- * The full license is available at http://www.gnu.org/licenses/gpl.html
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
+ Copyright (C) 2012-2015 Grant Galitz
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 function GameBoyAdvanceGraphicsRenderer(coreExposed, skippingBIOS) {
     this.coreExposed = coreExposed;
     this.initializeIO(skippingBIOS);
-    this.initializeRenderer();
+    this.initializePaletteStorage();
+    this.generateRenderers();
+    this.initializeRenderers();
 }
 GameBoyAdvanceGraphicsRenderer.prototype.initializeIO = function (skippingBIOS) {
     //Initialize Pre-Boot:
@@ -52,8 +47,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.initializeIO = function (skippingBIOS) 
     }
     this.backdrop = 0x3A00000;
 }
-GameBoyAdvanceGraphicsRenderer.prototype.initializeRenderer = function () {
-    this.initializePaletteStorage();
+GameBoyAdvanceGraphicsRenderer.prototype.generateRenderers = function () {
     this.compositor = new GameBoyAdvanceCompositor(this);
     this.bg0Renderer = new GameBoyAdvanceBGTEXTRenderer(this, 0);
     this.bg1Renderer = new GameBoyAdvanceBGTEXTRenderer(this, 1);
@@ -65,17 +59,32 @@ GameBoyAdvanceGraphicsRenderer.prototype.initializeRenderer = function () {
     this.bg3MatrixRenderer = new GameBoyAdvanceBGMatrixRenderer(this, 3);
     this.bg2FrameBufferRenderer = new GameBoyAdvanceBG2FrameBufferRenderer(this);
     this.objRenderer = new GameBoyAdvanceOBJRenderer(this);
-    this.window0Renderer = new GameBoyAdvanceWindowRenderer(this);
-    this.window1Renderer = new GameBoyAdvanceWindowRenderer(this);
+    this.window0Renderer = new GameBoyAdvanceWindowRenderer(new GameBoyAdvanceCompositor(this));
+    this.window1Renderer = new GameBoyAdvanceWindowRenderer(new GameBoyAdvanceCompositor(this));
     this.objWindowRenderer = new GameBoyAdvanceOBJWindowRenderer(this);
-    this.mosaicRenderer = new GameBoyAdvanceMosaicRenderer(this);
+    this.mosaicRenderer = new GameBoyAdvanceMosaicRenderer();
     this.colorEffectsRenderer = new GameBoyAdvanceColorEffectsRenderer();
     this.mode0Renderer = new GameBoyAdvanceMode0Renderer(this);
     this.mode1Renderer = new GameBoyAdvanceMode1Renderer(this);
     this.mode2Renderer = new GameBoyAdvanceMode2Renderer(this);
     this.modeFrameBufferRenderer = new GameBoyAdvanceModeFrameBufferRenderer(this);
-    
+}
+GameBoyAdvanceGraphicsRenderer.prototype.initializeRenderers = function () {
+    this.compositor.initialize();
     this.compositorPreprocess();
+    this.bg0Renderer.initialize();
+    this.bg1Renderer.initialize();
+    this.bg2TextRenderer.initialize();
+    this.bg3TextRenderer.initialize();
+    this.bgAffineRenderer0.initialize();
+    this.bgAffineRenderer1.initialize();
+    this.bg2MatrixRenderer.initialize();
+    this.bg3MatrixRenderer.initialize();
+    this.bg2FrameBufferRenderer.initialize();
+    this.objRenderer.initialize();
+    this.window0Renderer.initialize();
+    this.window1Renderer.initialize();
+    this.objWindowRenderer.initialize();
 }
 GameBoyAdvanceGraphicsRenderer.prototype.initializePaletteStorage = function () {
     //Both BG and OAM in unified storage:
@@ -164,7 +173,11 @@ GameBoyAdvanceGraphicsRenderer.prototype.incrementScanLineQueue = function () {
     }
 }
 GameBoyAdvanceGraphicsRenderer.prototype.compositorPreprocess = function () {
-    this.compositor.preprocess((this.WINOutside & 0x20) != 0 || (this.display & 0xE0) == 0);
+    var controlBits = this.WINOutside & 0x20;
+    if ((this.display & 0xE0) == 0) {
+        controlBits = controlBits | 1;
+    }
+    this.compositor.preprocess(controlBits | 0);
 }
 GameBoyAdvanceGraphicsRenderer.prototype.compositeLayers = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     //Arrange our layer stack so we can remove disabled and order for correct edge case priority:

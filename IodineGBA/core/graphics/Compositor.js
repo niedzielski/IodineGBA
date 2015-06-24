@@ -1,26 +1,27 @@
 "use strict";
 /*
- * This file is part of IodineGBA
- *
- * Copyright (C) 2012-2013 Grant Galitz
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- * The full license is available at http://www.gnu.org/licenses/gpl.html
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
+ Copyright (C) 2012-2015 Grant Galitz
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 function GameBoyAdvanceCompositor(gfx) {
     this.gfx = gfx;
-    this.preprocess(false);
+}
+GameBoyAdvanceCompositor.prototype.initialize = function () {
+    this.colorEffectsRenderer = this.gfx.colorEffectsRenderer;
 }
 GameBoyAdvanceCompositor.prototype.preprocess = function (doEffects) {
-    this.renderScanLine = (doEffects) ? this.renderScanLineWithEffects : this.renderNormalScanLine;
+    doEffects = doEffects | 0;
+    if ((doEffects | 0) != 0) {
+        this.renderScanLine = this.renderScanLineWithEffects;
+    }
+    else {
+        this.renderScanLine = this.renderNormalScanLine;
+    }
 }
 GameBoyAdvanceCompositor.prototype.cleanLayerStack = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     //Clear out disabled layers from our stack:
@@ -102,7 +103,7 @@ GameBoyAdvanceCompositor.prototype.fillWithBackdropSpecial = function (xStart, x
     xStart = xStart | 0;
     xEnd = xEnd | 0;
     while ((xStart | 0) < (xEnd | 0)) {
-        lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.process(0, this.gfx.backdrop | 0) | 0;
+        lineBuffer[xStart | 0] = this.colorEffectsRenderer.process(0, this.gfx.backdrop | 0) | 0;
         xStart = ((xStart | 0) + 1) | 0;
     }
 }
@@ -129,7 +130,7 @@ GameBoyAdvanceCompositor.prototype.composite1Layer = function (xStart, xEnd, lin
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -165,7 +166,7 @@ GameBoyAdvanceCompositor.prototype.composite2Layer = function (xStart, xEnd, lin
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -209,7 +210,7 @@ GameBoyAdvanceCompositor.prototype.composite3Layer = function (xStart, xEnd, lin
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -261,7 +262,7 @@ GameBoyAdvanceCompositor.prototype.composite4Layer = function (xStart, xEnd, lin
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -321,7 +322,7 @@ GameBoyAdvanceCompositor.prototype.composite5Layer = function (xStart, xEnd, lin
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -345,12 +346,12 @@ GameBoyAdvanceCompositor.prototype.composite1LayerSpecial = function (xStart, xE
         if ((currentPixel & 0x400000) == 0) {
             //Normal Pixel:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
         }
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -382,12 +383,12 @@ GameBoyAdvanceCompositor.prototype.composite2LayerSpecial = function (xStart, xE
         if ((currentPixel & 0x400000) == 0) {
             //Normal Pixel:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
         }
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -427,12 +428,12 @@ GameBoyAdvanceCompositor.prototype.composite3LayerSpecial = function (xStart, xE
         if ((currentPixel & 0x400000) == 0) {
             //Normal Pixel:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
         }
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -480,12 +481,12 @@ GameBoyAdvanceCompositor.prototype.composite4LayerSpecial = function (xStart, xE
         if ((currentPixel & 0x400000) == 0) {
             //Normal Pixel:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
         }
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }
@@ -541,12 +542,12 @@ GameBoyAdvanceCompositor.prototype.composite5LayerSpecial = function (xStart, xE
         if ((currentPixel & 0x400000) == 0) {
             //Normal Pixel:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.process(lowerPixel | 0, currentPixel | 0) | 0;
         }
         else {
             //OAM Pixel Processing:
             //Pass the highest two pixels to be arbitrated in the color effects processing:
-            lineBuffer[xStart | 0] = this.gfx.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
+            lineBuffer[xStart | 0] = this.colorEffectsRenderer.processOAMSemiTransparent(lowerPixel | 0, currentPixel | 0) | 0;
         }
         xStart = ((xStart | 0) + 1) | 0;
     }

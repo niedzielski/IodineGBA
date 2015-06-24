@@ -1,32 +1,43 @@
 "use strict";
 /*
- * This file is part of IodineGBA
- *
- * Copyright (C) 2012-2015 Grant Galitz
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- * The full license is available at http://www.gnu.org/licenses/gpl.html
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
+ Copyright (C) 2012-2015 Grant Galitz
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 function GameBoyAdvanceOBJWindowRenderer(gfx) {
     this.gfx = gfx;
+}
+GameBoyAdvanceOBJWindowRenderer.prototype.initialize = function () {
     this.WINOBJOutside = 0;
     this.preprocess();
 }
 GameBoyAdvanceOBJWindowRenderer.prototype.renderNormalScanLine = function (line, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
+    line = line | 0;
+    if ((this.WINOBJOutside & 0x1) == 0) {
+        //BG Layer 0 Disabled:
+        BG0Buffer = null;
+    }
+    if ((this.WINOBJOutside & 0x2) == 0) {
+        //BG Layer 1 Disabled:
+        BG1Buffer = null;
+    }
+    if ((this.WINOBJOutside & 0x4) == 0) {
+        //BG Layer 2 Disabled:
+        BG2Buffer = null;
+    }
+    if ((this.WINOBJOutside & 0x8) == 0) {
+        //BG Layer 3 Disabled:
+        BG3Buffer = null;
+    }
+    if ((this.WINOBJOutside & 0x10) == 0) {
+        //Sprite Layer Disabled:
+        OBJBuffer = null;
+    }
     //Arrange our layer stack so we can remove disabled and order for correct edge case priority:
-    OBJBuffer = ((this.WINOBJOutside & 0x10) != 0) ? OBJBuffer : null;
-    BG0Buffer = ((this.WINOBJOutside & 0x1) != 0) ? BG0Buffer: null;
-    BG1Buffer = ((this.WINOBJOutside & 0x2) != 0) ? BG1Buffer: null;
-    BG2Buffer = ((this.WINOBJOutside & 0x4) != 0) ? BG2Buffer: null;
-    BG3Buffer = ((this.WINOBJOutside & 0x8) != 0) ? BG3Buffer: null;
     var layerStack = this.gfx.compositor.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
     var stackDepth = layerStack.length | 0;
     var stackIndex = 0;
