@@ -11,24 +11,41 @@
 function GameBoyAdvanceModeFrameBufferRenderer(gfx) {
     this.gfx = gfx;
 }
+GameBoyAdvanceModeFrameBufferRenderer.prototype.initialize = function () {
+    this.lineBuffer = this.gfx.lineBuffer;
+    this.bg2FrameBufferRenderer = this.gfx.bg2FrameBufferRenderer;
+    this.objRenderer = this.gfx.objRenderer;
+    this.objWindowRenderer = this.gfx.objWindowRenderer;
+    this.window1Renderer = this.gfx.window1Renderer;
+    this.window0Renderer = this.gfx.window0Renderer;
+}
 GameBoyAdvanceModeFrameBufferRenderer.prototype.renderScanLine = function (line) {
     line = line | 0;
-    var BG2Buffer = ((this.gfx.display & 0x4) != 0) ? this.gfx.bg2FrameBufferRenderer.renderScanLine(line | 0) : null;
-    var OBJBuffer = ((this.gfx.display & 0x10) != 0) ? this.gfx.objRenderer.renderScanLine(line | 0) : null;
+    var BG2Buffer = null;
+    var OBJBuffer = null;
+    if ((this.gfx.display & 0x4) != 0) {
+        BG2Buffer = this.bg2FrameBufferRenderer.renderScanLine(line | 0);
+    }
+    if ((this.gfx.display & 0x10) != 0) {
+        OBJBuffer = this.objRenderer.renderScanLine(line | 0);
+    }
     this.gfx.compositeLayers(OBJBuffer, null, null, BG2Buffer, null);
     if ((this.gfx.display & 0x80) != 0) {
-        this.gfx.objWindowRenderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, null, null, BG2Buffer, null);
+        this.objWindowRenderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, null, null, BG2Buffer, null);
     }
     if ((this.gfx.display & 0x40) != 0) {
-        this.gfx.window1Renderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, null, null, BG2Buffer, null);
+        this.window1Renderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, null, null, BG2Buffer, null);
     }
     if ((this.gfx.display & 0x20) != 0) {
-        this.gfx.window0Renderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, null, null, BG2Buffer, null);
+        this.window0Renderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, null, null, BG2Buffer, null);
     }
     this.gfx.copyLineToFrameBuffer(line | 0);
 }
-GameBoyAdvanceModeFrameBufferRenderer.prototype.preprocess = function (BGMode) {
-    BGMode = BGMode | 0;
+GameBoyAdvanceModeFrameBufferRenderer.prototype.preprocess = function (displayControl) {
+    displayControl = displayControl | 0;
+    displayControl = Math.min(displayControl & 0x7, 5) | 0;
     //Set up pixel fetcher ahead of time:
-    this.gfx.bg2FrameBufferRenderer.selectMode(BGMode | 0);
+    if ((displayControl | 0) > 2) {
+        this.bg2FrameBufferRenderer.selectMode(displayControl | 0);
+    }
 }

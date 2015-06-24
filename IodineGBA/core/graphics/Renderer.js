@@ -17,9 +17,7 @@ function GameBoyAdvanceGraphicsRenderer(coreExposed, skippingBIOS) {
 }
 GameBoyAdvanceGraphicsRenderer.prototype.initializeIO = function (skippingBIOS) {
     //Initialize Pre-Boot:
-    this.BGMode = 0;
-    this.VRAMOneDimensional = false;
-    this.forcedBlank = true;
+    this.displayControl = 0x80;
     this.display = 0;
     this.greenSwap = false;
     this.BGPriority = getUint8Array(0x4);
@@ -85,6 +83,10 @@ GameBoyAdvanceGraphicsRenderer.prototype.initializeRenderers = function () {
     this.window0Renderer.initialize();
     this.window1Renderer.initialize();
     this.objWindowRenderer.initialize();
+    this.mode0Renderer.initialize();
+    this.mode1Renderer.initialize();
+    this.mode2Renderer.initialize();
+    this.modeFrameBufferRenderer.initialize();
 }
 GameBoyAdvanceGraphicsRenderer.prototype.initializePaletteStorage = function () {
     //Both BG and OAM in unified storage:
@@ -118,7 +120,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.graphicsJITVBlank = function () {
     this.graphicsJITScanlineGroup();
 }
 GameBoyAdvanceGraphicsRenderer.prototype.renderScanLine = function () {
-    switch (this.BGMode | 0) {
+    switch (this.displayControl & 0x7) {
         case 0:
             this.mode0Renderer.renderScanLine(this.lastUnrenderedLine | 0);
             break;
@@ -210,7 +212,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBuffer = function (line)
     line = line | 0;
     var offsetStart = ((line | 0) * 240) | 0;
     var position = 0;
-    if (this.forcedBlank) {
+    if ((this.displayControl & 0x80) != 0) {
         for (; (position | 0) < 240; offsetStart = ((offsetStart | 0) + 1) | 0, position = ((position | 0) + 1) | 0) {
             this.frameBuffer[offsetStart | 0] = 0x7FFF;
         }
@@ -245,14 +247,10 @@ GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBuffer = function (line)
 GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_0 = function (data) {
     data = data | 0;
     this.graphicsJIT();
-    this.BGMode = data & 0x07;
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
     this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
-    this.VRAMOneDimensional = ((data & 0x40) != 0);
-    this.forcedBlank = ((data & 0x80) != 0);
-    if ((this.BGMode | 0) > 2) {
-        this.modeFrameBufferRenderer.preprocess(Math.min(this.BGMode | 0, 5) | 0);
-    }
+    this.modeFrameBufferRenderer.preprocess(data | 0);
+    this.displayControl = data | 0;
 }
 GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_1 = function (data) {
     data = data | 0;
@@ -268,28 +266,20 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_2 = function (data) {
 GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT16 = function (data) {
     data = data | 0;
     this.graphicsJIT();
-    this.BGMode = data & 0x07;
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
     this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
-    this.VRAMOneDimensional = ((data & 0x40) != 0);
-    this.forcedBlank = ((data & 0x80) != 0);
-    if ((this.BGMode | 0) > 2) {
-        this.modeFrameBufferRenderer.preprocess(Math.min(this.BGMode | 0, 5) | 0);
-    }
+    this.modeFrameBufferRenderer.preprocess(data | 0);
+    this.displayControl = data | 0;
     this.display = data >> 8;
     this.compositorPreprocess();
 }
 GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT32 = function (data) {
     data = data | 0;
     this.graphicsJIT();
-    this.BGMode = data & 0x07;
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
     this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
-    this.VRAMOneDimensional = ((data & 0x40) != 0);
-    this.forcedBlank = ((data & 0x80) != 0);
-    if ((this.BGMode | 0) > 2) {
-        this.modeFrameBufferRenderer.preprocess(Math.min(this.BGMode | 0, 5) | 0);
-    }
+    this.modeFrameBufferRenderer.preprocess(data | 0);
+    this.displayControl = data | 0;
     this.display = (data >> 8) & 0xFF;
     this.compositorPreprocess();
     this.greenSwap = ((data & 0x10000) != 0);
@@ -1128,7 +1118,7 @@ if (__LITTLE_ENDIAN__) {
     GameBoyAdvanceGraphicsRenderer.prototype.writeVRAM8 = function (address, data) {
         address = address | 0;
         data = data | 0;
-        if ((address & 0x10000) == 0 || ((address & 0x17FFF) < 0x14000 && (this.BGMode | 0) >= 3)) {
+        if ((address & 0x10000) == 0 || ((address & 0x17FFF) < 0x14000 && (this.displayControl & 0x7) >= 3)) {
             this.graphicsJIT();
             address = address & (((address & 0x10000) >> 1) ^ address);
             this.VRAM16[(address >> 1) & 0xFFFF] = Math.imul(data & 0xFF, 0x101) | 0;
@@ -1191,7 +1181,7 @@ if (__LITTLE_ENDIAN__) {
 else {
     GameBoyAdvanceGraphicsRenderer.prototype.writeVRAM8 = function (address, data) {
         address &= 0x1FFFE & (((address & 0x10000) >> 1) ^ address);
-        if (address < 0x10000 || ((address & 0x17FFF) < 0x14000 && this.BGMode >= 3)) {
+        if (address < 0x10000 || ((address & 0x17FFF) < 0x14000 && (this.displayControl & 0x7) >= 3)) {
             this.graphicsJIT();
             this.VRAM[address++] = data & 0xFF;
             this.VRAM[address] = data & 0xFF;

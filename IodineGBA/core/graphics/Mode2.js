@@ -11,20 +11,38 @@
 function GameBoyAdvanceMode2Renderer(gfx) {
     this.gfx = gfx;
 }
+GameBoyAdvanceMode2Renderer.prototype.initialize = function () {
+    this.lineBuffer = this.gfx.lineBuffer;
+    this.bg2MatrixRenderer = this.gfx.bg2MatrixRenderer;
+    this.bg3MatrixRenderer = this.gfx.bg3MatrixRenderer;
+    this.objRenderer = this.gfx.objRenderer;
+    this.objWindowRenderer = this.gfx.objWindowRenderer;
+    this.window1Renderer = this.gfx.window1Renderer;
+    this.window0Renderer = this.gfx.window0Renderer;
+}
 GameBoyAdvanceMode2Renderer.prototype.renderScanLine = function (line) {
     line = line | 0;
-    var BG2Buffer = ((this.gfx.display & 0x4) != 0) ? this.gfx.bg2MatrixRenderer.renderScanLine(line | 0) : null;
-    var BG3Buffer = ((this.gfx.display & 0x8) != 0) ? this.gfx.bg3MatrixRenderer.renderScanLine(line | 0) : null;
-    var OBJBuffer = ((this.gfx.display & 0x10) != 0) ? this.gfx.objRenderer.renderScanLine(line | 0) : null;
+    var BG2Buffer = null;
+    var BG3Buffer = null;
+    var OBJBuffer = null;
+    if ((this.gfx.display & 0x4) != 0) {
+        BG2Buffer = this.bg2MatrixRenderer.renderScanLine(line | 0);
+    }
+    if ((this.gfx.display & 0x8) != 0) {
+        BG3Buffer = this.bg3MatrixRenderer.renderScanLine(line | 0);
+    }
+    if ((this.gfx.display & 0x10) != 0) {
+        OBJBuffer = this.objRenderer.renderScanLine(line | 0);
+    }
     this.gfx.compositeLayers(OBJBuffer, null, null, BG2Buffer, BG3Buffer);
     if ((this.gfx.display & 0x80) != 0) {
-        this.gfx.objWindowRenderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, null, null, BG2Buffer, BG3Buffer);
+        this.objWindowRenderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, null, null, BG2Buffer, BG3Buffer);
     }
     if ((this.gfx.display & 0x40) != 0) {
-        this.gfx.window1Renderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, null, null, BG2Buffer, BG3Buffer);
+        this.window1Renderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, null, null, BG2Buffer, BG3Buffer);
     }
     if ((this.gfx.display & 0x20) != 0) {
-        this.gfx.window0Renderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, null, null, BG2Buffer, BG3Buffer);
+        this.window0Renderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, null, null, BG2Buffer, BG3Buffer);
     }
     this.gfx.copyLineToFrameBuffer(line | 0);
 }

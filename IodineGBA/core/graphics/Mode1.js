@@ -11,21 +11,43 @@
 function GameBoyAdvanceMode1Renderer(gfx) {
     this.gfx = gfx;
 }
+GameBoyAdvanceMode1Renderer.prototype.initialize = function () {
+    this.lineBuffer = this.gfx.lineBuffer;
+    this.bg0Renderer = this.gfx.bg0Renderer;
+    this.bg1Renderer = this.gfx.bg1Renderer;
+    this.bg2MatrixRenderer = this.gfx.bg2MatrixRenderer;
+    this.objRenderer = this.gfx.objRenderer;
+    this.objWindowRenderer = this.gfx.objWindowRenderer;
+    this.window1Renderer = this.gfx.window1Renderer;
+    this.window0Renderer = this.gfx.window0Renderer;
+}
 GameBoyAdvanceMode1Renderer.prototype.renderScanLine = function (line) {
     line = line | 0;
-    var BG0Buffer = ((this.gfx.display & 0x1) != 0) ? this.gfx.bg0Renderer.renderScanLine(line | 0) : null;
-    var BG1Buffer = ((this.gfx.display & 0x2) != 0) ? this.gfx.bg1Renderer.renderScanLine(line | 0) : null;
-    var BG2Buffer = ((this.gfx.display & 0x4) != 0) ? this.gfx.bg2MatrixRenderer.renderScanLine(line | 0) : null;
-    var OBJBuffer = ((this.gfx.display & 0x10) != 0) ? this.gfx.objRenderer.renderScanLine(line | 0) : null;
+    var BG0Buffer = null;
+    var BG1Buffer = null;
+    var BG2Buffer = null;
+    var OBJBuffer = null;
+    if ((this.gfx.display & 0x1) != 0) {
+        BG0Buffer = this.bg0Renderer.renderScanLine(line | 0);
+    }
+    if ((this.gfx.display & 0x2) != 0) {
+        BG1Buffer = this.bg1Renderer.renderScanLine(line | 0);
+    }
+    if ((this.gfx.display & 0x4) != 0) {
+        BG2Buffer = this.bg2MatrixRenderer.renderScanLine(line | 0);
+    }
+    if ((this.gfx.display & 0x10) != 0) {
+        OBJBuffer = this.objRenderer.renderScanLine(line | 0);
+    }
     this.gfx.compositeLayers(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
     if ((this.gfx.display & 0x80) != 0) {
-        this.gfx.objWindowRenderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
+        this.objWindowRenderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
     }
     if ((this.gfx.display & 0x40) != 0) {
-        this.gfx.window1Renderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
+        this.window1Renderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
     }
     if ((this.gfx.display & 0x20) != 0) {
-        this.gfx.window0Renderer.renderScanLine(line | 0, this.gfx.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
+        this.window0Renderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
     }
     this.gfx.copyLineToFrameBuffer(line | 0);
 }

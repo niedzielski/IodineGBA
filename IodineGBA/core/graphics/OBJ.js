@@ -423,7 +423,7 @@ if (typeof Math.imul == "function") {
         tileNumber = tileNumber | 0;
         xSize = xSize | 0;
         yOffset = yOffset | 0;
-        if (!this.gfx.VRAMOneDimensional) {
+        if ((this.gfx.displayControl & 0x40) == 0) {
             //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
             //Hardware ignores the LSB in this case:
             tileNumber = ((tileNumber & -2) + (Math.imul(yOffset >> 3, 0x20) | 0)) | 0;
@@ -440,7 +440,7 @@ if (typeof Math.imul == "function") {
         tileNumber = tileNumber | 0;
         xSize = xSize | 0;
         yOffset = yOffset | 0;
-        if (!this.gfx.VRAMOneDimensional) {
+        if ((this.gfx.displayControl & 0x40) == 0) {
             //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
             tileNumber = ((tileNumber | 0) + (Math.imul(yOffset >> 3, 0x20) | 0)) | 0;
         }
@@ -456,7 +456,7 @@ if (typeof Math.imul == "function") {
 else {
     //Math.imul not found, use the compatibility method:
     GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress256 = function (tileNumber, xSize, yOffset) {
-        if (!this.gfx.VRAMOneDimensional) {
+        if ((this.gfx.displayControl & 0x40) == 0) {
             //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
             //Hardware ignores the LSB in this case:
             tileNumber &= -2;
@@ -470,7 +470,7 @@ else {
         return (tileNumber << 5) + 0x10000;
     }
     GameBoyAdvanceOBJRenderer.prototype.tileNumberToAddress16 = function (tileNumber, xSize, yOffset) {
-        if (!this.gfx.VRAMOneDimensional) {
+        if ((this.gfx.displayControl & 0x40) == 0) {
             //2D Mapping (32 8x8 tiles by 32 8x8 tiles):
             tileNumber += (yOffset >> 3) * 0x20;
         }
@@ -532,7 +532,7 @@ GameBoyAdvanceOBJRenderer.prototype.isDrawable = function (sprite, doWindowOBJ) 
     if ((sprite.mode | doWindowOBJ) < 2 || (sprite.mode | 0) == (doWindowOBJ | 0)) {
         if ((sprite.doubleSizeOrDisabled | 0) == 0 || (sprite.matrix2D | 0) != 0) {
             if ((sprite.shape | 0) < 3) {
-                if ((this.gfx.BGMode | 0) < 3 || (sprite.tileNumber | 0) >= 0x200) {
+                if ((this.gfx.displayControl & 0x7) < 3 || (sprite.tileNumber | 0) >= 0x200) {
                     return true;
                 }
             }
