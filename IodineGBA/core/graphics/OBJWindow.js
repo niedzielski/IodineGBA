@@ -39,7 +39,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderNormalScanLine = function (line,
         OBJBuffer = null;
     }
     //Arrange our layer stack so we can remove disabled and order for correct edge case priority:
-    var layerStack = this.gfx.compositor.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    var layerStack = GameBoyAdvanceCompositor.prototype.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
     var stackDepth = layerStack.length | 0;
     var stackIndex = 0;
     var OBJWindowBuffer = this.gfx.objRenderer.renderWindowScanLine(line | 0);
@@ -109,7 +109,7 @@ GameBoyAdvanceOBJWindowRenderer.prototype.renderScanLineWithEffects = function (
         OBJBuffer = null;
     }
     //Arrange our layer stack so we can remove disabled and order for correct edge case priority:
-    var layerStack = this.gfx.compositor.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    var layerStack = GameBoyAdvanceCompositor.prototype.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
     var stackDepth = layerStack.length | 0;
     var stackIndex = 0;
     var OBJWindowBuffer = this.gfx.objRenderer.renderWindowScanLine(line | 0);
