@@ -1107,26 +1107,26 @@ else {
         data = data | 0;
         data = data & 0x3FFF;
         this.IOCore.updateGraphicsClocking();
-        this.IOData16[16] = data & 0xFF;
-        this.IOData16[17] = data >> 8;
+        this.IOData8[16] = data & 0xFF;
+        this.IOData8[17] = data >> 8;
         this.renderer.writeBLDCNT16(data | 0);
     }
     GameBoyAdvanceRendererProxy.prototype.writeBLDALPHA16 = function (data) {
         data = data | 0;
         data = data & 0x1F1F;
         this.IOCore.updateGraphicsClocking();
-        this.IOData16[18] = data & 0xFF;
-        this.IOData16[19] = data >> 8;
+        this.IOData8[18] = data & 0xFF;
+        this.IOData8[19] = data >> 8;
         this.renderer.writeBLDALPHA16(data | 0);
     }
     GameBoyAdvanceRendererProxy.prototype.writeBLDCNT32 = function (data) {
         data = data | 0;
         data = data & 0x1F1F3FFF;
         this.IOCore.updateGraphicsClocking();
-        this.IOData16[16] = data & 0xFF;
-        this.IOData16[17] = (data >> 8) & 0xFF;
-        this.IOData16[18] = (data >> 16) & 0xFF;
-        this.IOData16[19] = data >>> 24;
+        this.IOData8[16] = data & 0xFF;
+        this.IOData8[17] = (data >> 8) & 0xFF;
+        this.IOData8[18] = (data >> 16) & 0xFF;
+        this.IOData8[19] = data >>> 24;
         this.renderer.writeBLDCNT32(data | 0);
     }
     GameBoyAdvanceRendererProxy.prototype.readBLDCNT16 = function () {

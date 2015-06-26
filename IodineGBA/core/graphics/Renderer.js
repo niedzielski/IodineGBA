@@ -352,7 +352,7 @@ else {
     //Math.imul not found, use the compatibility method:
     GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBuffer = function (line) {
         var offsetStart = line * 240;
-        if ((this.greenSwap | 0) == 0) {
+        if (this.greenSwap == 0) {
             //Blit normally:
             this.copyLineToFrameBufferNormal(offsetStart);
         }
