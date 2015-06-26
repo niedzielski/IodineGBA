@@ -88,7 +88,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.initializePaletteStorage = function () 
     this.paletteOBJ256[0] = 0x3800000;
     this.palette16 = getInt32Array(0x100);
     this.paletteOBJ16 = getInt32Array(0x100);
-    for (var index = 0; index < 0x10; ++index) {
+    for (var index = 0; (index | 0) < 0x10; index = ((index | 0) + 1) | 0) {
         this.palette16[index << 4] = 0x3800000;
         this.paletteOBJ16[index << 4] = 0x3800000;
     }
@@ -231,7 +231,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.renderMode1 = function (line) {
 }
 GameBoyAdvanceGraphicsRenderer.prototype.renderMode2 = function (line) {
     line = line | 0;
-    //Mode 3 Rendering Selected:
+    //Mode 2 Rendering Selected:
     var BG2Buffer = null;
     var BG3Buffer = null;
     var OBJBuffer = null;

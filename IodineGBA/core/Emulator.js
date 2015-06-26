@@ -29,10 +29,10 @@ function GameBoyAdvanceEmulator() {
     this.BIOS = [];                           //Initialize BIOS as not existing.
     this.ROM = [];                            //Initialize BIOS as not existing.
     //Cache some frame buffer lengths:
-    this.offscreenRGBCount = this.offscreenWidth * this.offscreenHeight * 3;
+    this.offscreenRGBCount = ((this.offscreenWidth | 0) * (this.offscreenHeight | 0) * 3) | 0;
     //Graphics buffers to generate in advance:
-    this.frameBuffer = getInt32Array(this.offscreenRGBCount);        //The internal buffer to composite to.
-    this.swizzledFrame = getUint8Array(this.offscreenRGBCount);      //The swizzled output buffer that syncs to the internal framebuffer on v-blank.
+    this.frameBuffer = getInt32Array(this.offscreenRGBCount | 0);        //The internal buffer to composite to.
+    this.swizzledFrame = getUint8Array(this.offscreenRGBCount | 0);      //The swizzled output buffer that syncs to the internal framebuffer on v-blank.
     this.audioUpdateState = false;            //Do we need to update the sound core with new info?
     this.saveExportHandler = null;            //Save export handler attached by GUI.
     this.saveImportHandler = null;            //Save import handler attached by GUI.
@@ -122,7 +122,7 @@ GameBoyAdvanceEmulator.prototype.iterationStartSequence = function () {
 }
 GameBoyAdvanceEmulator.prototype.iterationEndSequence = function () {
     this.faultFound = false;                                            //If core did not throw while running, unset the fatal error flag.
-    this.clockCyclesSinceStart += this.CPUCyclesTotal;                  //Accumulate tracking.
+    this.clockCyclesSinceStart = ((this.clockCyclesSinceStart | 0) + (this.CPUCyclesTotal | 0)) | 0;    //Accumulate tracking.
 }
 GameBoyAdvanceEmulator.prototype.attachROM = function (ROM) {
     this.stop();
@@ -214,17 +214,17 @@ GameBoyAdvanceEmulator.prototype.resetMetrics = function () {
     this.metricStart = new Date();
 }
 GameBoyAdvanceEmulator.prototype.calculateTimings = function () {
-    this.clocksPerSecond = this.settings.emulatorSpeed * 0x1000000;
-    this.CPUCyclesTotal = this.CPUCyclesPerIteration = (this.clocksPerSecond / 1000 * this.settings.timerIntervalRate) | 0;
+    this.clocksPerSecond = ((this.settings.emulatorSpeed | 0) * 0x1000000) | 0;
+    this.CPUCyclesTotal = this.CPUCyclesPerIteration = ((this.clocksPerSecond | 0) / 1000 * this.settings.timerIntervalRate) | 0;
     this.dynamicSpeedCounter = 0;
 }
 GameBoyAdvanceEmulator.prototype.calculateSpeedPercentage = function () {
     if (this.metricStart) {
-        if (this.metricCollectionCounted >= this.settings.metricCollectionMinimum) {
+        if ((this.metricCollectionCounted | 0) >= (this.settings.metricCollectionMinimum | 0)) {
             if (this.speedCallback) {
                 var metricEnd = new Date();
                 var timeDiff = Math.max(metricEnd.getTime() - this.metricStart.getTime(), 1);
-                var result = ((this.settings.timerIntervalRate * this.clockCyclesSinceStart / timeDiff) / this.CPUCyclesPerIteration) * 100;
+                var result = ((this.settings.timerIntervalRate * (this.clockCyclesSinceStart | 0) / timeDiff) / (this.CPUCyclesPerIteration | 0)) * 100;
                 this.speedCallback(result.toFixed(2) + "%");
             }
             this.resetMetrics();
@@ -233,7 +233,7 @@ GameBoyAdvanceEmulator.prototype.calculateSpeedPercentage = function () {
     else {
         this.resetMetrics();
     }
-    ++this.metricCollectionCounted;
+    this.metricCollectionCounted = ((this.metricCollectionCounted | 0) + 1) | 0;
 }
 GameBoyAdvanceEmulator.prototype.initializeCore = function () {
     //Setup a new instance of the i/o core:
@@ -264,10 +264,13 @@ GameBoyAdvanceEmulator.prototype.attachAudioHandler = function (mixerInputHandle
 GameBoyAdvanceEmulator.prototype.swizzleFrameBuffer = function () {
     //Convert our dirty 15-bit (15-bit, with internal render flags above it) framebuffer to an 8-bit buffer with separate indices for the RGB channels:
     var bufferIndex = 0;
-    for (var canvasIndex = 0; canvasIndex < this.offscreenRGBCount;) {
-        this.swizzledFrame[canvasIndex++] = (this.frameBuffer[bufferIndex] & 0x1F) << 3;            //Red
-        this.swizzledFrame[canvasIndex++] = (this.frameBuffer[bufferIndex] & 0x3E0) >> 2;            //Green
-        this.swizzledFrame[canvasIndex++] = (this.frameBuffer[bufferIndex++] & 0x7C00) >> 7;        //Blue
+    for (var canvasIndex = 0; (canvasIndex | 0) < (this.offscreenRGBCount | 0); bufferIndex = ((bufferIndex | 0) + 1) | 0) {
+        this.swizzledFrame[canvasIndex | 0] = (this.frameBuffer[bufferIndex | 0] & 0x1F) << 3;      //Red
+        canvasIndex = ((canvasIndex | 0) + 1) | 0;
+        this.swizzledFrame[canvasIndex | 0] = (this.frameBuffer[bufferIndex | 0] & 0x3E0) >> 2;     //Green
+        canvasIndex = ((canvasIndex | 0) + 1) | 0;
+        this.swizzledFrame[canvasIndex | 0] = (this.frameBuffer[bufferIndex | 0] & 0x7C00) >> 7;    //Blue
+        canvasIndex = ((canvasIndex | 0) + 1) | 0;
     }
 }
 GameBoyAdvanceEmulator.prototype.prepareFrame = function () {
@@ -284,12 +287,12 @@ GameBoyAdvanceEmulator.prototype.requestDraw = function () {
 GameBoyAdvanceEmulator.prototype.enableAudio = function () {
     if (!this.audioFound && this.audio) {
         //Calculate the variables for the preliminary downsampler first:
-        this.audioResamplerFirstPassFactor = Math.max(Math.min(Math.floor(this.clocksPerSecond / 44100), Math.floor(0x7FFFFFFF / 0x3FF)), 1);
-        this.audioDownSampleInputDivider = (2 / 0x3FF) / this.audioResamplerFirstPassFactor;
+        this.audioResamplerFirstPassFactor = Math.max(Math.min(Math.floor((this.clocksPerSecond | 0) / 44100), Math.floor(0x7FFFFFFF / 0x3FF)), 1) | 0;
+        this.audioDownSampleInputDivider = (2 / 0x3FF) / (this.audioResamplerFirstPassFactor | 0);
         this.audioSetState(true);    //Set audio to 'found' by default.
         //Attempt to enable audio:
         var parentObj = this;
-        this.audio.initialize(2, this.clocksPerSecond / this.audioResamplerFirstPassFactor, Math.max(this.CPUCyclesPerIteration * this.settings.audioBufferSize / this.audioResamplerFirstPassFactor, 8192) << 1, this.settings.audioVolume, function () {
+        this.audio.initialize(2, (this.clocksPerSecond | 0) / (this.audioResamplerFirstPassFactor | 0), Math.max((this.CPUCyclesPerIteration | 0) * this.settings.audioBufferSize / (this.audioResamplerFirstPassFactor | 0), 8192) << 1, this.settings.audioVolume, function () {
                                      //Disable audio in the callback here:
                                      parentObj.disableAudio();
         });
@@ -309,12 +312,12 @@ GameBoyAdvanceEmulator.prototype.disableAudio = function () {
 }
 GameBoyAdvanceEmulator.prototype.initializeAudioBuffering = function () {
     this.audioDestinationPosition = 0;
-    this.audioBufferContainAmount = Math.max(this.CPUCyclesPerIteration * this.settings.audioBufferUnderrunLimit / this.audioResamplerFirstPassFactor, 4096) << 1;
-    this.audioBufferDynamicContainAmount = Math.max(this.CPUCyclesPerIteration * this.settings.audioBufferDynamicLimit / this.audioResamplerFirstPassFactor, 2048) << 1;
-    var audioNumSamplesTotal = Math.max(this.CPUCyclesPerIteration / this.audioResamplerFirstPassFactor, 1) << 1;
-    if (audioNumSamplesTotal != this.audioNumSamplesTotal) {
-        this.audioNumSamplesTotal = audioNumSamplesTotal;
-        this.audioBuffer = getFloat32Array(this.audioNumSamplesTotal);
+    this.audioBufferContainAmount = Math.max((this.CPUCyclesPerIteration | 0) * this.settings.audioBufferUnderrunLimit / (this.audioResamplerFirstPassFactor | 0), 4096) << 1;
+    this.audioBufferDynamicContainAmount = Math.max((this.CPUCyclesPerIteration | 0) * this.settings.audioBufferDynamicLimit / (this.audioResamplerFirstPassFactor | 0), 2048) << 1;
+    var audioNumSamplesTotal = Math.max((this.CPUCyclesPerIteration | 0) / (this.audioResamplerFirstPassFactor | 0), 1) << 1;
+    if ((audioNumSamplesTotal | 0) != (this.audioNumSamplesTotal | 0)) {
+        this.audioNumSamplesTotal = audioNumSamplesTotal | 0;
+        this.audioBuffer = getFloat32Array(this.audioNumSamplesTotal | 0);
     }
 }
 GameBoyAdvanceEmulator.prototype.changeVolume = function (newVolume) {
@@ -329,9 +332,11 @@ GameBoyAdvanceEmulator.prototype.incrementVolume = function (delta) {
 GameBoyAdvanceEmulator.prototype.outputAudio = function (downsampleInputLeft, downsampleInputRight) {
     downsampleInputLeft = downsampleInputLeft | 0;
     downsampleInputRight = downsampleInputRight | 0;
-    this.audioBuffer[this.audioDestinationPosition++] = (downsampleInputLeft * this.audioDownSampleInputDivider) - 1;
-    this.audioBuffer[this.audioDestinationPosition++] = (downsampleInputRight * this.audioDownSampleInputDivider) - 1;
-    if (this.audioDestinationPosition == this.audioNumSamplesTotal) {
+    this.audioBuffer[this.audioDestinationPosition | 0] = (downsampleInputLeft * this.audioDownSampleInputDivider) - 1;
+    this.audioDestinationPosition = ((this.audioDestinationPosition | 0) + 1) | 0;
+    this.audioBuffer[this.audioDestinationPosition | 0] = (downsampleInputRight * this.audioDownSampleInputDivider) - 1;
+    this.audioDestinationPosition = ((this.audioDestinationPosition | 0) + 1) | 0;
+    if ((this.audioDestinationPosition | 0) == (this.audioNumSamplesTotal | 0)) {
         this.audio.push(this.audioBuffer);
         this.audioDestinationPosition = 0;
     }
@@ -341,36 +346,36 @@ GameBoyAdvanceEmulator.prototype.audioUnderrunAdjustment = function () {
     if (this.audioFound) {
         var remainingAmount = this.audio.remainingBuffer();
         if (typeof remainingAmount == "number") {
-            remainingAmount = Math.max(remainingAmount, 0);
-            var underrunAmount = this.audioBufferContainAmount - remainingAmount;
-            if (underrunAmount > 0) {
+            remainingAmount = Math.max(remainingAmount | 0, 0) | 0;
+            var underrunAmount = ((this.audioBufferContainAmount | 0) - (remainingAmount | 0)) | 0;
+            if ((underrunAmount | 0) > 0) {
                 if (this.settings.dynamicSpeed) {
-                    if (this.dynamicSpeedCounter > this.settings.metricCollectionMinimum) {
-                        if ((this.audioBufferDynamicContainAmount - remainingAmount) > 0) {
+                    if ((this.dynamicSpeedCounter | 0) > (this.settings.metricCollectionMinimum | 0)) {
+                        if (((this.audioBufferDynamicContainAmount | 0) - (remainingAmount | 0)) > 0) {
                             var speed = this.getSpeed();
                             speed = Math.max(speed - 0.1, 0.1);
                             this.setSpeed(speed);
                         }
                         else {
-                            this.dynamicSpeedCounter = this.settings.metricCollectionMinimum;
+                            this.dynamicSpeedCounter = this.settings.metricCollectionMinimum | 0;
                         }
                     }
-                    this.dynamicSpeedCounter++;
+                    this.dynamicSpeedCounter = ((this.dynamicSpeedCounter | 0) + 1) | 0;
                 }
-                this.CPUCyclesTotal = Math.min(((this.CPUCyclesTotal | 0) + ((underrunAmount >> 1) * this.audioResamplerFirstPassFactor)) | 0, this.CPUCyclesTotal << 1, 0x7FFFFFFF) | 0;
+                this.CPUCyclesTotal = Math.min(((this.CPUCyclesTotal | 0) + ((underrunAmount >> 1) * (this.audioResamplerFirstPassFactor | 0))) | 0, this.CPUCyclesTotal << 1, 0x7FFFFFFF) | 0;
             }
             else if (this.settings.dynamicSpeed) {
-                if (this.dynamicSpeedCounter > this.settings.metricCollectionMinimum) {
+                if ((this.dynamicSpeedCounter | 0) > (this.settings.metricCollectionMinimum | 0)) {
                     var speed = this.getSpeed();
                     if (speed < 1) {
                         speed = Math.min(speed + 0.05, 1);
                         this.setSpeed(speed);
                     }
                     else {
-                        this.dynamicSpeedCounter = this.settings.metricCollectionMinimum;
+                        this.dynamicSpeedCounter = this.settings.metricCollectionMinimum | 0;
                     }
                 }
-                this.dynamicSpeedCounter++;
+                this.dynamicSpeedCounter = ((this.dynamicSpeedCounter | 0) + 1) | 0;
             }
         }
     }
