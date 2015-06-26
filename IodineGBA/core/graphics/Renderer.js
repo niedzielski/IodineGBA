@@ -19,7 +19,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.initializeIO = function (skippingBIOS) 
     //Initialize Pre-Boot:
     this.displayControl = 0x80;
     this.display = 0;
-    this.greenSwap = false;
+    this.greenSwap = 0;
     this.BGPriority = getUint8Array(0x4);
     this.BGCharacterBaseBlock = getUint8Array(0x4);
     this.BGMosaic = [false, false, false, false];
@@ -62,10 +62,6 @@ GameBoyAdvanceGraphicsRenderer.prototype.generateRenderers = function () {
     this.objWindowRenderer = new GameBoyAdvanceOBJWindowRenderer(this);
     this.mosaicRenderer = new GameBoyAdvanceMosaicRenderer();
     this.colorEffectsRenderer = new GameBoyAdvanceColorEffectsRenderer();
-    this.mode0Renderer = new GameBoyAdvanceMode0Renderer(this);
-    this.mode1Renderer = new GameBoyAdvanceMode1Renderer(this);
-    this.mode2Renderer = new GameBoyAdvanceMode2Renderer(this);
-    this.modeFrameBufferRenderer = new GameBoyAdvanceModeFrameBufferRenderer(this);
 }
 GameBoyAdvanceGraphicsRenderer.prototype.initializeRenderers = function () {
     this.compositor.initialize();
@@ -83,10 +79,6 @@ GameBoyAdvanceGraphicsRenderer.prototype.initializeRenderers = function () {
     this.window0Renderer.initialize();
     this.window1Renderer.initialize();
     this.objWindowRenderer.initialize();
-    this.mode0Renderer.initialize();
-    this.mode1Renderer.initialize();
-    this.mode2Renderer.initialize();
-    this.modeFrameBufferRenderer.initialize();
 }
 GameBoyAdvanceGraphicsRenderer.prototype.initializePaletteStorage = function () {
     //Both BG and OAM in unified storage:
@@ -119,35 +111,6 @@ GameBoyAdvanceGraphicsRenderer.prototype.graphicsJITVBlank = function () {
     this.totalLinesPassed = ((this.totalLinesPassed | 0) + (this.queuedScanLines | 0)) | 0;
     this.graphicsJITScanlineGroup();
 }
-GameBoyAdvanceGraphicsRenderer.prototype.renderScanLine = function () {
-    switch (this.displayControl & 0x7) {
-        case 0:
-            this.mode0Renderer.renderScanLine(this.lastUnrenderedLine | 0);
-            break;
-        case 1:
-            this.mode1Renderer.renderScanLine(this.lastUnrenderedLine | 0);
-            break;
-        case 2:
-            this.mode2Renderer.renderScanLine(this.lastUnrenderedLine | 0);
-            break;
-        default:
-            this.modeFrameBufferRenderer.renderScanLine(this.lastUnrenderedLine | 0);
-    }
-    //Update the affine bg counters:
-    this.updateReferenceCounters();
-}
-GameBoyAdvanceGraphicsRenderer.prototype.updateReferenceCounters = function () {
-    if ((this.lastUnrenderedLine | 0) == 159) {
-        //Reset some affine bg counters on roll-over to line 0:
-        this.bgAffineRenderer0.resetReferenceCounters();
-        this.bgAffineRenderer1.resetReferenceCounters();
-    }
-    else {
-        //Increment the affine bg counters:
-        this.bgAffineRenderer0.incrementReferenceCounters();
-        this.bgAffineRenderer1.incrementReferenceCounters();
-    }
-}
 GameBoyAdvanceGraphicsRenderer.prototype.graphicsJITScanlineGroup = function () {
     //Normal rendering JIT, where we try to do groups of scanlines at once:
     while ((this.queuedScanLines | 0) > 0) {
@@ -174,12 +137,137 @@ GameBoyAdvanceGraphicsRenderer.prototype.incrementScanLineQueue = function () {
         }
     }
 }
-GameBoyAdvanceGraphicsRenderer.prototype.compositorPreprocess = function () {
-    var controlBits = this.WINOutside & 0x20;
-    if ((this.display & 0xE0) == 0) {
-        controlBits = controlBits | 1;
+GameBoyAdvanceGraphicsRenderer.prototype.renderScanLine = function () {
+    var line = this.lastUnrenderedLine | 0;
+    if ((this.displayControl & 0x80) == 0) {
+        //Render with the current mode selected:
+        switch (this.displayControl & 0x7) {
+            case 0:
+                //Mode 0:
+                this.renderMode0(line | 0);
+                break;
+            case 1:
+                //Mode 1:
+                this.renderMode1(line | 0);
+                break;
+            case 2:
+                //Mode 2:
+                this.renderMode2(line | 0);
+                break;
+            default:
+                //Modes 3-5:
+                this.renderModeFrameBuffer(line | 0);
+        }
+        //Copy line to our framebuffer:
+        this.copyLineToFrameBuffer(line | 0);
     }
-    this.compositor.preprocess(controlBits | 0);
+    else {
+        //Forced blank is on, rendering disabled:
+        this.renderForcedBlank(line | 0);
+    }
+    //Update the affine bg counters:
+    this.updateReferenceCounters();
+}
+GameBoyAdvanceGraphicsRenderer.prototype.renderMode0 = function (line) {
+    line = line | 0;
+    //Mode 0 Rendering Selected:
+    var BG0Buffer = null;
+    var BG1Buffer = null;
+    var BG2Buffer = null;
+    var BG3Buffer = null;
+    var OBJBuffer = null;
+    if ((this.display & 0x1) != 0) {
+        //Render the BG0 layer:
+        BG0Buffer = this.bg0Renderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x2) != 0) {
+        //Render the BG1 layer:
+        BG1Buffer = this.bg1Renderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x4) != 0) {
+        //Render the BG2 layer:
+        BG2Buffer = this.bg2TextRenderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x8) != 0) {
+        //Render the BG3 layer:
+        BG3Buffer = this.bg3TextRenderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x10) != 0) {
+        //Render the sprite layer:
+        OBJBuffer = this.objRenderer.renderScanLine(line | 0);
+    }
+    //Composite the non-windowed result:
+    this.compositeLayers(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    //Composite the windowed result:
+    this.compositeWindowedLayers(line | 0, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+}
+GameBoyAdvanceGraphicsRenderer.prototype.renderMode1 = function (line) {
+    line = line | 0;
+    //Mode 1 Rendering Selected:
+    var BG0Buffer = null;
+    var BG1Buffer = null;
+    var BG2Buffer = null;
+    var OBJBuffer = null;
+    if ((this.display & 0x1) != 0) {
+        //Render the BG0 layer:
+        BG0Buffer = this.bg0Renderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x2) != 0) {
+        //Render the BG1 layer:
+        BG1Buffer = this.bg1Renderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x4) != 0) {
+        //Render the BG2 layer:
+        BG2Buffer = this.bg2MatrixRenderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x10) != 0) {
+        //Render the sprite layer:
+        OBJBuffer = this.objRenderer.renderScanLine(line | 0);
+    }
+    //Composite the non-windowed result:
+    this.compositeLayers(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
+    //Composite the windowed result:
+    this.compositeWindowedLayers(line | 0, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, null);
+}
+GameBoyAdvanceGraphicsRenderer.prototype.renderMode2 = function (line) {
+    line = line | 0;
+    //Mode 3 Rendering Selected:
+    var BG2Buffer = null;
+    var BG3Buffer = null;
+    var OBJBuffer = null;
+    if ((this.display & 0x4) != 0) {
+        //Render the BG2 layer:
+        BG2Buffer = this.bg2MatrixRenderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x8) != 0) {
+        //Render the BG3 layer:
+        BG3Buffer = this.bg3MatrixRenderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x10) != 0) {
+        //Render the sprite layer:
+        OBJBuffer = this.objRenderer.renderScanLine(line | 0);
+    }
+    //Composite the non-windowed result:
+    this.compositeLayers(OBJBuffer, null, null, BG2Buffer, BG3Buffer);
+    //Composite the windowed result:
+    this.compositeWindowedLayers(line | 0, OBJBuffer, null, null, BG2Buffer, BG3Buffer);
+}
+GameBoyAdvanceGraphicsRenderer.prototype.renderModeFrameBuffer = function (line) {
+    line = line | 0;
+    //Mode 3/4/5 Rendering Selected:
+    var BG2Buffer = null;
+    var OBJBuffer = null;
+    if ((this.display & 0x4) != 0) {
+        BG2Buffer = this.bg2FrameBufferRenderer.renderScanLine(line | 0);
+    }
+    if ((this.display & 0x10) != 0) {
+        //Render the sprite layer:
+        OBJBuffer = this.objRenderer.renderScanLine(line | 0);
+    }
+    //Composite the non-windowed result:
+    this.compositeLayers(OBJBuffer, null, null, BG2Buffer, null);
+    //Composite the windowed result:
+    this.compositeWindowedLayers(line | 0, OBJBuffer, null, null, BG2Buffer, null);
 }
 GameBoyAdvanceGraphicsRenderer.prototype.compositeLayers = function (OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     //Arrange our layer stack so we can remove disabled and order for correct edge case priority:
@@ -206,42 +294,140 @@ GameBoyAdvanceGraphicsRenderer.prototype.compositeLayers = function (OBJBuffer, 
             OBJBuffer = null;
         }
     }
+    //Composite the non-windowed result:
     this.compositor.renderScanLine(0, 240, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
 }
-GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBuffer = function (line) {
+GameBoyAdvanceGraphicsRenderer.prototype.compositeWindowedLayers = function (line, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     line = line | 0;
-    var offsetStart = ((line | 0) * 240) | 0;
-    var position = 0;
-    if ((this.displayControl & 0x80) != 0) {
-        for (; (position | 0) < 240; offsetStart = ((offsetStart | 0) + 1) | 0, position = ((position | 0) + 1) | 0) {
-            this.frameBuffer[offsetStart | 0] = 0x7FFF;
+    //Composite the windowed result:
+    if ((this.display & 0x80) != 0) {
+        //Object Window:
+        this.objWindowRenderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    }
+    if ((this.display & 0x40) != 0) {
+        //Window 1:
+        this.window1Renderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    }
+    if ((this.display & 0x20) != 0) {
+        //Window 0:
+        this.window0Renderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
+    }
+}
+if (typeof Math.imul == "function") {
+    //Math.imul found, insert the optimized path in:
+    GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBuffer = function (line) {
+        line = line | 0;
+        var offsetStart = Math.imul(line | 0, 240) | 0;
+        if ((this.greenSwap | 0) == 0) {
+            //Blit normally:
+            this.copyLineToFrameBufferNormal(offsetStart | 0);
+        }
+        else {
+            //Blit with green swap:
+            this.copyLineToFrameBufferGreenSwapped(offsetStart | 0);
+        }
+    }
+    if (__LITTLE_ENDIAN__ && typeof Uint8Array.prototype.fill == "function") {
+        GameBoyAdvanceGraphicsRenderer.prototype.renderForcedBlank = function (line) {
+            line = line | 0;
+            var offsetStart = Math.imul(line | 0, 240) | 0;
+            //Render a blank line:
+            var offsetEnd = ((offsetStart | 0) + 240) | 0;
+            this.frameBuffer.fill(0x7FFF, offsetStart | 0, offsetEnd | 0);
         }
     }
     else {
-        if (!this.greenSwap) {
-            if (!!this.frameBuffer.set) {
-                this.frameBuffer.set(this.lineBuffer, offsetStart | 0);
+        GameBoyAdvanceGraphicsRenderer.prototype.renderForcedBlank = function (line) {
+            line = line | 0;
+            var offsetStart = Math.imul(line | 0, 240) | 0;
+            //Render a blank line:
+            for (var position = 0; (position | 0) < 240; position = ((position | 0) + 1) | 0) {
+                this.frameBuffer[offsetStart | 0] = 0x7FFF;
+                offsetStart = ((offsetStart | 0) + 1) | 0;
             }
-            else {
-                for (; (position | 0) < 240; offsetStart = ((offsetStart | 0) + 1) | 0, position = ((position | 0) + 1) | 0) {
-                    this.frameBuffer[offsetStart | 0] = this.lineBuffer[position | 0] | 0;
-                }
-            }
+        }
+    }
+}
+else {
+    //Math.imul not found, use the compatibility method:
+    GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBuffer = function (line) {
+        var offsetStart = line * 240;
+        if ((this.greenSwap | 0) == 0) {
+            //Blit normally:
+            this.copyLineToFrameBufferNormal(offsetStart);
         }
         else {
-            var pixel0 = 0;
-            var pixel1 = 0;
-            while (position < 240) {
-                pixel0 = this.lineBuffer[position | 0] | 0;
-                position = ((position | 0) + 1) | 0;
-                pixel1 = this.lineBuffer[position | 0] | 0;
-                position = ((position | 0) + 1) | 0;
-                this.frameBuffer[offsetStart | 0] = (pixel0 & 0x7C1F) | (pixel1 & 0x3E0);
-                offsetStart = ((offsetStart | 0) + 1) | 0;
-                this.frameBuffer[offsetStart | 0] = (pixel1 & 0x7C1F) | (pixel0 & 0x3E0);
-                offsetStart = ((offsetStart | 0) + 1) | 0;
-            }
+            //Blit with green swap:
+            this.copyLineToFrameBufferGreenSwapped(offsetStart);
         }
+    }
+    GameBoyAdvanceGraphicsRenderer.prototype.renderForcedBlank = function (line) {
+        var offsetStart = line * 240;
+        //Render a blank line:
+        for (var position = 0; position < 240; ++position) {
+            this.frameBuffer[offsetStart++] = 0x7FFF;
+        }
+    }
+}
+if (__LITTLE_ENDIAN__ && typeof Uint8Array.prototype.set == "function") {
+    GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBufferNormal = function (offsetStart) {
+        offsetStart = offsetStart | 0;
+        //Render a line:
+        this.frameBuffer.set(this.lineBuffer, offsetStart | 0);
+    }
+}
+else {
+    GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBufferNormal = function (offsetStart) {
+        offsetStart = offsetStart | 0;
+        //Render a line:
+        for (var position = 0; (position | 0) < 240; position = ((position | 0) + 1) | 0) {
+            this.frameBuffer[offsetStart | 0] = this.lineBuffer[position | 0] | 0;
+            offsetStart = ((offsetStart | 0) + 1) | 0;
+        }
+    }
+}
+GameBoyAdvanceGraphicsRenderer.prototype.copyLineToFrameBufferGreenSwapped = function (offsetStart) {
+    offsetStart = offsetStart | 0;
+    //Render a line with green swap effect:
+    var position = 0;
+    var pixel0 = 0;
+    var pixel1 = 0;
+    while ((position | 0) < 240) {
+        pixel0 = this.lineBuffer[position | 0] | 0;
+        position = ((position | 0) + 1) | 0;
+        pixel1 = this.lineBuffer[position | 0] | 0;
+        position = ((position | 0) + 1) | 0;
+        this.frameBuffer[offsetStart | 0] = (pixel0 & 0x7C1F) | (pixel1 & 0x3E0);
+        offsetStart = ((offsetStart | 0) + 1) | 0;
+        this.frameBuffer[offsetStart | 0] = (pixel1 & 0x7C1F) | (pixel0 & 0x3E0);
+        offsetStart = ((offsetStart | 0) + 1) | 0;
+    }
+}
+GameBoyAdvanceGraphicsRenderer.prototype.updateReferenceCounters = function () {
+    if ((this.lastUnrenderedLine | 0) == 159) {
+        //Reset some affine bg counters on roll-over to line 0:
+        this.bgAffineRenderer0.resetReferenceCounters();
+        this.bgAffineRenderer1.resetReferenceCounters();
+    }
+    else {
+        //Increment the affine bg counters:
+        this.bgAffineRenderer0.incrementReferenceCounters();
+        this.bgAffineRenderer1.incrementReferenceCounters();
+    }
+}
+GameBoyAdvanceGraphicsRenderer.prototype.compositorPreprocess = function () {
+    var controlBits = this.WINOutside & 0x20;
+    if ((this.display & 0xE0) == 0) {
+        controlBits = controlBits | 1;
+    }
+    this.compositor.preprocess(controlBits | 0);
+}
+GameBoyAdvanceGraphicsRenderer.prototype.frameBufferModePreprocess = function (displayControl) {
+    displayControl = displayControl | 0;
+    displayControl = Math.min(displayControl & 0x7, 5) | 0;
+    //Set up pixel fetcher ahead of time:
+    if ((displayControl | 0) > 2) {
+        this.bg2FrameBufferRenderer.selectMode(displayControl | 0);
     }
 }
 GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_0 = function (data) {
@@ -249,7 +435,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_0 = function (data) {
     this.graphicsJIT();
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
     this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
-    this.modeFrameBufferRenderer.preprocess(data | 0);
+    this.frameBufferModePreprocess(data | 0);
     this.displayControl = data | 0;
 }
 GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_1 = function (data) {
@@ -261,14 +447,14 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_1 = function (data) {
 GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT8_2 = function (data) {
     data = data | 0;
     this.graphicsJIT();
-    this.greenSwap = ((data & 0x01) != 0);
+    this.greenSwap = data & 0x01;
 }
 GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT16 = function (data) {
     data = data | 0;
     this.graphicsJIT();
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
     this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
-    this.modeFrameBufferRenderer.preprocess(data | 0);
+    this.frameBufferModePreprocess(data | 0);
     this.displayControl = data | 0;
     this.display = data >> 8;
     this.compositorPreprocess();
@@ -278,11 +464,11 @@ GameBoyAdvanceGraphicsRenderer.prototype.writeDISPCNT32 = function (data) {
     this.graphicsJIT();
     this.bg2FrameBufferRenderer.writeFrameSelect((data & 0x10) << 27);
     this.objRenderer.setHBlankIntervalFreeStatus(data & 0x20);
-    this.modeFrameBufferRenderer.preprocess(data | 0);
+    this.frameBufferModePreprocess(data | 0);
     this.displayControl = data | 0;
     this.display = (data >> 8) & 0xFF;
     this.compositorPreprocess();
-    this.greenSwap = ((data & 0x10000) != 0);
+    this.greenSwap = data & 0x10000;
 }
 GameBoyAdvanceGraphicsRenderer.prototype.writeBG0CNT8_0 = function (data) {
     data = data | 0;
