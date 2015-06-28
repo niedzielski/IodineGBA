@@ -13,6 +13,29 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*
 
+Launching
+---------
+
+1. Clone the repo and submodules:
+
+        git clone --recursive https://github.com/taisel/IodineGBA.git
+
+1. Enter the repo directory:
+
+        cd IodineGBA
+
+1. Launch a web server within the repo:
+
+        python -m SimpleHTTPServer 7777
+
+1. Open the URL in browser:
+
+        firefox http://localhost:7777/
+
+1. Open the emulator options panel by mousing to the left side of the window.
+1. Load the BIOS (downloaded elsewhere).
+1. Load a game (downloaded elsewhere).
+1. Press play.
 
 Screenshots
 --------------------------------------------------------------------
