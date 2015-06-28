@@ -148,12 +148,12 @@ else {
 }
 GameBoyAdvanceOBJRenderer.prototype.renderScanLine = function (line) {
     line = line | 0;
-    this.performRenderLoop(line | 0, 0);
+    this.performRenderLoop(line | 0);
     return this.scratchBuffer;
 }
 GameBoyAdvanceOBJRenderer.prototype.renderWindowScanLine = function (line) {
     line = line | 0;
-    this.performRenderLoop(line | 0, 0x2);
+    this.performRenderLoop(line | 0);
     return this.scratchWindowBuffer;
 }
 GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line) {
