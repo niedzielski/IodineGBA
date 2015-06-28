@@ -151,11 +151,6 @@ GameBoyAdvanceOBJRenderer.prototype.renderScanLine = function (line) {
     this.performRenderLoop(line | 0);
     return this.scratchBuffer;
 }
-GameBoyAdvanceOBJRenderer.prototype.renderWindowScanLine = function (line) {
-    line = line | 0;
-    this.performRenderLoop(line | 0);
-    return this.scratchWindowBuffer;
-}
 GameBoyAdvanceOBJRenderer.prototype.performRenderLoop = function (line) {
     line = line | 0;
     this.clearScratch();

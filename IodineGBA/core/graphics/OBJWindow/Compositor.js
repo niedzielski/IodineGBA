@@ -13,6 +13,7 @@ function GameBoyAdvanceOBJWindowCompositor(gfx) {
 }
 GameBoyAdvanceOBJWindowCompositor.prototype.initialize = function () {
     this.colorEffectsRenderer = this.gfx.colorEffectsRenderer;
+    this.OBJWindowBuffer = this.gfx.objRenderer.scratchWindowBuffer;
 }
 GameBoyAdvanceOBJWindowCompositor.prototype.preprocess = function (doEffects) {
     doEffects = doEffects | 0;
@@ -43,73 +44,73 @@ GameBoyAdvanceOBJWindowCompositor.prototype.cleanLayerStack = function (OBJBuffe
     }
     return layerStack;
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.renderNormalScanLine = function (OBJWindowBuffer, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
+GameBoyAdvanceOBJWindowCompositor.prototype.renderNormalScanLine = function (lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
     switch (layerStack.length) {
         case 0:
-            this.fillWithBackdrop(OBJWindowBuffer, lineBuffer);
+            this.fillWithBackdrop(lineBuffer);
             break;
         case 1:
-            this.composite1Layer(OBJWindowBuffer, lineBuffer, layerStack[0]);
+            this.composite1Layer(lineBuffer, layerStack[0]);
             break;
         case 2:
-            this.composite2Layer(OBJWindowBuffer, lineBuffer, layerStack[0], layerStack[1]);
+            this.composite2Layer(lineBuffer, layerStack[0], layerStack[1]);
             break;
         case 3:
-            this.composite3Layer(OBJWindowBuffer, lineBuffer, layerStack[0], layerStack[1], layerStack[2]);
+            this.composite3Layer(lineBuffer, layerStack[0], layerStack[1], layerStack[2]);
             break;
         case 4:
-            this.composite4Layer(OBJWindowBuffer, lineBuffer, layerStack[0], layerStack[1], layerStack[2], layerStack[3]);
+            this.composite4Layer(lineBuffer, layerStack[0], layerStack[1], layerStack[2], layerStack[3]);
             break;
         case 5:
-            this.composite5Layer(OBJWindowBuffer, lineBuffer, layerStack[0], layerStack[1], layerStack[2], layerStack[3], layerStack[4]);
+            this.composite5Layer(lineBuffer, layerStack[0], layerStack[1], layerStack[2], layerStack[3], layerStack[4]);
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.renderScanLineWithEffects = function (OBJWindowBuffer, lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
+GameBoyAdvanceOBJWindowCompositor.prototype.renderScanLineWithEffects = function (lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     var layerStack = this.cleanLayerStack(OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
     switch (layerStack.length) {
         case 0:
-            this.fillWithBackdropSpecial(OBJWindowBuffer, lineBuffer);
+            this.fillWithBackdropSpecial(lineBuffer);
             break;
         case 1:
-            this.composite1LayerSpecial(OBJWindowBuffer, lineBuffer, layerStack[0]);
+            this.composite1LayerSpecial(lineBuffer, layerStack[0]);
             break;
         case 2:
-            this.composite2LayerSpecial(OBJWindowBuffer, lineBuffer, layerStack[0], layerStack[1]);
+            this.composite2LayerSpecial(lineBuffer, layerStack[0], layerStack[1]);
             break;
         case 3:
-            this.composite3LayerSpecial(OBJWindowBuffer, lineBuffer, layerStack[0], layerStack[1], layerStack[2]);
+            this.composite3LayerSpecial(lineBuffer, layerStack[0], layerStack[1], layerStack[2]);
             break;
         case 4:
-            this.composite4LayerSpecial(OBJWindowBuffer, lineBuffer, layerStack[0], layerStack[1], layerStack[2], layerStack[3]);
+            this.composite4LayerSpecial(lineBuffer, layerStack[0], layerStack[1], layerStack[2], layerStack[3]);
             break;
         case 5:
-            this.composite5LayerSpecial(OBJWindowBuffer, lineBuffer, layerStack[0], layerStack[1], layerStack[2], layerStack[3], layerStack[4]);
+            this.composite5LayerSpecial(lineBuffer, layerStack[0], layerStack[1], layerStack[2], layerStack[3], layerStack[4]);
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.fillWithBackdrop = function (OBJWindowBuffer, lineBuffer) {
+GameBoyAdvanceOBJWindowCompositor.prototype.fillWithBackdrop = function (lineBuffer) {
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lineBuffer[xStart | 0] = this.gfx.backdrop | 0;
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.fillWithBackdropSpecial = function (OBJWindowBuffer, lineBuffer) {
+GameBoyAdvanceOBJWindowCompositor.prototype.fillWithBackdropSpecial = function (lineBuffer) {
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lineBuffer[xStart | 0] = this.colorEffectsRenderer.process(0, this.gfx.backdrop | 0) | 0;
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite1Layer = function (OBJWindowBuffer, lineBuffer, layer0) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite1Layer = function (lineBuffer, layer0) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -131,13 +132,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite1Layer = function (OBJWindo
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite2Layer = function (OBJWindowBuffer, lineBuffer, layer0, layer1) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite2Layer = function (lineBuffer, layer0, layer1) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -167,13 +168,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite2Layer = function (OBJWindo
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite3Layer = function (OBJWindowBuffer, lineBuffer, layer0, layer1, layer2) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite3Layer = function (lineBuffer, layer0, layer1, layer2) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -211,13 +212,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite3Layer = function (OBJWindo
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite4Layer = function (OBJWindowBuffer, lineBuffer, layer0, layer1, layer2, layer3) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite4Layer = function (lineBuffer, layer0, layer1, layer2, layer3) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -263,13 +264,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite4Layer = function (OBJWindo
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite5Layer = function (OBJWindowBuffer, lineBuffer, layer0, layer1, layer2, layer3, layer4) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite5Layer = function (lineBuffer, layer0, layer1, layer2, layer3, layer4) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -323,13 +324,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite5Layer = function (OBJWindo
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite1LayerSpecial = function (OBJWindowBuffer, lineBuffer, layer0) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite1LayerSpecial = function (lineBuffer, layer0) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -352,13 +353,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite1LayerSpecial = function (O
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite2LayerSpecial = function (OBJWindowBuffer, lineBuffer, layer0, layer1) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite2LayerSpecial = function (lineBuffer, layer0, layer1) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -389,13 +390,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite2LayerSpecial = function (O
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite3LayerSpecial = function (OBJWindowBuffer, lineBuffer, layer0, layer1, layer2) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite3LayerSpecial = function (lineBuffer, layer0, layer1, layer2) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -434,13 +435,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite3LayerSpecial = function (O
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite4LayerSpecial = function (OBJWindowBuffer, lineBuffer, layer0, layer1, layer2, layer3) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite4LayerSpecial = function (lineBuffer, layer0, layer1, layer2, layer3) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
@@ -487,13 +488,13 @@ GameBoyAdvanceOBJWindowCompositor.prototype.composite4LayerSpecial = function (O
         }
     }
 }
-GameBoyAdvanceOBJWindowCompositor.prototype.composite5LayerSpecial = function (OBJWindowBuffer, lineBuffer, layer0, layer1, layer2, layer3, layer4) {
+GameBoyAdvanceOBJWindowCompositor.prototype.composite5LayerSpecial = function (lineBuffer, layer0, layer1, layer2, layer3, layer4) {
     var currentPixel = 0;
     var lowerPixel = 0;
     var workingPixel = 0;
     for (var xStart = 0; (xStart | 0) < 240; xStart = ((xStart | 0) + 1) | 0) {
         //If non-transparent OBJ (Marked for OBJ WIN) pixel detected:
-        if ((OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
+        if ((this.OBJWindowBuffer[xStart | 0] | 0) < 0x3800000) {
             lowerPixel = currentPixel = this.gfx.backdrop | 0;
             workingPixel = layer0[xStart | 0] | 0;
             if ((workingPixel & 0x3800000) <= (currentPixel & 0x1800000)) {
