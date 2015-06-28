@@ -300,7 +300,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.compositeLayers = function (OBJBuffer, 
 GameBoyAdvanceGraphicsRenderer.prototype.compositeWindowedLayers = function (line, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer) {
     line = line | 0;
     //Composite the windowed result:
-    if ((this.display & 0x90) != 0) {
+    if ((this.display & 0x90) == 0x90) {
         //Object Window:
         this.objWindowRenderer.renderScanLine(line | 0, this.lineBuffer, OBJBuffer, BG0Buffer, BG1Buffer, BG2Buffer, BG3Buffer);
     }
