@@ -59,7 +59,7 @@ GameBoyAdvanceGraphicsRenderer.prototype.generateRenderers = function () {
     this.objRenderer = new GameBoyAdvanceOBJRenderer(this);
     this.window0Renderer = new GameBoyAdvanceWindowRenderer(new GameBoyAdvanceCompositor(this));
     this.window1Renderer = new GameBoyAdvanceWindowRenderer(new GameBoyAdvanceCompositor(this));
-    this.objWindowRenderer = new GameBoyAdvanceOBJWindowRenderer(this);
+    this.objWindowRenderer = new GameBoyAdvanceOBJWindowRenderer(new GameBoyAdvanceOBJWindowCompositor(this));
     this.mosaicRenderer = new GameBoyAdvanceMosaicRenderer();
     this.colorEffectsRenderer = new GameBoyAdvanceColorEffectsRenderer();
 }
